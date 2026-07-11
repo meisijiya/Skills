@@ -25,7 +25,7 @@ meisijiya-skills/
 │   │   ├── test-driven-development/
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/
-│   └── .extra/                ← 选装集(10 个,按需)
+│   └── .extra/                ← 选装集(11 个,按需)
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/
 │       ├── designer-handoff/
@@ -85,3 +85,14 @@ npx skills add <this-repo> --skill build-gate-visual-review
 ## License
 
 MIT
+
+---
+
+## 当前状态(v0.1.0)
+
+- 17 个 SKILL.md(6 个 `.core/` + 11 个 `.extra/`)
+- 17 个 eval case(全部 skill 都有)
+- `scripts/validate-skills.sh` 验证脚本(YAML frontmatter + 结构检查)
+- `docs/p0-outline.md` 归档(已 ship)
+
+详见 `git log --oneline`。
