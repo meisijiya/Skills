@@ -2,6 +2,25 @@
 
 All notable changes to meisijiya-skills.
 
+## [0.2.0] - 2026-07-11
+
+### Added
+
+- **`omo-integration/SKILL.md` + eval case** — cross-reference map of meisijiya-skills to omo features (MCPs, agents, built-in skills, modes, categories). Read at session start when running under omo.
+
+### Changed
+
+- **5 priority skills now explicitly invoke omo features:**
+  - `source-driven-development` — context7 MCP (primary, replaces WebFetch), grep_app MCP (real-world examples), websearch MCP (fallback)
+  - `debugging-and-error-recovery` — added Step 2.5 "Escalate to oracle" (omo read-only consultation when stuck); lsp MCP for goto_definition/find_references in localization
+  - `incremental-implementation` — delegates slice todo tracking to omo's atlas agent; uses omo's git-master skill for atomic commits + branch hygiene
+  - `designer-handoff` — frontend agent now runs under omo's `visual-engineering` category (Gemini 3.1 Pro) + loads omo's `frontend-ui-ux` skill
+  - `using-meisijiya-skills` — strengthened Sisyphus + IntentGate handoff documentation; added omo atlas agent reference for todo orchestration
+
+### Design rationale
+
+omo is the orchestration layer; meisijiya-skills is the workflow discipline. v0.1.x focused on the discipline (skills, evals, scripts). v0.2.0 deepens the integration: each skill now knows which omo feature to leverage, avoiding redundant WebFetch calls, manual commits, general-agent UI work, etc.
+
 ## [0.1.3] - 2026-07-11
 
 ### Fixed

@@ -1,6 +1,6 @@
 ---
 name: debugging-and-error-recovery
-description: "Five-step triage — reproduce / localize / reduce / fix / guard. Use when tests fail, builds break, or behavior is unexpected. Anti-pattern: guessing root cause and shotgun-changing files."
+description: "Five-step triage — reproduce / localize / reduce / fix / guard. Under omo, escalate to oracle agent when stuck at Step 2 (Localize) and use lsp MCP for code intelligence. Use when tests fail, builds break, or behavior is unexpected. Anti-pattern: guessing root cause and shotgun-changing files."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 
@@ -55,6 +55,7 @@ Document the reproduce command in `progress.md`:
 - **Binary search the timeline:** `git bisect` to find which commit introduced the bug
 - **Binary search the codebase:** comment out half the code, see if it still fails
 - **Add logging:** at module / function / branch boundaries, narrow down
+- **omo LSP MCP** (when running under omo): `mcp__lsp__goto_definition` / `find_references` to trace code flow without grepping
 
 Goal: identify **specific function + line** where behavior diverges from expectation.
 
@@ -63,6 +64,17 @@ Document:
 ```
 [debug] localized: <file>:<line> | <expected> != <actual>
 ```
+
+### 2.5 Escalate to oracle (omo, optional but recommended for hard bugs)
+
+If after Step 2 you're still stuck — especially for architecture-level bugs, multi-service interactions, or "why does this happen in production but not in tests" — escalate to omo's oracle agent:
+
+```
+Ask Sisyphus: "Stuck debugging <symptom>. Tried: <your attempts>.
+Hypotheses: <list>. Please consult oracle for fresh-context reasoning."
+```
+
+Oracle is **read-only** — won't change code, but provides a fresh-context reasoning pass. Use after your own 3+ failed attempts, not as the first move (you should still localize first).
 
 ### 3. Reduce
 

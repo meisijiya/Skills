@@ -1,6 +1,6 @@
 ---
 name: using-meisijiya-skills
-description: "Dispatcher meta-skill for the meisijiya-skills collection. Forces the agent to check applicable skills before every response, initialize planning-with-files if not yet done, and coordinate with oh-my-openagent's Sisyphus. Use when starting any session in a project where meisijiya-skills are installed, or when about to take any action on the user's behalf."
+description: "Dispatcher meta-skill for the meisijiya-skills collection. Forces the agent to check applicable skills before every response, initialize planning-with-files if not yet done, and coordinate with oh-my-openagent's Sisyphus + IntentGate. Delegates todo orchestration to omo's atlas agent. Use when starting any session in a project where meisijiya-skills are installed, or when about to take any action on the user's behalf."
 allowed-tools: "Read Bash Glob Grep"
 ---
 
@@ -69,9 +69,11 @@ If you're about to take action without naming a skill, **stop and check the cata
 
 When running under [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent), `using-meisijiya-skills` is the **fallback dispatcher**:
 
-- omo's Sisyphus + IntentGate handle routing upstream
+- omo's **Sisyphus + IntentGate** handle routing upstream (IntentGate classifies intent, Sisyphus orchestrates)
 - This skill is the safety net for when omo is absent or for omo's edge cases
+- **omo atlas agent** handles todo orchestration — defer multi-step task tracking to atlas, don't manually maintain task lists
 - Don't fight Sisyphus — if Sisyphus delegated to a category agent, let that agent finish
+- If Sisyphus is stuck or unsure, **prompt Sisyphus to consult oracle** (read-only reasoning) for architectural decisions
 
 ### 5. Record what you considered
 

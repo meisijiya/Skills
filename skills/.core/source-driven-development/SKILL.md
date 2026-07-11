@@ -1,6 +1,6 @@
 ---
 name: source-driven-development
-description: "Forces the agent to verify framework / library API behavior against official documentation before writing code. Use when working with any framework or library where correctness matters, when crossing major version upgrades, or when debugging 'why does this API behave like that?'"
+description: "Forces the agent to verify framework / library API behavior against official documentation before writing code. Under omo, uses context7 MCP (primary, replaces WebFetch) and grep_app MCP (real-world examples). Use when working with any framework or library where correctness matters, when crossing major version upgrades, or when debugging 'why does this API behave like that?'."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch Bash"
 ---
 
@@ -40,13 +40,16 @@ State explicitly:
 
 ### 2. Query authoritative source
 
-Priority of sources:
+Priority of sources (omo-optimized):
 
-1. **Official docs (current version):** <lib>.dev / docs.<lib>.com
-2. **Context7 MCP** (if available): `mcp__context7__get-library-docs`
-3. **Source code:** GitHub repo at the exact tagged version
-4. **CHANGELOG / migration guide** (for upgrades)
-5. **Type definitions:** `.d.ts` files in the installed package
+1. **Context7 MCP** (omo primary, replaces manual WebFetch): `mcp__context7__get-library-docs`
+   - Structured, version-pinned, AI-optimized
+2. **grep_app MCP** (omo, real-world examples): `mcp__grep_app__searchGitHub`
+   - "How does <lib> handle <pattern>" → see actual production code
+3. **WebFetch fallback** (when omo MCPs unavailable): official docs URL
+4. **Source code:** GitHub repo at the exact tagged version (for internals)
+5. **CHANGELOG / migration guide** (for upgrades)
+6. **Type definitions:** `.d.ts` files in the installed package
 
 Avoid:
 - Random blog posts (often outdated)

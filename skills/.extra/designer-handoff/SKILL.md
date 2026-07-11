@@ -1,6 +1,6 @@
 ---
 name: designer-handoff
-description: "Generates a UI/UX design spec via ui-ux-pro-max-skill and hands it off to the frontend agent (omo visual-engineering category) as a strict input. Use when the project has UI and you want the frontend agent to follow design rules (color palettes, typography, anti-patterns) instead of guessing."
+description: "Generates a UI/UX design spec via ui-ux-pro-max-skill and hands it off to the frontend agent (omo visual-engineering category + frontend-ui-ux built-in skill) as a strict input. Use when the project has UI and you want the frontend agent to follow design rules (color palettes, typography, anti-patterns) instead of guessing."
 allowed-tools: "Read Bash Glob Grep Write WebFetch"
 ---
 
@@ -93,15 +93,21 @@ The frontend agent MUST read design-spec.md before writing any UI code.
 UI code that violates design-spec.md rules will be flagged in review.
 ```
 
-### 6. Hand off to frontend agent
+### 6. Hand off to frontend agent (omo-optimized)
 
-When the build phase starts (via `incremental-implementation`):
+When the build phase starts (via `incremental-implementation`), Sisyphus should:
 
-1. Frontend agent loads `designer-handoff` first
-2. Designer-handoff tells agent: "Read design-spec.md"
-3. Frontend agent reads spec
+1. **Delegate to visual-engineering category** (Gemini 3.1 Pro, design-optimized) — NOT general agents
+2. Load omo's `frontend-ui-ux` skill (consumes our design-spec.md)
+3. Frontend agent reads `design-spec.md` FIRST (before any UI code)
 4. Frontend agent writes UI code following spec rules
 5. Frontend agent self-checks against pre-delivery checklist before commit
+
+Category + skill combo rationale:
+- **visual-engineering category** — Gemini is better at design-consistent UI than Claude/GPT
+- **frontend-ui-ux omo skill** — already has design intelligence baked in
+- **our design-spec.md** — provides project-specific rules (color palette, typography, anti-patterns)
+- **order**: read spec → apply omo skill → use category routing
 
 ### 7. Verify frontend compliance
 

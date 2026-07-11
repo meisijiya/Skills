@@ -1,6 +1,6 @@
 ---
 name: incremental-implementation
-description: "Decomposes a task into vertical slices — each slice is independently committable, testable, and rollback-safe. Use when any change touches more than one file, when the task has 3+ steps, or when refactoring/migrating existing code."
+description: "Decomposes a task into vertical slices — each slice is independently committable, testable, and rollback-safe. Under omo, delegates slice todo tracking to atlas agent and uses git-master skill for atomic commits. Use when any change touches more than one file, when the task has 3+ steps, or when refactoring/migrating existing code."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 
@@ -72,11 +72,13 @@ This lets you switch context, run tests in isolation, and rollback cleanly.
 ### 4. Implement + verify per slice
 
 For each slice, follow the loop:
-1. Implement the slice
-2. Run `test-driven-development` skill (red-green-refactor)
-3. Verify the slice ships end-to-end (not just unit tests)
-4. Commit with `slice: <slice-name>` prefix in message
-5. Append to `progress.md`:
+1. **omo**: load `git-master` skill (atomic commits, branch hygiene, rebase surgery)
+2. **omo**: delegate slice todo tracking to `atlas` agent (Sisyphus routes)
+3. Implement the slice
+4. Run `test-driven-development` skill (red-green-refactor)
+5. Verify the slice ships end-to-end (not just unit tests)
+6. Commit with `slice: <slice-name>` prefix in message (git-master enforces atomicity)
+7. Append to `progress.md`:
    ```
    [slice] <name> → <commit-sha> | <LOC> | tests pass
    ```
