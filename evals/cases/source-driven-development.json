@@ -1,0 +1,64 @@
+{
+  "name": "source-driven-development",
+  "version": "0.1.0",
+  "description": "Verify framework / library API against official docs before writing code",
+  "positive_triggers": [
+    {
+      "input": "Use the new React Server Components API in this app",
+      "expected_skill": "source-driven-development",
+      "reason": "Unfamiliar / new API, must verify against docs"
+    },
+    {
+      "input": "Upgrade Next.js from 14 to 15",
+      "expected_skill": "source-driven-development",
+      "reason": "Major version upgrade, breaking changes likely"
+    },
+    {
+      "input": "Why does this useEffect fire twice in development?",
+      "expected_skill": "source-driven-development",
+      "reason": "Debugging requires knowing the documented behavior, not guessing"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Use Array.prototype.map to transform this list",
+      "expected_no_skill": true,
+      "reason": "Standard library, stable across versions"
+    },
+    {
+      "input": "Sort this list of numbers in ascending order",
+      "expected_no_skill": true,
+      "reason": "Pure business logic, no external API"
+    },
+    {
+      "input": "What does the existing code in this file do?",
+      "expected_no_skill": true,
+      "reason": "Reading existing code, not writing new API calls"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Use the new React Server Components API'",
+      "expected_behavior": [
+        "Agent identifies library: react, current version in package.json",
+        "Agent queries official docs (react.dev) or context7 MCP",
+        "Agent extracts exact signature and behavior of the new API",
+        "Agent writes findings.md with: source URL, access date, exact version, key excerpt",
+        "Agent confirms docs version matches installed version",
+        "Agent cites source in code comment when using non-obvious API"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Upgrade Next.js from 14 to 15'",
+      "expected_behavior": [
+        "Agent reads Next.js 15 migration guide from official docs",
+        "Agent extracts breaking changes (codemod, deprecated APIs)",
+        "Agent checks installed version: 'npm ls next'",
+        "Agent writes findings.md with breaking changes and migration steps",
+        "Agent identifies which existing code will break (based on docs, not memory)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

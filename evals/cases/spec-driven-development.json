@@ -1,0 +1,64 @@
+{
+  "name": "spec-driven-development",
+  "version": "0.1.0",
+  "description": "Forces spec writing before any code on non-trivial tasks",
+  "positive_triggers": [
+    {
+      "input": "Build a new REST API for managing tasks",
+      "expected_skill": "spec-driven-development",
+      "reason": "New project, multi-file, needs spec before code"
+    },
+    {
+      "input": "Add a new payment processing flow to the existing app",
+      "expected_skill": "spec-driven-development",
+      "reason": "Significant new feature, multi-step, needs contract"
+    },
+    {
+      "input": "Refactor the auth module from session-based to OAuth",
+      "expected_skill": "spec-driven-development",
+      "reason": "Cross-module refactor, behavior change, needs spec"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Fix typo in README.md",
+      "expected_no_skill": true,
+      "reason": "Single-file trivial change, not a 'project'"
+    },
+    {
+      "input": "Rename getUserById to fetchUser across the codebase",
+      "expected_no_skill": true,
+      "reason": "Trivial rename, behavior unchanged"
+    },
+    {
+      "input": "What does the current spec for the user module say?",
+      "expected_no_skill": true,
+      "reason": "Pure Q&A, no action implied"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Build me a REST API for managing tasks'",
+      "expected_behavior": [
+        "Agent checks pwf state (task_plan.md or .planning/)",
+        "If pwf not initialized AND task is non-trivial, prompts user to run init-session.sh",
+        "Agent creates 'Phase 1: Spec' section in task_plan.md",
+        "Agent fills spec template: Goal / Scope / Acceptance Criteria / Commands / Test Strategy / Risks",
+        "Agent writes concrete acceptance criteria (not TBD)",
+        "Agent runs scripts/attest-plan.sh",
+        "Agent shows spec to user and waits for confirmation before Phase 2"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Refactor auth module to use OAuth'",
+      "expected_behavior": [
+        "Agent recognizes cross-module refactor → loads spec-driven-development",
+        "Agent lists affected modules in Scope (In/Out)",
+        "Agent includes behavior-change acceptance criteria (session-based still works during migration, OAuth works after)",
+        "Agent identifies risks (token storage, session migration, backward compat)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

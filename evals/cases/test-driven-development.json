@@ -1,0 +1,65 @@
+{
+  "name": "test-driven-development",
+  "version": "0.1.0",
+  "description": "Red-green-refactor discipline for any new logic / bug fix / behavior change",
+  "positive_triggers": [
+    {
+      "input": "Implement a rate limiter that allows 10 requests per second",
+      "expected_skill": "test-driven-development",
+      "reason": "New logic, must be testable"
+    },
+    {
+      "input": "Fix bug: empty input crashes the email parser",
+      "expected_skill": "test-driven-development",
+      "reason": "Bug fix must start with failing regression test"
+    },
+    {
+      "input": "Add email format validation to the signup endpoint",
+      "expected_skill": "test-driven-development",
+      "reason": "Behavior change, needs TDD cycle"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Fix typo in a comment",
+      "expected_no_skill": true,
+      "reason": "Pure docs, no logic"
+    },
+    {
+      "input": "Add a console.log to figure out why the loop is infinite",
+      "expected_no_skill": true,
+      "reason": "Exploratory debug, use debugging-and-error-recovery after"
+    },
+    {
+      "input": "Generate boilerplate from the OpenAPI schema",
+      "expected_no_skill": true,
+      "reason": "Codegen, not authored logic"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Implement a rate limiter that allows 10 requests per second'",
+      "expected_behavior": [
+        "Agent writes a failing test FIRST (red)",
+        "Agent runs the test, confirms it fails for the right reason",
+        "Agent writes minimum implementation to pass (green)",
+        "Agent runs the test, confirms it passes",
+        "Agent refactors (behavior unchanged)",
+        "Agent adds boundary tests: 0 req, 11 req (over limit), concurrent access",
+        "Agent commits with 'test:' then 'feat:' (or combined 'feat: with test')"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Fix bug: empty input crashes the email parser'",
+      "expected_behavior": [
+        "Agent writes a failing test that passes empty input and asserts graceful handling",
+        "Agent runs test, confirms it fails (reproduces the bug)",
+        "Agent fixes root cause (input validation in parser, not catch-and-return-null)",
+        "Agent runs test, confirms it passes",
+        "Agent adds additional boundary tests (whitespace-only, very long input, unicode)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

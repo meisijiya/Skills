@@ -1,0 +1,67 @@
+{
+  "name": "debugging-and-error-recovery",
+  "version": "0.1.0",
+  "description": "Five-step triage: reproduce / localize / reduce / fix / guard",
+  "positive_triggers": [
+    {
+      "input": "Tests are failing in CI but passing on my laptop",
+      "expected_skill": "debugging-and-error-recovery",
+      "reason": "Behavior bug, needs reproduce + localize"
+    },
+    {
+      "input": "Build broke after I upgraded the dependency",
+      "expected_skill": "debugging-and-error-recovery",
+      "reason": "Build failure, needs five-step triage"
+    },
+    {
+      "input": "User reports that creating an account returns 500 sometimes",
+      "expected_skill": "debugging-and-error-recovery",
+      "reason": "Runtime failure, needs reproduce command first"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Refactor this function for readability",
+      "expected_no_skill": true,
+      "reason": "Not a bug, not debugging"
+    },
+    {
+      "input": "Document the API endpoints in OpenAPI",
+      "expected_no_skill": true,
+      "reason": "Docs work, not debugging"
+    },
+    {
+      "input": "Make this query faster",
+      "expected_no_skill": true,
+      "reason": "Performance work, use performance-optimization"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User reports: 'Tests fail in CI but pass locally'",
+      "expected_behavior": [
+        "Agent writes a reproduce command that runs the same test locally (step 1: Reproduce)",
+        "Agent confirms whether it reproduces locally",
+        "If not reproducible locally: agent investigates env diff (OS, deps, env vars)",
+        "Agent uses git bisect or binary search to localize to specific commit (step 2: Localize)",
+        "Agent reduces to minimal failing case (step 3: Reduce)",
+        "Agent fixes root cause, not symptom (step 4: Fix)",
+        "Agent adds regression test that fails without the fix (step 5: Guard)",
+        "Agent records [debug] log lines in progress.md"
+      ]
+    },
+    {
+      "scenario": "Build broke after dependency upgrade",
+      "expected_behavior": [
+        "Agent captures exact build error and command (Reproduce)",
+        "Agent reads CHANGELOG of upgraded dependency for breaking changes (Localize)",
+        "Agent identifies specific API call that broke",
+        "Agent applies migration per official guide (Fix)",
+        "Agent runs build, confirms 0 exit code",
+        "Agent adds a build-check step to CI to catch this earlier next time (Guard)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

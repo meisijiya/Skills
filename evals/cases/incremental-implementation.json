@@ -1,0 +1,64 @@
+{
+  "name": "incremental-implementation",
+  "version": "0.1.0",
+  "description": "Vertical-slice decomposition for non-trivial implementations",
+  "positive_triggers": [
+    {
+      "input": "Add user CRUD operations to the app",
+      "expected_skill": "incremental-implementation",
+      "reason": "Multi-file, multi-step, needs slice decomposition"
+    },
+    {
+      "input": "Migrate the API from REST to GraphQL",
+      "expected_skill": "incremental-implementation",
+      "reason": "Refactor/migration, needs rollback-safe slices"
+    },
+    {
+      "input": "Implement a checkout flow with cart, payment, confirmation",
+      "expected_skill": "incremental-implementation",
+      "reason": "3+ steps, multiple capabilities, needs vertical slicing"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Fix one line in login.ts that has a typo",
+      "expected_no_skill": true,
+      "reason": "Single-file trivial change, no slicing needed"
+    },
+    {
+      "input": "Update the version field in package.json",
+      "expected_no_skill": true,
+      "reason": "Config-only change, no slicing needed"
+    },
+    {
+      "input": "Show me the git log of the last 10 commits",
+      "expected_no_skill": true,
+      "reason": "Pure read, no implementation"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Add user CRUD operations'",
+      "expected_behavior": [
+        "Agent decomposes task into vertical slices (not horizontal layers)",
+        "Slices are: create-user, read-user, update-user, delete-user (each end-to-end)",
+        "Each slice has net diff ≤ 100 lines",
+        "Agent uses git worktree or feature branch for isolation",
+        "Each slice gets own commit with 'slice:' prefix",
+        "Each slice is followed by test-driven-development verification",
+        "Agent updates progress.md with [slice] log lines"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Migrate REST to GraphQL'",
+      "expected_behavior": [
+        "Agent decomposes by resource/capability, not by file type",
+        "First slice is read-only (add GraphQL read for one resource alongside REST)",
+        "Each slice ships independently (REST still works until all migrated)",
+        "Agent rehearses rollback: 'Can I revert just slice 3?' before declaring done"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}
