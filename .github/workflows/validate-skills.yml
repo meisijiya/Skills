@@ -1,0 +1,58 @@
+name: validate-skills
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  validate:
+    name: Validate SKILL.md files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate all SKILL.md
+        run: bash scripts/validate-skills.sh
+
+      - name: Validate all eval JSONs are parseable
+        run: |
+          set -e
+          for f in evals/cases/*.json; do
+            python3 -c "import json; json.load(open('$f'))" || {
+              echo "::error file=$f::Invalid JSON"
+              exit 1
+            }
+          done
+          echo "All $(ls evals/cases/*.json | wc -l) eval JSONs parse cleanly."
+
+      - name: Verify skill↔eval bijection
+        run: |
+          python3 -c "
+          import json, os
+          evals = {f.replace('.json','').split('/')[-1] for f in os.listdir('evals/cases') if f.endswith('.json')}
+          skills = set()
+          for root in ['skills/.core','skills/.extra']:
+              for d in os.listdir(root):
+                  skills.add(d)
+          missing = skills - evals
+          extra = evals - skills
+          if missing or extra:
+              print(f'skills without eval: {missing}')
+              print(f'evals without skill: {extra}')
+              exit(1)
+          print(f'Bijection OK: {len(skills)} skills ↔ {len(evals)} evals')
+          "
+
+      - name: Test install.sh
+        run: |
+          bash scripts/install.sh --list > /dev/null
+          bash scripts/install.sh --dry-run --target /tmp/ci-test > /dev/null
+          bash scripts/install.sh --target /tmp/ci-test 2>&1 | tail -1
+          test -d /tmp/ci-test/.opencode/skills/using-meisijiya-skills || {
+            echo "::error::install.sh failed to copy using-meisijiya-skills"
+            exit 1
+          }
+          rm -rf /tmp/ci-test
+          echo "install.sh: 4 modes verified (--list, --dry-run, --target, real install)"
