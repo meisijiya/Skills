@@ -43,28 +43,46 @@ meisijiya-skills/
 
 ## 安装
 
-### 必装集(`.core/`)
+### 快速安装(推荐)
 
-通过 `vercel-labs/skills` CLI:
+`scripts/install.sh` 处理全部安装逻辑 —— 必装 + 按需选装 + dry-run + 跳过已存在。
 
 ```bash
-npx skills add <this-repo> --from skills/.core
+# 装 .core/ 6 个到当前目录的 .opencode/skills/
+scripts/install.sh
+
+# 装到指定项目
+scripts/install.sh --target /path/to/your-project
+
+# 装 .core/ + 指定的几个 .extra/
+scripts/install.sh --extra interview-me --extra security-and-hardening
+
+# 装所有
+scripts/install.sh --all-extra
+
+# 看可选的 .extra/
+scripts/install.sh --list
+
+# 全局安装(到 ~/.config/opencode/skills/)
+scripts/install.sh --global
+
+# 预览但不复制
+scripts/install.sh --dry-run
 ```
 
-或手动复制到 omo 项目级发现路径:
+### 手动安装
+
+如果不想用脚本,把 `skills/.core/` 复制到 omo 项目级发现路径即可:
 
 ```bash
 cp -r skills/.core/* <your-project>/.opencode/skills/
 ```
 
-### 选装集(`.extra/`)
-
-按需挑:
+### 通过 `vercel-labs/skills` CLI
 
 ```bash
-npx skills add <this-repo> --skill pwf-enforcer
-npx skills add <this-repo> --skill build-gate-visual-review
-# ...
+npx skills add <this-repo> --from skills/.core    # 必装集
+npx skills add <this-repo> --skill pwf-enforcer   # 单个选装
 ```
 
 ## 前置依赖
