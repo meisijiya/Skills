@@ -19,6 +19,7 @@ This skill is a cross-reference: for each omo feature, which meisijiya-skills sh
 - Optimizing skill execution by leveraging omo's MCPs (instead of shelling out to web)
 - Wanting to know which omo agent to delegate to for a given task type
 - Deciding whether to invoke an omo built-in skill directly vs through a meisijiya-skills wrapper
+- Setting up meisijiya-skills in a new omo project (use the AGENTS.md injection + per-agent config)
 
 **NOT for:**
 - Running without omo (Claude Code / Codex CLI — these features don't exist there)
@@ -127,6 +128,34 @@ Inside any meisijiya-skill's Process section, when you want to use an omo featur
 - [ ] When stuck, escalate to oracle agent (not guess)
 - [ ] Heavy plans use `hyperplan` (not ad-hoc planning)
 - [ ] Frontend work delegates to `visual-engineering` category
+
+## Distributing meta-info to user-level AGENTS.md (opt-in)
+
+omo loads `AGENTS.md` as agent context at session start. To give the agent persistent awareness of installed meisijiya-skills without forcing a hook into omo itself, append our skill catalog to your user-level AGENTS.md:
+
+```bash
+scripts/inject-agents-md.sh                          # default: ~/.config/opencode/AGENTS.md
+scripts/inject-agents-md.sh --local                  # project-level AGENTS.md
+scripts/inject-agents-md.sh --target PATH            # custom path
+scripts/inject-agents-md.sh --dry-run                # preview
+scripts/inject-agents-md.sh --remove                 # undo
+```
+
+The script is **opt-in** (never auto-runs) and **idempotent** (sentinel markers prevent duplicates). It does NOT modify omo's routing, hooks, or config — only appends a static block to AGENTS.md.
+
+> **Note**: superpowers uses a similar effect via an OpenCode plugin registration (`"plugin": ["superpowers@..."]` in `opencode.json`), not an AGENTS.md hook. Our approach is simpler and more portable.
+
+## Per-agent skill list config (in repo, not auto-applied)
+
+To constrain each omo agent to only the skills it needs (instead of all 18), apply the recommended per-agent config in `docs/omo-agent-skill-config.md` to your `~/.config/opencode/oh-my-openagent.json`.
+
+Key points:
+- **Sisyphus gets all 18** (`"skills": ["*"]`)
+- **Other agents** get a curated subset (e.g., `hephaestus` gets 5, `prometheus` gets 2, `explore` gets 0)
+- This is **user-applied, not auto-applied** — we do NOT modify your `oh-my-openagent.json`
+- Per-agent lists are an **optimization**, not a hard restriction (omo can still load skills on demand)
+
+See `docs/omo-agent-skill-config.md` for the full table and example config.
 
 ## pwf Integration
 

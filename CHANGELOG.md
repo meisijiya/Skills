@@ -2,7 +2,23 @@
 
 All notable changes to meisijiya-skills.
 
-## [0.2.0] - 2026-07-11
+## [0.2.1] - 2026-07-11
+
+### Added (infrastructure for omo ecosystem)
+
+- **`scripts/inject-agents-md.sh`** — opt-in, idempotent script that appends meisijiya-skills meta-info (skill catalog + omo integration summary + conventions) to user-level `AGENTS.md`. Uses sentinel markers for idempotency. Supports `--target`, `--local`, `--dry-run`, `--remove`. **Does NOT modify omo's routing or hooks.**
+- **`templates/AGENTS-snippet.md`** — the meta-info block that gets injected. Concise (53 lines) — full skill details stay in `omo-integration/SKILL.md`.
+- **`docs/omo-agent-skill-config.md`** — guidance for constraining per-agent skill lists in `oh-my-openagent.json`. Recommends which of the 18 meisijiya-skills each omo agent should have (Sisyphus gets all, others get curated subset). **User-applied, not auto-applied.**
+
+### Updated
+
+- `omo-integration/SKILL.md` — added "Distributing meta-info to user-level AGENTS.md" and "Per-agent skill list config" sections that reference the new artifacts.
+
+### Design rationale
+
+The user asked: can meisijiya-skills do what superpowers does (append skill meta-info at startup)? Answer: superpowers uses an OpenCode plugin registration (not a hook); we use a simpler opt-in script that writes to `AGENTS.md`. Both achieve "agent knows what skills are available at session start" without forcing modifications to omo's routing.
+
+> **Parked for future**: Oracle advised v0.2.1 should also integrate `security-and-hardening` (security-research mode + grep_app) and `performance-optimization` (lsp MCP). Not done in this release — separate scope.
 
 ### Added
 
