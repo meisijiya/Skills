@@ -1,0 +1,75 @@
+{
+  "name": "using-meisijiya-skills",
+  "version": "0.1.0",
+  "description": "Dispatcher meta-skill — fires before every response to check applicable skills",
+  "positive_triggers": [
+    {
+      "input": "I want to start a new feature for the user dashboard",
+      "expected_skill": "using-meisijiya-skills",
+      "reason": "Meta-skill must fire first to route to spec-driven-development"
+    },
+    {
+      "input": "Let's plan out the next two weeks of work on the auth refactor",
+      "expected_skill": "using-meisijiya-skills",
+      "reason": "Multi-step planning — pwf initialization must be offered"
+    },
+    {
+      "input": "Help me debug why this test keeps failing",
+      "expected_skill": "using-meisijiya-skills",
+      "reason": "Meta-skill routes to debugging-and-error-recovery"
+    },
+    {
+      "input": "Add a new API endpoint for /users/{id}/preferences",
+      "expected_skill": "using-meisijiya-skills",
+      "reason": "Touches multiple files; routes to api-and-interface-design + incremental-implementation"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "What is the capital of France?",
+      "expected_no_skill": true,
+      "reason": "Pure trivia — no workflow, no action implied"
+    },
+    {
+      "input": "echo hello world",
+      "expected_no_skill": true,
+      "reason": "One-shot shell command — trivial"
+    },
+    {
+      "input": "Tell me a joke",
+      "expected_no_skill": true,
+      "reason": "No action implied, no workflow needed"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Build me a REST API for managing tasks'",
+      "expected_behavior": [
+        "Agent checks for task_plan.md / .planning/*/task_plan.md",
+        "Agent identifies spec-driven-development as applicable (new project + multi-file)",
+        "Agent loads spec-driven-development via Skill tool BEFORE producing the spec",
+        "Agent asks clarifying questions about the API surface (auth? pagination? rate limit?)",
+        "Agent records the skill-check decision in progress.md"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Why is this test failing?' (test already exists, agent is mid-debug)",
+      "expected_behavior": [
+        "Agent recognizes this is mid-debug workflow",
+        "Agent loads debugging-and-error-recovery via Skill tool",
+        "Agent does NOT restart the workflow — continues from current step"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Just rename foo to bar in this one file' (single trivial change)",
+      "expected_behavior": [
+        "Agent checks skill catalog",
+        "Agent determines no skill applies (single trivial rename)",
+        "Agent proceeds directly without loading any skill",
+        "Agent records '[skill-check] no skill needed' in progress.md"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker (see addyosmani/agent-skills#352)."
+}
