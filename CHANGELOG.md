@@ -2,12 +2,26 @@
 
 All notable changes to meisijiya-skills.
 
+## [0.1.2] - 2026-07-11
+
+### Fixed
+
+- Skill install paths corrected from `~/.config/opencode/skills/` → `~/.agents/skills/`. The canonical location for `vercel-labs/skills` CLI global installs is `~/.agents/skills/`, not omo's local config dir. Fixes:
+  - `pwf-enforcer/SKILL.md` — 4 path refs (verify + 3 hook commands)
+  - `build-gate-visual-review/SKILL.md` — 3 path refs (verify + install options + verification)
+  - `designer-handoff/SKILL.md` — 1 path ref (ui-ux-pro-max verify)
+  - `scripts/install.sh` — default `--global` target + 2 comments
+  - `README.md` — 2 prerequisites lines
+  - `evals/cases/build-gate-visual-review.json` — behavioral eval + notes
+
+omo config path (`~/.config/opencode/oh-my-openagent.json`) is unchanged — it's not a skill install location, it's omo's runtime config.
+
 ## [0.1.1] - 2026-07-11
 
 ### Changed
 
 - `build-gate-visual-review` (skill + eval): replaced HTML Anything with [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill). Reason: HTML Anything was a self-hosted web service (`pnpm dev`, `localhost:3000`, POST API) — heavy for the use case. html-ppt-skill is an installed AgentSkill (SKILL.md + themes + layouts + animations) that the agent loads directly and produces a static HTML slide deck. Simpler install, more focused output.
-- README prerequisites: HTML Anything → `npx skills add <html-ppt-skill-url>` (installs to `~/.config/opencode/skills/`).
+- README prerequisites: HTML Anything → `npx skills add <html-ppt-skill-url>` (installs to `~/.agents/skills/`).
 
 ### Required user action
 
@@ -17,7 +31,7 @@ After upgrading to v0.1.1:
 npx skills add https://github.com/lewislulu/html-ppt-skill
 ```
 
-(html-ppt-skill must be pre-installed in `~/.config/opencode/skills/` before using `build-gate-visual-review`; agent does not auto-install.)
+(html-ppt-skill must be pre-installed in `~/.agents/skills/` before using `build-gate-visual-review`; agent does not auto-install.)
 
 ## [0.1.0] - 2026-07-11
 

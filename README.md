@@ -63,7 +63,7 @@ scripts/install.sh --all-extra
 # 看可选的 .extra/
 scripts/install.sh --list
 
-# 全局安装(到 ~/.config/opencode/skills/)
+# 全局安装(到 ~/.agents/skills/)
 scripts/install.sh --global
 
 # 预览但不复制
@@ -90,7 +90,7 @@ npx skills add <this-repo> --skill pwf-enforcer   # 单个选装
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`)
 - **planning-with-files** 必须安装(`/plugin marketplace add OthmanAdi/planning-with-files`)
 - **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
-- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill`(build-gate-visual-review 需要,装到 `~/.config/opencode/skills/`)
+- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill`(build-gate-visual-review 需要,装到 `~/.agents/skills/`)
 
 ## 写作规范
 

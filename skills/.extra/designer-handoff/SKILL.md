@@ -36,7 +36,7 @@ allowed-tools: "Read Bash Glob Grep Write WebFetch"
 npm list -g ui-ux-pro-max-cli 2>/dev/null || which uipro
 
 # OpenCode integration initialized?
-test -d ~/.config/opencode/skills/ui-ux-pro-max && echo "installed" || \
+test -d ~/.agents/skills/ui-ux-pro-max && echo "installed" || \
   uipro init --ai opencode
 ```
 

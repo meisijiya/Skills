@@ -40,7 +40,7 @@
     {
       "scenario": "User asks: 'Show me what we're about to build'",
       "expected_behavior": [
-        "Agent verifies html-ppt-skill installed at ~/.config/opencode/skills/html-ppt-skill/",
+        "Agent verifies html-ppt-skill installed at ~/.agents/skills/html-ppt-skill/",
         "If not installed, agent prompts user with npx skills add URL or manual clone instructions",
         "Agent compiles build-context.md from task_plan.md + spec.md + design-spec.md + findings.md summary",
         "Agent loads html-ppt-skill via Skill tool",
@@ -60,5 +60,5 @@
     }
   ],
   "owner": "meisijiya",
-  "notes": "v0.2.0 — replaced HTML Anything (self-hosted web service) with html-ppt-skill (installed AgentSkill). html-ppt-skill must be pre-installed in ~/.config/opencode/skills/ by the user (not auto-installed by agent). Install: 'npx skills add https://github.com/lewislulu/html-ppt-skill' or manual git clone."
+  "notes": "v0.2.0 — replaced HTML Anything (self-hosted web service) with html-ppt-skill (installed AgentSkill). html-ppt-skill must be pre-installed in ~/.agents/skills/ by the user (not auto-installed by agent). Install: 'npx skills add https://github.com/lewislulu/html-ppt-skill' or manual git clone."
 }

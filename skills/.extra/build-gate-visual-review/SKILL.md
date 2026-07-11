@@ -36,7 +36,7 @@ allowed-tools: "Read Bash Glob Grep Write"
 `html-ppt-skill` 必须装在全局 skills 目录(由用户预装):
 
 ```bash
-test -d ~/.config/opencode/skills/html-ppt-skill && echo "html-ppt-skill installed" || echo "install html-ppt-skill first"
+test -d ~/.agents/skills/html-ppt-skill && echo "html-ppt-skill installed" || echo "install html-ppt-skill first"
 ```
 
 If missing, prompt user with one of:
@@ -47,7 +47,7 @@ npx skills add https://github.com/lewislulu/html-ppt-skill
 
 # Option B: manual clone into global omo skills dir
 git clone https://github.com/lewislulu/html-ppt-skill \
-  ~/.config/opencode/skills/html-ppt-skill
+  ~/.agents/skills/html-ppt-skill
 ```
 
 ### 2. Gather project state
@@ -148,7 +148,7 @@ If reject → go back to spec phase
 ## Verification
 
 Before declaring build-gate ready, confirm:
-- [ ] html-ppt-skill installed at `~/.config/opencode/skills/html-ppt-skill/`
+- [ ] html-ppt-skill installed at `~/.agents/skills/html-ppt-skill/`
 - [ ] build-context.md compiled with all relevant sections
 - [ ] html-ppt-skill loaded via Skill tool
 - [ ] Deck generated successfully (non-empty file)
