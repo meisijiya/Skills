@@ -1,0 +1,64 @@
+{
+  "name": "api-and-interface-design",
+  "version": "0.1.0",
+  "description": "Contract-first API design with Hyrum's Law + One-Version Rule + typed errors",
+  "positive_triggers": [
+    {
+      "input": "Design a REST API for our user management module",
+      "expected_skill": "api-and-interface-design",
+      "reason": "New public API, needs contract-first design"
+    },
+    {
+      "input": "I need to define the type contract between our frontend and backend teams",
+      "expected_skill": "api-and-interface-design",
+      "reason": "Cross-team type contract"
+    },
+    {
+      "input": "We're publishing an SDK — what's the right API surface?",
+      "expected_skill": "api-and-interface-design",
+      "reason": "SDK design is high-stakes public API"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Refactor this internal helper function",
+      "expected_no_skill": true,
+      "reason": "Private helper, not a public interface"
+    },
+    {
+      "input": "Style this button differently",
+      "expected_no_skill": true,
+      "reason": "UI work, use frontend-ui-engineering"
+    },
+    {
+      "input": "Write a one-off data migration script",
+      "expected_no_skill": true,
+      "reason": "Throwaway script, no API"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Design a REST API for our user management module'",
+      "expected_behavior": [
+        "Agent identifies contract surface: endpoints, input/output shapes, errors, auth, rate limits, versioning",
+        "Agent writes contract spec FIRST (OpenAPI / type definitions)",
+        "Agent applies Hyrum's Law: generic names, no internal types leaked",
+        "Agent defines typed errors with semantic kinds (not just HTTP status codes)",
+        "Agent specifies validation at trust boundary",
+        "Agent includes version strategy (URL path / header / content type)",
+        "Agent reviews contract with peer BEFORE implementing handlers"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Define type contract between frontend and backend'",
+      "expected_behavior": [
+        "Agent proposes shared type definitions (.d.ts / .pyi)",
+        "Agent identifies which types cross the boundary",
+        "Agent avoids leaking internal types (DB row types, internal IDs)",
+        "Agent specifies validation contract (which fields are required, formats, ranges)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

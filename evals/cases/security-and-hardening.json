@@ -1,0 +1,65 @@
+{
+  "name": "security-and-hardening",
+  "version": "0.1.0",
+  "description": "Hardens code against vulnerabilities at three trust boundaries",
+  "positive_triggers": [
+    {
+      "input": "Add a new endpoint that accepts user-uploaded files",
+      "expected_skill": "security-and-hardening",
+      "reason": "New trust boundary, file upload is high-risk surface"
+    },
+    {
+      "input": "We're adding OAuth login to the app",
+      "expected_skill": "security-and-hardening",
+      "reason": "Auth changes need security review"
+    },
+    {
+      "input": "Store user credit card info for future payments",
+      "expected_skill": "security-and-hardening",
+      "reason": "Sensitive PII storage needs explicit security planning"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Refactor the internal logging helper",
+      "expected_no_skill": true,
+      "reason": "Internal helper, no trust boundary"
+    },
+    {
+      "input": "Style the dashboard differently",
+      "expected_no_skill": true,
+      "reason": "UI work, use frontend-ui-engineering"
+    },
+    {
+      "input": "Add a print statement to debug",
+      "expected_no_skill": true,
+      "reason": "Exploration, use debugging-and-error-recovery"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Add a new endpoint that accepts user-uploaded files'",
+      "expected_behavior": [
+        "Agent identifies trust boundary: file upload enters system",
+        "Agent specifies typed validation: file type, max size, content sniffing (not just extension)",
+        "Agent uses established library for parsing, never eval / Function() on file content",
+        "Agent stores files outside webroot with random names, never user-supplied names",
+        "Agent serves via auth-checked download endpoint, not direct URL",
+        "Agent runs dependency audit on any new upload-related deps",
+        "Agent adds logging for upload events (without logging file content)"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Store user credit card info'",
+      "expected_behavior": [
+        "Agent refuses to store raw card numbers (PCI DSS violation)",
+        "Agent recommends tokenization via payment processor (Stripe, etc.)",
+        "Agent confirms TLS in transit and at-rest encryption",
+        "Agent verifies secrets via env, not code/config",
+        "Agent checks audit logging for access events"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

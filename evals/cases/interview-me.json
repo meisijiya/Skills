@@ -1,0 +1,65 @@
+{
+  "name": "interview-me",
+  "version": "0.1.0",
+  "description": "One-question-at-a-time requirement extraction until ~95% confidence",
+  "positive_triggers": [
+    {
+      "input": "Help me build something for my project",
+      "expected_skill": "interview-me",
+      "reason": "Underspecified request, multiple interpretations possible"
+    },
+    {
+      "input": "I want to refactor the auth module, can you interview me about the requirements?",
+      "expected_skill": "interview-me",
+      "reason": "User explicitly invokes interview workflow"
+    },
+    {
+      "input": "Which database should I pick?",
+      "expected_skill": "interview-me",
+      "reason": "Decision with major consequences, needs requirement extraction first"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Fix typo in login.ts",
+      "expected_no_skill": true,
+      "reason": "Trivial change, no interview needed"
+    },
+    {
+      "input": "What's the capital of France?",
+      "expected_no_skill": true,
+      "reason": "Pure trivia, no workflow"
+    },
+    {
+      "input": "Add a console.log to debug the loop",
+      "expected_no_skill": true,
+      "reason": "Exploration, use debugging-and-error-recovery"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Help me build something for my project'",
+      "expected_behavior": [
+        "Agent forms a hypothesis about what's being asked",
+        "Agent asks EXACTLY ONE question via AskUserQuestion",
+        "Question has 2-4 mutually exclusive options",
+        "Agent updates hypothesis based on answer",
+        "Agent loops until ~95% confident (3-7 questions typical)",
+        "Agent summarizes understanding and asks for confirmation",
+        "Agent writes Q&A summary to progress.md"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Which database should I pick?'",
+      "expected_behavior": [
+        "Agent recognizes this needs interview before answer",
+        "Agent asks one question about access pattern (read-heavy / write-heavy / mixed)",
+        "Based on answer, asks one question about scale (single instance / distributed)",
+        "Agent does NOT batch 3 questions in one round",
+        "Agent does NOT ask 'what features do you need?' (open-ended)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

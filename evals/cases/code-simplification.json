@@ -1,0 +1,64 @@
+{
+  "name": "code-simplification",
+  "version": "0.1.0",
+  "description": "Reduces accidental complexity while preserving behavior",
+  "positive_triggers": [
+    {
+      "input": "Refactor this 500-line module, it's hard to understand",
+      "expected_skill": "code-simplification",
+      "reason": "Accidental complexity, needs Chesterton's Fence + behavior preservation"
+    },
+    {
+      "input": "I need to add a feature but touching 5 files for one change seems wrong",
+      "expected_skill": "code-simplification",
+      "reason": "Diff sprawl suggests unnecessary coupling"
+    },
+    {
+      "input": "Can you clean up this function? It works but has too many nested ifs",
+      "expected_skill": "code-simplification",
+      "reason": "Working code that's harder to read than it should be"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Make this query faster",
+      "expected_no_skill": true,
+      "reason": "Performance work, use performance-optimization"
+    },
+    {
+      "input": "Remove the AI-generated comments and emoji from this code",
+      "expected_no_skill": true,
+      "reason": "AI slop cleanup, use omo's remove-ai-slops skill"
+    },
+    {
+      "input": "Rewrite this entire module from scratch",
+      "expected_no_skill": true,
+      "reason": "Full rewrite, use spec-driven-development flow"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Refactor this 500-line module, hard to understand'",
+      "expected_behavior": [
+        "Agent identifies specific target function/class (not 'refactor everything')",
+        "Agent runs git blame / history on lines to be removed (Chesterton's Fence)",
+        "Agent runs test suite to establish baseline (must pass before)",
+        "Agent applies techniques in order: rename → extract → inline → remove dead → flatten → co-locate",
+        "After each change: re-run tests",
+        "Agent verifies behavior unchanged via same test suite (still pass)",
+        "Net diff is negative or near-zero (removed ≥ added)"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Add a feature but touching 5 files seems wrong'",
+      "expected_behavior": [
+        "Agent investigates the 5-file spread to find accidental coupling",
+        "Agent proposes simplification that reduces coupling (not just adds the feature)",
+        "Agent ensures tests still pass before AND after simplification",
+        "Agent does NOT simplify unrelated code in the same diff"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}
