@@ -1,0 +1,64 @@
+{
+  "name": "observability-and-instrumentation",
+  "version": "0.1.0",
+  "description": "Instruments production systems with structured logs, RED metrics, tracing",
+  "positive_triggers": [
+    {
+      "input": "We're about to deploy this new service to production",
+      "expected_skill": "observability-and-instrumentation",
+      "reason": "New service going to prod, needs instrumentation"
+    },
+    {
+      "input": "On-call is getting paged but we can't figure out what's wrong from logs",
+      "expected_skill": "observability-and-instrumentation",
+      "reason": "Insufficient observability for diagnosis"
+    },
+    {
+      "input": "Add a new background job to process uploaded files",
+      "expected_skill": "observability-and-instrumentation",
+      "reason": "New background work, needs instrumentation"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Write a one-off migration script",
+      "expected_no_skill": true,
+      "reason": "Throwaway, not production"
+    },
+    {
+      "input": "Style the dashboard",
+      "expected_no_skill": true,
+      "reason": "UI work, use frontend-ui-engineering"
+    },
+    {
+      "input": "Refactor this internal helper",
+      "expected_no_skill": true,
+      "reason": "Internal, no production exposure"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Deploy this new service to production'",
+      "expected_behavior": [
+        "Agent adds structured logging (fields, not string concat) at key state changes",
+        "Agent instruments RED metrics: rate / errors / duration per request",
+        "Agent adds tracing spans for cross-service calls",
+        "Agent configures symptom-based alerts (error rate > X%, P95 > Y ms)",
+        "Agent uses correct log levels (ERROR for failures, INFO for state changes, etc.)",
+        "Agent ensures no secrets / PII in logs",
+        "Agent writes runbook for known failure modes"
+      ]
+    },
+    {
+      "scenario": "User reports: 'On-call can't figure out what's wrong'",
+      "expected_behavior": [
+        "Agent audits current observability: what's logged? what's metricked? what's traced?",
+        "Agent identifies gaps (e.g., no error counter, no tracing)",
+        "Agent adds missing instrumentation BEFORE attempting root cause",
+        "Agent updates runbook to reference new metrics"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

@@ -1,0 +1,63 @@
+{
+  "name": "agent-project-structure",
+  "version": "0.1.0",
+  "description": "Initializes canonical agent-project/ 10-folder template",
+  "positive_triggers": [
+    {
+      "input": "I'm starting a new agent project, help me set up the structure",
+      "expected_skill": "agent-project-structure",
+      "reason": "New agent project, needs canonical structure"
+    },
+    {
+      "input": "Our repo has scattered .md files everywhere, organize them",
+      "expected_skill": "agent-project-structure",
+      "reason": "Existing project needs structure consolidation"
+    },
+    {
+      "input": "I want to open-source my agent project, what's the standard layout?",
+      "expected_skill": "agent-project-structure",
+      "reason": "Standard layout needed for public release"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Refactor the user service to use the new error format",
+      "expected_no_skill": true,
+      "reason": "Code work, not structure work"
+    },
+    {
+      "input": "Build a simple CLI todo app",
+      "expected_no_skill": true,
+      "reason": "Non-agent project, structure template doesn't apply"
+    },
+    {
+      "input": "Document the API endpoints",
+      "expected_no_skill": true,
+      "reason": "Doc writing, use documentation-and-adrs"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'I'm starting a new agent project'",
+      "expected_behavior": [
+        "Agent identifies project type (RAG / tool-using / production agent / etc.)",
+        "Agent initializes ONLY relevant folders (not all 10 by default)",
+        "Agent creates README in each folder explaining its purpose",
+        "Agent bridges to pwf: task_plan.md / findings.md / progress.md stay at root, NOT inside 01_planner/",
+        "Agent applies naming convention (lowercase-hyphenated.md, numeric prefix for stable order)"
+      ]
+    },
+    {
+      "scenario": "User asks: 'Organize scattered .md files'",
+      "expected_behavior": [
+        "Agent inventories existing .md files in repo root",
+        "Agent classifies each by content (plan / memory / docs / etc.)",
+        "Agent moves them into corresponding folders (or merges)",
+        "Agent avoids duplicating pwf-managed files (task_plan.md etc.)",
+        "Agent updates any references to old paths"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

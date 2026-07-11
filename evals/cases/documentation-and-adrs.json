@@ -1,0 +1,64 @@
+{
+  "name": "documentation-and-adrs",
+  "version": "0.1.0",
+  "description": "Records decisions via ADRs + documents the 'why' alongside code",
+  "positive_triggers": [
+    {
+      "input": "Should we use PostgreSQL or MongoDB for this project?",
+      "expected_skill": "documentation-and-adrs",
+      "reason": "Architectural decision needs ADR"
+    },
+    {
+      "input": "We're changing the public API in a breaking way",
+      "expected_skill": "documentation-and-adrs",
+      "reason": "Breaking API change needs documentation + ADR"
+    },
+    {
+      "input": "Major refactor: split the monolith into 3 services",
+      "expected_skill": "documentation-and-adrs",
+      "reason": "Major architectural decision needs ADR"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Rename this internal helper function",
+      "expected_no_skill": true,
+      "reason": "Internal rename, no ADR needed"
+    },
+    {
+      "input": "Fix a typo in this comment",
+      "expected_no_skill": true,
+      "reason": "Trivial typo"
+    },
+    {
+      "input": "Try out a new library on a throwaway prototype",
+      "expected_no_skill": true,
+      "reason": "Spike / experiment, no ADR needed"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'PostgreSQL or MongoDB?'",
+      "expected_behavior": [
+        "Agent loads interview-me first to extract requirements (read/write ratio, query patterns, scale)",
+        "Agent then writes ADR with: Context / Options Considered / Decision / Consequences / Reversibility",
+        "Agent documents pros/cons of EACH option considered (not just the chosen one)",
+        "Agent states consequences BOTH positive and negative",
+        "Agent states reversibility (Postgres → Mongo is hard; library swap is easy)",
+        "Agent stores ADR in 10_docs/adr/ or docs/adr/"
+      ]
+    },
+    {
+      "scenario": "User announces: 'Changing public API in breaking way'",
+      "expected_behavior": [
+        "Agent writes ADR capturing the breaking change",
+        "Agent updates API documentation (OpenAPI / .d.ts) in same commit",
+        "Agent adds CHANGELOG entry",
+        "Agent writes migration guide for users",
+        "Agent communicates deprecation timeline (when old version sunset)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

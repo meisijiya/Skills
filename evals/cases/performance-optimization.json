@@ -1,0 +1,65 @@
+{
+  "name": "performance-optimization",
+  "version": "0.1.0",
+  "description": "Measure-first performance optimization with profiling workflows",
+  "positive_triggers": [
+    {
+      "input": "Users are reporting the page is slow, help investigate",
+      "expected_skill": "performance-optimization",
+      "reason": "User-perceived latency, needs measurement + profiling"
+    },
+    {
+      "input": "Lighthouse score dropped from 90 to 65 in this release",
+      "expected_skill": "performance-optimization",
+      "reason": "Performance regression detected"
+    },
+    {
+      "input": "P95 latency on the API has gone up 3x in production",
+      "expected_skill": "performance-optimization",
+      "reason": "Production perf regression"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "I think this loop could be faster",
+      "expected_no_skill": true,
+      "reason": "Speculation without measurement — measure first"
+    },
+    {
+      "input": "Add a console.log to debug",
+      "expected_no_skill": true,
+      "reason": "Debug work, use debugging-and-error-recovery"
+    },
+    {
+      "input": "One user reported the page was slow once",
+      "expected_no_skill": true,
+      "reason": "Single anecdotal report, not a performance issue yet"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User reports: 'Page is slow'",
+      "expected_behavior": [
+        "Agent defines target metric (LCP / FID / CLS / TTI / P95) and threshold",
+        "Agent measures baseline (Lighthouse / WebPageTest / k6), records 3+ runs",
+        "Agent profiles (DevTools / py-spy / pprof) to find ACTUAL bottleneck",
+        "Agent does NOT optimize without measurement",
+        "Agent applies one change at a time, measures after each",
+        "Agent confirms improvement is statistically significant",
+        "Agent adds guard (perf budget in CI / monitoring)"
+      ]
+    },
+    {
+      "scenario": "User reports: 'P95 latency up 3x in production'",
+      "expected_behavior": [
+        "Agent checks observability for context (deployments / traffic changes / deps)",
+        "Agent profiles production (anonymized) or staging reproduction",
+        "Agent identifies specific bottleneck (DB query / N+1 / GC / external API)",
+        "Agent applies targeted fix, not blanket optimization",
+        "Agent monitors P95 after deploy to confirm fix"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}
