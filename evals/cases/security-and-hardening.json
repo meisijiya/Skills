@@ -58,6 +58,17 @@
         "Agent verifies secrets via env, not code/config",
         "Agent checks audit logging for access events"
       ]
+    },
+    {
+      "scenario": "User asks: 'Before deploying our auth refactor, do a thorough security review' (production-critical code, omo environment)",
+      "expected_behavior": [
+        "Agent identifies this as production-critical (auth code, real user impact)",
+        "Agent asks Sisyphus to invoke /security-research mode (3 vulnerability hunters + 2 PoC engineers in parallel)",
+        "Agent waits for all 5 parallel audit reports to complete",
+        "Agent synthesizes per-attacker findings with severity classification",
+        "Agent runs the standard pre-deployment gate (Step 7) after the omo audit",
+        "Agent records both audit results in task_plan.md"
+      ]
     }
   ],
   "owner": "meisijiya",

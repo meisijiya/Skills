@@ -1,6 +1,6 @@
 ---
 name: security-and-hardening
-description: "Hardens code against vulnerabilities at trust boundaries. Use when handling user input, authentication, data storage, or external integrations. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services."
+description: "Hardens code against vulnerabilities at trust boundaries. Under omo, escalates to security-research mode (3 vulnerability hunters + 2 PoC engineers) for production-critical code and uses grep_app MCP for known CVE pattern search. Use when handling user input, authentication, data storage, or external integrations."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 
@@ -109,6 +109,29 @@ app.delete('/users/:id', deleteUser)  // anyone authenticated can delete anyone
 
 **Default deny.** Allow what you mean to allow.
 
+### 6.5 omo: security-research mode + grep_app MCP (opt-in, production-critical only)
+
+For production-critical code (auth, payment, PII handling), escalate to omo's parallel security audit:
+
+```bash
+# Ask Sisyphus to invoke /security-research mode
+# This spawns 3 vulnerability hunters + 2 PoC engineers in parallel
+# Each has its own context, all run concurrently
+```
+
+Output: per-attacker audit report with severity-classified findings + working PoC exploits for each issue. Use for code going to production with real user impact. Skip for prototypes or internal tools.
+
+For dependency audits, use omo's `grep_app` MCP to search GitHub for known CVE patterns:
+
+```
+mcp__grep_app__searchGitHub <CVE-id> + <library> in:file
+mcp__grep_app__searchGitHub <library> <vulnerability-pattern> language:python
+```
+
+This catches CVE fixes that are present in the wild but not yet in your local `npm audit` / `pip-audit` databases.
+
+**Important**: these are enhancements, not replacements for Steps 1-7. Always run the standard pre-deployment gate first; omo's parallel audit is for finding issues the standard checklist misses.
+
 ### 7. Pre-deployment gate
 
 Before merging anything that touches a trust boundary:
@@ -119,6 +142,7 @@ Before merging anything that touches a trust boundary:
 - [ ] Dependency audit clean
 - [ ] Logs don't contain secrets
 - [ ] Error responses don't leak stack traces / internal paths
+- [ ] For production-critical code, omo security-research audit (Step 6.5) completed
 
 ## Common Rationalizations
 

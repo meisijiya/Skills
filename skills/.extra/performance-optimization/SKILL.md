@@ -1,6 +1,6 @@
 ---
 name: performance-optimization
-description: "Measure-first performance optimization with Core Web Vitals targets and profiling workflows. Use when performance requirements exist, when regressions are suspected, or when user-perceived latency is high."
+description: "Measure-first performance optimization with Core Web Vitals targets and profiling workflows. Under omo, uses lsp MCP (goto_definition, find_references) for bottleneck localization in large codebases and analyze mode for focused audits. Use when performance requirements exist, when regressions are suspected, or when user-perceived latency is high."
 allowed-tools: "Read Edit Bash Glob Grep Bash"
 ---
 
@@ -54,6 +54,10 @@ Use a profiler. For:
 - **Frontend:** Chrome DevTools Performance tab, Lighthouse, WebPageTest
 - **Backend:** `perf`, `py-spy`, `clinic.js`, `pprof`, `async-profiler`
 - **Database:** `EXPLAIN ANALYZE`, slow query log
+- **omo (large codebases, > 50 files):** lsp MCP for code intelligence —
+  - `mcp__lsp__goto_definition` — trace the hot path from entry point through call chain
+  - `mcp__lsp__find_references` — find all callers of suspected hot function
+  - Faster than grep for tracing through deep call chains; especially useful for backend services with many layers
 
 Find the **actual bottleneck**. Most performance issues are in < 5% of the code.
 
@@ -74,6 +78,7 @@ Add the metric to CI / monitoring:
 - Performance budget in CI (fail build if LCP > threshold)
 - Production monitoring (alert on P95 latency drift)
 - Regression test if possible
+- **omo: trigger `analyze` mode** for thorough perf reviews on suspicious changes (delegates to ultrabrain category for hard perf reasoning)
 
 ## Core Web Vitals Targets
 

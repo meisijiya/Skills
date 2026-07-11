@@ -42,11 +42,11 @@
       "expected_behavior": [
         "Agent defines target metric (LCP / FID / CLS / TTI / P95) and threshold",
         "Agent measures baseline (Lighthouse / WebPageTest / k6), records 3+ runs",
-        "Agent profiles (DevTools / py-spy / pprof) to find ACTUAL bottleneck",
+        "Agent profiles (DevTools / py-spy / pprof / omo lsp MCP for large codebases) to find ACTUAL bottleneck",
         "Agent does NOT optimize without measurement",
         "Agent applies one change at a time, measures after each",
         "Agent confirms improvement is statistically significant",
-        "Agent adds guard (perf budget in CI / monitoring)"
+        "Agent adds guard (perf budget in CI / monitoring + omo analyze mode for follow-up audits)"
       ]
     },
     {
@@ -54,6 +54,7 @@
       "expected_behavior": [
         "Agent checks observability for context (deployments / traffic changes / deps)",
         "Agent profiles production (anonymized) or staging reproduction",
+        "Agent uses omo lsp MCP (goto_definition / find_references) to trace the hot path through deep call chains",
         "Agent identifies specific bottleneck (DB query / N+1 / GC / external API)",
         "Agent applies targeted fix, not blanket optimization",
         "Agent monitors P95 after deploy to confirm fix"

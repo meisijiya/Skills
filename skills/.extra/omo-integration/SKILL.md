@@ -32,7 +32,7 @@ This skill is a cross-reference: for each omo feature, which meisijiya-skills sh
 | `context7` | Library docs lookup | `source-driven-development` (primary, replaces manual `WebFetch`) |
 | `grep_app` | GitHub code search | `source-driven-development` (real-world examples), `security-and-hardening` (CVE patterns, dependency audit) |
 | `websearch` (Exa AI) | Web search | `source-driven-development` (current info fallback when context7 doesn't have the lib) |
-| `lsp` | Local language server | `debugging-and-error-recovery` (localization via goto_definition), `performance-optimization` (profiling context) |
+| `lsp` | Local language server | `debugging-and-error-recovery` (localization via goto_definition), `performance-optimization` (profiling context for large codebases) |
 
 ## omo Agents → meisijiya-skills
 
@@ -68,10 +68,10 @@ This skill is a cross-reference: for each omo feature, which meisijiya-skills sh
 |---|---|---|
 | `ultrawork` / `ulw` | All agents activated, doesn't stop until done | Long-running agentic work — say "ulw" to activate |
 | `search` | Search-focused mode | Quick code/doc lookup |
-| `analyze` | Analysis-focused mode | `performance-optimization`, `code-review-and-quality` |
+| `analyze` | Analysis-focused mode | `performance-optimization` (deep perf audits), `code-review-and-quality` |
 | `team` | Team Mode enabled (lead + up to 8 parallel members) | For `/hyperplan` (5 hostile critics) or `/security-research` (3 hunters + 2 PoC engineers) |
 | `hyperplan` | 5-agent adversarial plan review | After `spec-driven-development`, before commit |
-| `security-research` | 3 hunters + 2 PoC engineer audit | For serious security audit on production code |
+| `security-research` | 3 hunters + 2 PoC engineer audit | `security-and-hardening` Step 6.5 for production-critical code (auth, payment, PII) |
 
 ## omo Categories → meisijiya-skills
 

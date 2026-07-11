@@ -2,6 +2,19 @@
 
 All notable changes to meisijiya-skills.
 
+## [0.2.2] - 2026-07-11
+
+### Changed
+
+- **`security-and-hardening`** — added Step 6.5: omo `security-research` mode (3 vulnerability hunters + 2 PoC engineers in parallel) for production-critical code + `grep_app` MCP for known CVE pattern search. Updated description and Pre-deployment gate (Step 7) to cross-reference the omo audit.
+- **`performance-optimization`** — added omo `lsp` MCP to Step 3 (Profile) for bottleneck localization in large codebases + `analyze` mode reference in Step 6 (Add a guard). Updated description.
+- **`omo-integration/SKILL.md`** — updated MCP table (lsp → performance) and Modes table (`analyze` and `security-research` rows).
+- Both eval cases updated with new behavioral scenarios for the omo integrations.
+
+### Design rationale
+
+Per Oracle's advice from the v0.2.0 review: these are the two highest-value remaining omo integrations. `security-and-hardening` gains genuinely new capability (parallel hunter audit is qualitatively different from a sequential checklist). `performance-optimization` gains speed (lsp tracing is faster than grep in large codebases). All other potential integrations were assessed as low-impact and deferred.
+
 ## [0.2.1] - 2026-07-11
 
 ### Added (infrastructure for omo ecosystem)
