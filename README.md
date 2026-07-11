@@ -6,7 +6,7 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
 - **pwf 硬遵守加强**:用 omo hook 把 pwf 的软遵守流程硬约束化。
-- **教学化门控**:build 之前用 [HTML Anything](https://github.com/nexu-io/html-anything) 把项目状态渲染成 HTML,让用户可视化审视。
+- **教学化门控**:build 之前用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 把项目状态生成 HTML slide deck,让用户可视化审视。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
 - **双目录结构**:`.core/` 必装集 + `.extra/` 选装集,适配 `vercel-labs/skills` CLI。
 
@@ -89,8 +89,8 @@ npx skills add <this-repo> --skill pwf-enforcer   # 单个选装
 
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`)
 - **planning-with-files** 必须安装(`/plugin marketplace add OthmanAdi/planning-with-files`)
-- **可选**:`pnpm add -g ui-ux-pro-max-cli`(designer-handoff 需要)
-- **可选**:`pnpm dev` 启动 HTML Anything(build-gate-visual-review 需要)
+- **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
+- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill`(build-gate-visual-review 需要,装到 `~/.config/opencode/skills/`)
 
 ## 写作规范
 

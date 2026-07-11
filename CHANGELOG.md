@@ -2,6 +2,23 @@
 
 All notable changes to meisijiya-skills.
 
+## [0.1.1] - 2026-07-11
+
+### Changed
+
+- `build-gate-visual-review` (skill + eval): replaced HTML Anything with [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill). Reason: HTML Anything was a self-hosted web service (`pnpm dev`, `localhost:3000`, POST API) — heavy for the use case. html-ppt-skill is an installed AgentSkill (SKILL.md + themes + layouts + animations) that the agent loads directly and produces a static HTML slide deck. Simpler install, more focused output.
+- README prerequisites: HTML Anything → `npx skills add <html-ppt-skill-url>` (installs to `~/.config/opencode/skills/`).
+
+### Required user action
+
+After upgrading to v0.1.1:
+
+```bash
+npx skills add https://github.com/lewislulu/html-ppt-skill
+```
+
+(html-ppt-skill must be pre-installed in `~/.config/opencode/skills/` before using `build-gate-visual-review`; agent does not auto-install.)
+
 ## [0.1.0] - 2026-07-11
 
 Initial fork from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), adapted for the oh-my-openagent (omo) + planning-with-files (pwf) stack.
@@ -25,7 +42,7 @@ Initial fork from [addyosmani/agent-skills](https://github.com/addyosmani/agent-
 
 **.extra/ — 11 optional skills**
 - `pwf-enforcer` — bridges pwf's Claude Code hooks to omo's OpenCode hook system (Tier 3 honest: advisory only)
-- `build-gate-visual-review` — HTML Anything orchestration for pre-build visual review
+- `build-gate-visual-review` — html-ppt-skill orchestration for pre-build visual review (HTML slide deck)
 - `designer-handoff` — ui-ux-pro-max-skill orchestration for frontend-agent design contract
 - `agent-project-structure` — 10-folder canonical agent-project/ template (planner / memory / tools / knowledge / agent_core / evaluation / observability / deployment / examples / docs)
 - `interview-me` — one-question-at-a-time requirement extraction

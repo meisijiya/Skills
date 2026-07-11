@@ -1,16 +1,18 @@
 ---
 name: build-gate-visual-review
-description: "Before build phase, renders current project state (spec / plan / design spec / progress) as a single HTML file using HTML Anything, so the user can visually review and approve before any code is written. Use when the project has UI, when the user wants to verify understanding before implementation, or when teaching/learning mode is active."
-allowed-tools: "Read Bash Glob Grep Write WebFetch"
+description: "Before build phase, generates an HTML slide deck via html-ppt-skill from current project state (spec / plan / design spec / progress), so the user can visually review and approve before any code is written. Use when the project has UI, when the user wants to verify understanding before implementation, or when teaching/learning mode is active."
+allowed-tools: "Read Bash Glob Grep Write"
 ---
 
 # build-gate-visual-review
 
 ## Overview
 
-在 build 之前,把项目的当前状态(spec / plan / design spec / research findings / progress)渲染成**单文件 HTML**,让用户在浏览器里可视化审视。
+在 build 之前,把项目的当前状态(spec / plan / design spec / research findings / progress)生成为**HTML slide deck**,让用户在浏览器里可视化审视。
 
-目的:build 阶段写代码之前,用户和 agent **对项目状态有共同的、可视化的理解**。纯 markdown 描述容易各理解各的;可视化 HTML 消除歧义。
+目的:build 阶段写代码之前,用户和 agent **对项目状态有共同的、可视化的理解**。Slide deck 比纯 markdown 更易 review(每页一个主题、视觉层次清晰)。
+
+[html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 提供 36 themes × 31 layouts × 47 animations,输出纯静态 HTML/CSS/JS,无需构建步骤。
 
 ## When to Use
 
@@ -31,20 +33,22 @@ allowed-tools: "Read Bash Glob Grep Write WebFetch"
 
 ### 1. Verify prerequisites
 
-```bash
-# HTML Anything CLI installed?
-test -d ~/html-anything || which html-anything 2>/dev/null
-# Or: bun/pnpm based on user's install
-```
-
-If not installed, prompt user:
+`html-ppt-skill` 必须装在全局 skills 目录(由用户预装):
 
 ```bash
-git clone https://github.com/nexu-io/html-anything ~/html-anything
-cd ~/html-anything && pnpm install && pnpm dev  # starts on localhost:3000
+test -d ~/.config/opencode/skills/html-ppt-skill && echo "html-ppt-skill installed" || echo "install html-ppt-skill first"
 ```
 
-HTML Anything reuses your existing AI CLI session — no API key needed.
+If missing, prompt user with one of:
+
+```bash
+# Option A: via vercel-labs/skills CLI
+npx skills add https://github.com/lewislulu/html-ppt-skill
+
+# Option B: manual clone into global omo skills dir
+git clone https://github.com/lewislulu/html-ppt-skill \
+  ~/.config/opencode/skills/html-ppt-skill
+```
 
 ### 2. Gather project state
 
@@ -66,56 +70,38 @@ cat spec.md               # from spec-driven-development
 cat contract.{yaml,json,graphql,proto}  # from api-and-interface-design
 ```
 
-Compile a single markdown document: `BUILD_CONTEXT.md` at `.planning/<plan-id>/build-context.md`.
+Compile a single markdown document: `build-context.md` at `.planning/<plan-id>/build-context.md`.
 
-### 3. Choose HTML Anything template
+### 3. Activate html-ppt-skill
 
-HTML Anything has 9 surfaces × 75 templates. For build-gate review:
+通过 Skill tool 加载 `html-ppt-skill`,让 agent 使用其 36 themes / 31 layouts / 47 animations 创建 deck。
 
-| Surface | Best for |
-|---|---|
-| **magazine** | Long-form spec narrative |
-| **deck** | Slides for stakeholder review |
-| **data report** | API contracts, schema diagrams |
-| **prototype** | UI mockup preview (if design spec exists) |
+### 4. Author the deck
 
-Default: **magazine** for spec narrative, **deck** for stakeholder review.
+让 html-ppt-skill 把 `build-context.md` 转换成 slide deck。建议的 slide 结构:
 
-### 4. Generate HTML
+- Slide 1: 项目名 + 目标(cover layout)
+- Slide 2: 目录 / 路线图(toc / roadmap layout)
+- Slide 3+: spec 关键决策(spec 摘要 / 验收标准)
+- Slide N-1: 设计 spec 摘要(if UI 项目,chart-grid / arch-diagram layout)
+- Slide N: 当前 phase 状态 / 下一步(cta / thanks layout)
 
-Invoke HTML Anything with the chosen template + build-context.md content:
+Theme 选择:可让用户从 html-ppt-skill 的 36 themes 中选(`minimal-white` / `editorial-serif` / `cyberpunk-neon` / `xiaohongshu-white` 等),或 agent 根据项目类型自动选。
 
-```bash
-# Assuming HTML Anything runs on localhost:3000
-# API call (or use the web UI):
-curl -X POST http://localhost:3000/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "template": "magazine",
-    "surface": "article",
-    "input": "'"$(cat .planning/<plan-id>/build-context.md | base64 -w0)"'",
-    "output": ".planning/<plan-id>/build-gate.html"
-  }'
-```
+### 5. Output deck file
 
-Or use the HTML Anything web UI directly: paste content, pick template, download.
+Output 位置:`.planning/<plan-id>/build-gate-deck/index.html`(html-ppt-skill 标准的多文件 deck 结构)
 
-### 5. Verify HTML generated
-
-```bash
-test -s .planning/<plan-id>/build-gate.html && echo "OK" || echo "Generation failed"
-wc -l .planning/<plan-id>/build-gate.html
-```
+或简单的单文件:`.planning/<plan-id>/build-gate.html`
 
 ### 6. Present to user
 
-Tell the user the file path + how to view:
+告诉用户文件路径 + 打开方式:
 
 ```
 Build-gate review ready:
-  File: /abs/path/to/build-gate.html
-  Open: file:// URL in browser, or run:
-        pnpm --dir ~/html-anything dev  # then visit localhost:3000
+  File: /abs/path/to/build-gate.html (or build-gate-deck/index.html)
+  Open: file:// URL in browser
 
 Content includes:
   - Project goal & scope
@@ -135,44 +121,45 @@ Wait for user confirmation. Append to `progress.md`:
 ```
 
 If approve → proceed to build phase
-If modify → update spec / plan, regenerate HTML
+If modify → update spec / plan, regenerate deck
 If reject → go back to spec phase
 
 ## Common Rationalizations
 
 | Excuse | Reality |
 |---|---|
-| "用户已经看了 spec,不需要再 review" | Spec 是文字,build-gate 是可视化。两种认知负担不同。 |
-| "HTML 渲染浪费时间" | 5 分钟渲染 vs 50 分钟改错代码。前者更快。 |
+| "用户已经看了 spec,不需要再 review" | Spec 是文字,deck 是可视化。两种认知负担不同。 |
+| "Deck 渲染浪费时间" | 5 分钟渲染 vs 50 分钟改错代码。前者更快。 |
 | "纯后端项目不需要这个" | 对,后端跳过 build-gate(写明 NOT for)。 |
 | "用户太忙,跳过 review" | 忙 ≠ 不要 review。Build-gate 是异步的,用户有空再看。 |
 | "直接动手,出问题再调" | 出问题再调 = 返工 = 更慢。 |
-| "HTML Anything 装起来麻烦" | `git clone && pnpm install && pnpm dev` 30 秒。 |
+| "html-ppt-skill 装起来麻烦" | `npx skills add <url>` 一行命令。 |
 
 ## Red Flags
 
-- HTML Anything 没装就用 skill(脚本会失败)
+- html-ppt-skill 没装就用 skill(agent 不会自动安装)
 - 跳到 build 之前没等用户确认
 - Build context 拼凑不全(漏 spec / 漏 design)
-- HTML 模板选错(prototype 模板渲 spec 文档会很怪)
-- 用户没看到 build-gate.html 就进入 build phase
-- build-gate.html 路径写错 / 权限不够
-- 生成 HTML 失败但不报告
+- Deck 内容跟 build-context.md 不一致(凭空捏造)
+- 用户没看到 deck 就进入 build phase
+- Deck 路径写错 / 权限不够
+- 生成失败但不报告
 
 ## Verification
 
 Before declaring build-gate ready, confirm:
-- [ ] HTML Anything installed and running
+- [ ] html-ppt-skill installed at `~/.config/opencode/skills/html-ppt-skill/`
 - [ ] build-context.md compiled with all relevant sections
-- [ ] HTML generated successfully (non-empty file)
+- [ ] html-ppt-skill loaded via Skill tool
+- [ ] Deck generated successfully (non-empty file)
 - [ ] User presented with file path + how to open
 - [ ] User explicitly approved (verbal / progress.md entry)
 - [ ] Any modifications from review applied
-- [ ] HTML re-generated if spec changed
+- [ ] Deck re-generated if spec changed
 
 ## pwf Integration
 
-Maps to `task_plan.md` **Phase 3.5: Build Gate Visual Review**. The HTML goes in `.planning/<plan-id>/build-gate.html` (not in task_plan.md — it's an artifact, not a plan element).
+Maps to `task_plan.md` **Phase 3.5: Build Gate Visual Review**. The deck goes in `.planning/<plan-id>/build-gate-deck/` (artifact directory, not in task_plan.md).
 
 The gate decision is recorded in `progress.md`:
 
