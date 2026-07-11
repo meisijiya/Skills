@@ -1,0 +1,63 @@
+{
+  "name": "build-gate-visual-review",
+  "version": "0.1.0",
+  "description": "Renders project state as HTML for user visual review before build phase",
+  "positive_triggers": [
+    {
+      "input": "Show me what we're about to build before any code",
+      "expected_skill": "build-gate-visual-review",
+      "reason": "User wants visual confirmation before build"
+    },
+    {
+      "input": "Generate an HTML review of the current project state",
+      "expected_skill": "build-gate-visual-review",
+      "reason": "Explicit request for HTML render"
+    },
+    {
+      "input": "Visual gate before build phase",
+      "expected_skill": "build-gate-visual-review",
+      "reason": "Gate workflow explicitly invoked"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Build a CLI todo tool",
+      "expected_no_skill": true,
+      "reason": "No UI, no visual gate needed"
+    },
+    {
+      "input": "Just write the code, no review needed",
+      "expected_no_skill": true,
+      "reason": "User explicitly skips review"
+    },
+    {
+      "input": "Fix one typo",
+      "expected_no_skill": true,
+      "reason": "Trivial change, no gate"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Show me what we're about to build'",
+      "expected_behavior": [
+        "Agent verifies HTML Anything installed (clone + pnpm install + pnpm dev)",
+        "Agent compiles build-context.md from task_plan.md + spec.md + design-spec.md + findings.md summary",
+        "Agent picks appropriate template (magazine / deck / data-report / prototype)",
+        "Agent invokes HTML Anything CLI/API to generate HTML",
+        "Agent stores output at .planning/<plan-id>/build-gate.html",
+        "Agent presents file path + how to open (browser / web UI)",
+        "Agent waits for user approval before build phase"
+      ]
+    },
+    {
+      "scenario": "User says: 'Looks good, proceed to build'",
+      "expected_behavior": [
+        "Agent records [build-gate] review → user: approve in progress.md",
+        "Agent proceeds to build phase",
+        "If user had said 'modify': agent updates spec/plan and regenerates HTML"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

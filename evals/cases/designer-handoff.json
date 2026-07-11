@@ -1,0 +1,64 @@
+{
+  "name": "designer-handoff",
+  "version": "0.1.0",
+  "description": "Generates UI design spec via ui-ux-pro-max and hands off to frontend agent",
+  "positive_triggers": [
+    {
+      "input": "Generate UI design spec for our React project",
+      "expected_skill": "designer-handoff",
+      "reason": "UI project needs design spec"
+    },
+    {
+      "input": "Frontend agent keeps using AI purple gradients, give it design rules",
+      "expected_skill": "designer-handoff",
+      "reason": "Frontend needs constraints to avoid anti-patterns"
+    },
+    {
+      "input": "Hand off design to frontend implementation",
+      "expected_skill": "designer-handoff",
+      "reason": "Explicit designer-to-frontend handoff"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Build a backend REST API",
+      "expected_no_skill": true,
+      "reason": "No UI, no design spec needed"
+    },
+    {
+      "input": "Designer already gave me Figma mockups",
+      "expected_no_skill": true,
+      "reason": "Already have design spec, use it directly"
+    },
+    {
+      "input": "Just code it, no spec",
+      "expected_no_skill": true,
+      "reason": "User explicitly skips spec"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Generate UI design spec for our React project'",
+      "expected_behavior": [
+        "Agent verifies ui-ux-pro-max-cli installed + OpenCode integration initialized",
+        "Agent reads spec for project type (SaaS / Fintech / E-commerce / etc.), tech stack, mood",
+        "Agent invokes ui-ux-pro-max generate with appropriate flags",
+        "Agent stores design spec at .planning/<plan-id>/design-spec.md",
+        "Agent adds Phase 1.5: UI Design Spec to task_plan.md",
+        "Agent documents frontend agent contract (read spec first, follow rules, run pre-delivery checklist)"
+      ]
+    },
+    {
+      "scenario": "Frontend agent starts writing UI code",
+      "expected_behavior": [
+        "Agent loads designer-handoff first",
+        "Agent reads design-spec.md BEFORE writing any UI file",
+        "Agent references design-spec.md in code comments where rules apply",
+        "Agent runs pre-delivery checklist before commit (WCAG, focus states, prefers-reduced-motion)",
+        "Agent rejects UI code that violates spec (in code review)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker."
+}
