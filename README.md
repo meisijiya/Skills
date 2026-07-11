@@ -63,7 +63,7 @@ scripts/install.sh --all-extra
 # 看可选的 .extra/
 scripts/install.sh --list
 
-# 全局安装(到 ~/.agents/skills/)
+# 全局安装(到 ~/.config/opencode/skills/)
 scripts/install.sh --global
 
 # 预览但不复制

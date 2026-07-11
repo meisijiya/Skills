@@ -10,7 +10,7 @@
 #   scripts/install.sh --all-extra              # install all .extra/ skills
 #   scripts/install.sh --list                   # list available .extra/ skills
 #   scripts/install.sh --dry-run                # show what would be installed, don't copy
-#   scripts/install.sh --global                 # install to ~/.agents/skills/
+#   scripts/install.sh --global                 # install to ~/.config/opencode/skills/
 #
 # Defaults: install all .core/ to <target>/.opencode/skills/
 #
@@ -40,7 +40,7 @@ Usage: $0 [options]
 
 Options:
   --target PATH        install to <PATH>/.opencode/skills/ (default: cwd)
-  --global             install to ~/.agents/skills/
+  --global             install to ~/.config/opencode/skills/
   --extra NAME         also install .extra/NAME (repeatable)
   --all-extra          install all .extra/ skills
   --list               list available .extra/ skills and exit
@@ -83,7 +83,7 @@ fi
 
 # Resolve target dir
 if $GLOBAL; then
-  INSTALL_ROOT="${HOME}/.agents/skills"
+  INSTALL_ROOT="${HOME}/.config/opencode/skills"
 else
   INSTALL_ROOT="$TARGET/.opencode/skills"
 fi

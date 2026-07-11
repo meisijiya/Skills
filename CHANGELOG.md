@@ -2,16 +2,34 @@
 
 All notable changes to meisijiya-skills.
 
+## [0.1.3] - 2026-07-11
+
+### Fixed
+
+- **Over-broad fix in v0.1.2 reverted for this repo's own paths.** v0.1.2 changed all `~/.config/opencode/skills/` refs to `~/.agents/skills/` — too broad. Correct rule:
+  - **Skills installed via `vercel-labs/skills` CLI** (pwf, html-ppt-skill, ui-ux-pro-max) → `~/.agents/skills/`
+  - **This repo's own install paths** (`scripts/install.sh --global`) → `~/.config/opencode/skills/` (omo's native)
+  - **omo runtime config** (`oh-my-openagent.json`) → `~/.config/opencode/oh-my-openagent.json` (unchanged)
+
+Reverted:
+- `scripts/install.sh` — `--global` default target + 2 comments back to `~/.config/opencode/skills/`
+- `README.md` — `--global` comment back to `~/.config/opencode/skills/`
+
+Kept (v0.1.2 fix was correct for these):
+- `pwf-enforcer/SKILL.md` — pwf at `~/.agents/skills/`
+- `build-gate-visual-review/SKILL.md` — html-ppt-skill at `~/.agents/skills/`
+- `designer-handoff/SKILL.md` — ui-ux-pro-max at `~/.agents/skills/`
+- `evals/cases/build-gate-visual-review.json` — html-ppt-skill refs
+
 ## [0.1.2] - 2026-07-11
 
 ### Fixed
 
-- Skill install paths corrected from `~/.config/opencode/skills/` → `~/.agents/skills/`. The canonical location for `vercel-labs/skills` CLI global installs is `~/.agents/skills/`, not omo's local config dir. Fixes:
+- **Skills-CLI-managed skill paths corrected** from `~/.config/opencode/skills/` → `~/.agents/skills/`. The canonical location for `vercel-labs/skills` CLI global installs is `~/.agents/skills/`, not omo's local config dir. Applies to skills that users install via `npx skills add` (pwf, html-ppt-skill, ui-ux-pro-max). Does NOT apply to meisijiya-skills' own install paths (those use omo's native locations — see v0.1.3 for the correction). Fixes:
   - `pwf-enforcer/SKILL.md` — 4 path refs (verify + 3 hook commands)
   - `build-gate-visual-review/SKILL.md` — 3 path refs (verify + install options + verification)
   - `designer-handoff/SKILL.md` — 1 path ref (ui-ux-pro-max verify)
-  - `scripts/install.sh` — default `--global` target + 2 comments
-  - `README.md` — 2 prerequisites lines
+  - `README.md` — html-ppt-skill prerequisites line
   - `evals/cases/build-gate-visual-review.json` — behavioral eval + notes
 
 omo config path (`~/.config/opencode/oh-my-openagent.json`) is unchanged — it's not a skill install location, it's omo's runtime config.
