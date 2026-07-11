@@ -1,7 +1,7 @@
-# .core/ 5 个 P0 SKILL.md 大纲(草稿)
+# .core/ 5 个 P0 SKILL.md 大纲(归档)
 
-> **状态**:等用户 review 元 skill(`using-meisijiya-skills/SKILL.md`)的写作风格后,按相同结构批量产出。
-> 此文档**只列大纲**,不是完整 SKILL.md。完整版每个 200~400 行。
+> **状态**:✅ 已 ship(2026-07-11)。本文件保留作为设计记录。
+> 实际 SKILL.md 已写入 `skills/.core/{spec-driven-development,incremental-implementation,test-driven-development,debugging-and-error-recovery,source-driven-development}/SKILL.md`。
 
 ---
 
