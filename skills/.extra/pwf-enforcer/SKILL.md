@@ -32,7 +32,7 @@ pwf 在 Claude Code 上有原生 hooks(`UserPromptSubmit` / `PreToolUse` / `Post
 
 ```bash
 test -f ~/.config/opencode/oh-my-openagent.json && echo "omo installed" || echo "install omo first"
-test -d ~/.claude/plugins/marketplaces/planning-with-files/ && echo "pwf installed" || echo "install pwf first"
+test -d ~/.config/opencode/skills/planning-with-files/ && echo "pwf installed" || echo "install pwf first"
 ```
 
 If either missing, prompt user to install before proceeding.
@@ -60,7 +60,7 @@ Append to `~/.config/opencode/oh-my-openagent.json`:
   "hooks": {
     "tool.before.write|edit": [
       {
-        "command": "~/.claude/plugins/marketplaces/planning-with-files/scripts/inject-plan.sh --context=pretool",
+        "command": "~/.config/opencode/skills/planning-with-files/scripts/inject-plan.sh --context=pretool",
         "description": "Inject active plan head before any file edit (PreToolUse equivalent)"
       }
     ],
@@ -72,13 +72,13 @@ Append to `~/.config/opencode/oh-my-openagent.json`:
     ],
     "experimental.session.compacting": [
       {
-        "command": "~/.claude/plugins/marketplaces/planning-with-files/scripts/inject-plan.sh --context=precompact",
+        "command": "~/.config/opencode/skills/planning-with-files/scripts/inject-plan.sh --context=precompact",
         "description": "Flush pwf state before compaction (PreCompact equivalent)"
       }
     ],
     "session.idle": [
       {
-        "command": "~/.claude/plugins/marketplaces/planning-with-files/scripts/check-complete.sh || echo '[pwf-enforcer] incomplete phases remain'",
+        "command": "~/.config/opencode/skills/planning-with-files/scripts/check-complete.sh || echo '[pwf-enforcer] incomplete phases remain'",
         "description": "Advisory check at session idle (Stop equivalent — Tier 3, notify only)"
       }
     ]
