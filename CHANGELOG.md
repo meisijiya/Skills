@@ -4,6 +4,29 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Fixed (CI bijection false-positive on README.md)
+
+CI run #29180590851 failed at step "Verify skill↔eval bijection":
+```
+skills without eval: {'README.md'}
+```
+
+**Root cause:** inline Python used `os.listdir(root)` to enumerate skills, which returned `README.md` alongside actual skill directories. The script then treated `README.md` as a skill missing its eval case.
+
+The Node 20 deprecation warning in the same run was unrelated (a yellow notice, not the failure).
+
+**Fix:** filter `os.listdir()` results to directories that contain a `SKILL.md`. README.md / docs / scripts / etc. are now correctly skipped.
+
+**Verified locally:**
+- New logic: `Bijection OK: 16 skills ↔ 16 evals`
+- Old logic: `missing={'README.md'}` (confirmed the bug)
+- validate-skills.sh: 16/16 OK
+- check-marketplace.sh: OK marketplace.json in sync
+
+### Added
+
+- **`.github/workflows/validate-skills.yml`** — added `actions/setup-node@v4` pinning `node-version: '24'`. The workflow itself doesn't run Node, but `actions/checkout@v4` internally targets Node 20 which GitHub deprecated (Sept 2025). Pinning silences the deprecation warning.
+
 ### Added
 
 - **`skills/core/README.md`** — human-readable catalog of the 6 must-install skills:

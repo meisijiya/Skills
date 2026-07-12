@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node 24 (silence Node 20 deprecation warning)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Validate all SKILL.md
         run: bash scripts/validate-skills.sh
 
@@ -30,12 +35,16 @@ jobs:
       - name: Verify skill↔eval bijection
         run: |
           python3 -c "
-          import json, os
-          evals = {f.replace('.json','').split('/')[-1] for f in os.listdir('evals/cases') if f.endswith('.json')}
+          import os
+          evals = {f[:-5] for f in os.listdir('evals/cases') if f.endswith('.json')}
           skills = set()
-          for root in ['skills/core','skills/extra']:
+          for root in ['skills/core', 'skills/extra']:
+              if not os.path.isdir(root):
+                  continue
               for d in os.listdir(root):
-                  skills.add(d)
+                  skill_path = os.path.join(root, d)
+                  if os.path.isdir(skill_path) and os.path.exists(os.path.join(skill_path, 'SKILL.md')):
+                      skills.add(d)
           missing = skills - evals
           extra = evals - skills
           if missing or extra:
