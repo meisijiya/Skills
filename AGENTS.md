@@ -28,8 +28,8 @@ This project uses [meisijiya-skills](https://github.com/meisijiya/meisijiya-skil
 - `debugging-and-error-recovery` — 5-step triage (reproduce / localize / reduce / fix / guard)
 - `source-driven-development` — verify API against official docs
 
-**.extra/ (opt-in, 12):**
-`pwf-enforcer` · `build-gate-visual-review` · `designer-handoff` · `agent-project-structure` · `interview-me` · `code-simplification` · `api-and-interface-design` · `security-and-hardening` · `performance-optimization` · `observability-and-instrumentation` · `documentation-and-adrs` · `omo-integration`
+**.extra/ (opt-in, 10):**
+`pwf-enforcer` · `build-gate-visual-review` · `designer-handoff` · `interview-me` · `code-simplification` · `api-and-interface-design` · `security-and-hardening` · `performance-optimization` · `observability-and-instrumentation` · `documentation-and-adrs`
 
 ### omo integration (v0.2.0+)
 
@@ -44,7 +44,7 @@ Skills explicitly leverage omo features:
 | `security-and-hardening` | security-research mode (v0.2.1+) |
 | `using-meisijiya-skills` | Sisyphus + IntentGate handoff, atlas agent |
 
-Full map: load `omo-integration` skill (already in `.extra/`).
+Full omo → skills cross-reference map: in `~/.config/opencode/AGENTS.md` (consolidated from former `omo-integration` skill).
 
 ### Conventions
 

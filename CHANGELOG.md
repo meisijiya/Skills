@@ -4,6 +4,15 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (skill consolidation)
+
+Dropped 2 skills that were pure documentation (no executable workflow). Content moved to user-level `~/.config/opencode/AGENTS.md` as condensed reference blocks.
+
+- **Removed `skills/.extra/agent-project-structure/`** + eval case. The 10-folder agent-project layout is now a 10-line section in `~/.config/opencode/AGENTS.md` under `<!-- meisijiya-extras_START -->`.
+- **Removed `skills/.extra/omo-integration/`** + eval case. The omo features cross-reference map is now a 7-line section in the same place.
+
+**Why:** Skills without workflow are redundant — agents read user-level AGENTS.md every turn, no skill-matching needed. Removing them shrinks the injected catalog (12 → 10 in `.extra/`).
+
 ### Changed (pwf-enforcer rewrite)
 
 **Previously:** `skills/.extra/pwf-enforcer/SKILL.md` documented a fake mapping table of "omo hook events" (`session.created`, `tool.before.*`, `file.changed`, `session.idle`, `experimental.session.compacting`) and instructed users to add a `hooks:` field to `~/.config/opencode/oh-my-openagent.json`. **None of this was real.** omo's actual schema has only `disabled_hooks` (a deny list), not a user-writable `hooks` config. Several event names were fabricated or wrong.
