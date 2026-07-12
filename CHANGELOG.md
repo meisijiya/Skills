@@ -6,6 +6,24 @@ All notable changes to meisijiya-skills.
 
 ### Added
 
+- **`skills/core/README.md`** — human-readable catalog of the 6 must-install skills:
+  - One-line description per skill (what it does, when to use)
+  - "Why must-install" table (consequence of skipping each one)
+  - Install command
+
+- **`skills/extra/README.md`** — human-readable catalog of the 10 opt-in skills + decision support:
+  - "How to choose" table: pick skills based on project type (UI / production / multi-engineer / using pwf / etc.)
+  - One-line description per skill
+  - Dependency table (which skill needs which other tool installed first)
+  - Install command
+
+- **`README.md`** updates:
+  - New "Skills" section with explicit jump links to both subdirectory READMEs
+  - Repo structure tree updated to show README.md in each skills/ subdirectory
+  - "当前状态" block refreshed (v0.2.2 → v0.3.0, recent Unreleased commits listed)
+
+### Added
+
 - **`scripts/check-marketplace.sh`** — automated bidirectional drift check between `.claude-plugin/marketplace.json` and `skills/` filesystem:
   - Verifies every skill under `skills/<dir>/<name>/SKILL.md` is listed in some plugin entry's `skills[]` array
   - Verifies every manifest path exists on disk

@@ -24,6 +24,7 @@ meisijiya-skills/
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
 │   ├── core/                 ← 必装集(6 个)
+│   │   ├── README.md          ← 6 个 skill 详情 + 必装理由
 │   │   ├── using-meisijiya-skills/
 │   │   ├── spec-driven-development/
 │   │   ├── incremental-implementation/
@@ -31,6 +32,7 @@ meisijiya-skills/
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/
 │   └── extra/                ← 选装集(10 个,按需)
+│       ├── README.md          ← 10 个 skill + "怎么选" 决策表
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/
 │       ├── designer-handoff/
@@ -78,6 +80,15 @@ npx skills add <this-repo> -g
 ```
 
 vercel-labs/skills CLI 自动处理 dedup / 多 agent harness 兼容 / 符号链接。
+
+## Skills
+
+按用途拆成两个子目录,每个有自己的 README 详细解释:
+
+- **必装集**(6 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
+- **选装集**(10 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+
+> 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
 
 ### 高级:`scripts/install.sh`(项目级 install / 自定义路径)
 
@@ -148,9 +159,7 @@ MIT
 
 ## 当前状态
 
-最近 tag: **v0.2.2**(16 个 SKILL.md / 16 个 eval case;6 `core/` + 10 `extra/`)
-Unreleased: pwf-enforcer plugin 重写(`e1330d2`)+ skill consolidate 18→16(`dfff240`)+ lite CLI(`83a1773`:`bin/meisijiya` plugin list/verify)
+最近 tag: **v0.3.0**(16 个 SKILL.md / 16 个 eval case;6 `core/` + 10 `extra/`)
+Unreleased: AGENTS.md 按 Oracle 审查重写(`38d60c5`)+ `.claude-plugin/marketplace.json` 双 plugin entry 分组(`685d104`)+ CI 漂移检查 `scripts/check-marketplace.sh`(`17dfbcc`)
 
 详见 `CHANGELOG.md` 与 `git log --oneline`。
-
-详见 `git log --oneline`。
