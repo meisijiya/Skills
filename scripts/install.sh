@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# scripts/install.sh
-#
-# Install meisijiya-skills to an OpenCode project.
+# scripts/install.sh — see README for method comparison vs `npx skills add`.
 #
 # Usage:
 #   scripts/install.sh                          # install .core/ to ./.opencode/skills/
