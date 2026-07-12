@@ -45,6 +45,9 @@ jobs:
           print(f'Bijection OK: {len(skills)} skills ↔ {len(evals)} evals')
           "
 
+      - name: Verify marketplace.json in sync with filesystem
+        run: bash scripts/check-marketplace.sh
+
       - name: Test install.sh
         run: |
           bash scripts/install.sh --list > /dev/null

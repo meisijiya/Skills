@@ -6,6 +6,25 @@ All notable changes to meisijiya-skills.
 
 ### Added
 
+- **`scripts/check-marketplace.sh`** — automated bidirectional drift check between `.claude-plugin/marketplace.json` and `skills/` filesystem:
+  - Verifies every skill under `skills/<dir>/<name>/SKILL.md` is listed in some plugin entry's `skills[]` array
+  - Verifies every manifest path exists on disk
+  - Verifies all paths start with `./` (CLI requirement)
+  - Exits 1 with diff on drift, 0 with count on match
+  
+  Wired into `.github/workflows/validate-skills.yml` as a CI step. New skill additions that forget to update marketplace.json will fail CI.
+
+### Documentation
+
+- **`skill-anatomy.md`** — added a new "Marketplace 清单" section documenting:
+  - File structure (`plugins[].name` + `plugins[].skills[]`)
+  - Rules (path must start with `./`, paths to skill dirs not files, single group per plugin)
+  - 5-step checklist for adding a new skill (write SKILL.md → update manifest → add eval → run checks)
+  - Known constraints (CLI groups by pluginName not by directory)
+- **`AGENTS.md` Section B** — added bullet linking to skill-anatomy.md for the marketplace convention
+
+### Added
+
 - **`.claude-plugin/marketplace.json`** — declares the plugin as TWO named units (`meisijiya-core` + `meisijiya-extra`) so the vercel-labs/skills CLI picker shows skills under two distinct group headers matching the source directory layout.
 
   Initial attempt was `.claude-plugin/plugin.json` with a single `name="meisijiya-skills"` — produced one merged group "Meisijiya Skills" containing all 16 skills. Reading `vercel-labs/skills` src/add.ts confirmed: `pluginName` (assigned per skill from `getPluginGroupings`) drives the group header. Multiple groups require multiple plugin entries — only `marketplace.json` supports that schema.

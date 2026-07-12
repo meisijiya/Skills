@@ -62,6 +62,7 @@ When adding a new skill to this repo, follow the conventions in [`skill-anatomy.
 - **≤ 500 lines**: Move reference material to supporting files.
 - **`allowed-tools`**: Specify in frontmatter when the skill needs tool restrictions.
 - **Eval case**: Add `evals/cases/<skill-name>.json` with 3 positive triggers + 3 negative triggers + ≥ 1 behavioral scenario.
+- **Marketplace manifest** (`.claude-plugin/marketplace.json`): Every new skill must add its path to the corresponding plugin entry's `skills[]` array. `npx skills add` groups by `pluginName`, not by directory. See `skill-anatomy.md` for the full convention. CI `scripts/check-marketplace.sh` enforces this.
 - **omo integration** (if applicable): Reference relevant omo MCPs / agents / built-ins. See any existing skill's Process section for the format.
 
 Existing skills are the reference. When in doubt, copy a similar skill's structure (e.g., `test-driven-development` for the canonical 6-section pattern).

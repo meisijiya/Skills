@@ -77,3 +77,54 @@ allowed-tools: "Read Edit Bash Glob Grep"
 - 不要用模糊的 verification("make sure it works" → "run `npm test` and verify exit 0")
 - 不要超过 500 行不拆 supporting file
 - 不要在 SKILL.md 里写 README 风格的介绍——那是 README 的事
+
+## Marketplace 清单(.claude-plugin/marketplace.json)
+
+`npx skills add <repo>` CLI 靠这个文件把 skill 分组显示。**新增 skill 时必须同步更新它**,否则 picker 里看不到新 skill。
+
+### 文件结构
+
+```json
+{
+  "plugins": [
+    {
+      "name": "meisijiya-core",     // 必装集(6 个)
+      "skills": [
+        "./skills/core/<skill-name>",
+        ...
+      ]
+    },
+    {
+      "name": "meisijiya-extra",    // 选装集(10 个)
+      "skills": [
+        "./skills/extra/<skill-name>",
+        ...
+      ]
+    }
+  ]
+}
+```
+
+### 规则
+
+- `name` 是 picker 里显示的 group header
+- 每个路径必须以 `./` 起头
+- 路径指向 skill 目录(包含 SKILL.md 的目录),**不是 SKILL.md 文件本身**
+- 必装集(6 个)放 `meisijiya-core`,选装集放 `meisijiya-extra`
+- 同一 skill 不能出现在多个 plugin 里(否则 pluginName 二义性)
+
+### 添加新 skill 的步骤
+
+1. 写 `skills/<dir>/<new-skill>/SKILL.md` 满足上方全部规则
+2. 把 `"./skills/<dir>/<new-skill>"` 加到 `marketplace.json` 对应 plugin 的 `skills[]` 数组
+3. 加 `evals/cases/<new-skill>.json`
+4. 跑 `bash scripts/check-marketplace.sh` — 应输出 `OK`
+5. 跑 `bash scripts/validate-skills.sh` — 应 `16/16`(或更新后的数字)
+
+**CI 会自动跑 step 1-4**。任何漂移 → PR 失败。
+
+### 已知约束
+
+- `npx skills add` CLI 用 `pluginName` 字段做 group header(`pluginName = name`)
+- 单个 `name` 只能给所有列出的 skill 同一个 group → 必须用 `marketplace.json` 多 plugin entry 才有多个 group
+- CLI 不按目录名分组(`.core/` vs `.extra/` 仅是组织约定,不影响显示)
