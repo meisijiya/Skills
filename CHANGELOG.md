@@ -6,11 +6,36 @@ All notable changes to meisijiya-skills.
 
 ### Added
 
-- **`.claude-plugin/plugin.json`** — declares the plugin as a named unit so the vercel-labs/skills CLI groups all 16 skills under `meisijiya-skills` in the install picker (instead of a flat list). Pattern lifted from mattpocock/skills.
+- **`.claude-plugin/marketplace.json`** — declares the plugin as TWO named units (`meisijiya-core` + `meisijiya-extra`) so the vercel-labs/skills CLI picker shows skills under two distinct group headers matching the source directory layout.
 
-  Without this file the CLI walks `skills/` recursively and lists all skills flat — no group header. With the file, all skills listed in `skills[]` get `pluginName="meisijiya-skills"` and the picker groups them.
+  Initial attempt was `.claude-plugin/plugin.json` with a single `name="meisijiya-skills"` — produced one merged group "Meisijiya Skills" containing all 16 skills. Reading `vercel-labs/skills` src/add.ts confirmed: `pluginName` (assigned per skill from `getPluginGroupings`) drives the group header. Multiple groups require multiple plugin entries — only `marketplace.json` supports that schema.
 
-  **Maintenance:** the `skills[]` array must be kept in sync with the filesystem. Drift between the manifest and `skills/{core,extra}/*` will leave some skills un-installable via the CLI picker (they're discoverable via direct path, but not in the grouped list). Add a CI check in a follow-up if drift becomes a problem.
+  Schema (from vercel-labs/skills src/plugin-manifest.ts):
+  ```json
+  {
+    "plugins": [
+      { "name": "meisijiya-core",  "skills": ["./skills/core/..."] },
+      { "name": "meisijiya-extra", "skills": ["./skills/extra/..."] }
+    ]
+  }
+  ```
+
+  After this, `npx skills add https://github.com/meisijiya/Skills` displays:
+  ```
+  ◆ meisijiya-core (6)
+    □ debugging-and-error-recovery
+    □ incremental-implementation
+    □ source-driven-development
+    □ spec-driven-development
+    □ test-driven-development
+    □ using-meisijiya-skills
+
+  ◆ meisijiya-extra (10)
+    □ api-and-interface-design
+    □ ...
+  ```
+
+  **Maintenance:** each `skills[]` array must be kept in sync with the filesystem. Drift = un-installable via picker (still installable via direct path). Add CI check in follow-up if drift becomes a problem.
 
 ## v0.3.0 (2026-07-12)
 
