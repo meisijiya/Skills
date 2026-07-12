@@ -99,14 +99,14 @@ scripts/install.sh --all-extra
 # 看可选的 .extra/
 scripts/install.sh --list
 
-# 全局装(到 ~/.config/opencode/skills/,omo 原生路径)
+# 全局装(到 ~/.agents/skills/,跟 npx skills add 同位置 — 统一管理)
 scripts/install.sh --global
 
 # 预览但不复制
 scripts/install.sh --dry-run
 ```
 
-> 注意:`scripts/install.sh` 装到 omo 原生路径(`~/.config/opencode/skills/`),不是 skills CLI 的 canonical 路径(`~/.agents/skills/`)。两者都被 OpenCode 发现,但**混用会装两份副本**。如果你已经在用 skills CLI 装其它 skill,优先用 CLI。
+> 注意:`scripts/install.sh --global` 现在跟 `npx skills add` 装到**同一位置**(`~/.agents/skills/`)。OpenCode 从两个路径都发现 skill,所以即使你从不同来源装,也只会有同一份副本。**project-level 安装**仍走 `<project>/.opencode/skills/`(omo 原生,不被 skills CLI 影响)。
 
 ### Lite CLI:`bin/meisijiya`(OpenCode plugin 管理)
 

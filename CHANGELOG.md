@@ -4,6 +4,31 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (install path unification — BREAKING for `--global` users)
+
+**`scripts/install.sh --global`** target: `~/.config/opencode/skills/` → `~/.agents/skills/`.
+
+**Why:** `npx skills add <repo>` (canonical, vercel-labs CLI) installs to `~/.agents/skills/`. `scripts/install.sh --global` previously went to `~/.config/opencode/skills/` (omo native), causing two problems:
+1. Two different global paths for the same skill system — confusing mental model
+2. Cross-CLI dedup didn't work — `npx skills add` could see `~/.config/opencode/skills/<name>` and refuse to install to `~/.agents/skills/<name>` (or vice versa)
+
+Now both methods converge on `~/.agents/skills/`. OpenCode discovers skills from there.
+
+**Project-level path unchanged:** `scripts/install.sh --target <path>` still installs to `<path>/.opencode/skills/` (omo's per-project convention; not used by skills CLI).
+
+**Migration for users on the old `--global` path:**
+```bash
+# If you previously ran --global and have skills at ~/.config/opencode/skills/meisijiya-*:
+ls ~/.config/opencode/skills/ | grep ^meisijiya-  # check what's there
+rm -rf ~/.config/opencode/skills/meisijiya-*      # safe to delete — they're at ~/.agents/skills/ now (or will be after re-running --global)
+```
+
+Verified via `scripts/install.sh --global --dry-run`:
+```
+Target: /home/ljh2923/.agents/skills
+Skills: 6
+```
+
 ### Fixed (audit cleanups from path/coherence review)
 
 User requested a full audit before using the system. Findings → fixes:

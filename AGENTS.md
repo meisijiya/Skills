@@ -57,7 +57,7 @@ Full omo → skills cross-reference map: in `~/.config/opencode/AGENTS.md` (cons
 ### Install paths
 
 - **This skill system (recommended)**: `npx skills add <repo>` → `~/.agents/skills/<name>/` (canonical)
-- **This skill system (advanced)**: `scripts/install.sh` → `~/.config/opencode/skills/<name>/` (omo native) or `<project>/.opencode/skills/<name>/`
+- **This skill system (advanced)**: `scripts/install.sh --global` → `~/.agents/skills/<name>/` (same as skills CLI);`--target <path>` → `<path>/.opencode/skills/<name>/` (project-level, omo native)
 - **Other skills** (pwf, html-ppt-skill, ui-ux-pro-max): `~/.agents/skills/<name>/` (canonical, all via skills CLI)
 
 ### Meta-info injection source
