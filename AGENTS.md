@@ -14,13 +14,15 @@ The block between the sentinel markers below is what `scripts/inject-agents-md.s
 
 <!-- meisijiya-skills:start -->
 
-## meisijiya-skills (installed)
+## meisijiya-skills
 
-This project uses [meisijiya-skills](https://github.com/meisijiya/meisijiya-skills) — a personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) for the [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (omo) + [planning-with-files](https://github.com/OthmanAdi/planning-with-files) (pwf) stack.
+Use this skill system for the omo + pwf stack. Invoke skills by matching their `description` field against the user's request; do not invoke skills that don't match.
 
-### Skill catalog
+These conventions apply globally unless a project-level AGENTS.md overrides them.
 
-**.core/ (always-loaded, 6):**
+### Catalog
+
+**.core/ — load always:**
 - `using-meisijiya-skills` — meta dispatcher; check before every response
 - `spec-driven-development` — spec before non-trivial code
 - `incremental-implementation` — vertical slices (≤ 100 lines each)
@@ -28,44 +30,23 @@ This project uses [meisijiya-skills](https://github.com/meisijiya/meisijiya-skil
 - `debugging-and-error-recovery` — 5-step triage (reproduce / localize / reduce / fix / guard)
 - `source-driven-development` — verify API against official docs
 
-**.extra/ (opt-in, 10):**
+**.extra/ — load on demand:**
 `pwf-enforcer` · `build-gate-visual-review` · `designer-handoff` · `interview-me` · `code-simplification` · `api-and-interface-design` · `security-and-hardening` · `performance-optimization` · `observability-and-instrumentation` · `documentation-and-adrs`
 
-### omo integration (v0.2.0+)
+### omo integration
 
-Skills explicitly leverage omo features:
+For the reverse map (omo feature → skills that use it), see the `meisijiya-extras` block above. Skills use:
 
-| Skill | omo feature used |
-|---|---|
-| `source-driven-development` | context7 MCP (primary), grep_app MCP, websearch MCP |
-| `debugging-and-error-recovery` | oracle agent (escalation), lsp MCP (localization) |
-| `incremental-implementation` | git-master skill, atlas agent |
-| `designer-handoff` | visual-engineering category, frontend-ui-ux skill |
-| `security-and-hardening` | security-research mode (v0.2.1+) |
-| `using-meisijiya-skills` | Sisyphus + IntentGate handoff, atlas agent |
-
-Full omo → skills cross-reference map: in `~/.config/opencode/AGENTS.md` (consolidated from former `omo-integration` skill).
+- `source-driven-development` — context7 MCP (primary), grep_app MCP
+- `debugging-and-error-recovery` — oracle agent (escalation), lsp MCP
+- `incremental-implementation` — git-master skill, atlas agent
+- `designer-handoff` — visual-engineering category, frontend-ui-ux skill
+- `security-and-hardening` — security-research mode
+- `using-meisijiya-skills` — Sisyphus (executing delegation), atlas (todo orchestration)
 
 ### Conventions
 
-- pwf `task_plan.md` is the source of truth for in-flight work (legacy mode) or `.planning/<date>-<slug>/task_plan.md` (parallel mode)
 - Don't ship code without spec + tests
-- Verify APIs against official docs, not memory (use context7 MCP under omo)
-- Multi-file changes → vertical slices (commit with `slice:` prefix)
-- pwf phase boundaries defined in `pwf-integration.md`
-
-### Install paths
-
-- **This skill system (recommended)**: `npx skills add <repo>` → `~/.agents/skills/<name>/` (canonical)
-- **This skill system (advanced)**: `scripts/install.sh --global` → `~/.agents/skills/<name>/` (same as skills CLI);`--target <path>` → `<path>/.opencode/skills/<name>/` (project-level, omo native)
-- **Other skills** (pwf, html-ppt-skill, ui-ux-pro-max): `~/.agents/skills/<name>/` (canonical, all via skills CLI)
-
-### Meta-info injection source
-
-This block was injected by `meisijiya-skills/scripts/inject-agents-md.sh`.
-Source: `AGENTS.md` (Section A) in the meisijiya-skills repo.
-Re-run: `scripts/inject-agents-md.sh` (idempotent).
-Remove: `scripts/inject-agents-md.sh --remove`.
 
 <!-- meisijiya-skills:end -->
 
@@ -81,7 +62,7 @@ When adding a new skill to this repo, follow the conventions in [`skill-anatomy.
 - **≤ 500 lines**: Move reference material to supporting files.
 - **`allowed-tools`**: Specify in frontmatter when the skill needs tool restrictions.
 - **Eval case**: Add `evals/cases/<skill-name>.json` with 3 positive triggers + 3 negative triggers + ≥ 1 behavioral scenario.
-- **omo integration** (if applicable): Reference relevant omo MCPs / agents / built-ins. See [`skills/.extra/omo-integration/SKILL.md`](./skills/.extra/omo-integration/SKILL.md) for the cross-reference map.
+- **omo integration** (if applicable): Reference relevant omo MCPs / agents / built-ins. See any existing skill's Process section for the format.
 
 Existing skills are the reference. When in doubt, copy a similar skill's structure (e.g., `test-driven-development` for the canonical 6-section pattern).
 

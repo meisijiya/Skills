@@ -104,9 +104,14 @@ build_block() {
   printf '%s\n%s\n%s\n' "$MARKER_BEGIN" "$SNIPPET_CONTENT" "$MARKER_END"
 }
 
-# Check if markers already exist (idempotency)
+# Paired begin+end required — false-positive guard on files with stray marker substrings
 has_block() {
-  [[ -f "$1" ]] && grep -qF "$MARKER_BEGIN" "$1"
+  [[ -f "$1" ]] || return 1
+  awk -v b="$MARKER_BEGIN" -v e="$MARKER_END" '
+    $0 == b { seen_begin = 1; next }
+    $0 == e { if (seen_begin) { found = 1; exit 0 } }
+    END { if (!found) exit 1 }
+  ' "$1"
 }
 
 # Remove existing block (between markers, inclusive)

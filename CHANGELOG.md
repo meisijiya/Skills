@@ -4,6 +4,32 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (AGENTS.md rewrite per Oracle review)
+
+Oracle audit verdict: 4 of 6 axes NEEDS-FIX. Section A reduced from 51 → 36 lines; dropped repo-internal noise and duplicates with existing user-level content.
+
+**Removed** (was repo-maintenance noise or duplicate content in user-level AGENTS.md):
+- "Re-sync" section (commands the user can't run — they don't have the script)
+- "Install paths" section (user already installed to receive the injection)
+- `task_plan.md` global convention (pwf-specific, not applicable to all projects)
+- `context7 MCP` reminder (duplicates existing Grilling "Look it up first")
+- `slice:` commit prefix (meisijiya-skills repo convention, not global)
+
+**Changed**:
+- Opening line: declarative "Skill system for..." → imperative "Use this skill system for the omo + pwf stack."
+- "omo integration" table → compact bullet list with cross-link to existing `meisijiya-extras` block (no more duplicate MCP/agent listings)
+- `using-meisijiya-skills` row: "Sisyphus + IntentGate handoff, atlas agent" → "Sisyphus (executing delegation), atlas (todo orchestration)" (dropped jargon)
+- Added scope disclaimer: "These conventions apply globally unless a project-level AGENTS.md overrides them."
+
+### Fixed (inject script edge case)
+
+`scripts/inject-agents-md.sh` `has_block()` was checking for the begin marker substring anywhere in the file. If a user's notes happened to contain the marker string (e.g., as a section placeholder), the script would silently skip — reporting "Block already present ... idempotent: no change" without injecting anything. **Silent failure**.
+
+Replaced with stateful awk: tracks seen_begin flag, only returns true when a paired end is found. Verified with three fixtures:
+- paired block → returns 0 (true)
+- stray begin only → returns 1 (false, proceeds to inject)
+- no markers → returns 1 (false)
+
 ### Changed (install path unification — BREAKING for `--global` users)
 
 **`scripts/install.sh --global`** target: `~/.config/opencode/skills/` → `~/.agents/skills/`.
