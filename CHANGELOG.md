@@ -4,9 +4,35 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
-### Changed (docs)
+### Added
 
-- **README + AGENTS-snippet + install.sh**: promoted `npx skills add <repo>` as the **recommended** install method. `scripts/install.sh` is now documented as the "advanced / manual / custom path" method.
+- **`AGENTS.md` at repo root** — canonical agent context file with 3 sections:
+  - **Section A**: The injectable block (between `<!-- meisijiya-skills:start -->` markers)
+  - **Section B**: Contributor guide for adding new skills (refers to `skill-anatomy.md`)
+  - **Section C**: User guide for `AGENTS.md` supplement conventions (project layout, operations)
+
+### Changed
+
+- **`scripts/inject-agents-md.sh`** now reads from `AGENTS.md` Section A (extracting content between sentinel markers via awk), instead of a separate `templates/AGENTS-snippet.md` file. **Single source of truth** for the injectable content.
+- **`README.md`** repo structure updated to reference `AGENTS.md` (not `templates/AGENTS-snippet.md`).
+
+### Removed
+
+- **`templates/AGENTS-snippet.md`** — content moved to `AGENTS.md` Section A. Templates directory is now empty (git doesn't track, so effectively gone).
+
+### Rationale
+
+User feedback: AGENTS.md (the canonical agent context) should serve dual purpose:
+1. Source of truth for `inject-agents-md.sh` (script reads Section A)
+2. Self-contained doc users can browse on GitHub and copy manually
+
+Having the snippet in a separate `templates/AGENTS-snippet.md` was unneeded indirection — Section A of AGENTS.md IS the template.
+
+### Earlier unreleased (still relevant)
+
+- **README + install.sh**: promoted `npx skills add <repo>` as the recommended install method. `scripts/install.sh` demoted to advanced.
+
+No tag bump (docs-only structural change). Next tag will be the next functional release.
 
 ### Rationale
 

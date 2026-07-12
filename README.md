@@ -16,13 +16,12 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 ```
 meisijiya-skills/
 ├── README.md                  ← 本文件
+├── AGENTS.md                  ← 仓库自描述 + skill 元信息 source(inject 脚本从这里读)
 ├── skill-anatomy.md           ← SKILL.md 写作规范
 ├── pwf-integration.md         ← 跟 pwf 协作的约定
 ├── docs/
 │   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南
 │   └── p0-outline.md              ← 归档(已 ship)
-├── templates/
-│   └── AGENTS-snippet.md          ← 注入到用户级 AGENTS.md 的内容
 ├── skills/
 │   ├── .core/                 ← 必装集(6 个)
 │   │   ├── using-meisijiya-skills/
@@ -46,7 +45,7 @@ meisijiya-skills/
 │       └── omo-integration/         ← v0.2.0 新增:omo 特性跨参考图
 ├── scripts/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查
-│   ├── install.sh                 ← 装到 .opencode/skills/(项目/global)
+│   ├── install.sh                 ← 装到 .opencode/skills/(项目/global,高级)
 │   └── inject-agents-md.sh        ← v0.2.1 新增:把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
 └── evals/
     └── cases/                 ← 每个 skill 的 eval case(18 个)

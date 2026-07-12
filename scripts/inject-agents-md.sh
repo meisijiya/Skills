@@ -24,7 +24,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SNIPPET="$REPO_ROOT/templates/AGENTS-snippet.md"
+AGENTS_MD="$REPO_ROOT/AGENTS.md"
 
 MARKER_BEGIN="<!-- meisijiya-skills:start -->"
 MARKER_END="<!-- meisijiya-skills:end -->"
@@ -80,14 +80,24 @@ if [[ -z "$TARGET" ]]; then
   fi
 fi
 
-# Verify snippet exists
-if [[ ! -f "$SNIPPET" ]]; then
-  echo "Error: snippet not found at $SNIPPET" >&2
+if [[ ! -f "$AGENTS_MD" ]]; then
+  echo "Error: AGENTS.md not found at $AGENTS_MD" >&2
   exit 1
 fi
 
-# Read snippet content (without the leading ## since it goes under a heading)
-SNIPPET_CONTENT=$(cat "$SNIPPET")
+SNIPPET_CONTENT=$(awk -v begin="$MARKER_BEGIN" -v end="$MARKER_END" '
+  $0 == begin { in_block = 1; next }
+  $0 == end { in_block = 0; next }
+  in_block { print }
+' "$AGENTS_MD")
+
+if [[ -z "$(printf '%s' "$SNIPPET_CONTENT" | tr -d '[:space:]')" ]]; then
+  echo "Error: no content between $MARKER_BEGIN and $MARKER_END in $AGENTS_MD" >&2
+  echo "  See Section A of AGENTS.md for the expected format" >&2
+  exit 1
+fi
+
+SNIPPET_LINES=$(printf '%s\n' "$SNIPPET_CONTENT" | wc -l | tr -d ' ')
 
 # Build the block with markers
 build_block() {
@@ -135,7 +145,7 @@ if $DRY_RUN; then
   echo "DRY RUN: would append to $TARGET"
   echo "---"
   echo "  $MARKER_BEGIN"
-  echo "  ($(wc -l < "$SNIPPET" | tr -d ' ') lines from $SNIPPET)"
+  echo "  ($SNIPPET_LINES lines from $AGENTS_MD Section A)"
   echo "  $MARKER_END"
   exit 0
 fi
@@ -156,5 +166,5 @@ fi
 } >> "$TARGET"
 
 echo "Injected meisijiya-skills block into $TARGET"
-echo "  ($(wc -l < "$SNIPPET" | tr -d ' ') lines from snippet)"
+echo "  ($SNIPPET_LINES lines from $AGENTS_MD Section A)"
 echo "  Idempotent: re-running is a no-op. Use --remove to delete."
