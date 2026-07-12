@@ -4,6 +4,18 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added
+
+- **`bin/meisijiya` — lite CLI for OpenCode plugin management (65 lines, bash)**
+  Two commands only:
+  - `plugin list` — list installed plugins in `~/.config/opencode/plugins/` with status (looks for `import type { Plugin` to confirm it's actually a plugin)
+  - `plugin verify` — run `bun check` on all installed `.ts` plugins
+  Requires `bun` for verify. Override plugin directory via `OPENCODE_PLUGINS_DIR` env var.
+
+  **Scope: intentional lite per maintainer recommendation. Does NOT do:** `plugin add`, `plugin remove`, `inject`, `status`, `doctor`, `update` — those are YAGNI until they hurt. `git revert` this commit if a fuller CLI was wanted.
+
+  **Why a CLI at all:** skill install is covered by `npx skills add`. Plugin install currently requires manual `cp templates/x.ts ~/.config/opencode/plugins/` + `bun check`. Closing that small gap doesn't justify a 150-line monorepo CLI; 65 lines of bash does.
+
 ### Changed (skill consolidation)
 
 Dropped 2 skills that were pure documentation (no executable workflow). Content moved to user-level `~/.config/opencode/AGENTS.md` as condensed reference blocks.

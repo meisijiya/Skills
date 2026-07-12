@@ -45,8 +45,10 @@ meisijiya-skills/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查
 │   ├── install.sh                 ← 装到 .opencode/skills/(项目/global,高级)
 │   └── inject-agents-md.sh        ← v0.2.1 新增:把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
+├── bin/
+│   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(18 个)
+    └── cases/                 ← 每个 skill 的 eval case(16 个)
 ```
 
 ## 安装
@@ -105,6 +107,23 @@ scripts/install.sh --dry-run
 ```
 
 > 注意:`scripts/install.sh` 装到 omo 原生路径(`~/.config/opencode/skills/`),不是 skills CLI 的 canonical 路径(`~/.agents/skills/`)。两者都被 OpenCode 发现,但**混用会装两份副本**。如果你已经在用 skills CLI 装其它 skill,优先用 CLI。
+
+### Lite CLI:`bin/meisijiya`(OpenCode plugin 管理)
+
+skill 安装用 `npx skills add`(已存在),**plugin 管理没有现成 CLI**,所以做了个 65 行 lite 工具,只覆盖痛的两件事:
+
+```bash
+# 列出已装 plugin(在 ~/.config/opencode/plugins/)
+./bin/meisijiya plugin list
+
+# 验证所有 plugin 的 TypeScript 语法(需要 bun)
+./bin/meisijiya plugin verify
+
+# 装到 PATH(任意一处)
+ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
+```
+
+**只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check`,没有 bun 会报错提示安装。
 
 ## 前置依赖
 

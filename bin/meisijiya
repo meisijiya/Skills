@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+PLUGINS_DIR="${OPENCODE_PLUGINS_DIR:-${HOME}/.config/opencode/plugins}"
+
+usage() {
+  cat <<EOF
+meisijiya — minimal OpenCode plugin manager (lite)
+
+Usage:
+  meisijiya plugin list      List installed plugins with status
+  meisijiya plugin verify    Run bun check on all installed plugins
+
+Plugin directory: $PLUGINS_DIR (override via OPENCODE_PLUGINS_DIR).
+Requires bun: https://bun.sh
+EOF
+}
+
+cmd_list() {
+  [[ -d "$PLUGINS_DIR" ]] || { echo "Not found: $PLUGINS_DIR" >&2; return 1; }
+  echo "Installed plugins in $PLUGINS_DIR:"
+  local count=0
+  for p in "$PLUGINS_DIR"/*.ts "$PLUGINS_DIR"/*.js; do
+    [[ -e "$p" ]] || continue
+    count=$((count + 1))
+    local n=$(basename "$p")
+    if [[ "$p" == *.ts ]] && ! grep -q 'import type { Plugin' "$p"; then
+      echo "  WARN $n (no Plugin type import — may not be a plugin)"
+    else
+      echo "  OK   $n"
+    fi
+  done
+  [[ $count -eq 0 ]] && echo "  (none)"
+}
+
+cmd_verify() {
+  command -v bun >/dev/null 2>&1 || { echo "bun not in PATH; install: curl -fsSL https://bun.sh/install | bash" >&2; return 1; }
+  [[ -d "$PLUGINS_DIR" ]] || { echo "Not found: $PLUGINS_DIR" >&2; return 1; }
+  local failed=0 total=0
+  for p in "$PLUGINS_DIR"/*.ts; do
+    [[ -e "$p" ]] || continue
+    total=$((total + 1))
+    local n=$(basename "$p")
+    printf "  %s ... " "$n"
+    if err=$(bun check "$p" 2>&1); then
+      echo "OK"
+    else
+      echo "FAILED"; echo "$err" | tail -10; failed=$((failed + 1))
+    fi
+  done
+  echo
+  echo "$total plugin(s), $failed failed"
+  return $failed
+}
+
+case "${1:-}" in
+  plugin)
+    shift
+    case "${1:-}" in
+      list) cmd_list ;;
+      verify) cmd_verify ;;
+      *) usage; exit 1 ;;
+    esac
+    ;;
+  -h|--help|"") usage ;;
+  *) echo "Unknown: $1" >&2; usage; exit 1 ;;
+esac
