@@ -4,6 +4,16 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (pwf-enforcer rewrite)
+
+**Previously:** `skills/.extra/pwf-enforcer/SKILL.md` documented a fake mapping table of "omo hook events" (`session.created`, `tool.before.*`, `file.changed`, `session.idle`, `experimental.session.compacting`) and instructed users to add a `hooks:` field to `~/.config/opencode/oh-my-openagent.json`. **None of this was real.** omo's actual schema has only `disabled_hooks` (a deny list), not a user-writable `hooks` config. Several event names were fabricated or wrong.
+
+**Now:** pwf-enforcer documents the real OpenCode plugin API (`@opencode-ai/plugin@1.17.18` d.ts-verified) and ships a verified plugin template:
+
+- **`templates/pwf-enforcer.ts`** — 6-hook TypeScript plugin, type-checks clean with `tsc --noEmit --strict` against `@opencode-ai/plugin` + `@types/node`. Hooks used: `experimental.chat.system.transform` (system-prompt reminder), `tool.definition` (rewrite write/edit descriptions), `tool.execute.before` (bash echo prepend), `tool.execute.after` (append reminder to tool output), `experimental.session.compacting` (push plan head to compaction prompt), `event` handler (catch `session.idle`).
+- **Two-layer enforcement** — hard layer (the plugin, fires automatically) + soft layer (concise AGENTS.md reminder block, opt-in reading). Both installable from the skill.
+- **Routing clarification** — explicit note: pwf-enforcer is prompt injection at events, NOT routing. Routing = which skill/agent handles a request (omo category/agent config). Different mechanisms, different layers.
+
 ### Added
 
 - **`AGENTS.md` at repo root** — canonical agent context file with 3 sections:

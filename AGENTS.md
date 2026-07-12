@@ -136,3 +136,16 @@ Three sections, top-to-bottom:
 - The script does NOT touch omo's routing or hooks — only appends to AGENTS.md.
 - If you hand-edit the area around markers, re-running the script is still safe (won't duplicate).
 - Removing the block via `--remove` preserves everything outside the markers, including any content you've added directly above/below.
+
+### Behavior enforcement: two layers
+
+Some skills (notably `pwf-enforcer`) enforce workflow discipline on OpenCode. They use **two layers**:
+
+| Layer | Where it lives | Strength | Who reads it |
+|---|---|---|---|
+| **Hard** | OpenCode plugin at `~/.config/opencode/plugins/<skill>.ts` | Fires on real events (tool calls, compaction, system-prompt turn); always runs | The plugin runs every event; agent cannot skip it |
+| **Soft** | A short reminder block in `~/.config/opencode/AGENTS.md` (user-level) or your project's `AGENTS.md` | Reminder only — agent reads and may or may not honor | The model reads AGENTS.md every turn |
+
+**Hard layer ≠ routing.** Routing = which skill/agent handles a request (controlled by omo category/agent config). Enforcement = inject extra context at the right moments (plugin hooks). Don't conflate them. See `skills/.extra/pwf-enforcer/SKILL.md` for the canonical example.
+
+Soft-layer content should be **concise** (5–10 lines). For full doc, read the skill.
