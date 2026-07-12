@@ -2,6 +2,18 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased
+
+### Changed (docs)
+
+- **README + AGENTS-snippet + install.sh**: promoted `npx skills add <repo>` as the **recommended** install method. `scripts/install.sh` is now documented as the "advanced / manual / custom path" method.
+
+### Rationale
+
+Both methods work (OpenCode discovers skills from both `~/.config/opencode/skills/` and `~/.agents/skills/`), but skills CLI is now the de-facto canonical install method for the broader agent skill ecosystem (pwf, html-ppt-skill, ui-ux-pro-max are all installed there). Mixing install locations causes duplicate copies. Users using skills CLI for other skills should use it for this one too.
+
+No tag bump (docs-only change). Next tag will be the next functional release.
+
 ## [0.2.2] - 2026-07-11
 
 ### Changed

@@ -54,12 +54,38 @@ meisijiya-skills/
 
 ## 安装
 
-### 快速安装(推荐)
+### 快速安装(推荐:`vercel-labs/skills` CLI)
 
-`scripts/install.sh` 处理全部安装逻辑 —— 必装 + 按需选装 + dry-run + 跳过已存在。
+`npx skills add <repo>` 自动装到 `~/.agents/skills/`(canonical skills 路径,OpenCode 作为 universal agent 直接读)。与 pwf / html-ppt-skill / ui-ux-pro-max 等其他 skills CLI 装的 skill 在同一位置,便于统一管理。
 
 ```bash
-# 装 .core/ 6 个到当前目录的 .opencode/skills/
+# 装必装集(6 个 .core/)
+npx skills add <this-repo> --from skills/.core
+
+# 装某个选装
+npx skills add <this-repo> --skill pwf-enforcer
+
+# 装多个选装
+npx skills add <this-repo> --skill interview-me --skill security-and-hardening
+
+# 看仓库有哪些 skill 可装
+npx skills add <this-repo> --list
+
+# 装到项目级(cwd 下的 .agents/skills/)
+npx skills add <this-repo> --from skills/.core
+
+# 全局装(到 ~/.agents/skills/)
+npx skills add <this-repo> -g
+```
+
+vercel-labs/skills CLI 自动处理 dedup / 多 agent harness 兼容 / 符号链接。
+
+### 高级:`scripts/install.sh`(项目级 install / 自定义路径)
+
+仅当你**不能或不想**用 skills CLI、或者需要非标准路径时,才用这个脚本:
+
+```bash
+# 项目级 install: 装到 cwd 的 .opencode/skills/(omo 原生路径)
 scripts/install.sh
 
 # 装到指定项目
@@ -68,33 +94,20 @@ scripts/install.sh --target /path/to/your-project
 # 装 .core/ + 指定的几个 .extra/
 scripts/install.sh --extra interview-me --extra security-and-hardening
 
-# 装所有
+# 装全部(必装 + 选装)
 scripts/install.sh --all-extra
 
 # 看可选的 .extra/
 scripts/install.sh --list
 
-# 全局安装(到 ~/.config/opencode/skills/)
+# 全局装(到 ~/.config/opencode/skills/,omo 原生路径)
 scripts/install.sh --global
 
 # 预览但不复制
 scripts/install.sh --dry-run
 ```
 
-### 手动安装
-
-如果不想用脚本,把 `skills/.core/` 复制到 omo 项目级发现路径即可:
-
-```bash
-cp -r skills/.core/* <your-project>/.opencode/skills/
-```
-
-### 通过 `vercel-labs/skills` CLI
-
-```bash
-npx skills add <this-repo> --from skills/.core    # 必装集
-npx skills add <this-repo> --skill pwf-enforcer   # 单个选装
-```
+> 注意:`scripts/install.sh` 装到 omo 原生路径(`~/.config/opencode/skills/`),不是 skills CLI 的 canonical 路径(`~/.agents/skills/`)。两者都被 OpenCode 发现,但**混用会装两份副本**。如果你已经在用 skills CLI 装其它 skill,优先用 CLI。
 
 ## 前置依赖
 

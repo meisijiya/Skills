@@ -38,13 +38,11 @@ Full map: load `omo-integration` skill (already in `.extra/`).
 - Multi-file changes → vertical slices (commit with `slice:` prefix)
 - pwf phase boundaries defined in `pwf-integration.md`
 
-### Install path (for reference)
+### Install paths
 
-- This skill system itself: `~/.config/opencode/skills/<name>/` (omo native) or `<project>/.opencode/skills/<name>/`
-- Other skills via `vercel-labs/skills` CLI: `~/.agents/skills/<name>/` (canonical)
-- pwf: `~/.agents/skills/planning-with-files/`
-- html-ppt-skill: `~/.agents/skills/html-ppt-skill/`
-- ui-ux-pro-max: `~/.agents/skills/ui-ux-pro-max/`
+- **This skill system (recommended)**: `npx skills add <repo>` → `~/.agents/skills/<name>/` (canonical)
+- **This skill system (advanced)**: `scripts/install.sh` → `~/.config/opencode/skills/<name>/` (omo native) or `<project>/.opencode/skills/<name>/`
+- **Other skills** (pwf, html-ppt-skill, ui-ux-pro-max): `~/.agents/skills/<name>/` (canonical, all via skills CLI)
 
 ### Meta-info injection source
 
