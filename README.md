@@ -5,7 +5,7 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 ## 与上游的差异
 
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
-- **omo 深度集成**(v0.2.0+):fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`omo-integration` 段)。
+- **omo 深度集成**(v0.2.0+):fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **pwf 硬遵守加强**:装 OpenCode 插件(`pwf-enforcer` 提供模板)把 pwf 的软遵守升级为硬触发 hook。
 - **教学化门控**:build 之前用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 把项目状态生成 HTML slide deck,让用户可视化审视。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
@@ -146,11 +146,11 @@ MIT
 
 ---
 
-## 当前状态(v0.1.0)
+## 当前状态
 
-- 17 个 SKILL.md(6 个 `.core/` + 11 个 `.extra/`)
-- 17 个 eval case(全部 skill 都有)
-- `scripts/validate-skills.sh` 验证脚本(YAML frontmatter + 结构检查)
-- `docs/p0-outline.md` 归档(已 ship)
+最近 tag: **v0.2.2**(16 个 SKILL.md / 16 个 eval case;6 `.core/` + 10 `.extra/`)
+Unreleased: pwf-enforcer plugin 重写(`e1330d2`)+ skill consolidate 18→16(`dfff240`)+ lite CLI(`83a1773`:`bin/meisijiya` plugin list/verify)
+
+详见 `CHANGELOG.md` 与 `git log --oneline`。
 
 详见 `git log --oneline`。

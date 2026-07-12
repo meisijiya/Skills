@@ -19,7 +19,7 @@ import { existsSync } from "node:fs"
 import { join } from "node:path"
 
 const HOME = process.env.HOME || process.env.USERPROFILE || ""
-const PWF_DIR = join(HOME, ".agents", "skills", "planning-with-files")
+const PWF_DIR = process.env.PWF_DIR || join(HOME, ".agents", "skills", "planning-with-files")
 const INJECT_PLAN_SH = join(PWF_DIR, "scripts", "inject-plan.sh")
 const CHECK_COMPLETE_SH = join(PWF_DIR, "scripts", "check-complete.sh")
 

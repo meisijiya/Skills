@@ -4,6 +4,15 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Fixed (audit cleanups from path/coherence review)
+
+User requested a full audit before using the system. Findings → fixes:
+
+- **`pwf-integration.md` line 36** — fixed stale reference to "configure omo hooks" + `oh-my-openagent.json`. omo has NO user-writable hooks field (only `disabled_hooks` deny list). The actual approach is an OpenCode TypeScript plugin at `~/.config/opencode/plugins/pwf-enforcer.ts`. This was a remnant from before the pwf-enforcer rewrite (`e1330d2`). Also fixed the count "17 个 skill (11 主流程 + 4 sub-phase + 2 一次性 = 17)" → "16 个 skill (10 + 4 + 2 = 16)" since `agent-project-structure` was consolidated in `dfff240`.
+- **`README.md` line 8** — fixed section reference: "`~/.config/opencode/AGENTS.md`(`omo-integration` 段)" → "(`meisijiya-extras` 段)". The actual injected block uses `<!-- meisijiya-extras_START -->` markers, not "omo-integration".
+- **`README.md` status block (lines 149–156)** — replaced stale v0.1.0 / "17 SKILL.md / 17 eval" with current state: last tag v0.2.2 (16 / 16), unreleased commits listed with hashes.
+- **`pwf-enforcer.ts`** — added `PWF_DIR` env var override for `PWF_DIR` (consistency with `bin/meisijiya`'s `OPENCODE_PLUGINS_DIR` override). Falls back to `${HOME}/.agents/skills/planning-with-files/`.
+
 ### Added
 
 - **`bin/meisijiya` — lite CLI for OpenCode plugin management (65 lines, bash)**
