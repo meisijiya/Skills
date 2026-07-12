@@ -4,6 +4,14 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added
+
+- **`.claude-plugin/plugin.json`** — declares the plugin as a named unit so the vercel-labs/skills CLI groups all 16 skills under `meisijiya-skills` in the install picker (instead of a flat list). Pattern lifted from mattpocock/skills.
+
+  Without this file the CLI walks `skills/` recursively and lists all skills flat — no group header. With the file, all skills listed in `skills[]` get `pluginName="meisijiya-skills"` and the picker groups them.
+
+  **Maintenance:** the `skills[]` array must be kept in sync with the filesystem. Drift between the manifest and `skills/{core,extra}/*` will leave some skills un-installable via the CLI picker (they're discoverable via direct path, but not in the grouped list). Add a CI check in a follow-up if drift becomes a problem.
+
 ## v0.3.0 (2026-07-12)
 
 ### Changed (skill directory rename for `npx skills add` grouping)

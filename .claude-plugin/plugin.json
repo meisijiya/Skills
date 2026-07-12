@@ -1,0 +1,21 @@
+{
+  "name": "meisijiya-skills",
+  "skills": [
+    "./skills/core/using-meisijiya-skills",
+    "./skills/core/spec-driven-development",
+    "./skills/core/incremental-implementation",
+    "./skills/core/test-driven-development",
+    "./skills/core/debugging-and-error-recovery",
+    "./skills/core/source-driven-development",
+    "./skills/extra/pwf-enforcer",
+    "./skills/extra/build-gate-visual-review",
+    "./skills/extra/designer-handoff",
+    "./skills/extra/interview-me",
+    "./skills/extra/code-simplification",
+    "./skills/extra/api-and-interface-design",
+    "./skills/extra/security-and-hardening",
+    "./skills/extra/performance-optimization",
+    "./skills/extra/observability-and-instrumentation",
+    "./skills/extra/documentation-and-adrs"
+  ]
+}
