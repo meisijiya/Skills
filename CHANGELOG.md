@@ -4,6 +4,8 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+## v0.3.0 (2026-07-12)
+
 ### Changed (skill directory rename for `npx skills add` grouping)
 
 `skills/.core/` → `skills/core/`, `skills/.extra/` → `skills/extra/` (removed leading dots).
