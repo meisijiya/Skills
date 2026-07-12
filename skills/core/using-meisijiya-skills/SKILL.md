@@ -54,8 +54,8 @@ Decision:
 
 The Skill tool injects the catalog automatically. For each incoming task, identify:
 
-- Which `.core/` skill matches (always available, load it)
-- Which `.extra/` skill might apply (load on demand)
+- Which `core/` skill matches (always available, load it)
+- Which `extra/` skill might apply (load on demand)
 
 If you're about to take action without naming a skill, **stop and check the catalog**.
 
@@ -87,7 +87,7 @@ This makes the decision traceable for later review.
 
 ## Skill Catalog
 
-### `.core/` (Required)
+### `core/` (Required)
 
 | Skill | Load when |
 |---|---|
@@ -98,7 +98,7 @@ This makes the decision traceable for later review.
 | `debugging-and-error-recovery` | Tests fail, build breaks, or behavior is unexpected |
 | `source-driven-development` | Working with any framework or library where correctness matters |
 
-### `.extra/` (Optional, loaded on demand)
+### `extra/` (Optional, loaded on demand)
 
 | Skill | Load when |
 |---|---|

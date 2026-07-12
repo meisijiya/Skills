@@ -4,6 +4,16 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (skill directory rename for `npx skills add` grouping)
+
+`skills/.core/` → `skills/core/`, `skills/.extra/` → `skills/extra/` (removed leading dots).
+
+**Why:** `vercel-labs/skills` CLI treats directories starting with `.` as hidden and does NOT display them as groups in the install picker. Without grouping, all 16 skills show as a flat list. Renaming to non-hidden directories makes them appear as 2 groups: `core` (6 skills, must-install) and `extra` (10 skills, opt-in). Reference image: mattpocock/skills uses this pattern (`Mattpocock Skills` + `Other` groups).
+
+**Migration for users on the old paths:** none — `npx skills add <repo> --from skills/.core` no longer works; use `--from skills/core` instead. The skill NAMES didn't change, so installed skills at `~/.agents/skills/<name>/` are unaffected.
+
+**Files touched:** 7 (README.md, AGENTS.md, pwf-integration.md, docs/p0-outline.md, .github/workflows/validate-skills.yml, scripts/install.sh, skills/core/using-meisijiya-skills/SKILL.md). Historical CHANGELOG entries preserved as-is (they reference the old paths in past tense, which is correct historical record).
+
 ### Changed (AGENTS.md rewrite per Oracle review)
 
 Oracle audit verdict: 4 of 6 axes NEEDS-FIX. Section A reduced from 51 → 36 lines; dropped repo-internal noise and duplicates with existing user-level content.

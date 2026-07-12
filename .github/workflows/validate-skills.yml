@@ -33,7 +33,7 @@ jobs:
           import json, os
           evals = {f.replace('.json','').split('/')[-1] for f in os.listdir('evals/cases') if f.endswith('.json')}
           skills = set()
-          for root in ['skills/.core','skills/.extra']:
+          for root in ['skills/core','skills/extra']:
               for d in os.listdir(root):
                   skills.add(d)
           missing = skills - evals

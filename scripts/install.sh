@@ -2,19 +2,19 @@
 # scripts/install.sh — see README for method comparison vs `npx skills add`.
 #
 # Usage:
-#   scripts/install.sh                          # install .core/ to ./.opencode/skills/
+#   scripts/install.sh                          # install core/ to ./.opencode/skills/
 #   scripts/install.sh --target /path/to/proj   # install to specific project
-#   scripts/install.sh --extra <name>           # also install a specific .extra/ skill
-#   scripts/install.sh --all-extra              # install all .extra/ skills
-#   scripts/install.sh --list                   # list available .extra/ skills
+#   scripts/install.sh --extra <name>           # also install a specific extra/ skill
+#   scripts/install.sh --all-extra              # install all extra/ skills
+#   scripts/install.sh --list                   # list available extra/ skills
 #   scripts/install.sh --dry-run                # show what would be installed, don't copy
 #   scripts/install.sh --global                 # install to ~/.agents/skills/ (same as npx skills add)
 #
-# Defaults: install all .core/ to <target>/.opencode/skills/
+# Defaults: install all core/ to <target>/.opencode/skills/
 #
 # Notes:
-#   - .core/ is always installed by default (required set)
-#   - .extra/ is opt-in (you pick which ones)
+#   - core/ is always installed by default (required set)
+#   - extra/ is opt-in (you pick which ones)
 #   - Existing skills in target dir are not overwritten (rm manually if needed)
 #   - Uses cp -r, so no symlinks (clean copy)
 
@@ -22,7 +22,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CORE_DIR="$REPO_ROOT/skills/.core"
+CORE_DIR="$REPO_ROOT/skills/core"
 
 # Defaults
 TARGET="$(pwd)"
@@ -39,14 +39,14 @@ Usage: $0 [options]
 Options:
   --target PATH        install to <PATH>/.opencode/skills/ (default: cwd)
   --global             install to ~/.agents/skills/ (same as npx skills add)
-  --extra NAME         also install .extra/NAME (repeatable)
-  --all-extra          install all .extra/ skills
-  --list               list available .extra/ skills and exit
+  --extra NAME         also install extra/NAME (repeatable)
+  --all-extra          install all extra/ skills
+  --list               list available extra/ skills and exit
   --dry-run            show what would be installed, don't copy
   -h, --help           show this help
 
 Examples:
-  $0                                          # install .core/ to cwd
+  $0                                          # install core/ to cwd
   $0 --target ~/projects/myapp                # install to myapp/.opencode/skills/
   $0 --extra interview-me --extra security-and-hardening
   $0 --all-extra --dry-run                    # preview all-extra install
@@ -69,8 +69,8 @@ done
 
 # List mode
 if $LIST_ONLY; then
-  echo "Available .extra/ skills:"
-  for d in "$REPO_ROOT/skills/.extra"/*/; do
+  echo "Available extra/ skills:"
+  for d in "$REPO_ROOT/skills/extra"/*/; do
     [[ -f "$d/SKILL.md" ]] || continue
     name=$(basename "$d")
     desc=$(awk -F': *' '/^description:/{sub(/^description: */,""); print; exit}' "$d/SKILL.md")
@@ -89,7 +89,7 @@ fi
 # Build the list of (source, dest) pairs to install
 PAIRS=()
 
-# Always install all .core/
+# Always install all core/
 if [[ ! -d "$CORE_DIR" ]]; then
   echo "Error: $CORE_DIR not found. Run from meisijiya-skills repo root." >&2
   exit 1
@@ -102,16 +102,16 @@ done
 
 # Optional extras
 if $ALL_EXTRA; then
-  for d in "$REPO_ROOT/skills/.extra"/*/; do
+  for d in "$REPO_ROOT/skills/extra"/*/; do
     [[ -f "$d/SKILL.md" ]] || continue
     name=$(basename "$d")
     PAIRS+=("$d|$INSTALL_ROOT/$name")
   done
 else
   for extra in "${EXTRAS[@]}"; do
-    src="$REPO_ROOT/skills/.extra/$extra"
+    src="$REPO_ROOT/skills/extra/$extra"
     if [[ ! -d "$src" ]]; then
-      echo "Error: .extra/$extra not found. Use --list to see available skills." >&2
+      echo "Error: extra/$extra not found. Use --list to see available skills." >&2
       exit 1
     fi
     PAIRS+=("$src|$INSTALL_ROOT/$extra")

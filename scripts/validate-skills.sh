@@ -6,7 +6,7 @@
 #
 # Usage:
 #   scripts/validate-skills.sh                # default: skills/
-#   scripts/validate-skills.sh skills/.core
+#   scripts/validate-skills.sh skills/core
 #   NO_COLOR=1 scripts/validate-skills.sh     # no ANSI in CI logs
 #
 # Exit codes:

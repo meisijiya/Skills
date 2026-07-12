@@ -9,7 +9,7 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 - **pwf 硬遵守加强**:装 OpenCode 插件(`pwf-enforcer` 提供模板)把 pwf 的软遵守升级为硬触发 hook。
 - **教学化门控**:build 之前用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 把项目状态生成 HTML slide deck,让用户可视化审视。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
-- **双目录结构**:`.core/` 必装集 + `.extra/` 选装集,适配 `vercel-labs/skills` CLI。
+- **双目录结构**:`core/` 必装集 + `extra/` 选装集,适配 `vercel-labs/skills` CLI。
 
 ## 仓库结构
 
@@ -23,14 +23,14 @@ meisijiya-skills/
 │   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
-│   ├── .core/                 ← 必装集(6 个)
+│   ├── core/                 ← 必装集(6 个)
 │   │   ├── using-meisijiya-skills/
 │   │   ├── spec-driven-development/
 │   │   ├── incremental-implementation/
 │   │   ├── test-driven-development/
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/
-│   └── .extra/                ← 选装集(10 个,按需)
+│   └── extra/                ← 选装集(10 个,按需)
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/
 │       ├── designer-handoff/
@@ -58,8 +58,8 @@ meisijiya-skills/
 `npx skills add <repo>` 自动装到 `~/.agents/skills/`(canonical skills 路径,OpenCode 作为 universal agent 直接读)。与 pwf / html-ppt-skill / ui-ux-pro-max 等其他 skills CLI 装的 skill 在同一位置,便于统一管理。
 
 ```bash
-# 装必装集(6 个 .core/)
-npx skills add <this-repo> --from skills/.core
+# 装必装集(6 个 core/)
+npx skills add <this-repo> --from skills/core
 
 # 装某个选装
 npx skills add <this-repo> --skill pwf-enforcer
@@ -71,7 +71,7 @@ npx skills add <this-repo> --skill interview-me --skill security-and-hardening
 npx skills add <this-repo> --list
 
 # 装到项目级(cwd 下的 .agents/skills/)
-npx skills add <this-repo> --from skills/.core
+npx skills add <this-repo> --from skills/core
 
 # 全局装(到 ~/.agents/skills/)
 npx skills add <this-repo> -g
@@ -90,13 +90,13 @@ scripts/install.sh
 # 装到指定项目
 scripts/install.sh --target /path/to/your-project
 
-# 装 .core/ + 指定的几个 .extra/
+# 装 core/ + 指定的几个 extra/
 scripts/install.sh --extra interview-me --extra security-and-hardening
 
 # 装全部(必装 + 选装)
 scripts/install.sh --all-extra
 
-# 看可选的 .extra/
+# 看可选的 extra/
 scripts/install.sh --list
 
 # 全局装(到 ~/.agents/skills/,跟 npx skills add 同位置 — 统一管理)
@@ -148,7 +148,7 @@ MIT
 
 ## 当前状态
 
-最近 tag: **v0.2.2**(16 个 SKILL.md / 16 个 eval case;6 `.core/` + 10 `.extra/`)
+最近 tag: **v0.2.2**(16 个 SKILL.md / 16 个 eval case;6 `core/` + 10 `extra/`)
 Unreleased: pwf-enforcer plugin 重写(`e1330d2`)+ skill consolidate 18→16(`dfff240`)+ lite CLI(`83a1773`:`bin/meisijiya` plugin list/verify)
 
 详见 `CHANGELOG.md` 与 `git log --oneline`。

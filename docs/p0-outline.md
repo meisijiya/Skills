@@ -1,7 +1,7 @@
-# .core/ 5 个 P0 SKILL.md 大纲(归档)
+# core/ 5 个 P0 SKILL.md 大纲(归档)
 
 > **状态**:✅ 已 ship(2026-07-11)。本文件保留作为设计记录。
-> 实际 SKILL.md 已写入 `skills/.core/{spec-driven-development,incremental-implementation,test-driven-development,debugging-and-error-recovery,source-driven-development}/SKILL.md`。
+> 实际 SKILL.md 已写入 `skills/core/{spec-driven-development,incremental-implementation,test-driven-development,debugging-and-error-recovery,source-driven-development}/SKILL.md`。
 
 ---
 

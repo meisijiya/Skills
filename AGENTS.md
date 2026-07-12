@@ -22,7 +22,7 @@ These conventions apply globally unless a project-level AGENTS.md overrides them
 
 ### Catalog
 
-**.core/ — load always:**
+**core/ — load always:**
 - `using-meisijiya-skills` — meta dispatcher; check before every response
 - `spec-driven-development` — spec before non-trivial code
 - `incremental-implementation` — vertical slices (≤ 100 lines each)
@@ -30,7 +30,7 @@ These conventions apply globally unless a project-level AGENTS.md overrides them
 - `debugging-and-error-recovery` — 5-step triage (reproduce / localize / reduce / fix / guard)
 - `source-driven-development` — verify API against official docs
 
-**.extra/ — load on demand:**
+**extra/ — load on demand:**
 `pwf-enforcer` · `build-gate-visual-review` · `designer-handoff` · `interview-me` · `code-simplification` · `api-and-interface-design` · `security-and-hardening` · `performance-optimization` · `observability-and-instrumentation` · `documentation-and-adrs`
 
 ### omo integration
@@ -127,6 +127,6 @@ Some skills (notably `pwf-enforcer`) enforce workflow discipline on OpenCode. Th
 | **Hard** | OpenCode plugin at `~/.config/opencode/plugins/<skill>.ts` | Fires on real events (tool calls, compaction, system-prompt turn); always runs | The plugin runs every event; agent cannot skip it |
 | **Soft** | A short reminder block in `~/.config/opencode/AGENTS.md` (user-level) or your project's `AGENTS.md` | Reminder only — agent reads and may or may not honor | The model reads AGENTS.md every turn |
 
-**Hard layer ≠ routing.** Routing = which skill/agent handles a request (controlled by omo category/agent config). Enforcement = inject extra context at the right moments (plugin hooks). Don't conflate them. See `skills/.extra/pwf-enforcer/SKILL.md` for the canonical example.
+**Hard layer ≠ routing.** Routing = which skill/agent handles a request (controlled by omo category/agent config). Enforcement = inject extra context at the right moments (plugin hooks). Don't conflate them. See `skills/extra/pwf-enforcer/SKILL.md` for the canonical example.
 
 Soft-layer content should be **concise** (5–10 lines). For full doc, read the skill.
