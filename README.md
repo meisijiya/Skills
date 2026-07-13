@@ -23,14 +23,17 @@ meisijiya-skills/
 │   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
-│   ├── core/                 ← 必装集(6 个)
-│   │   ├── README.md          ← 6 个 skill 详情 + 必装理由
+│   ├── core/                 ← 必装集(9 个)
+│   │   ├── README.md          ← 9 个 skill 详情 + 必装理由
 │   │   ├── using-meisijiya-skills/
+│   │   ├── brainstorming/                  ← v0.4.0(adapted from superpowers)
 │   │   ├── spec-driven-development/
 │   │   ├── incremental-implementation/
 │   │   ├── test-driven-development/
+│   │   ├── verification-before-completion/  ← v0.4.0(adapted from superpowers)
 │   │   ├── debugging-and-error-recovery/
-│   │   └── source-driven-development/
+│   │   ├── source-driven-development/
+│   │   └── writing-skills/                 ← v0.4.0(adapted from superpowers)
 │   └── extra/                ← 选装集(10 个,按需)
 │       ├── README.md          ← 10 个 skill + "怎么选" 决策表
 │       ├── pwf-enforcer/
@@ -50,7 +53,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(16 个)
+    └── cases/                 ← 每个 skill 的 eval case(19 个)
 ```
 
 ## 安装
@@ -85,7 +88,7 @@ vercel-labs/skills CLI 自动处理 dedup / 多 agent harness 兼容 / 符号链
 
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
-- **必装集**(6 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
+- **必装集**(9 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
 - **选装集**(10 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
@@ -159,7 +162,11 @@ MIT
 
 ## 当前状态
 
-最近 tag: **v0.3.0**(16 个 SKILL.md / 16 个 eval case;6 `core/` + 10 `extra/`)
-Unreleased: AGENTS.md 按 Oracle 审查重写(`38d60c5`)+ `.claude-plugin/marketplace.json` 双 plugin entry 分组(`685d104`)+ CI 漂移检查 `scripts/check-marketplace.sh`(`17dfbcc`)
+最近 tag: **v0.4.0**(19 个 SKILL.md / 19 个 eval case;9 `core/` + 10 `extra/`)
+
+v0.4.0 内容:
+- vendor 3 个 superpowers skill 到 `.core/`: `brainstorming`(HARD-GATE pre-design)、`verification-before-completion`(Iron Law)、`writing-skills`(TDD-for-docs + 提取重复工作流)
+- `using-meisijiya-skills` 加 EXTREMELY-IMPORTANT 框架 + Skill Priority 链
+- `AGENTS.md` Section A 加 Discipline layer + Skill chains 子段;Section C 加项目级 AGENTS.md skill 引用规范(含失败检测 grep)
 
 详见 `CHANGELOG.md` 与 `git log --oneline`。
