@@ -4,6 +4,7 @@
 >
 > - **For users**: **Section A** is what `scripts/inject-agents-md.sh` injects into YOUR project's `AGENTS.md`. You can also manually copy Section A content.
 > - **For contributors**: **Section B** documents how to add new skills to this repo.
+> - **For AGENTS.md writers**: Writing rules (no version narrative, no historical comparisons, etc.) are in [`docs/agents-md-guide.md`](./docs/agents-md-guide.md). Apply to user-level, project-level, and Section A.
 > - **For agents reading this repo**: This whole file is context.
 
 ---
