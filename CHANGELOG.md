@@ -4,6 +4,37 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (skill cross-reference path convention)
+
+Every meisijiya skill mention in agent-facing docs now carries its install path (`~/.agents/skills/<name>/SKILL.md`) so the agent can find the file when invoked.
+
+**Why:** AI matches a skill by name (e.g., "use interview-me") but doesn't know where to read it from — only the agent's installed skill tree at `~/.agents/skills/<name>/` is guaranteed to exist after `npx skills add`. Without explicit paths, AI guesses or fails to load.
+
+**Scope:** 17 agent-facing files updated (1 AGENTS.md + 16 SKILL.md files).
+
+**Convention:**
+- AGENTS.md Section A (injected block) and each SKILL.md: install path `~/.agents/skills/<name>/SKILL.md` as markdown link
+- Repo-source docs (README, skill-anatomy.md): repo paths `skills/<dir>/<name>/SKILL.md` (for human browsing on GitHub)
+- Self-references (e.g., `using-meisijiya-skills` mentioning itself): exempt — the file IS the path
+
+**Files modified:**
+- `AGENTS.md` Section A catalog tables (6 core + 10 extra skills, plus 6 omo-integration entries)
+- `AGENTS.md` Section B + C (contributor + user guide references)
+- `skills/core/using-meisijiya-skills/SKILL.md` (catalog tables, rationalizations, red flags)
+- `skills/core/spec-driven-development/SKILL.md` (1 ref to interview-me)
+- `skills/core/incremental-implementation/SKILL.md` (1 ref to test-driven-development)
+- `skills/extra/designer-handoff/SKILL.md` (3 refs)
+- `skills/extra/interview-me/SKILL.md` (1 ref to spec-driven-development)
+- `skills/extra/documentation-and-adrs/SKILL.md` (1 ref to interview-me; removed stale `agent-project-structure` reference)
+
+**Cleanup:** removed stale `agent-project-structure` skill reference in `documentation-and-adrs/SKILL.md` (skill was deleted in commit dfff240; convention lives on in user-level AGENTS.md `meisijiya-extras` block).
+
+**Verified:**
+- Audit script: 17 files, 0 missing paths (excluding intentional self-references)
+- `validate-skills.sh`: 16/16 OK
+- `check-marketplace.sh`: OK marketplace.json in sync
+- `inject-agents-md.sh` round-trip: extracts 36 lines from Section A, 13 path references preserved
+
 ### Fixed (CI bijection false-positive on README.md)
 
 CI run #29180590851 failed at step "Verify skill↔eval bijection":
