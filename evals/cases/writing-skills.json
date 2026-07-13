@@ -1,0 +1,71 @@
+{
+  "name": "writing-skills",
+  "version": "0.1.0",
+  "description": "Meta-skill for creating new skills or extracting repeated workflows into reusable skills (TDD for process documentation)",
+  "positive_triggers": [
+    {
+      "input": "Add a new skill for handling database migrations",
+      "expected_skill": "writing-skills",
+      "reason": "Creating a new skill requires the TDD-based writing process"
+    },
+    {
+      "input": "Edit the brainstorming skill to fix a loophole",
+      "expected_skill": "writing-skills",
+      "reason": "Editing existing skill requires the same discipline (RED baseline → GREEN → REFACTOR)"
+    },
+    {
+      "input": "We keep doing manual changelog updates — should this become a skill?",
+      "expected_skill": "writing-skills",
+      "reason": "Extracting repeated workflow into skill is writing-skills territory"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "How do I use the Skill tool?",
+      "expected_no_skill": true,
+      "reason": "Tool usage question, not skill authoring"
+    },
+    {
+      "input": "Fix typo in README.md",
+      "expected_no_skill": true,
+      "reason": "Single-file trivial change, not creating a skill"
+    },
+    {
+      "input": "Should this project convention go in AGENTS.md or a skill?",
+      "expected_no_skill": true,
+      "reason": "Decision question, not skill creation (writing-skills answers 'how' not 'where')"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Create a skill for handling database migrations'",
+      "expected_behavior": [
+        "Agent invokes writing-skills (recognizes this as skill authoring)",
+        "Agent runs RED phase: pressure scenario WITHOUT skill — observe agent's natural behavior with migrations",
+        "Agent documents observed failures / rationalizations",
+        "Agent writes GREEN phase: minimal skill addressing those failures",
+        "Agent runs same scenario WITH skill — agent now complies",
+        "Agent does REFACTOR: closes new rationalizations iteratively"
+      ]
+    },
+    {
+      "scenario": "Team notices they manually write changelog entries every release — should this be a skill?",
+      "expected_behavior": [
+        "Agent invokes writing-skills to evaluate",
+        "Agent applies 'when to extract' criteria: cross-session repetition? judgment calls? cross-project?",
+        "Agent decides yes/no with rationale",
+        "If yes: RED baseline (current manual process) → GREEN skill → REFACTOR"
+      ]
+    },
+    {
+      "scenario": "Agent is about to create a skill but skips the RED phase because 'I know what the skill should say'",
+      "expected_behavior": [
+        "Agent invokes verification-before-completion to verify the skip-decision",
+        "Agent realizes skipping RED = untested skill = potential misalignment",
+        "Agent goes back and runs the baseline scenario"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Vendored from obra/superpowers. Core principle preserved: writing skills = TDD for process documentation. Critical for capturing repeated workflows into reusable skills."
+}

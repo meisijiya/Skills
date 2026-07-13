@@ -66,9 +66,15 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 ## 引用其他 skill
 
+- **必填 install path** — 提到别的 skill 时,必须用 markdown link 给出 `~/.agents/skills/<name>/SKILL.md`:
+  ```markdown
+  Run [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) first.
+  ```
+  AI 知道 skill 名但不知道去哪读 — 必须在每个引用给路径。**这不只是规范,是运行时可读性**。
 - 用反引号包住 skill 名:`test-driven-development`
 - **不要重复内容**——直接引用即可
 - 引用 hooks / 命令:`attest-plan.sh`、`/plan-goal`
+- **失效检测** — 项目级 AGENTS.md 里的 skill 引用用 install path 后,grep 一下就能扫出 broken refs;上游改名 / 删 skill 时会立刻暴露
 
 ## 不要做的事
 

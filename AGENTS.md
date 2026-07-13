@@ -20,18 +20,37 @@ Use this skill system for the omo + pwf stack. Invoke skills by matching their `
 
 These conventions apply globally unless a project-level AGENTS.md overrides them.
 
+### Discipline layer
+
+Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md). Evidence before claims, always.
+
 ### Catalog
 
-**.core/ — load always:**
+**.core/ — load always (9):**
 - [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher; check before every response
+- [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — pre-design exploration (HARD-GATE: no implementation before user-approved design)
 - [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — spec before non-trivial code
 - [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices (≤ 100 lines each)
 - [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor
+- [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — no completion claims without fresh evidence
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
+- [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — meta: create/edit skills (TDD for process docs); use to extract repeated workflows into reusable skills
 
-**.extra/ — load on demand:**
+**.extra/ — load on demand (10):**
 [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`interview-me`](~/.agents/skills/interview-me/SKILL.md) · [`code-simplification`](~/.agents/skills/code-simplification/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md)
+
+### Skill chains (process order)
+
+Most work follows a process chain. Invoke skills in order:
+
+1. [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — design before implementation (HARD-GATE)
+2. [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — formalize design
+3. [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices
+4. [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor (per slice)
+5. [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — before any completion claim
+
+[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) is invoked separately when adding/editing skills OR extracting a repeated workflow into a reusable skill.
 
 ### omo integration
 
@@ -47,6 +66,8 @@ For the reverse map (omo feature → skills that use it), see the `meisijiya-ext
 ### Conventions
 
 - Don't ship code without spec + tests
+- Verify before claiming completion (use [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md))
+- When you notice a repeated workflow, capture it as a skill (use [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md))
 
 <!-- meisijiya-skills:end -->
 
@@ -101,6 +122,34 @@ Three sections, top-to-bottom:
 1. **Project context** (top) — agent reads first, knows the project
 2. **meisijiya-skills block** (middle, injected) — agent knows what skills are installed
 3. **Project-specific** (bottom) — your domain knowledge, custom conventions
+
+### Skill reference convention (project-level)
+
+When your project's `AGENTS.md` (or any project doc) references a skill by name, **include the install path as a markdown link**:
+
+```markdown
+- [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — spec before code
+```
+
+**Why**: AI can find the skill at runtime after `npx skills add`. Without the path, AI guesses or fails to load.
+
+**Failure detection** — when a skill breaks (renamed, deleted, upstream drift), broken refs surface at runtime:
+```bash
+# Check that all skill references in your AGENTS.md resolve to installed paths
+grep -oE '~\/\.agents\/skills\/[a-z0-9-]+\/SKILL\.md' .opencode/AGENTS.md | \
+  while read path; do
+    [ -f "$path" ] || echo "BROKEN REF: $path"
+  done
+```
+
+**Periodic check** — re-run `validate-skills.sh` + `check-marketplace.sh` from the meisijiya-skills repo to catch upstream drift:
+```bash
+git clone https://github.com/meisijiya/Skills /tmp/mjs-check
+bash /tmp/mjs-check/scripts/validate-skills.sh
+bash /tmp/mjs-check/scripts/check-marketplace.sh
+```
+
+**Convention is enforced by AI behavior, not tooling** — the agent reads your AGENTS.md and looks up paths. Without paths, the agent has no way to know where the skill actually lives on disk.
 
 ### Common operations
 

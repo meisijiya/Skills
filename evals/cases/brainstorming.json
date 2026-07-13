@@ -1,0 +1,62 @@
+{
+  "name": "brainstorming",
+  "version": "0.1.0",
+  "description": "HARD-GATE pre-design exploration before any implementation",
+  "positive_triggers": [
+    {
+      "input": "Build a new REST API for managing tasks",
+      "expected_skill": "brainstorming",
+      "reason": "New project, multi-file, design decisions need user approval first"
+    },
+    {
+      "input": "Add OAuth support to the existing app",
+      "expected_skill": "brainstorming",
+      "reason": "Significant feature, multiple approaches (passport.js, oauth2-server, NextAuth), scope ambiguous"
+    },
+    {
+      "input": "Refactor the auth module to support multiple providers",
+      "expected_skill": "brainstorming",
+      "reason": "Cross-module refactor with design choices, needs user alignment first"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Fix typo in README.md",
+      "expected_no_skill": true,
+      "reason": "Single-file trivial change, no design needed"
+    },
+    {
+      "input": "Rename getUserById to fetchUser across the codebase",
+      "expected_no_skill": true,
+      "reason": "Trivial rename, behavior unchanged, no scope questions"
+    },
+    {
+      "input": "What does the current spec say?",
+      "expected_no_skill": true,
+      "reason": "Pure Q&A, no implementation implied"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Build me a REST API for managing tasks'",
+      "expected_behavior": [
+        "Agent invokes brainstorming BEFORE any implementation skill",
+        "Agent explores project context (existing files, recent commits)",
+        "Agent asks clarifying questions one at a time (auth? pagination? rate limits?)",
+        "Agent proposes 2-3 approaches with trade-offs",
+        "Agent writes design doc and gets user approval",
+        "Agent does NOT invoke spec-driven-development / incremental-implementation directly"
+      ]
+    },
+    {
+      "scenario": "User says 'just add OAuth, you know what I want'",
+      "expected_behavior": [
+        "Agent STILL invokes brainstorming (HARD-GATE applies even to quick requests)",
+        "Agent asks: 'Which OAuth provider? Existing user table? Token storage?'",
+        "Agent does NOT skip design because user said 'just do it'"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Vendored from obra/superpowers. HARD-GATE principle preserved: no implementation skill invoked without user-approved design."
+}

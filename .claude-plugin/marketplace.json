@@ -4,11 +4,14 @@
       "name": "meisijiya-core",
       "skills": [
         "./skills/core/using-meisijiya-skills",
+        "./skills/core/brainstorming",
         "./skills/core/spec-driven-development",
         "./skills/core/incremental-implementation",
         "./skills/core/test-driven-development",
+        "./skills/core/verification-before-completion",
         "./skills/core/debugging-and-error-recovery",
-        "./skills/core/source-driven-development"
+        "./skills/core/source-driven-development",
+        "./skills/core/writing-skills"
       ]
     },
     {

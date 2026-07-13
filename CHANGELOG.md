@@ -4,6 +4,55 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (v0.4.0 — superpowers integration + AGENTS.md enhancement)
+
+**3 superpowers skills vendored to `.core/`:**
+- `brainstorming` — HARD-GATE pre-design exploration; "no implementation before user-approved design"
+- `verification-before-completion` — discipline layer: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE (Iron Law)
+- `writing-skills` — meta: TDD for process documentation; extract repeated workflows into reusable skills
+
+**Why these 3 in core (not extra):** Cross-cutting discipline / process skills that ALL work should use, not opt-in utilities.
+
+**Inspired by superpowers' skill-integration patterns:**
+- `using-meisijiya-skills` enhanced with EXTREMELY-IMPORTANT framing + Skill Priority section (process skills first, then implementation, then discipline, then meta) + Skill capture process step (writing-skills invoked when patterns repeat)
+- Description field rules (per superpowers' writing-skills): "Use when..." + triggering conditions only, NO workflow summary (which causes agents to skip reading the skill)
+
+**AGENTS.md Section A enhanced:**
+- Added "Discipline layer" subsection: invoke `verification-before-completion` before any completion claim
+- Added "Skill chains (process order)" subsection: brainstorming → spec → incremental → TDD → verification
+- Catalog now: 9 core (was 6) + 10 extra = 19 total
+- All skill mentions carry `~/.agents/skills/<name>/SKILL.md` install paths
+- New convention bullets: "Verify before claiming completion" + "Capture repeated workflows as skills"
+
+**AGENTS.md Section C enhanced (project-level AGENTS.md):**
+- New "Skill reference convention" subsection: when project-level AGENTS.md references a skill, **must include install path as markdown link**
+- Failure detection: grep-based check that all `~/.agents/skills/<name>/SKILL.md` paths resolve to installed files
+- Periodic check: re-run `validate-skills.sh` + `check-marketplace.sh` from meisijiya-skills repo
+- Addresses: "项目级AGETNS.md的skill引用使得后续生成的项目级skill出现问题可以及时修复"
+
+**Files modified (7):**
+- `AGENTS.md` — Section A + Section C (~25 new path refs in injected block)
+- `.claude-plugin/marketplace.json` — meisijiya-core plugin entries 6 → 9
+- `skills/core/using-meisijiya-skills/SKILL.md` — rewrite (181 lines, was ~150)
+- `skills/core/brainstorming/SKILL.md` — new (139 lines)
+- `skills/core/verification-before-completion/SKILL.md` — new (139 lines)
+- `skills/core/writing-skills/SKILL.md` — new (178 lines)
+- `skill-anatomy.md` — "引用其他 skill" section: now requires install path
+
+**Eval cases (3 new):**
+- `brainstorming.json` — 3 positive + 3 negative + 2 behavioral
+- `verification-before-completion.json` — 4 positive + 3 negative + 3 behavioral
+- `writing-skills.json` — 3 positive + 3 negative + 3 behavioral
+
+**Verified:**
+- `validate-skills.sh`: 19/19 OK (was 16)
+- `check-marketplace.sh`: OK marketplace.json in sync (19 skills)
+- All 19 SKILL.md files have frontmatter
+- `inject-agents-md.sh` round-trip: extracts 57 lines, 25 path references preserved
+- Path-sweep audit: 0 missing paths across AGENTS.md + 16 SKILL.md
+
+**Tag:** v0.4.0 (was v0.3.0)
+
 ### Added (skill cross-reference path convention)
 
 Every meisijiya skill mention in agent-facing docs now carries its install path (`~/.agents/skills/<name>/SKILL.md`) so the agent can find the file when invoked.

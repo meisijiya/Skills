@@ -1,0 +1,75 @@
+{
+  "name": "verification-before-completion",
+  "version": "0.1.0",
+  "description": "Discipline skill: no completion claims without fresh verification evidence",
+  "positive_triggers": [
+    {
+      "input": "I just fixed the login bug",
+      "expected_skill": "verification-before-completion",
+      "reason": "About to claim 'fixed' — must verify with reproduction test"
+    },
+    {
+      "input": "Tests should pass now",
+      "expected_skill": "verification-before-completion",
+      "reason": "About to claim test status — must run tests, read output"
+    },
+    {
+      "input": "Subagent reported it finished the migration successfully",
+      "expected_skill": "verification-before-completion",
+      "reason": "Agent self-report — must verify via VCS diff + actual test"
+    },
+    {
+      "input": "Looks good to me, ready to merge",
+      "expected_skill": "verification-before-completion",
+      "reason": "Satisfaction expression before merge — must run verification"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "What does the codebase do?",
+      "expected_no_skill": true,
+      "reason": "Pure Q&A, no completion claim"
+    },
+    {
+      "input": "I'm working on X, here's my plan",
+      "expected_no_skill": true,
+      "reason": "Mid-task update, no completion claim being made"
+    },
+    {
+      "input": "How do I use the Skill tool?",
+      "expected_no_skill": true,
+      "reason": "Tool usage question, not a completion claim"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Agent edited 3 files in auth/ and is about to tell user 'done'",
+      "expected_behavior": [
+        "Agent invokes verification-before-completion BEFORE claiming done",
+        "Agent identifies what proves the claim (test command? lint? build?)",
+        "Agent runs the FULL command in this turn",
+        "Agent reads full output (not just exit code)",
+        "Agent reports specific evidence: 'Tests: 34/34 pass, exit 0'"
+      ]
+    },
+    {
+      "scenario": "Subagent said 'I've completed the migration successfully'",
+      "expected_behavior": [
+        "Agent does NOT trust subagent self-report",
+        "Agent checks VCS diff for actual changes",
+        "Agent runs project test command to verify",
+        "Agent reports: 'Verified: <evidence>. Subagent's claim verified.' OR 'Verified: <evidence>. Subagent's claim NOT verified — <failure>'"
+      ]
+    },
+    {
+      "scenario": "Agent is tired, wants to wrap up, types 'Tests should pass now'",
+      "expected_behavior": [
+        "Agent invokes verification-before-completion (RED: 'should' is a red flag)",
+        "Agent actually runs tests instead of just saying 'should'",
+        "Agent reports actual count, not assumption"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Vendored from obra/superpowers. Iron Law preserved: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE."
+}

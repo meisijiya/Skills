@@ -6,13 +6,22 @@ allowed-tools: "Read Bash Glob Grep"
 
 # Using meisijiya-skills
 
+## EXTREMELY-IMPORTANT
+
+**If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.**
+
+**If a skill applies to your task, you do not have a choice. You must use it.**
+
+This is not negotiable. You cannot rationalize your way out of this.
+
 ## Overview
 
-This meta-skill is the **entry point** of meisijiya-skills. It enforces three non-negotiable habits:
+This meta-skill is the **entry point** of meisijiya-skills. It enforces non-negotiable habits:
 
 1. Before every response, check whether a meisijiya skill applies.
 2. Before every non-trivial task, ensure planning-with-files is initialized.
 3. Coordinate with oh-my-openagent's Sisyphus — don't fight it.
+4. Before any completion claim, invoke [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md).
 
 Without this skill, agents skip skills entirely — even when one is exactly what the user asked for. The skill catalog is in the agent's context, but agents default to the shortest path (answer directly), and "shortest" rarely means "load the right skill first."
 
@@ -31,6 +40,15 @@ Without this skill, agents skip skills entirely — even when one is exactly wha
 - Tasks that the user explicitly framed as "no skill, just answer"
 
 ## Core Process
+
+### 0. Skill Priority (when multiple skills apply)
+
+When several skills could apply, invoke them in this order:
+
+1. **Process skills first** (set the approach): [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) → [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md)
+2. **Implementation skills** (carry it out): [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) → [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md)
+3. **Discipline skills** (wrap it up): [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md), [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
+4. **Meta skills** (when changing the system itself): [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md)
 
 ### 1. Check pwf state (every session start)
 
@@ -64,6 +82,7 @@ If you're about to take action without naming a skill, **stop and check the cata
 1. **Does a skill match what the user asked?** If yes, load it via the Skill tool *before* producing the answer.
 2. **Is this the middle of an active skill workflow?** Continue that skill, don't restart.
 3. **Is this a Q&A with no implied action?** Answer directly.
+4. **Am I about to claim completion?** If yes, invoke [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) FIRST.
 
 ### 4. Defer to omo Sisyphus
 
@@ -85,18 +104,25 @@ After deciding, append a single line to `progress.md`:
 
 This makes the decision traceable for later review.
 
+### 6. Capture repeated workflows as skills (proactive)
+
+If during execution you notice a workflow you do repeatedly (2+ times across sessions), invoke [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) to extract it. The threshold: "if I had to onboard someone new, would I need to teach them this?" — if yes, it's a skill candidate.
+
 ## Skill Catalog
 
-### `core/` (Required)
+### `core/` (Required, load always)
 
 | Skill | Load when |
 |---|---|
 | [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) | (this skill — meta, always-on) |
+| [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | Starting any non-trivial work; HARD-GATE before implementation |
 | [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) | Starting a new project, feature, or significant change |
 | [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) | Any change touching more than one file |
 | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) | Implementing logic, fixing bugs, changing behavior |
+| [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | Before any completion claim (commit, PR, "done") |
 | [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | Tests fail, build breaks, or behavior is unexpected |
 | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | Working with any framework or library where correctness matters |
+| [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | Creating/editing skills, or extracting a repeated workflow into a skill |
 
 ### `extra/` (Optional, loaded on demand)
 
@@ -123,6 +149,9 @@ This makes the decision traceable for later review.
 | "Loading skills costs tokens" | Skipping a relevant skill costs more — wrong answers, rework, debugging time, user frustration. |
 | "The user said 'just do X quickly'" | Quickly ≠ sloppily. Load the skill, then execute. The skill is faster than recovery. |
 | "I'm inside another skill, no need to re-check" | Correct — finish the active skill first. But record what you considered in `progress.md`. |
+| "This is too simple to need brainstorming" | Even one-liners have hidden assumptions. [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) takes 30 seconds for trivial work; the design doc catches misalignments. |
+| "I'm about to claim done — but I'm confident" | Confidence ≠ evidence. Invoke [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md), run the test, read the output. |
+| "I keep doing X manually; this is just normal workflow" | If you do it more than twice, invoke [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) and capture it as a skill. |
 
 ## Red Flags
 
@@ -132,16 +161,19 @@ This makes the decision traceable for later review.
 - Agent restarts a skill workflow mid-stream (e.g., reloads [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) while already inside it)
 - Agent loads multiple skills at once instead of one at a time
 - Agent invokes `using-meisijiya-skills` recursively to "double-check"
+- Agent says "done" / "fixed" / "passing" without first invoking [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
+- Agent starts implementation (writes code, scaffolds project) without first invoking [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md)
+- Agent notices a repeated workflow but doesn't capture it as a skill
 
 ## Verification
 
 Before responding to the user, confirm:
-
 - [ ] I checked whether a meisijiya skill matches the task
 - [ ] I checked whether pwf is initialized (for non-trivial tasks)
 - [ ] If a skill applies, I loaded it *before* producing the answer
 - [ ] If no skill applies, I answered directly without loading anything
 - [ ] I appended a `[skill-check]` line to `progress.md`
+- [ ] If I'm about to claim completion, I invoked [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) and ran the verification
 
 ## pwf Integration
 
