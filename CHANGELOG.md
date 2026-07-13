@@ -177,6 +177,18 @@ The Node 20 deprecation warning in the same run was unrelated (a yellow notice, 
 
   **Maintenance:** each `skills[]` array must be kept in sync with the filesystem. Drift = un-installable via picker (still installable via direct path). Add CI check in follow-up if drift becomes a problem.
 
+### Added (v0.4.2 — AGENTS.md hygiene tooling)
+
+**`docs/agents-md-guide.md`** (116 lines) — Records the rules for writing `AGENTS.md` content: no version narrative / historical comparisons / change announcements in inject block; 4 core rules + 4 error-fix examples (E1-E4); 3 ways to handle stale-prone counts (delete / manual sync / script sync); where history narrative belongs (`CHANGELOG.md` / `git log` / `git tag` / `README.md` release section). Referenced from user-level `~/.config/opencode/AGENTS.md` `meisijiya-extras` segment.
+
+**`scripts/inject-agents-md.sh` auto-derive** — Section A's `(9)` / `(10)` skill counts now auto-derived from `.claude-plugin/marketplace.json` via `grep -c` (no `jq` needed). Idempotent: source numbers may drift, rendered block always matches current manifest. Falls back to source values with `(?)` in the output line if marketplace.json is missing or has zero counts. `AGENTS.md` Section B documents this.
+
+**`scripts/check-agents-md-narrative.sh`** — Validates that the meisijiya-skills inject block in any `AGENTS.md` contains no version narrative. Patterns: `v0.0.0`, `\bwas\b`, `\bnow has\b`, `\bnewly added\b`, `\bnew in v[0-9]`, `\bsince v[0-9]`. Exit 0 = clean, 1 = dirty. Default args: check repo `AGENTS.md` + user-level `~/.config/opencode/AGENTS.md`.
+
+**`scripts/hooks/pre-commit` + `scripts/install-hooks.sh`** — Pre-commit hook template auto-checks staged `AGENTS.md` files via `git diff --cached --diff-filter=ACMR`. Installer copies template to `.git/hooks/pre-commit` and `chmod +x`. Idempotent install. Bypass: `git commit --no-verify`.
+
+**Triggered by user feedback (v0.4.0 → v0.4.1):** adding 3 superpowers skills exposed that the inject block can carry version narrative ("v0.4.0 status" written into the user-level `meisijiya-extras` segment polluted agent startup context). v0.4.2 establishes rules + tooling to prevent recurrence: rules in the guide, runtime gate via the pre-commit hook, source-of-truth via auto-derived counts.
+
 ## v0.3.0 (2026-07-12)
 
 ### Changed (skill directory rename for `npx skills add` grouping)
