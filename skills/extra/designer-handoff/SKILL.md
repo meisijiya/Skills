@@ -44,14 +44,14 @@ If not installed, prompt user to run `npm install -g ui-ux-pro-max-cli && uipro 
 
 ### 2. Gather requirements
 
-Read the spec (from `spec-driven-development` skill output):
+Read the spec (from [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) skill output):
 
 - Project type (SaaS / Fintech / Healthcare / E-commerce / etc.)
 - Tech stack (React / Vue / Svelte / Tailwind / shadcn / etc.)
 - Key screens (dashboard / landing / checkout / etc.)
 - Brand mood (luxury / playful / minimal / brutalist / etc.)
 
-If spec is missing info, use `interview-me` to clarify.
+If spec is missing info, use [`interview-me`](~/.agents/skills/interview-me/SKILL.md) to clarify.
 
 ### 3. Generate design spec via ui-ux-pro-max
 
@@ -95,7 +95,7 @@ UI code that violates design-spec.md rules will be flagged in review.
 
 ### 6. Hand off to frontend agent (omo-optimized)
 
-When the build phase starts (via `incremental-implementation`), Sisyphus should:
+When the build phase starts (via [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)), Sisyphus should:
 
 1. **Delegate to visual-engineering category** (Gemini 3.1 Pro, design-optimized) — NOT general agents
 2. Load omo's `frontend-ui-ux` skill (consumes our design-spec.md)

@@ -91,34 +91,33 @@ This makes the decision traceable for later review.
 
 | Skill | Load when |
 |---|---|
-| `using-meisijiya-skills` | (this skill — meta, always-on) |
-| `spec-driven-development` | Starting a new project, feature, or significant change |
-| `incremental-implementation` | Any change touching more than one file |
-| `test-driven-development` | Implementing logic, fixing bugs, changing behavior |
-| `debugging-and-error-recovery` | Tests fail, build breaks, or behavior is unexpected |
-| `source-driven-development` | Working with any framework or library where correctness matters |
+| [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) | (this skill — meta, always-on) |
+| [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) | Starting a new project, feature, or significant change |
+| [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) | Any change touching more than one file |
+| [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) | Implementing logic, fixing bugs, changing behavior |
+| [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | Tests fail, build breaks, or behavior is unexpected |
+| [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | Working with any framework or library where correctness matters |
 
 ### `extra/` (Optional, loaded on demand)
 
 | Skill | Load when |
 |---|---|
-| `pwf-enforcer` | Hard-enforce pwf via omo hooks (A scheme: omo hook only) |
-| `build-gate-visual-review` | Before final delivery, render project state as HTML for user review |
-| `designer-handoff` | UI projects — generate design spec for frontend agent |
-| `agent-project-structure` | Initializing a new project, want canonical doc structure |
-| `interview-me` | User request is underspecified |
-| `code-simplification` | Code works but is harder to read than it should be |
-| `api-and-interface-design` | Designing APIs, module boundaries, public interfaces |
-| `security-and-hardening` | Handling user input, auth, data storage, external integrations |
-| `performance-optimization` | Performance requirements exist or regressions suspected |
-| `observability-and-instrumentation` | Shipping anything that runs in production |
-| `documentation-and-adrs` | Making architectural decisions, changing public APIs |
+| [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) | Hard-enforce pwf via omo hooks (A scheme: omo hook only) |
+| [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) | Before final delivery, render project state as HTML for user review |
+| [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) | UI projects — generate design spec for frontend agent |
+| [`interview-me`](~/.agents/skills/interview-me/SKILL.md) | User request is underspecified |
+| [`code-simplification`](~/.agents/skills/code-simplification/SKILL.md) | Code works but is harder to read than it should be |
+| [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) | Designing APIs, module boundaries, public interfaces |
+| [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) | Handling user input, auth, data storage, external integrations |
+| [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) | Performance requirements exist or regressions suspected |
+| [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) | Shipping anything that runs in production |
+| [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) | Making architectural decisions, changing public APIs |
 
 ## Common Rationalizations
 
 | Excuse | Reality |
 |---|---|
-| "The user just asked a simple question, no skill needed" | Even simple questions may need `source-driven-development` (framework docs) or `interview-me` (clarify ambiguity). When in doubt, check. |
+| "The user just asked a simple question, no skill needed" | Even simple questions may need [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) (framework docs) or [`interview-me`](~/.agents/skills/interview-me/SKILL.md) (clarify ambiguity). When in doubt, check. |
 | "I already loaded the right skill earlier" | Skills don't persist across `/clear`. Re-check after compaction. |
 | "omo Sisyphus will route for me" | Yes — but this skill is the **fallback**. If omo is absent or disabled, this is the only dispatcher. |
 | "Loading skills costs tokens" | Skipping a relevant skill costs more — wrong answers, rework, debugging time, user frustration. |
@@ -130,7 +129,7 @@ This makes the decision traceable for later review.
 - Agent produces a long answer without first checking the skill catalog
 - Agent skips pwf initialization on a 3+ step task
 - Agent answers "the user just asked X" without considering what skill fits X
-- Agent restarts a skill workflow mid-stream (e.g., reloads `test-driven-development` while already inside it)
+- Agent restarts a skill workflow mid-stream (e.g., reloads [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) while already inside it)
 - Agent loads multiple skills at once instead of one at a time
 - Agent invokes `using-meisijiya-skills` recursively to "double-check"
 

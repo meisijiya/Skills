@@ -75,7 +75,7 @@ For each slice, follow the loop:
 1. **omo**: load `git-master` skill (atomic commits, branch hygiene, rebase surgery)
 2. **omo**: delegate slice todo tracking to `atlas` agent (Sisyphus routes)
 3. Implement the slice
-4. Run `test-driven-development` skill (red-green-refactor)
+4. Run [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) skill (red-green-refactor)
 5. Verify the slice ships end-to-end (not just unit tests)
 6. Commit with `slice: <slice-name>` prefix in message (git-master enforces atomicity)
 7. Append to `progress.md`:

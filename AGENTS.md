@@ -22,27 +22,27 @@ These conventions apply globally unless a project-level AGENTS.md overrides them
 
 ### Catalog
 
-**core/ — load always:**
-- `using-meisijiya-skills` — meta dispatcher; check before every response
-- `spec-driven-development` — spec before non-trivial code
-- `incremental-implementation` — vertical slices (≤ 100 lines each)
-- `test-driven-development` — red-green-refactor
-- `debugging-and-error-recovery` — 5-step triage (reproduce / localize / reduce / fix / guard)
-- `source-driven-development` — verify API against official docs
+**.core/ — load always:**
+- [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher; check before every response
+- [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — spec before non-trivial code
+- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices (≤ 100 lines each)
+- [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor
+- [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
+- [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
-**extra/ — load on demand:**
-`pwf-enforcer` · `build-gate-visual-review` · `designer-handoff` · `interview-me` · `code-simplification` · `api-and-interface-design` · `security-and-hardening` · `performance-optimization` · `observability-and-instrumentation` · `documentation-and-adrs`
+**.extra/ — load on demand:**
+[`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`interview-me`](~/.agents/skills/interview-me/SKILL.md) · [`code-simplification`](~/.agents/skills/code-simplification/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md)
 
 ### omo integration
 
 For the reverse map (omo feature → skills that use it), see the `meisijiya-extras` block above. Skills use:
 
-- `source-driven-development` — context7 MCP (primary), grep_app MCP
-- `debugging-and-error-recovery` — oracle agent (escalation), lsp MCP
-- `incremental-implementation` — git-master skill, atlas agent
-- `designer-handoff` — visual-engineering category, frontend-ui-ux skill
-- `security-and-hardening` — security-research mode
-- `using-meisijiya-skills` — Sisyphus (executing delegation), atlas (todo orchestration)
+- [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — context7 MCP (primary), grep_app MCP
+- [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — oracle agent (escalation), lsp MCP
+- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — git-master skill, atlas agent
+- [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — visual-engineering category, frontend-ui-ux skill
+- [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — security-research mode
+- [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — Sisyphus (executing delegation), atlas (todo orchestration)
 
 ### Conventions
 
@@ -65,7 +65,7 @@ When adding a new skill to this repo, follow the conventions in [`skill-anatomy.
 - **Marketplace manifest** (`.claude-plugin/marketplace.json`): Every new skill must add its path to the corresponding plugin entry's `skills[]` array. `npx skills add` groups by `pluginName`, not by directory. See `skill-anatomy.md` for the full convention. CI `scripts/check-marketplace.sh` enforces this.
 - **omo integration** (if applicable): Reference relevant omo MCPs / agents / built-ins. See any existing skill's Process section for the format.
 
-Existing skills are the reference. When in doubt, copy a similar skill's structure (e.g., `test-driven-development` for the canonical 6-section pattern).
+Existing skills are the reference. When in doubt, copy a similar skill's structure (e.g., [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) for the canonical 6-section pattern).
 
 For multi-harness compatibility, the skill should be readable even without omo or pwf installed. Reference them, but don't hard-depend on their presence.
 
@@ -121,7 +121,7 @@ Three sections, top-to-bottom:
 
 ### Behavior enforcement: two layers
 
-Some skills (notably `pwf-enforcer`) enforce workflow discipline on OpenCode. They use **two layers**:
+Some skills (notably [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md)) enforce workflow discipline on OpenCode. They use **two layers**:
 
 | Layer | Where it lives | Strength | Who reads it |
 |---|---|---|---|

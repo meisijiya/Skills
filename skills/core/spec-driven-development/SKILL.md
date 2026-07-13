@@ -83,7 +83,7 @@ The spec goes in `task_plan.md` (NOT a separate file). This keeps the plan + spe
 
 ### 4. Clarify ambiguity (if needed)
 
-If any section can't be filled confidently, load `interview-me` and ask **one question at a time**. Never batch-ask five questions.
+If any section can't be filled confidently, load [`interview-me`](~/.agents/skills/interview-me/SKILL.md) and ask **one question at a time**. Never batch-ask five questions.
 
 ### 5. Attest the plan
 

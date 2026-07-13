@@ -47,7 +47,7 @@ Based on the answer, update your model. If still < 95% confident, identify the n
 
 ### 4. Loop until ≥ 95% confident
 
-3-7 questions is typical. > 10 questions means you should have used `spec-driven-development` instead — break it down.
+3-7 questions is typical. > 10 questions means you should have used [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) instead — break it down.
 
 ### 5. Confirm before proceeding
 

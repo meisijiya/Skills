@@ -35,7 +35,7 @@ State it in one sentence:
 - "We use [X] instead of [Y] for [purpose]"
 - "We chose [architecture] because [reason]"
 
-If you can't state it in one sentence, the decision isn't clear yet. Use `interview-me` to clarify.
+If you can't state it in one sentence, the decision isn't clear yet. Use [`interview-me`](~/.agents/skills/interview-me/SKILL.md) to clarify.
 
 ### 2. Capture context
 
@@ -108,7 +108,7 @@ We chose **Option X** because <reason>.
 - <links to relevant docs, issues, discussions>
 ```
 
-Store ADRs in `10_docs/adr/` (per `agent-project-structure` convention) or `docs/adr/`.
+Store ADRs in `10_docs/adr/` or `docs/adr/`.
 
 ## Other Doc Types
 
