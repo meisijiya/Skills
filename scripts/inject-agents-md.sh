@@ -91,6 +91,24 @@ SNIPPET_CONTENT=$(awk -v begin="$MARKER_BEGIN" -v end="$MARKER_END" '
   in_block { print }
 ' "$AGENTS_MD")
 
+# Auto-derive skill counts from .claude-plugin/marketplace.json.
+# Stale-prone: source numbers in Section A may drift from the manifest.
+# This normalizes them on each inject. Idempotent.
+MARKETPLACE="$REPO_ROOT/.claude-plugin/marketplace.json"
+if [[ -f "$MARKETPLACE" ]]; then
+  N_CORE=$(grep -cE '"\./skills/core/' "$MARKETPLACE" || true)
+  N_EXTRA=$(grep -cE '"\./skills/extra/' "$MARKETPLACE" || true)
+  if [[ -n "$N_CORE" && -n "$N_EXTRA" && "$N_CORE" -gt 0 && "$N_EXTRA" -gt 0 ]]; then
+    SNIPPET_CONTENT=$(printf '%s\n' "$SNIPPET_CONTENT" | \
+      sed -E "s/(\*\*\.core\/ — load always \()([0-9]+)(\)\:\*\*)/\1${N_CORE}\3/" | \
+      sed -E "s/(\*\*\.extra\/ — load on demand \()([0-9]+)(\)\:\*\*)/\1${N_EXTRA}\3/")
+  else
+    N_CORE="?"; N_EXTRA="?"
+  fi
+else
+  N_CORE="?"; N_EXTRA="?"
+fi
+
 if [[ -z "$(printf '%s' "$SNIPPET_CONTENT" | tr -d '[:space:]')" ]]; then
   echo "Error: no content between $MARKER_BEGIN and $MARKER_END in $AGENTS_MD" >&2
   echo "  See Section A of AGENTS.md for the expected format" >&2
@@ -171,5 +189,5 @@ fi
 } >> "$TARGET"
 
 echo "Injected meisijiya-skills block into $TARGET"
-echo "  ($SNIPPET_LINES lines from $AGENTS_MD Section A)"
+echo "  ($SNIPPET_LINES lines from $AGENTS_MD Section A; counts: core=$N_CORE, extra=$N_EXTRA)"
 echo "  Idempotent: re-running is a no-op. Use --remove to delete."
