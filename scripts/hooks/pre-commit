@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# scripts/hooks/pre-commit (template; installed to .git/hooks/pre-commit
+# by scripts/install-hooks.sh)
+#
+# Pre-commit hook: reject commits that introduce version narrative in
+# the meisijiya-skills inject block. Bypass with `git commit --no-verify`.
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+CHECK="$REPO_ROOT/scripts/check-agents-md-narrative.sh"
+
+[[ -x "$CHECK" ]] || {
+  echo "pre-commit: $CHECK not found or not executable, skipping" >&2
+  exit 0
+}
+
+# Find staged AGENTS.md files (Added/Copied/Modified/Renamed)
+mapfile -t staged < <(
+  git diff --cached --name-only --diff-filter=ACMR | grep -E '(^|/)AGENTS\.md$' || true
+)
+
+if [[ ${#staged[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+echo "pre-commit: checking ${#staged[@]} staged AGENTS.md file(s)..."
+
+if ! "$CHECK" "${staged[@]}"; then
+  echo
+  echo "pre-commit: rejected. Fix the version narrative or use --no-verify to bypass." >&2
+  exit 1
+fi
+
+exit 0
