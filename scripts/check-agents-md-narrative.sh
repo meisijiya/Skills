@@ -51,7 +51,7 @@ for f in "${FILES[@]}"; do
   # Extract block between markers (only if both present)
   block=$(awk -v b="$MARKER_BEGIN" -v e="$MARKER_END" '
     $0 == b { in_block = 1; next }
-    $0 == e { in_block = 0 }
+    $0 == e { in_block = 0; next }
     in_block { print }
   ' "$f" 2>/dev/null || true)
 

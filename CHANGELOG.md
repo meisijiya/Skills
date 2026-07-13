@@ -189,6 +189,17 @@ The Node 20 deprecation warning in the same run was unrelated (a yellow notice, 
 
 **Triggered by user feedback (v0.4.0 → v0.4.1):** adding 3 superpowers skills exposed that the inject block can carry version narrative ("v0.4.0 status" written into the user-level `meisijiya-extras` segment polluted agent startup context). v0.4.2 establishes rules + tooling to prevent recurrence: rules in the guide, runtime gate via the pre-commit hook, source-of-truth via auto-derived counts.
 
+### Fixed (v0.4.3 — Oracle review nits)
+
+Oracle review of v0.4.2 returned PASS-WITH-NITS. Patches:
+
+- **`docs/agents-md-guide.md`** (3 stale refs):
+  - L82 + L84 — table row 3 + label updated from "用 `check-marketplace.sh` 在 CI 验证 `wc -l`" (CI-validation approach) to "注入时脚本自动派生" (v0.4.2 method); the "当前用做法 2" sentence below the table replaced with description of the actual v0.4.2 auto-derive
+  - L103 — manual grep example regex now has all 6 patterns matching the check script (was missing `\bnew in v[0-9]` and `\bsince v[0-9]`)
+  - L108 — "(可选)做 pre-commit hook...脚本占位...留待真痛了再加(YAGNI)" replaced with pointer to real `scripts/check-agents-md-narrative.sh` + `scripts/hooks/pre-commit` + `scripts/install-hooks.sh`
+- **`scripts/check-agents-md-narrative.sh`** — awk block extractor now has `next` after `$0 == e` (defensive parity with `scripts/inject-agents-md.sh`'s awk). HTML comment markers don't carry version narratives, so this never fired; consistency fix.
+- **`~/.config/opencode/AGENTS.md` meisijiya-extras segment** — cross-ref to `docs/agents-md-guide.md` self-referenced "v0.4.0" in the trail "(移走 v0.4.0 status 段)的依据", violating the rule the guide itself articulates. Replaced with a one-line version-free pointer. (User-level file, not in repo.)
+
 ## v0.3.0 (2026-07-12)
 
 ### Changed (skill directory rename for `npx skills add` grouping)

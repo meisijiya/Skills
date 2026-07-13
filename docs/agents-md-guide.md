@@ -79,9 +79,9 @@ cross-cutting discipline, not opt-in utilities.
 |---|---|
 | 删掉数字 | 数字不重要,只关心"哪些 skill 在 core" |
 | 写数字 + 手动同步 | 小型个人 repo,接受每次改 skill 时手动改 inject block |
-| 写数字 + 脚本同步 | 大型 repo,用 `check-marketplace.sh` 在 CI 验证 `wc -l` 等于 `jq '.plugins[0].skills \| length'` |
+| 注入时脚本自动派生 | inject 脚本 sed 替换源数字为 manifest 当前计数。源数字可随意;渲染总对(meisijiya-skills v0.4.2+ 用此法:纯 `grep -c`,无需 jq) |
 
-meisijiya-skills 当前用做法 2(写 `(9)` / `(10)`,靠 `check-marketplace.sh` 兜底)。
+meisijiya-skills v0.4.2+ 用自动派生(`scripts/inject-agents-md.sh`)。源数字不重要,渲染永远反映当前 manifest。
 
 ## 历史叙事该写哪里
 
@@ -100,12 +100,12 @@ meisijiya-skills 当前用做法 2(写 `(9)` / `(10)`,靠 `check-marketplace.sh`
 
 ```bash
 awk '/<!-- meisijiya-skills:start -->/{flag=1; next} /<!-- meisijiya-skills:end -->/{flag=0} flag' \
-  AGENTS.md | grep -nE "v[0-9]+\.[0-9]+\.[0-9]+|\bwas\b|\bnow has\b|\bnewly added\b" \
+  AGENTS.md | grep -nE "v[0-9]+\.[0-9]+\.[0-9]+|\bwas\b|\bnow has\b|\bnewly added\b|\bnew in v[0-9]|\bsince v[0-9]" \
   && echo "FAIL: version narrative in inject block" \
   || echo "PASS: clean"
 ```
 
-(可选)做 pre-commit hook 跑上述 grep,失败则拒绝 commit。脚本占位:`scripts/check-agents-md-narrative.sh` — 留待真痛了再加(YAGNI)。
+自动化门禁:`scripts/check-agents-md-narrative.sh` 是检查本体,`scripts/hooks/pre-commit`(模板)+ `scripts/install-hooks.sh`(安装)装到 `.git/hooks/` 后每次 commit 自动跑。Bypass:`git commit --no-verify`。
 
 ## 交叉引用
 
