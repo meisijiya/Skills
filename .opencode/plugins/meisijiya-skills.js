@@ -33,6 +33,12 @@ import os from 'os';
 
 const EXTREMELY_IMPORTANT_MARKER = 'EXTREMELY_IMPORTANT';
 
+const DIAG_LOG = '/tmp/meisijiya-skills.log';
+const log = (msg) => {
+  try { fs.appendFileSync(DIAG_LOG, `[${new Date().toISOString()}] ${msg}\n`); } catch {}
+};
+log('module loaded');
+
 // Module-level cache: bootstrap file does not change during a session.
 // See superpowers.js for the same pattern (avoids redundant disk reads per step).
 let _bootstrapCache = undefined; // undefined = not yet loaded, null = file missing
@@ -94,11 +100,13 @@ export const MeisijiyaSkillsPlugin = async ({ client, directory }) => {
      * Equivalent to a global `npx skills add`; doesn't require symlinks.
      */
     config: async (config) => {
+      log('config hook fired');
       config.skills = config.skills || {};
       config.skills.paths = config.skills.paths || [];
       if (!config.skills.paths.includes(skillsDir)) {
         config.skills.paths.push(skillsDir);
       }
+      log(`  skills.paths now has ${config.skills.paths.length} entries, includes meisijiya-skills: ${config.skills.paths.includes(skillsDir)}`);
     },
 
     /**
@@ -115,23 +123,41 @@ export const MeisijiyaSkillsPlugin = async ({ client, directory }) => {
      * This is also what makes us safely re-inject after session compaction.
      */
     'experimental.chat.messages.transform': async (_input, output) => {
+      log(`messages.transform fired, ${output.messages.length} messages`);
       const bootstrap = loadBootstrap();
-      if (!bootstrap || !output.messages.length) return;
+      if (!bootstrap) {
+        log('  bootstrap null (file missing or unreadable)');
+        return;
+      }
+      if (!output.messages.length) {
+        log('  no messages in output');
+        return;
+      }
 
       const firstUser = output.messages.find((m) => m.info.role === 'user');
-      if (!firstUser || !firstUser.parts.length) return;
+      if (!firstUser) {
+        log('  no user message found');
+        return;
+      }
+      if (!firstUser.parts.length) {
+        log('  user message has no parts');
+        return;
+      }
 
       // Guard: skip if bootstrap already present (idempotent for compaction + retries)
       if (firstUser.parts.some(
         (p) => p.type === 'text' && p.text.includes(EXTREMELY_IMPORTANT_MARKER)
       )) {
+        log('  already injected, skip');
         return;
       }
 
+      log('  INJECTING bootstrap');
       // In-place mutation on firstUser.parts. Reassigning parts would be a no-op
       // (OpenCode retains the original array reference; see issue #25754).
       const ref = firstUser.parts[0];
       firstUser.parts.unshift({ ...ref, type: 'text', text: bootstrap });
+      log(`  parts.length now ${firstUser.parts.length}`);
     },
   };
 };
