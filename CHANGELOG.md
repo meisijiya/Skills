@@ -200,6 +200,31 @@ Oracle review of v0.4.2 returned PASS-WITH-NITS. Patches:
 - **`scripts/check-agents-md-narrative.sh`** — awk block extractor now has `next` after `$0 == e` (defensive parity with `scripts/inject-agents-md.sh`'s awk). HTML comment markers don't carry version narratives, so this never fired; consistency fix.
 - **`~/.config/opencode/AGENTS.md` meisijiya-extras segment** — cross-ref to `docs/agents-md-guide.md` self-referenced "v0.4.0" in the trail "(移走 v0.4.0 status 段)的依据", violating the rule the guide itself articulates. Replaced with a one-line version-free pointer. (User-level file, not in repo.)
 
+### Added (v0.5.0 — OpenCode plugin for high-frequency skill invocation)
+
+- **`.opencode/plugins/meisijiya-skills.js`** (NEW, 137 lines): Hard-layer OpenCode plugin that auto-injects the `using-meisijiya-skills` bootstrap content into the first user message of every session, and registers `~/.agents/skills` with OpenCode's skill tool. Pattern adapted from [obra/superpowers' `superpowers.js`](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js).
+  - Hooks used: `config` (register skills dir) + `experimental.chat.messages.transform` (inject bootstrap)
+  - Idempotent: guarded by `EXTREMELY_IMPORTANT` marker; survives session compaction (OpenCode issue #17820 — hook re-fires after compact)
+  - Bootstrap source: `~/.agents/skills/using-meisijiya-skills/SKILL.md` (frontmatter stripped, body wrapped in `<EXTREMELY_IMPORTANT>` tags)
+  - No external deps (pure Node `fs/path`; Bun runtime, native ESM)
+
+**SDK verification** (2026-07): hook names + signatures matched against official OpenCode [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts). `Config.skills.paths` schema confirmed at [`packages/core/src/v1/config/skills.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/core/src/v1/config/skills.ts#L5). Critical gotcha: in-place mutation required ([issue #25754](https://github.com/anomalyco/opencode/issues/25754)) — `output.messages = newArr` is a silent no-op. Plugin uses `unshift` on `parts[]`, which is safe.
+
+**Install:**
+
+```bash
+mkdir -p ~/.config/opencode/plugins
+ln -sf "$(pwd)/.opencode/plugins/meisijiya-skills.js" \
+       ~/.config/opencode/plugins/meisijiya-skills.js
+```
+
+**Verified:**
+- Node syntax check (forced ESM): OK
+- Functional test (import + invoke hook with synthetic user message): bootstrap injected, marker present
+- Symlink live at `~/.config/opencode/plugins/meisijiya-skills.js`
+
+**Triggered by:** user observed that `using-meisijiya-skills` was listed in `<available_skills>` but never auto-invoked in their sessions (~0% invocation rate). The hard-layer plugin mirrors the superpowers pattern that achieves ~80-90% invocation rate.
+
 ## v0.3.0 (2026-07-12)
 
 ### Changed (skill directory rename for `npx skills add` grouping)

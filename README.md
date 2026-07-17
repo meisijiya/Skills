@@ -139,6 +139,30 @@ ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 
 **只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check`,没有 bun 会报错提示安装。
 
+### OpenCode Plugin(硬层 skill 注入)
+
+`.opencode/plugins/meisijiya-skills.js` 是 hard-layer OpenCode 插件,跟 [`obra/superpowers` 的 `superpowers.js`](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js) 同款机制 — 在每个会话首条 user message 注入 `using-meisijiya-skills` 的 bootstrap,让 skill 真正高频触发(否则只在 `<available_skills>` 列表里软躺着,模型不会主动 invoke)。
+
+**安装:**
+
+```bash
+mkdir -p ~/.config/opencode/plugins
+ln -sf "$(pwd)/.opencode/plugins/meisijiya-skills.js" \
+       ~/.config/opencode/plugins/meisijiya-skills.js
+```
+
+**禁用:** `rm ~/.config/opencode/plugins/meisijiya-skills.js`
+
+**SDK 验证**(2026-07):hook 名 + 签名匹配 OpenCode 官方 [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts)。用到的 hook:
+- `config` — 注册 `~/.agents/skills` 到 OpenCode skill tool
+- `experimental.chat.messages.transform` — 注入 bootstrap 到首条 user message
+
+**关键设计:**
+- 只注入首条,带 `EXTREMELY_IMPORTANT` guard 防重(session compaction 后仍幂等)
+- 严格 in-place mutation([issue #25754](https://github.com/anomalyco/opencode/issues/25754):`output.messages = ...` 是静默 no-op)
+- Bootstrap 来源:`~/.agents/skills/using-meisijiya-skills/SKILL.md`(strip frontmatter)
+- 无外部依赖,纯 Node `fs/path`,Bun 跑原生 ESM
+
 ## 前置依赖
 
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`)
