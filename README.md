@@ -147,11 +147,27 @@ ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 
 ```bash
 mkdir -p ~/.config/opencode/plugins
-ln -sf "$(pwd)/.opencode/plugins/meisijiya-skills.js" \
-       ~/.config/opencode/plugins/meisijiya-skills.js
+cp .opencode/plugins/meisijiya-skills.js \
+   ~/.config/opencode/plugins/meisijiya-skills.js
 ```
 
+> 注:实测 `ln -sf` 软链接不被 OpenCode plugin loader 拾起,**用 `cp` 实复制**。
+
 **禁用:** `rm ~/.config/opencode/plugins/meisijiya-skills.js`
+
+**Reload:** OpenCode 不会自动重读 plugins 目录。改完插件或 bootstrap 内容后,点面板底部 **"重新加载 OpenCode"** 按钮,或在 settings 里触发 plugin rescan。
+
+**诊断日志:** 插件内含 8 个 `log()` 调用,写到 `/tmp/meisijiya-skills.log`。可观察:
+- `module loaded` — plugin 被 import
+- `config hook fired` — `skills.paths` 注册成功
+- `messages.transform fired` — bootstrap 注入 hook 触发
+- `INJECTING bootstrap` — bootstrap 真的注入了首条 user message
+
+不需要诊断时:`rm /tmp/meisijiya-skills.log` + 编辑插件去掉 `log()` 调用。
+
+**Acceptance test:** 开新 session,发 `let's make X`(X 任意),期望模型先 announce `"Using brainstorming to ..."` 或其他 skill,再问需求。**不要直接 dive in 写代码**。
+
+**已知限制**(per [superpowers issue #54](https://github.com/obra/superpowers/issues/54)):即使 hard-layer + superpowers-grade 强措辞,调用率仍 ~80-90%,不是 100%。模型有时仍能反 rationalization 绕过(尤其 Plan Mode — issue #1667)。需要 ~100% 时,加 `tool.execute.before` 拦截非 skill-issued 工具调用。
 
 **SDK 验证**(2026-07):hook 名 + 签名匹配 OpenCode 官方 [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts)。用到的 hook:
 - `config` — 注册 `~/.agents/skills` 到 OpenCode skill tool

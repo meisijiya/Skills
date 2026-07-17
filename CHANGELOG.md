@@ -225,6 +225,27 @@ ln -sf "$(pwd)/.opencode/plugins/meisijiya-skills.js" \
 
 **Triggered by:** user observed that `using-meisijiya-skills` was listed in `<available_skills>` but never auto-invoked in their sessions (~0% invocation rate). The hard-layer plugin mirrors the superpowers pattern that achieves ~80-90% invocation rate.
 
+### Added (v0.5.1 — bootstrap content upgrade + plugin diagnostics)
+
+Two atomic commits on top of v0.5.0, in response to the v0.5.0 acceptance test failure:
+
+- **`skills/core/using-meisijiya-skills/SKILL.md`** (181 → 198 lines): Upgraded body to superpowers-grade strong imperatives.
+  - Added `<SUBAGENT-STOP>` block (subagent exemption pattern from `obra/superpowers`)
+  - Added `## The Rule` section: "Invoke skills BEFORE any response or action — including clarifying questions, exploring the codebase, or checking files"
+  - Added explicit `announce "Using [skill] to [purpose]"` pattern
+  - Strengthened `## Red Flags` table to superpowers' 12-row "STOP, you're rationalizing" format
+  - Pattern source: [`obra/superpowers` `using-superpowers/SKILL.md`](https://github.com/obra/superpowers/blob/main/skills/using-superpowers/SKILL.md)
+  - Runtime copy at `~/.agents/skills/using-meisijiya-skills/SKILL.md` (byte-identical with repo source)
+
+- **`.opencode/plugins/meisijiya-skills.js`** (137 → 165 lines): Kept diagnostic logging (8 `log()` calls writing to `/tmp/meisijiya-skills.log`).
+  - Confirms plugin loaded, hooks fired, bootstrap injected — used to verify v0.5.0 acceptance test
+  - Useful for future debugging of similar load/inject issues
+  - Disable by deleting `/tmp/meisijiya-skills.log` and removing the log calls
+
+**Triggered by**: v0.5.0 acceptance test (`let's make agent`) showed plugin loaded + bootstrap injected correctly, but model still skipped skill invocation. Root cause was bootstrap content (too soft), not plugin load. New content matches `obra/superpowers` patterns.
+
+**Known limitations** (from [superpowers issue #54](https://github.com/obra/superpowers/issues/54)): even with hard-layer plugin + superpowers-grade imperatives, invocation rate is ~80-90%, not 100%. Model can still rationalize its way out (especially in Plan Mode — issue #1667, #439). Path to higher rates: add `tool.execute.before` hook to block non-skill-issued tool calls.
+
 ## v0.3.0 (2026-07-12)
 
 ### Changed (skill directory rename for `npx skills add` grouping)
