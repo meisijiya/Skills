@@ -10,13 +10,13 @@
         "./skills/core/test-driven-development",
         "./skills/core/verification-before-completion",
         "./skills/core/debugging-and-error-recovery",
-        "./skills/core/source-driven-development",
-        "./skills/core/writing-skills"
+        "./skills/core/source-driven-development"
       ]
     },
     {
       "name": "meisijiya-extra",
       "skills": [
+        "./skills/extra/writing-skills",
         "./skills/extra/pwf-enforcer",
         "./skills/extra/build-gate-visual-review",
         "./skills/extra/designer-handoff",

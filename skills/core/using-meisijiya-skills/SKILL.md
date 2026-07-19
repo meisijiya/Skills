@@ -9,45 +9,48 @@ If you were dispatched as a subagent to execute a specific task, ignore this ski
 </SUBAGENT-STOP>
 
 <EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+If a Skill's description matches what you are about to do, you MUST invoke it before acting. If you are not sure whether a Skill applies, **stop and check the Skill catalog first**; do not default to skipping.
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
-
-This is not negotiable. You cannot rationalize your way out of this.
+This is not optional. Skills encode team-validated discipline; bypassing them because "this is simple" is exactly when they matter.
 </EXTREMELY-IMPORTANT>
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
+**Invoke relevant skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If no Skill matches, say so explicitly and proceed.
 
-**Before entering plan mode:** if you haven't already brainstormed, invoke the brainstorming skill first.
+**Before entering plan mode:** if you haven't already brainstormed, invoke [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) first.
 
-Then announce **"Using [skill] to [purpose]"** and follow it exactly. If it has a checklist, create a todo per item.
+Then announce **"Using [skill] to [purpose]"** and follow it exactly. If the Skill has a checklist, create a todo per item.
 
-## Skill Priority
+## Skill Priority (hard routing table)
 
-When multiple skills apply, process skills come first.
+When multiple Skills could apply, **process skills come first** — they're the discipline layer; the rest are tools.
 
-- "Let's build X" → [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) → [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) → implementation
-- "Fix this bug" → [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) → [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
-- "About to claim done" → [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
+| Trigger (user request pattern) | First Skill to invoke | Then |
+|---|---|---|
+| "Let's build X" / "implement Y" / new feature | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) → [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) |
+| "Fix this bug" / "X is broken" / "X is wrong" | [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
+| "About to claim done" / "ready to commit/PR" | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | (invoke OMO `review-work` per Stage 2) |
+| "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
+| "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
+| Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
+
+**Project-level AGENTS.md and direct user instructions override this priority** — only skip Skills when the human partner has explicitly told you to.
 
 ## Red Flags — STOP, you're rationalizing
 
 | Thought | Reality |
 |---|---|
-| "This is just a simple question" | Questions are tasks. Check for skills. |
-| "I need more context first" | Skill check comes BEFORE clarifying questions. |
+| "This is just a simple question" | Questions are tasks. Check for Skills. |
 | "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "I can check git/files quickly" | Files lack conversation context. Check for skills. |
-| "Let me gather information first" | Skills tell you HOW to gather information. |
-| "This doesn't need a formal skill" | If a skill exists, use it. |
+| "I can check git/files quickly" | Files lack conversation context. Check for Skills. |
+| "This doesn't need a formal skill" | If a Skill exists, use it. |
 | "I remember this skill" | Skills evolve. Read current version. |
-| "This doesn't count as a task" | Action = task. Check for skills. |
+| "This doesn't count as a task" | Action = task. Check for Skills. |
 | "The skill is overkill" | Simple things become complex. Use it. |
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
-| "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
+| "1% chance applies, must load" (removed) | Only invoke when description matches; "not sure" still requires checking the catalog first, but not loading every adjacent Skill. |
 
 ## pwf Integration
 

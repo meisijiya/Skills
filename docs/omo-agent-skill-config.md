@@ -2,11 +2,11 @@
 
 ## Overview
 
-[meisijiya-skills] installs 18 SKILL.md files. By default, omo loads all installed skills for **every** agent. This bloats context for agents that only need a few (e.g., `explore` doesn't need `spec-driven-development`).
+[meisijiya-skills] installs **19 SKILL.md** files(8 `core/` + 11 `extra/`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
 
-This guide recommends which skills each omo agent should have in its `skills` list, for users who want to constrain per-agent context.
+本指南为每个 omo agent 推荐应装载的 skill 子集,供希望按 agent 收敛 context 的用户参考。
 
-> **Constraint**: we do **NOT** modify `oh-my-openagent.json` for you. Apply this manually. This is **enhancement/guidance**, not routing modification.
+> **约束**:我们**不会**替你修改 `oh-my-openagent.json`。请手工应用。本文档是**增强/指南**,不是路由变更。
 
 ## Why per-agent skill lists?
 
@@ -15,21 +15,21 @@ This guide recommends which skills each omo agent should have in its `skills` li
 - **Less noise** — fewer "which skill applies?" decisions
 - **Clearer intent** — agent's role + skill set align
 
-Sisyphus (main orchestrator) gets **all 18** (it routes everything). All other agents get a subset.
+Sisyphus (main orchestrator) gets **all 19** (it routes everything). All other agents get a subset.
 
 ## Recommended per-agent config
 
 | omo Agent | Recommended skills | Why |
 |---|---|---|
-| **sisyphus** | (all 18) | Main orchestrator — full visibility needed |
-| **hephaestus** | spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development | Deep autonomous executor — full discipline stack |
-| **prometheus** | interview-me, spec-driven-development | Strategic planner — question-quality + spec discipline |
+| **sisyphus** | (all 19) | Main orchestrator — full visibility needed |
+| **hephaestus** | brainstorming, spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development | Deep autonomous executor — full discipline stack |
+| **prometheus** | brainstorming, spec-driven-development | Strategic planner — question-quality + spec discipline(`brainstorming` 已吸收原 `interview-me` 的一问一答规则) |
 | **atlas** | using-meisijiya-skills, incremental-implementation | Todo orchestrator — meta + slice guidance |
 | **oracle** | source-driven-development, debugging-and-error-recovery, api-and-interface-design | Read-only consultant — verification + interface design |
 | **librarian** | source-driven-development | Docs/OSS search — needs verification |
 | **explore** | (none) | Codebase grep — already fast, no skill needed |
 | **multimodal-looker** | (none) | Vision — no meisijiya-skill wrapper needed |
-| **metis** | spec-driven-development, agent-project-structure | Gap analyzer — spec + structure context |
+| **metis** | spec-driven-development | Gap analyzer — spec context only |
 | **momus** | (none) | Plan reviewer — direct-use agent |
 | **sisyphus-junior** | incremental-implementation, test-driven-development | Focused executor — slice + TDD |
 
@@ -85,7 +85,7 @@ Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-m
       "skills": []
     },
     "metis": {
-      "skills": ["spec-driven-development", "agent-project-structure"]
+      "skills": ["spec-driven-development"]
     },
     "momus": {
       "skills": []
@@ -111,7 +111,7 @@ Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-m
 After applying:
 
 1. Restart omo session.
-2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 18.
+2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 19.
 3. Dispatch a task to `hephaestus` and list its skills — should see only the 5 recommended.
 4. Spot-check 2-3 other agents.
 

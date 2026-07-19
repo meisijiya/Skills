@@ -1,6 +1,6 @@
 ---
 name: code-simplification
-description: "Reduces code complexity while preserving exact behavior. Use when code works but is harder to read or maintain than it should be, when adding a feature requires touching too many places, or when the diff to understand a module exceeds ~100 lines."
+description: "Backward-compat alias. For cleanup passes, prefer OMO built-in `refactor` (auto-routes to /simplify), `ponytail-review` (over-engineering hunt), and `remove-ai-slops` (AI-generated smell cleanup). This skill is preserved only so existing installs find a routing target with a Chesterton's Fence reminder."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 
@@ -8,117 +8,79 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 ## Overview
 
-行为不变的前提下削减复杂度。不是优化性能,不是清理 AI 痕迹(那是 `remove-ai-slops`,omo 内置),不是加测试覆盖。
+**ALIAS**:行为不变前提下削减复杂度的"6 techniques + Chesterton's Fence"方法论,已经被 OMO 内置 skill 覆盖:
 
-Complexity 的两种形态:
-- **Essential**:业务规则本身的复杂度(无法削减,只能命名)
-- **Accidental**:实现选择引入的复杂度(可以削减)
+| 任务 | 改用 OMO 内置 | 触发方式 |
+|---|---|---|
+| 一般重构(repeated logic / 抽象 / 命名) | `refactor` | `/refactor` 或 `code-simplification` 的 description match 时改调用此 skill |
+| 过度工程化狩猎(YAGNI / 不必要的接口 / 工厂) | `ponytail-review` | `/ponytail-review` |
+| AI 生成代码味(structural duplication / 长 if-elif / 占位) | `remove-ai-slops` | `/remove-ai-slops` |
+| 只有 Chesterton's Fence 一句话提醒 | **本 skill 保留此条** | 见 Process § 1 |
 
-这个 skill 只削减 accidental complexity。Chesterton's Fence 保护 essential complexity。
+**新流程请直接调用 OMO 内置 skill。** 本 skill 仅作向后兼容入口(其唯一独立价值是 Chesterton's Fence 一句提醒)。
 
 ## When to Use
 
 **Use when:**
-- 改一处需要 touch 5+ 个文件
-- 理解一个函数需要读 100+ 行
-- 同一个概念有 3+ 种命名
-- 重构时发现"A → B"中间有 5 个不必要的间接层
-- Code review 反复出现 "为什么这样写?"
+- 项目仍引用 `code-simplification` 名称(旧配置 / 旧 docs)
+- 你需要 Chesterton's Fence 提醒:**改代码前先搞明白它为什么存在** — 没搞清楚前别删
 
 **NOT for:**
-- Performance 优化(用 performance-optimization)
-- AI slop 清理(omo 的 remove-ai-slills skill)
-- 重写整个模块(spec-driven-development 流程)
-- 改动 behavior 的"简化"(那是新功能)
+- 真做 simplification:用 OMO `refactor` / `ponytail-review` / `remove-ai-slops`
+- AI slop 清扫:OMO `remove-ai-slops`(不要在本 skill 里手撸 grep 占位)
 
 ## Process
 
-### 1. Identify the target
+### 1. Chesterton's Fence (本 skill 唯一保留的硬规则)
 
-What's the specific module/function/class to simplify? Don't try to simplify everything at once.
+> **删任何代码前,先回答:它为什么存在?**
 
-### 2. Verify Chesterton's Fence
-
-Before removing anything, ask: **"Why was this added?"** If you can't answer, don't remove it. Use git blame, PR history, or ask the original author.
-
-Removing code you don't understand is the #1 simplification anti-pattern.
-
-### 3. Establish behavior baseline
-
-Run the existing test suite. **All tests must pass** before simplifying. If they don't, fix that first.
+回答不出来(没 blame、没 PR history、找不到原作者)→ **不要删**。
 
 ```bash
-npm test  # exit 0 baseline
+git blame -L <start>,<end> path/to/file.ts
+git log --all --oneline -- path/to/file.ts
 ```
 
-### 4. Apply simplification techniques (in order)
+如果这俩都不够,去问原作者(在 PR / chat / 公司 Slack)。**删一行能藏 5 层逻辑**,第 1 个被合并的 PR 不会感谢你。
 
-1. **Rename**: best names > good comments. If you need a comment to explain a name, the name is wrong.
-2. **Extract**: pull repeated logic into a named function. Don't extract single-use code.
-3. **Inline**: remove trivial wrappers that obscure the actual logic.
-4. **Remove dead code**: unused exports, unreachable branches, commented-out blocks.
-5. **Flatten nesting**: early returns > nested if/else.
-6. **Co-locate**: related code lives together, not in "utils" dumping ground.
+### 2. 其余步骤(高阶流程)— 改用 OMO 内置 skill
 
-Stop after each change. Re-run tests.
+| 你想做 | skill |
+|---|---|
+| 一般重构 | `refactor` |
+| 找过度工程 | `ponytail-review` |
+| 清理 AI slop | `remove-ai-slops` |
+| 缩窄本 Skill 重复内容 | (无 — 别再加) |
 
-### 5. Verify behavior unchanged
-
-```bash
-npm test  # exit 0 — same tests, same pass
-```
-
-If tests still pass, behavior is preserved. If not, you changed behavior — revert.
-
-### 6. Diff review
-
-```bash
-git diff --stat
-```
-
-**Net lines should be negative or near-zero.** If you added more lines than you removed, you didn't simplify — you rewrote.
+不要在本 skill 里复制 6 techniques 完整流程 — OMO 已有。
 
 ## Common Rationalizations
 
 | Excuse | Reality |
 |---|---|
-| "这层抽象以后会用到" | YAGNI。删,以后再加比留着的成本低。 |
-| "原作者可能有意为之" | 那就 git blame 问清楚,不要猜。 |
-| "简化会破坏现有功能" | 简化 ≠ 改 behavior。测试过就是没破。 |
-| "代码可以工作就别动" | "工作"是最低标准。"读得懂"才是合格的。 |
-| "这一行太巧妙了" | 巧妙 ≠ 简洁。Clever 是要 decode 的,simple 是直接读的。 |
-| "我只删了一行" | 一行能藏 5 层逻辑。每次简化只看 diff 大小,不看影响深度。 |
+| "装了 code-simplification,直接用它就行" | 优先 OMO `refactor` / `ponytail-review` / `remove-ai-slops`,本 skill 只剩 Chesterton's Fence 一条 |
+| "把 OMO 的能力再写一遍保险一点" | 重复实现 = 双份维护负担,且你会得到 OMO 已经拒绝的错误版本 |
+| "Chesterton's Fence 太保守了" | 数据:删一行无 git blame 引发的回归 bug 数 >> 因为"谨慎过度"延后的 PR 数 |
 
 ## Red Flags
 
-- 删了 Chesterton's Fence(没搞清楚为啥加的就删)
-- 测试没跑过就 commit
-- 简化后 net diff 为正(加了更多)
-- 改了 behavior 但没加测试
-- 简化了别人刚写的代码(< 1 周)—— 等沉淀再动
-- 在 master / main 分支直接简化(应该 PR)
-- 删了看起来"没用"的代码但没 git blame
+- 在本 skill 里跑 `grep -E "TODO|FIXME"` 当 cleanup(那是 AI-slop 识别,走 `remove-ai-slops`)
+- "我看一眼就知道这行没用" → 走 Chesterton's Fence:**用 git blame 印证**
+- 改完没跑全测就 commit
+- 一次删超过 50 行却没 blame 查询记录(见 Chesterton's Fence)
 
 ## Verification
 
-Before declaring done, confirm:
-- [ ] Chesterton's Fence verified for every removed line (blame / history checked)
-- [ ] Test suite passes before AND after
-- [ ] Net diff ≤ 0 (removed ≥ added)
-- [ ] No behavior change visible to test suite
-- [ ] No unrelated formatting changes in diff
-- [ ] Diff reviewed and is "obviously correct" (no clever bits)
+Before relying on this skill:
+- [ ] 我已确认本次 cleanup 改用 OMO `refactor` / `ponytail-review` / `remove-ai-slops` 之一
+- [ ] 唯一保留:Chesterton's Fence 已查 blame / history
 
 ## pwf Integration
 
-Maps to `task_plan.md` **Phase 6: Cleanup**. Each simplification is its own row:
+被 OMO 内置 `refactor` / `ponytail-review` / `remove-ai-slops` 取代。Phase 6 Cleanup 仍可在 `task_plan.md` 留行,但实现细节交给 OMO。
 
-```markdown
-### Phase 6: Simplify
-| Target | Diff | Tests | Behavior | Status |
-|--------|------|-------|----------|--------|
-| UserService.create | -15/+3 | ✓ | unchanged | complete |
-| (next target) | | | | pending |
-```
+## Related Skills
 
-See [pwf-integration.md](../../pwf-integration.md).
+- **OMO canonical**:`refactor` / `ponytail-review` / `remove-ai-slops`
+- 对应 `task_plan.md` Phase 6: Cleanup

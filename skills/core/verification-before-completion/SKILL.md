@@ -14,6 +14,11 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 
 **Violating the letter of this rule is violating the spirit of this rule.**
 
+> **二段验证(必备)**:
+> - **本会话证据**(test 命令 / lint / build)只是第一段
+> - 真正宣布 "done" 前还必须有 **OMO `review-work` 的新上下文审计**(第二段)
+> - UI 项目追加 **OMO `visual-qa` + 用户亲手运行** 的硬要求(把"人工品味 Taste"纳入完成门)
+
 ## When to Use
 
 **Use when — ALWAYS:**
@@ -29,21 +34,37 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 
 ## Process
 
-### The Gate Function
+### The Gate Function (two-stage)
 
 ```
 BEFORE any completion claim:
 
-1. IDENTIFY: What command proves this claim?
-2. RUN: Execute the FULL command (fresh, complete)
-3. READ: Full output, check exit code, count failures
-4. VERIFY: Does the output actually confirm the claim?
-   - If NO → state actual status with evidence ("X failed at step Y")
-   - If YES → state claim WITH evidence ("Tests pass: 34/34, exit 0")
-5. ONLY THEN: Make the claim
+  Stage 1 — in-session evidence:
+    1. IDENTIFY: What command proves this claim?
+    2. RUN: Execute the FULL command (fresh, complete)
+    3. READ: Full output, check exit code, count failures
+    4. VERIFY: Does the output actually confirm the claim?
+       - If NO → state actual status with evidence ("X failed at step Y")
+       - If YES → state first-stage PASS WITH evidence ("X: 34/34, exit 0")
 
-Skip any step = lying, not verifying.
+  Stage 2 — fresh-context independent audit (mandatory before "done"):
+    5. INVOKE OMO `review-work` skill (new-context, parallel sub-agents)
+       - Pass: full task_plan.md + branch diff (e.g. `git diff main...HEAD`)
+       - Wait for 5 parallel sub-agent reports (goal / constraint / code quality / security / context mining)
+    6. TRIAGE reports by severity (not all 🔴 are equal):
+       - minor / smell                   → convert to new Blocking slice (Step 6a)
+       - major / design issue            → convert to new Blocking slice (Step 6a)
+       - critical / data-loss / security / correctness regression
+                                          → **trigger [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) § 10 Rollback protocol**
+                                            (NOT a new Blocking slice — the implementation is wrong, not missing)
+    7. UI changes: ALSO invoke OMO `visual-qa` (Playwright screenshots + pixel diff)
+       AND ask the human to actually run the app and bless the Taste ("yes it feels right" / "no, change X")
+    8. ONLY THEN: Make the completion claim
+
+  Skip stage 2 = "tests pass" without independent audit. Not done.
 ```
+
+> **Why Stage 2 is mandatory (Matt Pocock)**: a sub-agent in the same session inherits your rationalizations. A fresh-context agent with empty `messages` doesn't. That's the whole point of `review-work`.
 
 ### Common Failures → Required Evidence
 
@@ -55,8 +76,10 @@ Skip any step = lying, not verifying.
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified (write → fails → fix → passes) | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
-| Requirements met | Line-by-line checklist against plan | Tests passing, "looks good" |
+| Requirements met | Line-by-line checklist against `task_plan.md` Spec | Tests passing, "looks good" |
 | Skill loaded | `ls ~/.agents/skills/<name>/SKILL.md` exists | Description matches |
+| **Code reviewed** | OMO `review-work` 5-并行子代理报告已收 + triage 完成 | 自我 declare "code looks good" |
+| **UI passes taste** | OMO `visual-qa` 报告 + 用户亲手确认 OK | "I built the UI, looks fine" |
 
 ### Per-context Verification Commands
 
@@ -90,7 +113,9 @@ ls ~/.agents/skills/<name>/SKILL.md
 - Relying on partial verification ("the file looks right")
 - Thinking "just this once"
 - Tired and wanting to wrap up the work
-- **ANY wording implying success without having run fresh verification this turn**
+- **Any wording implying success without having run fresh verification this turn**
+- 完成声明但没跑 OMO `review-work`(Stage 2 缺失)
+- UI 项目完成声明但没让用户亲手运行一次
 
 ## Common Rationalizations
 
@@ -105,6 +130,8 @@ ls ~/.agents/skills/<name>/SKILL.md
 | "Partial check is enough" | Partial proves nothing |
 | "Different words so rule doesn't apply" | Spirit over letter |
 | "The skill is too simple to need verification" | Simple things become complex. Run it. |
+| "我本会话看到 diff 了,不必再独立审查" | 你在自己上下文里 — 这是反 rationalization 的盲区。OMO `review-work` 用新上下文跑。 |
+| "UI 在我心里跑通了,不用 visual-qa" | 心里跑通的 UI ≠ 用户手感对的 UI。 |
 
 ## Anti-Patterns
 
@@ -112,7 +139,9 @@ ls ~/.agents/skills/<name>/SKILL.md
 - ❌ "Tests should pass now." (no output)
 - ❌ "Looks good." (no evidence)
 - ❌ "Done!" (no specific evidence attached)
-- ✅ "Tests pass: 34/34, exit 0. Build clean: tsc + vite build exit 0."
+- ❌ "All tests pass, ship it." (missing Stage 2 OMO `review-work`)
+- ❌ "UI built, looks fine to me." (missing user Taste OK)
+- ✅ "Tests pass: 34/34, exit 0. OMO review-work: 5 reports, 0 🔴. User confirmed Taste OK. Build clean: tsc + vite build exit 0."
 
 ## Why This Matters
 
@@ -121,6 +150,7 @@ From real failure memories:
 - Undefined functions shipped — would crash
 - Missing requirements shipped — incomplete features
 - Time wasted on false completion → redirect → rework
+- **Without Stage 2, the same self-rationalizations are re-asserted by the same model in the same session** — this is the bug TDD was invented to prevent
 - Violates: "Honesty is a core value. If you lie, you'll be replaced."
 
 ## Verification
@@ -129,11 +159,14 @@ Before any completion claim, confirm:
 - [ ] I ran the verification command **in this turn** (not a previous run)
 - [ ] I read the full output (not just the exit code)
 - [ ] The output **confirms** the specific claim I'm about to make
-- [ ] The claim is phrased with the evidence ("X: N/N, exit 0" — not "X looks good")
+- [ ] Stage 2: 🔴 items classified by severity — minor/major → new Blocking slice; **critical → § 10 Rollback protocol** triggered with `[rollback]` log + slice `rolled_back`
+- [ ] The claim is phrased with the evidence ("X: N/N, exit 0; review-work: 5/5 🟢; user: OK" — not "X looks good")
 - [ ] If verification failed, I state actual status with evidence instead
 
 ## Related Skills
 
 - Required by every workflow that produces output: [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md), [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md)
 - Complementary: [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — when verification reveals failure
+- Post-impl review: **OMO 内置 `review-work`** — fresh-context 5-parallel-sub-agent audit
+- UI taste: **OMO `visual-qa`** + 用户亲手运行
 - Cross-references meta: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — this discipline applies everywhere

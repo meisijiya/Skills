@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "Use when starting any non-trivial feature, component, or behavior change, or when the user proposes a plan whose intent is unclear. HARD-GATE: do NOT write code, scaffold projects, or invoke implementation skills before presenting a design and getting user approval. Applies even to projects that feel 'simple'."
+description: "HARD-GATE pre-design exploration: do NOT write code, scaffold projects, or invoke implementation skills before presenting a design and getting user approval. Applies even to projects that feel 'simple'. Use when starting any non-trivial feature, component, or behavior change, or when the user proposes a plan whose intent is unclear."
 allowed-tools: "Read Bash Glob Grep"
 ---
 
@@ -12,7 +12,7 @@ Every project — even "trivial" ones — goes through this. The design can be s
 
 **Core principle:** HARD-GATE. No implementation before design + user approval.
 
-**This skill precedes [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md).** Brainstorm produces the design; spec-driven-development writes the formal spec; then implementation.
+**This skill precedes [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md).** Brainstorm produces the design and writes it into `task_plan.md` (Phase 0 → Phase 1, no separate design-doc file); spec-driven-development then refines and attests the same Spec. **One approval gate, not two.**
 
 ## When to Use
 
@@ -27,6 +27,7 @@ Every project — even "trivial" ones — goes through this. The design can be s
 - User explicitly said "no design, just do it" (rare; respect this)
 - Pure trivia Q&A with no implementation implied
 - Already inside an active brainstorming session for this task
+- Single-line typo / rename / formatting (skip this skill)
 
 ## Process
 
@@ -40,14 +41,17 @@ Before asking detailed questions, check what's already in flight:
 
 If the request describes **multiple independent subsystems** ("build a platform with chat + file storage + billing + analytics"), flag this immediately. Help decompose into sub-projects first; then brainstorm each one through the normal flow. Each sub-project gets its own spec → plan → implementation cycle.
 
-### 2. Ask clarifying questions
+### 2. Ask clarifying questions — one at a time
 
-**One question at a time.** Never batch-ask 5 questions.
+Before asking, form a hypothesis: "I think the user actually wants X, right?" Then:
 
-- Prefer **multiple choice** when possible (easier to answer than open-ended)
-- Focus on: purpose, constraints, success criteria, edge cases, non-obvious decisions
-- If a topic needs more exploration, break into multiple questions
-- Don't ask questions whose answers you can find by reading the codebase
+- **One question at a time.** Never batch-ask 5 questions.
+- Use the AskUserQuestion tool (or equivalent) with **2-4 mutually exclusive options** (no "other" trap, no open-ended "what do you want?").
+- Each option must include a recommended answer (user can reply "agree" to advance).
+- Focus on: purpose, constraints, success criteria, edge cases, non-obvious decisions.
+- **Facts self-check, decisions ask the user.** If you can read code or grep for it, don't ask.
+- 3-7 questions is typical. > 10 questions = scope is wrong; switch to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) with TODOs.
+- When you reach ~95% confidence, summarize in 2-3 sentences and ask "我理解的对吗?" — if yes, proceed.
 
 ### 3. Propose 2-3 approaches
 
@@ -65,19 +69,32 @@ Cover: architecture, components, data flow, error handling, testing strategy.
 
 **Get user approval after each section**, not just at the end. Don't dump the entire design and ask "ok?" — section-by-section prevents the "I've read 200 lines, just say yes" pattern.
 
-### 5. Write design doc
+### 5. Write design into `task_plan.md` (no separate file)
 
-Save validated design to:
-- `.planning/<id>/spec.md` (if pwf active)
-- `task_plan.md` (legacy pwf mode)
-- `docs/specs/YYYY-MM-DD-<topic>-design.md` (user preference override)
+Append the validated design as **Phase 0: Design** of `task_plan.md`:
 
-Commit the design document.
+```markdown
+## Phase 0: Design
 
-### 6. Spec self-review
+**Goal:** <一句话目标>
+**Approach:** <the recommended approach from Step 3>
+**Architecture:** <key components + flow>
+**Components & data flow:**
+- <A> → <B> → <C>
+**Error handling:** <strategy>
+**Testing strategy:** <unit / integration / e2e split>
+**Open questions:** <anything still ambiguous — defer to Phase 1>
 
-After writing the spec, look at it with fresh eyes:
+**Status:** design_approved_pending_spec
+```
 
+**Why no separate file?** `task_plan.md` is the durable attestation source (pwf `attest-plan.sh` hashes it). Splitting design into a sibling file breaks the attestation chain. Phase 1 (Spec) refines the same content; one approval, one artifact.
+
+> **Do NOT auto-commit** the design. Pwf's attestation is the durable record; commits are governed by the project's git policy (often only on slice-level commits per [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)).
+
+### 6. Design self-review
+
+After writing, look with fresh eyes:
 - **Placeholder scan**: any "TBD", "TODO", incomplete sections, vague requirements? Fix inline.
 - **Internal consistency**: do sections contradict each other? Does the architecture match the feature descriptions?
 - **Scope check**: focused enough for a single implementation plan, or does it need decomposition?
@@ -85,20 +102,20 @@ After writing the spec, look at it with fresh eyes:
 
 Fix any issues inline. No need to re-review.
 
-### 7. User reviews the written spec
+### 7. Hand off to spec-driven-development
+
+Tell the user:
 
 ```
-Spec written and committed to <path>. Please review it and let me know
-if you want to make any changes before we start writing the implementation plan.
+Design written into task_plan.md Phase 0. Next: invoke
+spec-driven-development to refine into the formal PRD/Spec
+(Phase 1), get your final approval, then run attest-plan.sh.
+No separate design-doc file needed.
 ```
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once approved.
+Wait for the user's confirmation, then invoke [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md).
 
-### 8. Transition to implementation
-
-Invoke [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) to create the implementation plan.
-
-**DO NOT** invoke `incremental-implementation`, `test-driven-development`, or any other implementation skill directly. `spec-driven-development` is the next step.
+**DO NOT** invoke `incremental-implementation`, `test-driven-development`, or any other implementation skill directly.
 
 ## Common Rationalizations
 
@@ -110,6 +127,7 @@ Invoke [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKIL
 | "I'll iterate the design during implementation" | Code written without spec = rework when user reveals they meant something different. |
 | "The design will slow me down" | Writing code that gets thrown away is slower than a 2-minute design conversation. |
 | "I'll skip the doc, just describe verbally" | Verbal design evaporates. Written spec is what you implement against. |
+| "I'll ask 5 questions at once to save time" | The user answers the easiest and skips the consequential. One at a time. |
 
 ## Red Flags
 
@@ -117,23 +135,31 @@ Invoke [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKIL
 - User asks "how should we do X" and you start coding instead of brainstorming
 - Skipping clarifying questions because "the answer is obvious"
 - Multiple parallel implementation tasks without decomposing first
-- "I'll just fix this small thing" without checking the design doc
+- Writing the design into a separate file (`docs/specs/...`, `.planning/<id>/spec.md`) instead of `task_plan.md` — breaks attestation
 - Producing a long answer without first checking skill catalog
+- Asking 2+ questions in one round (use AskUserQuestion once with mutually exclusive options)
+- Auto-committing the design doc (commits are governed by slice-level policy)
 
 ## Verification
 
 Before invoking any implementation skill, confirm:
 - [ ] I explored project context (commits, plans, related files)
-- [ ] I asked clarifying questions one at a time until requirements are clear
+- [ ] I asked clarifying questions one at a time until requirements are clear (or zero questions if already clear)
 - [ ] I proposed 2-3 approaches with trade-offs + my recommendation
 - [ ] User approved the approach
-- [ ] Design was written to a doc file (not just verbal)
-- [ ] Spec self-review complete (no placeholders, no contradictions)
-- [ ] User approved the written spec
+- [ ] Design written into `task_plan.md` Phase 0 (not a separate file)
+- [ ] Design self-review complete (no placeholders, no contradictions)
+- [ ] User approved the written design
 - [ ] Next step is [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) (not implementation skill directly)
 
 ## pwf Integration
 
-Corresponds to **Phase 0** (pre-Intake): no `task_plan.md` exists yet. Output: spec document. Transition to Phase 1 (Intake via [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md)) after spec approval.
+Corresponds to **Phase 0: Design** of `task_plan.md`. Output: design section in `task_plan.md`. Transition to Phase 1 (Spec via [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md)) after design approval.
 
 See [pwf-integration.md](../../pwf-integration.md) for full phase mapping.
+
+## Related Skills
+
+- Successor: [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — refines Design into formal Spec, runs attestation
+- Backward-compat alias: [`interview-me`](~/.agents/skills/interview-me/SKILL.md) — one-question-at-a-time discipline moved here
+- Cross-references meta: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md)

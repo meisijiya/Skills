@@ -5,7 +5,7 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 ## 与上游的差异
 
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
-- **omo 深度集成**(v0.2.0+):fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
+- **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **pwf 硬遵守加强**:装 OpenCode 插件(`pwf-enforcer` 提供模板)把 pwf 的软遵守升级为硬触发 hook。
 - **教学化门控**:build 之前用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 把项目状态生成 HTML slide deck,让用户可视化审视。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
@@ -18,38 +18,38 @@ meisijiya-skills/
 ├── README.md                  ← 本文件
 ├── AGENTS.md                  ← 仓库自描述 + skill 元信息 source(inject 脚本从这里读)
 ├── skill-anatomy.md           ← SKILL.md 写作规范
-├── pwf-integration.md         ← 跟 pwf 协作的约定
+├── pwf-integration.md         ← 跟 pwf 协作的约定(8+4+3+2 phase 映射)
 ├── docs/
-│   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南
+│   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(19 SKILL.md 索引)
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
-│   ├── core/                 ← 必装集(9 个)
-│   │   ├── README.md          ← 9 个 skill 详情 + 必装理由
+│   ├── core/                 ← 必装集(8 个)
+│   │   ├── README.md          ← 8 个 skill 详情 + 必装理由
 │   │   ├── using-meisijiya-skills/
-│   │   ├── brainstorming/                  ← v0.4.0(adapted from superpowers)
-│   │   ├── spec-driven-development/
-│   │   ├── incremental-implementation/
+│   │   ├── brainstorming/                  ← HARD-GATE pre-design exploration(adapted from superpowers)
+│   │   ├── spec-driven-development/        ← spec-before-code,lock PRD to task_plan.md
+│   │   ├── incremental-implementation/    ← vertical slices with dep/HITL-AFK metadata,bridge to OMO review-work
 │   │   ├── test-driven-development/
-│   │   ├── verification-before-completion/  ← v0.4.0(adapted from superpowers)
+│   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
 │   │   ├── debugging-and-error-recovery/
-│   │   ├── source-driven-development/
-│   │   └── writing-skills/                 ← v0.4.0(adapted from superpowers)
-│   └── extra/                ← 选装集(10 个,按需)
-│       ├── README.md          ← 10 个 skill + "怎么选" 决策表
+│   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
+│   └── extra/                ← 选装集(11 个,按需装)
+│       ├── README.md          ← 11 个 skill + "怎么选" 决策表
+│       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
 │       ├── pwf-enforcer/
-│       ├── build-gate-visual-review/
+│       ├── build-gate-visual-review/        ← design-alignment gate (HTML slide deck via html-ppt-skill)
 │       ├── designer-handoff/
-│       ├── interview-me/
-│       ├── code-simplification/
+│       ├── interview-me/                    ← backward-compat alias (canonical: brainstorming)
+│       ├── code-simplification/             ← backward-compat alias (canonical: OMO refactor series)
 │       ├── api-and-interface-design/
-│       ├── security-and-hardening/
-│       ├── performance-optimization/
+│       ├── security-and-hardening/          ← trust-boundary hardening;depth audit via OMO security-research
+│       ├── performance-optimization/        ← backend profile + measure-first
 │       ├── observability-and-instrumentation/
-│       └── documentation-and-adrs/
+│       └── documentation-and-adrs/          ← architectural ADRs only
 ├── scripts/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查
 │   ├── install.sh                 ← 装到 .opencode/skills/(项目/global,高级)
-│   └── inject-agents-md.sh        ← v0.2.1 新增:把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
+│   └── inject-agents-md.sh        ← 把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
@@ -63,7 +63,7 @@ meisijiya-skills/
 `npx skills add <repo>` 自动装到 `~/.agents/skills/`(canonical skills 路径,OpenCode 作为 universal agent 直接读)。与 pwf / html-ppt-skill / ui-ux-pro-max 等其他 skills CLI 装的 skill 在同一位置,便于统一管理。
 
 ```bash
-# 装必装集(6 个 core/)
+# 装必装集(8 个 core/)
 npx skills add <this-repo> --from skills/core
 
 # 装某个选装
@@ -88,8 +88,8 @@ vercel-labs/skills CLI 自动处理 dedup / 多 agent harness 兼容 / 符号链
 
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
-- **必装集**(9 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
-- **选装集**(10 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+- **必装集**(8 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
+- **选装集**(11 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
 
@@ -194,10 +194,29 @@ MIT
 
 ## 当前状态
 
-最近 tag: **v0.4.0**(19 个 SKILL.md / 19 个 eval case;9 `core/` + 10 `extra/`)
+最近 tag: **v0.5.2**(19 个 SKILL.md / 19 个 eval case;**8 `core/` + 11 `extra/`**)
 
-v0.4.0 内容:
-- vendor 3 个 superpowers skill 到 `.core/`: `brainstorming`(HARD-GATE pre-design)、`verification-before-completion`(Iron Law)、`writing-skills`(TDD-for-docs + 提取重复工作流)
+### v0.5.2 — 全量 narrative hygiene
+
+- 19 个 `SKILL.md` 全部清空历史叙事(原本 / 以前 / previously / v0.X 之类的标记等)
+- 详细语义保留,但所有"过去 vs 现在"的对比描述改成纯净的 "When X, do Y" 指令式
+- 仅 `CHANGELOG.md` / `git log` / `git tag` / 本 README 末段保留版本叙事(per [`docs/agents-md-guide.md`](./docs/agents-md-guide.md) 第 86-95 行的四载规则)
+- `validate-skills.sh`: 19 / 19 OK;`check-marketplace.sh`: OK 19 skills in sync;独立 Oracle 审查确认无叙事残留
+
+### v0.5.1 — 中途需求变更路由
+
+- 18 项审计问题闭合(`brainstorming` 吸收 `interview-me`;`spec-driven-development` 锁定 PRD 唯一落点;`incremental-implementation` 增加 Slice 依赖 / HITL-AFK 元数据;`verification-before-completion` 二段验证)
+
+### v0.5.0 — Skill 系统重构 + OMO 桥接
+
+- 文档漂移修复(`pwf-integration.md` 计数、已删除 skill 引用、构建闸门时序冲突全部对齐)
+- 核心流程去重:`brainstorming` 吸收 `interview-me` 的一问一答规则;`spec-driven-development` 锁定 PRD 唯一落点;`incremental-implementation` 桥接 OMO `review-work` 新上下文审查;`verification-before-completion` 桥接 OMO `visual-qa`
+- 选装瘦化:`interview-me` / `code-simplification` 改为 OMO 内置薄别名;`documentation-and-adrs` 聚焦重大架构 ADR;`build-gate-visual-review` 明确为设计对齐闸门;`security-and-hardening` 路由至 OMO `security-research`;`performance-optimization` 卸下前端 CWV
+- `writing-skills` 迁出 `core/`(meta-only,按需装):core 9 → 8,extra 10 → 11
+
+### v0.4.0 — Superpowers 集成 + AGENTS.md 增强
+
+- vendor 3 个 superpowers skill 到 `.core/`: `brainstorming`、`verification-before-completion`、`writing-skills`
 - `using-meisijiya-skills` 加 EXTREMELY-IMPORTANT 框架 + Skill Priority 链
 - `AGENTS.md` Section A 加 Discipline layer + Skill chains 子段;Section C 加项目级 AGENTS.md skill 引用规范(含失败检测 grep)
 

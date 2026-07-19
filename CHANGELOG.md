@@ -4,6 +4,71 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (v0.5.2 — rollback protocol + review-work critical-severity routing)
+
+Closes the audit gap on "what do we record when code must be rolled back?" — v0.5.1 had requirement-change routing but no symmetric rollback routing. v0.5.2 adds it without inventing a new skill.
+
+**Files modified (2):**
+
+- `skills/core/incremental-implementation/SKILL.md` — new **§ 10 Rollback protocol**:
+  - **§ 10.1 触发条件**(5 路:review-work critical / 用户主动 / fix-the-fix / spec-retro / pre-merge cherry-pick 错位)
+  - **§ 10.2 协议**(7 步:halt → 选恢复方式 → 标 slice → log → critical 写 postmortem → amend spec → 验证)
+  - **§ 10.3 slice 状态机扩展**:新增 6 态 `rolled_back`,必填 `rolled_back_at` / `rolled_back_reason`
+  - **§ 10.4 `[rollback]` 日志模板**(7 字段:trigger / severity / recovered / reason / affected / action + optional `[postmortem]` `[test-gap]`)
+  - **§ 10.5 Common Rationalizations** + **§ 10.6 Red Flags**
+- `skills/core/verification-before-completion/SKILL.md` — Stage 2 step 6 added severity triage: minor/major → new Blocking slice; **critical → trigger § 10 Rollback protocol** (NOT a new slice — implementation is wrong, not missing). Verification checklist updated.
+
+**No historical narrative in skill content:** patch as-written uses pure "when X, do Y" prescription. The v0.5.2 version tag appears only as a section ID; the body never compares against a previous state. Aligns with `docs/agents-md-guide.md` rule #2 ("现状描述,不做历史对比").
+
+**Verified:**
+- `validate-skills.sh`: 19 / 19 OK
+- `check-marketplace.sh`: OK marketplace.json in sync (19 skills)
+- No deletion, no new file. SKILL.md content added: ~80 lines (incremental-implementation § 10) + ~10 lines (verification-before-completion severity triage). Net "skill内容" 增量集中在 § 10。
+
+### Added (v0.5.1 — mid-build requirement change routing)
+
+Closes the gap from the v0.5.0 audit: when users change requirements mid-build (after Slice work has started), the system previously had no protocol — agents either pretended the change didn't happen (Spec/code drift) or started a fresh spec cycle. v0.5.1 introduces a 5-tier change classifier + amend + re-attest + slice status state machine.
+
+**Files modified (2):**
+- `skills/core/incremental-implementation/SKILL.md` — slice metadata table gains `status` enum (`pending` / `in_progress` / `complete` / **`deprecated`** / **`superseded`**) + `superseded_by` field; new **§ 9 Mid-build requirement changes** (5-row classification table + 8-step Process + § 9.3 status state machine + Red Flags + Verification additions)
+- `skills/core/spec-driven-development/SKILL.md` — new **Step 5.5 Amend Spec mid-build** (when to call, 5-step Process, re-attest, log amendment, "no shortcuts" list) + Step 6 note on re-approval scope + Verification checklist addition
+
+**Why this matters (Matt Pocock-aligned):** the previous design assumed the Spec is locked after Phase 1 approval. Real engineering never works that way — requirements change mid-build, every project knows it. Without an explicit change protocol, agents ship Spec/code drift and lose the audit trail. v0.5.1 makes the change-classifier explicit (5 rows map to 5 routes) so the model has a decision tree instead of improvising.
+
+**No new skill**: the amend workflow lives in `spec-driven-development` (the contract) + `incremental-implementation` (the executor). OMO `atlas` / `team_task` already consume slice metadata; the `status` enum extension + `superseded_by` field are zero-cost additions from their perspective.
+
+**Verified:**
+- `validate-skills.sh`: 19 / 19 OK
+- `check-marketplace.sh`: OK marketplace.json in sync (19 skills)
+
+### Changed (v0.5.0 — skill system refactor + OMO bridge overhaul)
+
+The v0.4.x skill system had drifted from actual OMO capabilities in three measurable ways: (1) duplicate approval gates, (2) duplicate cleanup pathways now offered by OMO built-ins, and (3) post-implementation review never invoked despite OMO shipping the right primitive. v0.5.0 closes these.
+
+**Architecture changes (per Wave):**
+
+| Wave | Scope | Why |
+|---|---|---|
+| 1 — Doc drift | `pwf-integration.md` count 16/17 → 19, removed dead `agent-project-structure`, fixed `build-gate-visual-review` timing conflict; `docs/omo-agent-skill-config.md` "18 → 19" + removed dead skill; `README.md` "6 core → 8 core" + Skills section numeric alignment | Inventory must match filesystem before any architectural claim |
+| 2 — Core workflow dedup | `brainstorming` absorbs the one-question-at-a-time rule (formerly in `interview-me`), single design artifact → `task_plan.md` Phase 0 (no separate commit); `spec-driven-development` locks PRD/Spec single landing page = `task_plan.md` Phase 1, honest Tier 3 disclosure; `incremental-implementation` slice metadata + slice metadata = `blockedBy / parallel / HITL\|AFK / owner / verify` + post-slice hand-off to **OMO `review-work`** + per-slice human visual QA + `verification-before-completion` **two-stage gate** (Stage 1 in-session + Stage 2 OMO new-context audit + UI then OMO `visual-qa` + user hand-bless) | Stop duplicating what OMO already does; bind end-to-end to OMO primitives |
+| 3 — Narrow / thin extras | `interview-me` → thin alias (canonical = `brainstorming`); `code-simplification` → thin alias (canonical = OMO `refactor` / `ponytail-review` / `remove-ai-slops`) + retains only Chesterton's Fence reminder; `documentation-and-adrs` narrowed to "irreversible + cross-time + cross-person" architectural decisions (not daily docs); `build-gate-visual-review` clarified as **design-alignment gate** (not human QA), reads from `task_plan.md` (not separate `spec.md`); `security-and-hardening` Step 6.5 explicitly routes to OMO `security-research` (v0.4.0 falsely claimed OMO had no security skill); `performance-optimization` drops frontend CWV (routed to OMO `frontend`) | Shrink + route, not duplicate |
+| 4 — Repo layout | `writing-skills` moved from `.core/` (9 → 8) to `.extra/` (10 → 11); `.claude-plugin/marketplace.json` synced; `AGENTS.md` Section A catalog auto-derived counts; in-README install example updated | Catalog consistency |
+| 5 — Independent review | Oracle sub-agent in a fresh session verified 17 audit items; 16 PASS, 3 PARTIAL (README numeric typo + omo-config stale refs + pwf-integration arithmetic) → all fixed before declaring done | Matt Pocock-style "isolated fresh-context review" prevents self-rationalization |
+
+**Files modified (20) / net lines (-779 / +662, -117 lines)**
+- 5 docs / configs (`README.md`, `AGENTS.md`, `pwf-integration.md`, `docs/omo-agent-skill-config.md`, `.claude-plugin/marketplace.json`)
+- 5 core SKILL.md (`brainstorming` +92 / `incremental-implementation` +118 / `source-driven-development` +39 / `spec-driven-development` +73 / `using-meisijiya-skills` +41 / `verification-before-completion` +69)
+- 1 core/README.md + 1 extra/README.md (catalog counts)
+- 6 extra SKILL.md (`build-gate-visual-review` +107 / `code-simplification` +120 narrowed / `documentation-and-adrs` +186 narrowed / `interview-me` +98 narrowed / `performance-optimization` +98 narrowed / `security-and-hardening` +48)
+- 1 file delete + 1 dir migrate (`writing-skills` core → extra)
+
+**No new skill added.** Net TODO reduction: 3 skills dropped to alias form, 2 sub-routines moved out to OMO built-ins, 1 phase shifted.
+
+**Verified:**
+- `validate-skills.sh`: 19 / 19 OK (2 warnings = intentional superpowers-style dispatcher thinness on `using-meisijiya-skills` + `pwf-enforcer`)
+- `check-marketplace.sh`: OK marketplace.json in sync (19 skills)
+- Independent fresh-context Oracle review: 17 / 17 PASS after 3 follow-up fixes
+
 ### Added (v0.4.0 — superpowers integration + AGENTS.md enhancement)
 
 **3 superpowers skills vendored to `.core/`:**

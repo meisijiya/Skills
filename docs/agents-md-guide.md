@@ -81,7 +81,7 @@ cross-cutting discipline, not opt-in utilities.
 | 写数字 + 手动同步 | 小型个人 repo,接受每次改 skill 时手动改 inject block |
 | 注入时脚本自动派生 | inject 脚本 sed 替换源数字为 manifest 当前计数。源数字可随意;渲染总对(meisijiya-skills v0.4.2+ 用此法:纯 `grep -c`,无需 jq) |
 
-meisijiya-skills v0.4.2+ 用自动派生(`scripts/inject-agents-md.sh`)。源数字不重要,渲染永远反映当前 manifest。
+meisijiya-skills v0.4.2+ 用自动派生(`scripts/inject-agents-md.sh`)。**v0.5.0+ 仍沿用此机制** —— v0.5.0 做了 catalog refactor(`.core/` 9→8、`.extra/` 10→11、`writing-skills` 从 core 迁到 extra),但 inject 行为(Section A 内嵌 + 自动派生计数)未变;源数字不重要,渲染永远反映当前 manifest。若发现渲染后数字与目录对不上,跑 `scripts/check-agents-md-narrative.sh` 确认 block 仍在,然后 `bash scripts/inject-agents-md.sh --remove && bash scripts/inject-agents-md.sh` 强制重渲染。
 
 ## 历史叙事该写哪里
 

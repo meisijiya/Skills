@@ -12,6 +12,11 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 没有 spec 就动手 = 边写边猜 = 返工概率 100%。Spec 是省 debug 时间的工具,不是负担。
 
+> **职责边界**:
+> - **唯一落点**:PRD/Spec 写到 `task_plan.md` **Phase 1**。不允许独立 `spec.md` / `docs/specs/*.md` 文件(会破坏 pwf attestation 链)。
+> - **唯一审批门**:本 skill 是 `brainstorming` 之后的唯一一次"Spec 写完请用户确认"。`brainstorming` 已批准 Design,本 skill 只需批准最终 Spec。
+> - **诚实标注**:OpenCode 是 Tier 3,PreToolUse / Stop 不能硬阻断;PreCompact / 实验性 hook 才能注入上下文。
+
 ## When to Use
 
 **Use when:**
@@ -40,14 +45,16 @@ test -f task_plan.md && echo "pwf legacy" || \
 
 If not initialized AND the task is non-trivial, prompt the user to run `init-session.sh` before proceeding.
 
-### 2. Create Phase 1: Spec
+### 2. Read Phase 0: Design (from brainstorming)
 
-Append to `task_plan.md`:
+The [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) skill wrote Phase 0 into `task_plan.md`. Read it; don't re-derive. Your job is to **refine** the design into a verifiable Spec, not redo the conversation.
+
+### 3. Append Phase 1: Spec to `task_plan.md`
 
 ```markdown
 ## Phase 1: Spec
 
-**Goal:** <一句话目标>
+**Goal:** <一句话目标,继承 Phase 0>
 
 **Scope:**
 - In: <做 X / Y / Z>
@@ -64,7 +71,7 @@ Append to `task_plan.md`:
 - <lint 命令>: 退出 0
 
 **Test Strategy:**
-- Unit: <覆盖率目标>
+- Unit: <覆盖率目标 / 关键 seam>
 - Integration: <关键路径>
 - E2E: <用户场景>
 
@@ -75,29 +82,82 @@ Append to `task_plan.md`:
 **Status:** in_progress
 ```
 
-### 3. Write the spec
+Fill every section — don't leave "TBD". If you don't know something, that's a question for the user via [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) (one at a time), not an excuse to skip.
 
-Use the template above. Fill every section — don't leave "TBD". If you don't know something, that's a question for the user, not an excuse to skip.
-
-The spec goes in `task_plan.md` (NOT a separate file). This keeps the plan + spec colocated for attestation.
+The Spec lives in `task_plan.md` Phase 1 — Phase 0 (Design) above, Phase 2 (Research) below. **No separate spec file.**
 
 ### 4. Clarify ambiguity (if needed)
 
-If any section can't be filled confidently, load [`interview-me`](~/.agents/skills/interview-me/SKILL.md) and ask **one question at a time**. Never batch-ask five questions.
+If any section can't be filled confidently, return to the [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) one-question-at-a-time protocol. **Do NOT batch-ask five questions.**
 
 ### 5. Attest the plan
 
-Once spec is complete:
+Once Spec is complete:
 
 ```bash
 sh scripts/attest-plan.sh
 ```
 
-This locks `task_plan.md` content. Subsequent hooks will detect tampering.
+This locks `task_plan.md` content (SHA-256). Subsequent hooks will detect tampering.
 
-### 6. Get user confirmation
+> **Honest tier limits (OpenCode)**:
+> - On OpenCode, the **hash check is advisory** (Tier 3); it doesn't hard-block Write/Edit.
+> - The durable record is `task_plan.md` itself, not the plugin gate. Keep the file under VCS.
+> - The pwf `pwf-enforcer` plugin (extra) hard-injects the plan head via `experimental.chat.system.transform` and `experimental.session.compacting` — but cannot hard-stop on incomplete phases.
 
-Show the spec. Ask the user to confirm or modify **before** proceeding to Phase 2. The user is the contract holder — not you.
+### 5.5 Amend Spec mid-build
+
+需求进入 Phase 3 后用户改主意 / review-work 报告变更 / 验收标准漂移 — 必走 amend 协议。**禁止**继续按旧 Spec 写,因为旧 hash 仍是 plan head,新改动不被 pwf 注入,attest 失真。
+
+#### 何时调用
+
+由 [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) § 9 (Mid-build requirement changes) 路由而来:
+- **Data-shape / API contract** 改动 → 直接进 § 5.5
+- **Pure addition (orthogonal)** → append 一段到 Phase 1 后也进 § 5.5
+- **WHY changed(feature re-scope)** → 不进 § 5.5;先回 [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) Phase 0 重对齐,完成后再走 § 1-5 全新流程
+- **Cosmetic / HOW** → 不进 § 5.5(只在 `task_plan.md` 字面改文字;不重跑 attest,或不 hash 化)
+
+#### 流程
+
+1. **对照原 Spec** (`task_plan.md` Phase 1) 标出**仅被影响的 section**(Acceptance / Scope / Test Strategy / 等)。**不重写无关段**。
+2. **就地编辑** `task_plan.md` Phase 1 的对应 section。`Status: in_progress` 行保留(attest 后再变回 `amended`)。
+3. **同步增量**到 Spec 影响的所有 slice(由 [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) § 9.3 的状态机执行):新 slice append / 旧 slice 标 `superseded` / 旧 slice 改 `verify`。
+4. **Re-attest**(同 § 5):
+   ```bash
+   sh scripts/attest-plan.sh
+   ```
+   新 SHA-256 写到 `.planning/<id>/.attestation` 或 `.plan-attestation`(取决于 parallel / legacy 模式,见 [`pwf-integration.md`](../../pwf-integration.md))。**`pwf-enforcer` 下次 step 会主动重 inject 新 plan head**(因为 hash 变了)。
+5. **Log amendment**:`progress.md` 加一段:
+   ```
+   [amend] <type> at <ts> by <actor> reason:<一句话>
+        sections: <Phase-1.Section-list>
+        hash:     <新 attestation hash, truncated 8 chars>
+        affected: <slice-id-1, slice-id-2 ...>
+   ```
+   这是事后 audit"为什么 Spec 改了"的唯一线索。
+
+> **Honest tier limits** 同样适用:`attest-plan.sh` 在 OpenCode 上是软校验(advise),不能硬阻断 Write/Edit。但 pwf `pwf-enforcer` 插件会在下次 system prompt transform 时**自动用新 hash 替换 plan head** —— 这是 Tier 1 hook 的等价行为。
+
+#### 不允许的捷径
+
+- ❌ 跳过 § 5.5 amend、直接告知 Phase 3 "改一下 field 名吧" → 写代码用旧字段名,attest 失效,review-work 必红
+- ❌ amend 时只改 Spec 文字,不动 slice 拓扑 → Phase 3 后端仍引用旧字段名
+- ❌ amend 后不 re-attest → hash 不变 → pwf-enforcer 仍 inject 旧计划 → session 上下文分裂
+- ❌ amend 过程不写 `[amend]` 段 → 事后 audit 无线索
+
+### 6. Get user confirmation (single approval)
+
+> **Note on re-approval**:初次 Spec 已确认后,**日常 amend 不需要再走"用户全量批准"** —— 用户已经在来源(直接说"改成 X")给了批准,§ 5.5 amend 在 `progress.md` 留日志即可。仅当 amend 同时触发了 § 5 整段重写、attest 重置、或 Phase 0 WHY 变更时,才需要再次"用户全量批准"。
+
+Show the Spec to the user. Ask once: confirm or modify. **No re-approval in later phases** — downstream phases (incremental-implementation, etc.) follow the attested Spec.
+
+```
+Spec written into task_plan.md Phase 1 + attested.
+Please review and confirm or request changes. After approval,
+hand off to incremental-implementation for vertical slicing.
+```
+
+The user is the contract holder — not you.
 
 ## Common Rationalizations
 
@@ -109,6 +169,7 @@ Show the spec. Ask the user to confirm or modify **before** proceeding to Phase 
 | "这是个 trivial 改动" | 跨 3 文件的改动不 trivial。Trivial 改动不需要 spec 也不需要这个 skill。 |
 | "spec 写完用户还要看,慢" | 用户看 spec 5 分钟,你看错重写 50 分钟,这是杠杆。 |
 | "Plan 不是已经覆盖 spec 了吗" | Plan 是"分几步做",spec 是"做完长什么样"。两者正交。 |
+| "把 Spec 写到独立文件更整洁" | 破坏 pwf attestation 链;`task_plan.md` 是 source of truth。 |
 
 ## Red Flags
 
@@ -118,24 +179,35 @@ Show the spec. Ask the user to confirm or modify **before** proceeding to Phase 
 - Spec 没 attestation
 - Spec 写完没给用户看就开始 Phase 2
 - Spec 里出现代码片段(spec 描述"做什么",不描述"怎么做")
+- **Spec 写到独立文件**(违反唯一落点规则)
+- **承诺 PreToolUse / Stop 能硬阻断**(OpenCode Tier 3 是软约束)
 
 ## Verification
 
 Before proceeding to Phase 2, confirm:
 - [ ] `task_plan.md` Phase 1 section complete (no TBD)
-- [ ] `scripts/attest-plan.sh` exited 0, hash recorded
-- [ ] User has reviewed the spec and confirmed (verbal or in `progress.md`)
+- [ ] Phase 0 (Design from brainstorming) preserved above Phase 1
+- [ ] `scripts/attest-plan.sh` exited 0, hash recorded (advisory on OpenCode)
+- [ ] User has reviewed the Spec and confirmed (single approval, no repeats later)
 - [ ] At least 3 concrete acceptance criteria listed
 - [ ] At least 1 build / test / lint command listed (real, runnable)
+- [ ] 若 Phase 3 之后做过 amend:每次 amend 都重新跑了 `attest-plan.sh` 且新 hash 写入 attestation 文件 + `progress.md` 含完整 `[amend]` 段(含 sections / hash / affected 字段)
 
 ## pwf Integration
 
-Maps to `task_plan.md` **Phase 1: Spec**. The spec lives inside `task_plan.md`, not a separate file — this keeps attestation simple.
+Maps to `task_plan.md` **Phase 1: Spec**. The Spec lives inside `task_plan.md`, not a separate file — this keeps attestation simple.
 
-| pwf hook | Effect |
+| pwf hook | Effect on OpenCode (Tier 3) |
 |---|---|
-| `UserPromptSubmit` | Inject task_plan.md (attestation-verified) so agent reads the current spec |
-| `PreToolUse` | Allow Write/Edit only after spec attestation exists |
-| `PreCompact` | Flush spec state to progress.md so post-compaction agent can re-read |
+| `UserPromptSubmit` (plan head inject) | ✅ via `experimental.chat.system.transform` (real) |
+| `PreToolUse` (Write/Edit gate) | ⚠️ advisory only — hash check warns, doesn't block |
+| `PreCompact` (plan flush) | ✅ via `experimental.session.compacting` (real hard inject — killer feature) |
+| `Stop` (block incomplete) | ❌ notify-only on OpenCode |
 
 See [pwf-integration.md](../../pwf-integration.md) for the full phase map.
+
+## Related Skills
+
+- Predecessor: [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — Design + first approval
+- Successor: [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slicing
+- Companion: [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) — hard-enforce PWF on OpenCode

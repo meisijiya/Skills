@@ -1,32 +1,37 @@
 ---
 name: source-driven-development
-description: "Forces the agent to verify framework / library API behavior against official documentation before writing code. Under omo, uses context7 MCP (primary, replaces WebFetch) and grep_app MCP (real-world examples). Use when working with any framework or library where correctness matters, when crossing major version upgrades, or when debugging 'why does this API behave like that?'."
-allowed-tools: "Read Edit Bash Glob Grep WebFetch Bash"
+description: "Forces the agent to verify framework / library API behavior against official documentation before writing code. Under omo, uses context7 MCP (primary, replaces WebFetch) and grep_app MCP (real-world examples). Apply ONLY when API is unfamiliar, version-sensitive (major upgrade), or behavior is unexpectedly wrong. Don't trigger for stdlib or well-known APIs."
+allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 
 # source-driven-development
 
 ## Overview
 
-框架 / 库的 API 必须先查官方文档,凭记忆写代码容易错(尤其大版本升级)。训练数据有截止日期,但 npm/pypi/cargo 不会等你。
+框架 / 库的 API **不熟时**先查官方文档,凭记忆写代码容易错(尤其大版本升级)。训练数据有截止日期,但 npm/pypi/cargo 不会等你。
 
-"我用过 X 框架" ≠ "我知道 X 框架现在的 API"。React 18 → 19、Next.js 13 → 14 → 15、Vue 2 → 3、Tailwind 3 → 4 —— 每个大版本都改 breaking changes。
+> **收紧触发条件**:本 skill 不再适用"任何框架 / 库的 API"。仅在下列场景必查:
+> 1. API **首次接触**(陌生库)
+> 2. API **跨大版本升级**(React 18→19, Next.js 13→14→15, Vue 2→3, Tailwind 3→4)
+> 3. API **行为不符合预期**(debugging 诡异行为)
+> 标准库与知名 API (Array.map / Promise.all / fetch / etc.)**不需要**走本 skill。
+
+"我用过 X 框架" ≠ "我知道 X 框架现在的 API"。React 18 → 19、Next.js 13 → 14 → 15,每个大版本都改 breaking changes。
 
 ## When to Use
 
-**Use when:**
-- 用任何框架 / 库的 API(组件、钩子、配置项)
-- 跨大版本升级
-- 不熟悉的 API
-- 调试"为什么这个 API 表现不对"
-- 写 spec 时需要确认可行性
-- 选型时需要对比多个方案
+**Use when — narrowed:**
+- **陌生 API**:第一次接触的库 / 框架 / 配置项
+- **跨大版本升级**:从 v_n 升 v_(n+1) 或 v_(n+2),涉及 breaking change
+- **行为诡异**:现有 API 输出与文档不符(debugging 时的诊断步骤)
+- **选型对比**:评估 2+ 候选库的关键 API 差异
+- **写 spec 时**:spec 中包含未经验证的 API 用法,需要 feasibility 校验
 
-**NOT for:**
-- 标准库用法(语言自带,基本不变)
+**NOT for — expanded NOTs:**
+- 标准库用法(Array / Promise / fetch / dict / iter,语言自带基本不变)
+- 已经熟透的 v0 库(已在 `findings.md` 查过,且 < 1 周内)
 - 纯业务逻辑(无外部依赖)
-- 已知 trivial API(`Array.map`、`dict.get`)
-- 已经在 `findings.md` 查过且 < 1 周内的
+- 已知 trivial API(`arr.map` / `dict.get` / `try/except` 之类)
 
 ## Process
 
@@ -118,10 +123,11 @@ A doc snippet from version 5 may not apply to your installed version 3.
 |---|---|
 | "我用过 X 框架,知道 API" | 你的训练数据有截止日期。React 18 vs 19 的 useEffect 行为变了。 |
 | "文档太啰嗦" | 文档啰嗦比写错 API 强 100x。错 API 的 bug 调试时间 >> 读文档时间。 |
-| "这个 API 简单,不用查" | 简单的 API 也升级过 breaking change。`Array.prototype.flat` 在 ES2019 才进标准。 |
+| "这个 API 简单,不用查" | 简单熟透的 API 不属于本 skill 触发范围。如果还在查,说明它不熟。 |
 | "上下文太长了,先写再说" | 上下文里没有的,你就要去查。findings.md 是查的产物。 |
 | "官方文档过时了,看 GitHub issue 更准" | 偶尔对。但默认走官方文档,issue 作为补充。 |
 | "Context7 没有这个库" | 用 WebFetch 直接抓官方 docs URL。找不到 = 文档没公开,看源码。 |
+| "我要写 5 个 API 调用,每次都查烦死了" | 只有不熟的才查。findings.md 缓存结果,同 API 7 天内不再查。 |
 
 ## Red Flags
 
@@ -132,6 +138,7 @@ A doc snippet from version 5 may not apply to your installed version 3.
 - 把 findings 留在 context 里不写 `findings.md`
 - 引用 2 年前的博客文章当权威
 - `findings.md` 没记录访问日期(无法判断是否过期)
+- 对熟透的 stdlib / 常见 API 也走本 skill,产生大量 findings 噪音
 
 ## Verification
 

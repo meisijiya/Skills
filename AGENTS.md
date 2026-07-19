@@ -27,19 +27,20 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 
 ### Catalog
 
-**.core/ — load always (9):**
+**.core/ — load always (8):**
 - [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher; check before every response
 - [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — pre-design exploration (HARD-GATE: no implementation before user-approved design)
 - [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — spec before non-trivial code
-- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices (≤ 100 lines each)
+- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices (≤ 100 lines each) with dependency/HITL-AFK metadata
 - [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor
-- [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — no completion claims without fresh evidence
+- [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — no completion claims without fresh evidence; two-stage gate (in-session + OMO `review-work`)
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
-- [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — meta: create/edit skills (TDD for process docs); use to extract repeated workflows into reusable skills
 
-**.extra/ — load on demand (10):**
-[`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`interview-me`](~/.agents/skills/interview-me/SKILL.md) · [`code-simplification`](~/.agents/skills/code-simplification/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md)
+**.extra/ — load on demand (11):**
+[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) · [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`interview-me`](~/.agents/skills/interview-me/SKILL.md) · [`code-simplification`](~/.agents/skills/code-simplification/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md)
+
+Canonical write-side note: `writing-skills` is meta-only and lives in `extra/`; `interview-me` and `code-simplification` are backward-compat aliases (route to `brainstorming` and OMO refactor series respectively).
 
 ### Skill chains (process order)
 

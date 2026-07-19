@@ -1,6 +1,6 @@
 ---
 name: security-and-hardening
-description: "Hardens code against vulnerabilities at trust boundaries. Under omo, escalates to security-research mode (3 vulnerability hunters + 2 PoC engineers) for production-critical code and uses grep_app MCP for known CVE pattern search. Use when handling user input, authentication, data storage, or external integrations."
+description: "Hardens code against vulnerabilities at trust boundaries. Use when handling user input, authentication, data storage, or external integrations. Under omo, the security-research mode escalates production-critical code (3 vulnerability hunters + 2 PoC engineers in parallel); grep_app MCP searches GitHub for known CVE patterns."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 
@@ -10,7 +10,7 @@ allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 
 安全是设计问题,不是修补问题。修补在前 = 漏洞一直存在;设计在前 = 攻击面从一开始就被削减。
 
-omo 没有专门的安全 skill。`security-and-hardening` 是这个 fork 填补的缺口,聚焦在三个信任边界:**输入边界**、**认证边界**、**集成边界**。
+本 skill 聚焦三个**信任边界**:**输入边界**、**认证边界**、**集成边界**。深度 exploit / 风险评分交给 OMO `security-research`。
 
 ## When to Use
 
@@ -26,6 +26,7 @@ omo 没有专门的安全 skill。`security-and-hardening` 是这个 fork 填补
 - 内部 helper(无 user input)
 - 纯展示 UI(无数据流)
 - 已经审过的代码(重复审计浪费时间)
+- **生产前 exploit hunt / CVE 复现** → OMO `security-research`
 
 ## Process
 
@@ -90,9 +91,7 @@ pip-audit            # Python
 cargo audit          # Rust
 ```
 
-Run in CI on every PR. **Block merge on high-severity vulnerabilities** (don't just warn).
-
-Pin major versions in lockfiles; allow patch updates only.
+Run in CI on every PR. **Block merge on high-severity vulnerabilities** (don't just warn). Pin major versions in lockfiles; allow patch updates only.
 
 ### 6. Auth checks at every request
 
@@ -109,17 +108,20 @@ app.delete('/users/:id', deleteUser)  // anyone authenticated can delete anyone
 
 **Default deny.** Allow what you mean to allow.
 
-### 6.5 omo: security-research mode + grep_app MCP (opt-in, production-critical only)
+### 6.5 omo: security-research mode + grep_app MCP
 
-For production-critical code (auth, payment, PII handling), escalate to omo's parallel security audit:
+For **production-critical code**(auth, payment, PII handling),**直接调用 OMO 内置 `security-research` skill**(描述:"Team Mode security research skill. Orchestrates 3 vulnerability hunters + 2 PoC engineers in parallel"):
 
-```bash
-# Ask Sisyphus to invoke /security-research mode
-# This spawns 3 vulnerability hunters + 2 PoC engineers in parallel
-# Each has its own context, all run concurrently
+```
+/security-research
 ```
 
-Output: per-attacker audit report with severity-classified findings + working PoC exploits for each issue. Use for code going to production with real user impact. Skip for prototypes or internal tools.
+OMO Team 模式会:
+- 并行启动 3 个 vulnerability hunter 各审一个 attack surface
+- 并行启动 2 个 PoC engineer 写 working exploit
+- 输出一份 per-attacker 审计报告,severity-classified findings + working PoC
+
+本步骤不再手撸 OAuth flow 或认证逻辑 — 那些已经在 `security-research` 里实现。这里只触发跳转。
 
 For dependency audits, use omo's `grep_app` MCP to search GitHub for known CVE patterns:
 
@@ -130,7 +132,7 @@ mcp__grep_app__searchGitHub <library> <vulnerability-pattern> language:python
 
 This catches CVE fixes that are present in the wild but not yet in your local `npm audit` / `pip-audit` databases.
 
-**Important**: these are enhancements, not replacements for Steps 1-7. Always run the standard pre-deployment gate first; omo's parallel audit is for finding issues the standard checklist misses.
+**Important**: Step 6.5 is **not** a replacement for Steps 1-7 — Always run the standard pre-deployment gate first; OMO `security-research` is for **finding issues the standard checklist misses**(exploit-class, not design-class).
 
 ### 7. Pre-deployment gate
 
@@ -142,7 +144,7 @@ Before merging anything that touches a trust boundary:
 - [ ] Dependency audit clean
 - [ ] Logs don't contain secrets
 - [ ] Error responses don't leak stack traces / internal paths
-- [ ] For production-critical code, omo security-research audit (Step 6.5) completed
+- [ ] For production-critical code, OMO `security-research` audit (Step 6.5) completed
 
 ## Common Rationalizations
 
@@ -154,6 +156,7 @@ Before merging anything that touches a trust boundary:
 | "JWT secret 写代码里方便" | git 一旦 push,secret 就泄露。env / secret manager only。 |
 | "前端 validation 够了" | 前端 validation 是 UX,不是安全。用户可以绕过。Backend 必须重新 validation。 |
 | "我们小公司,没人会黑我们" | 自动化扫描不挑公司。任何暴露的 endpoint 都是潜在目标。 |
+| "omo 没安全 skill,我自己审计就够了" | OMO 有 `security-research`,production-critical 路由过去。 |
 
 ## Red Flags
 
@@ -166,6 +169,7 @@ Before merging anything that touches a trust boundary:
 - Auth 只在 session 开始检查一次(不是 per-request)
 - 依赖里有 known high-severity CVE
 - `/admin` 路由没额外的 auth 检查
+- production-critical 代码没调 OMO `security-research`
 
 ## Verification
 
@@ -178,10 +182,18 @@ Before declaring secure, confirm:
 - [ ] CSP / security headers set
 - [ ] Logs scrubbed of secrets
 - [ ] Error responses don't leak internals
-- [ ] Penetration test or threat model for new attack surface
+- [ ] For production-critical code: OMO `security-research` audit run with working PoC report
 
 ## pwf Integration
 
-Maps to `task_plan.md` **Phase 5.5: Security Review** (sub-phase). Security checklist goes in `.planning/<plan-id>/security-review.md` — separate file so it doesn't pollute attestation but survives plan changes.
+Maps to `task_plan.md` **Phase 5.5: Security Review** (sub-phase). Security checklist goes in `.planning/<id>/security-review.md` — separate file so it doesn't pollute attestation but survives plan changes.
+
+OMO `security-research` 输出 → 进 `.planning/<id>/security-research-report.md`。
 
 See [pwf-integration.md](../../pwf-integration.md).
+
+## Related Skills
+
+- Production audit: OMO 内置 `security-research` (3 hunters + 2 PoC engineers)
+- 前置:[`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — 边界要在 Spec 阶段就标
+- 后置:[`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — 完成门
