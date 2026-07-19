@@ -155,8 +155,9 @@ export const MeisijiyaSkillsPlugin = async ({ client, directory }) => {
       log('  INJECTING bootstrap');
       // In-place mutation on firstUser.parts. Reassigning parts would be a no-op
       // (OpenCode retains the original array reference; see issue #25754).
-      const ref = firstUser.parts[0];
-      firstUser.parts.unshift({ ...ref, type: 'text', text: bootstrap });
+      // Don't spread the original part: if parts[0] is a toolCall/toolResult,
+      // spreading would leak those fields into a part we explicitly type as 'text'.
+      firstUser.parts.unshift({ type: 'text', text: bootstrap });
       log(`  parts.length now ${firstUser.parts.length}`);
     },
   };
