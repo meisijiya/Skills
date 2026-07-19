@@ -1,10 +1,8 @@
 ---
 name: using-meisijiya-skills
-description: "Dispatcher meta-skill for the meisijiya-skills collection. Forces the agent to check applicable skills before every response, initialize planning-with-files if not yet done, and coordinate with oh-my-openagent's Sisyphus + IntentGate. Delegates todo orchestration to omo's atlas agent. Use when starting any session in a project where meisijiya-skills are installed, or when about to take any action on the user's behalf."
+description: "Dispatcher meta-skill for the meisijiya-skills collection. Forces the agent to check applicable skills before every response, coordinate with oh-my-openagent's Sisyphus + IntentGate, and initialize planning-with-files. Use when starting any session in a project where meisijiya-skills are installed, or when about to take any action on the user's behalf."
 allowed-tools: "Read Bash Glob Grep"
 ---
-
-# Using meisijiya-skills
 
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, ignore this skill.
@@ -28,12 +26,11 @@ Then announce **"Using [skill] to [purpose]"** and follow it exactly. If it has 
 
 ## Skill Priority
 
-When multiple skills apply:
+When multiple skills apply, process skills come first.
 
-1. **Process first** (set the approach): [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) → [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md)
-2. **Implementation** (carry it out): [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) → [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md)
-3. **Discipline** (wrap it up): [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md), [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
-4. **Meta** (when changing the system itself): [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md)
+- "Let's build X" → [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) → [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) → implementation
+- "Fix this bug" → [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) → [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
+- "About to claim done" → [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
 
 ## Red Flags — STOP, you're rationalizing
 
@@ -54,6 +51,8 @@ When multiple skills apply:
 
 ## pwf Integration
 
-This skill runs at session start, before any `task_plan.md` phase exists. It writes one `[skill-check]` line to `progress.md` per response, and may prompt the user to run `init-session.sh` if pwf is not active.
+This skill runs at session start, before any phase. May prompt for `init-session.sh` if pwf is not active.
 
-See [pwf-integration.md](../../pwf-integration.md) for the full phase mapping.
+## User Instructions
+
+User instructions (AGENTS.md, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
