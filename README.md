@@ -141,7 +141,7 @@ ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 
 ### OpenCode Plugin(硬层 skill 注入)
 
-`.opencode/plugins/meisijiya-skills.js` 是 hard-layer OpenCode 插件,跟 [`obra/superpowers` 的 `superpowers.js`](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js) 同款机制 — 在每个会话首条 user message 注入 `using-meisijiya-skills` 的 bootstrap,让 skill 真正高频触发(否则只在 `<available_skills>` 列表里软躺着,模型不会主动 invoke)。
+`.opencode/plugins/meisijiya-skills.js` 是 hard-layer OpenCode 插件,跟 [`obra/superpowers` 的 `superpowers.js`](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js) 同款机制 — 让 `using-meisijiya-skills` 在 LLM 每个调用前都出现在 firstUser.parts 里,触发模型真正高频 invoke skills(否则只在 `<available_skills>` 列表里软躺着,模型不会主动 invoke)。
 
 **安装:**
 
@@ -151,33 +151,25 @@ cp .opencode/plugins/meisijiya-skills.js \
    ~/.config/opencode/plugins/meisijiya-skills.js
 ```
 
-> 注:实测 `ln -sf` 软链接不被 OpenCode plugin loader 拾起,**用 `cp` 实复制**。
+> 实测 `ln -sf` 软链接不被 OpenCode plugin loader 拾起,**用 `cp` 实复制**。
+
+**Reload:** OpenCode 不会自动重读 plugins 目录。改完插件或 bootstrap 内容后,点面板底部 **"重新加载 OpenCode"** 按钮。
 
 **禁用:** `rm ~/.config/opencode/plugins/meisijiya-skills.js`
 
-**Reload:** OpenCode 不会自动重读 plugins 目录。改完插件或 bootstrap 内容后,点面板底部 **"重新加载 OpenCode"** 按钮,或在 settings 里触发 plugin rescan。
+**机制**(与 superpowers 同款):
 
-**诊断日志:** 插件内含 8 个 `log()` 调用,写到 `/tmp/meisijiya-skills.log`。可观察:
-- `module loaded` — plugin 被 import
-- `config hook fired` — `skills.paths` 注册成功
-- `messages.transform fired` — bootstrap 注入 hook 触发
-- `INJECTING bootstrap` — bootstrap 真的注入了首条 user message
-
-不需要诊断时:`rm /tmp/meisijiya-skills.log` + 编辑插件去掉 `log()` 调用。
+- `config` hook — 注册 `~/.agents/skills` 到 OpenCode skill tool
+- `experimental.chat.messages.transform` hook — 每 step 把 bootstrap 内容 unshift 到 `firstUser.parts`
+- **In-memory only,不持久化 DB**:OpenCode 每 step 从 DB 重载 messages,bootstrap 每次重新注入(不是 bug,是 superpowers 同款设计)
+- **bootstrap 锚定在 firstUser**:只第一条 user message 含 bootstrap,后续 user message 不污染;LLM 通过 conversation history 每步都看到
+- 严格 in-place mutation([issue #25754](https://github.com/anomalyco/opencode/issues/25754):`output.messages = ...` 是静默 no-op)
 
 **Acceptance test:** 开新 session,发 `let's make X`(X 任意),期望模型先 announce `"Using brainstorming to ..."` 或其他 skill,再问需求。**不要直接 dive in 写代码**。
 
-**已知限制**(per [superpowers issue #54](https://github.com/obra/superpowers/issues/54)):即使 hard-layer + superpowers-grade 强措辞,调用率仍 ~80-90%,不是 100%。模型有时仍能反 rationalization 绕过(尤其 Plan Mode — issue #1667)。需要 ~100% 时,加 `tool.execute.before` 拦截非 skill-issued 工具调用。
+**已知限制**(per [superpowers issue #54](https://github.com/obra/superpowers/issues/54)):即使 hard-layer + superpowers-grade 强措辞,调用率仍 ~80-90%,不是 100%。模型有时仍能反 rationalization 绕过。
 
-**SDK 验证**(2026-07):hook 名 + 签名匹配 OpenCode 官方 [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts)。用到的 hook:
-- `config` — 注册 `~/.agents/skills` 到 OpenCode skill tool
-- `experimental.chat.messages.transform` — 注入 bootstrap 到首条 user message
-
-**关键设计:**
-- 只注入首条,带 `EXTREMELY_IMPORTANT` guard 防重(session compaction 后仍幂等)
-- 严格 in-place mutation([issue #25754](https://github.com/anomalyco/opencode/issues/25754):`output.messages = ...` 是静默 no-op)
-- Bootstrap 来源:`~/.agents/skills/using-meisijiya-skills/SKILL.md`(strip frontmatter)
-- 无外部依赖,纯 Node `fs/path`,Bun 跑原生 ESM
+**SDK 验证**(2026-07):hook 名 + 签名匹配 OpenCode 官方 [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts)。
 
 ## 前置依赖
 
