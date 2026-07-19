@@ -49,6 +49,10 @@ When multiple skills apply, process skills come first.
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
 
+## Skill Design Principle
+
+When adding/editing a skill, follow superpowers' [writing-skills conventions](https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md) — concise body (target <100 lines), "Use when..." description only (no workflow summary), no duplication of `<available_skills>` or other skills. See the vendored [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) for full rules.
+
 ## pwf Integration
 
 This skill runs at session start, before any phase. May prompt for `init-session.sh` if pwf is not active.
