@@ -57,6 +57,24 @@
         "Each slice ships independently (REST still works until all migrated)",
         "Agent rehearses rollback: 'Can I revert just slice 3?' before declaring done"
       ]
+    },
+    {
+      "scenario": "User asks: 'Add checkout flow with cart, payment, confirmation' (3+ capabilities, parallel-friendly)",
+      "expected_behavior": [
+        "Agent writes slice metadata as a Kanban ticket board with title / goal / scope / acceptance / blockedBy / parallel / owner / verify / status",
+        "Agent computes the executable frontier: tickets with blockedBy=[] (no deps) form the first wave, others follow",
+        "Agent marks independent tickets (e.g. cart + payment behind a shared contract ticket) as parallel=true and dispatches them in one batch",
+        "Agent avoids declaring any ticket complete until its acceptance[] is fully verified"
+      ]
+    },
+    {
+      "scenario": "Agent is tempted to slice by technical layer: 'First the DB schema, then the API endpoint, then the UI'",
+      "expected_behavior": [
+        "Agent rejects the horizontal split — slice 1 alone yields a non-runnable system, integration feedback is deferred",
+        "Agent rewrites the plan as vertical tickets (one capability per ticket, spanning data + service + consumer)",
+        "First ticket is a Tracer Bullet: minimal end-to-end slice (data stub + service route + real UI/curl trigger) that exercises the full integration path",
+        "Subsequent tickets deepen the tracer path instead of layering horizontally"
+      ]
     }
   ],
   "owner": "meisijiya",
