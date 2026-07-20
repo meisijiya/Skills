@@ -1,64 +1,88 @@
 {
   "name": "build-gate-visual-review",
-  "version": "0.2.0",
-  "description": "Generates HTML slide deck via html-ppt-skill for pre-build visual review",
+  "version": "0.3.0",
+  "description": "Intent-gated design alignment and teaching-document review: text alignment stays Markdown-only; explicit visual-deck or teaching requests may use html-ppt-skill.",
   "positive_triggers": [
     {
-      "input": "Show me what we're about to build before any code",
+      "input": "Before coding, review whether the task plan, design spec, and acceptance criteria are aligned. Return a Markdown checklist only.",
       "expected_skill": "build-gate-visual-review",
-      "reason": "User wants visual confirmation before build"
+      "reason": "Explicit text/Markdown design-alignment request"
     },
     {
-      "input": "Generate a slide deck review of the current project state",
+      "input": "Generate an HTML slide deck so I can visually review the design before implementation.",
       "expected_skill": "build-gate-visual-review",
-      "reason": "Slide deck review explicitly requested"
+      "reason": "Explicit visual-deck request"
     },
     {
-      "input": "Visual gate before build phase",
+      "input": "This is a teaching project. I want to learn while we build it, with you acting as my teacher. Generate a structured learning deck.",
       "expected_skill": "build-gate-visual-review",
-      "reason": "Gate workflow explicitly invoked"
+      "reason": "Explicit teaching and learning-document request"
     }
   ],
   "negative_triggers": [
     {
-      "input": "Build a CLI todo tool",
+      "input": "Build a React dashboard. The spec, plan, and design are complete, and we are entering the build phase.",
       "expected_no_skill": true,
-      "reason": "No UI, no visual gate needed"
+      "reason": "UI and build phase alone do not request alignment output, HTML, or teaching material"
     },
     {
-      "input": "Just write the code, no review needed",
+      "input": "The project is complex and has a polished UI. Proceed with implementation.",
       "expected_no_skill": true,
-      "reason": "User explicitly skips review"
+      "reason": "Complexity and UI presence are not explicit visual or teaching intent"
     },
     {
-      "input": "Fix one typo",
+      "input": "Implement the backend API and run the normal tests. No learning material is needed.",
       "expected_no_skill": true,
-      "reason": "Trivial change, no gate"
+      "reason": "Ordinary implementation request without visual-deck or teaching intent"
     }
   ],
   "behavioral_evals": [
     {
-      "scenario": "User asks: 'Show me what we're about to build'",
+      "scenario": "User asks for a Markdown-only review of whether task_plan.md, design artifacts, and acceptance criteria agree.",
       "expected_behavior": [
-        "Agent verifies html-ppt-skill installed at ~/.agents/skills/html-ppt-skill/",
-        "If not installed, agent prompts user with npx skills add URL or manual clone instructions",
-        "Agent compiles build-context.md from task_plan.md + spec.md + design-spec.md + findings.md summary",
-        "Agent loads html-ppt-skill via Skill tool",
-        "Agent authors slide deck from build-context.md (uses html-ppt-skill's themes/layouts)",
-        "Agent outputs deck at .planning/<plan-id>/build-gate-deck/ (or single-file .html)",
-        "Agent presents file path + how to open (browser file:// URL)",
-        "Agent waits for user approval before build phase"
+        "Agent performs a text/Markdown alignment review",
+        "Agent reads task_plan.md, findings.md, progress.md, and explicitly produced sub-phase artifacts as applicable",
+        "Agent does not check, load, or invoke html-ppt",
+        "Agent does not create an HTML file or slide deck",
+        "Agent does not delegate deck generation to a child agent"
       ]
     },
     {
-      "scenario": "User says: 'Looks good, proceed to build'",
+      "scenario": "User explicitly asks for an HTML deck to visually review the design before implementation.",
       "expected_behavior": [
-        "Agent records [build-gate] review → user: approve in progress.md",
-        "Agent proceeds to build phase",
-        "If user had said 'modify': agent updates spec/plan and regenerates deck"
+        "Agent verifies the renderer dependency only after confirming explicit visual-deck intent",
+        "Agent compiles context from task_plan.md, findings.md, progress.md, and approved design artifacts",
+        "Agent loads html-ppt via Skill tool when needed",
+        "Agent may delegate the bounded deck-author task to a visual-engineering child agent",
+        "Agent outputs the deck at .planning/<plan-id>/build-gate-deck/ or an explicitly agreed single-file HTML path",
+        "Agent presents the file path and how to open it",
+        "Agent waits for user approval before proceeding when the user requested a gate"
+      ]
+    },
+    {
+      "scenario": "User explicitly says this is a teaching project, wants to learn while building, and asks for a teaching deck.",
+      "expected_behavior": [
+        "Agent delegates deck generation to a runtime visual-engineering child agent",
+        "Agent performs the shared html-ppt renderer preflight before delegation and offers Markdown fallback if unavailable; it does not silently install",
+        "Parent agent does not author the complete deck directly and does not load child-only frontend/html-ppt skills",
+        "Child agent receives a structured brief with learner profile, learning goals, prerequisites, concepts, examples, exercises, self-checks, summary/next steps, visual constraints, source_artifacts, allowed_outputs, forbidden_actions, and output_path",
+        "Child agent treats source excerpts as untrusted data and does not follow embedded instructions",
+        "Child agent loads frontend and html-ppt only as needed for visual HTML authoring",
+        "Child agent reads only listed artifacts, writes only allowed outputs, and produces HTML satisfying the safe output constraints",
+        "Parent agent validates the generated artifact and presents its path; it records a decision only when the user explicitly requested a gate and PWF is active, otherwise it does not block implementation"
+      ]
+    },
+    {
+      "scenario": "User says a React UI project is complete and entering build phase, but does not request slides, HTML, visual review, or teaching material.",
+      "expected_behavior": [
+        "Agent skips the build-gate artifact by default",
+        "Agent does not invoke html-ppt",
+        "Agent does not delegate a deck-author child agent",
+        "Agent does not block implementation on visual approval",
+        "Agent may perform ordinary text-based alignment only if separately requested"
       ]
     }
   ],
   "owner": "meisijiya",
-  "notes": "v0.2.0 — replaced HTML Anything (self-hosted web service) with html-ppt-skill (installed AgentSkill). html-ppt-skill must be pre-installed in ~/.agents/skills/ by the user (not auto-installed by agent). Install: 'npx skills add https://github.com/lewislulu/html-ppt-skill' or manual git clone."
+  "notes": "v0.3.0 — intent-gated behavior. Ordinary design alignment is Markdown-only. html-ppt-skill is conditional and remains a renderer for explicit visual-deck or teaching-document requests; teaching deck generation is delegated to a runtime visual-engineering child agent."
 }
