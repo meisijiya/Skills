@@ -47,6 +47,16 @@ All notable changes to meisijiya-skills.
 - Python 正则扫描 8 个 NOT for 段:0 命中 `→ [skill` / `用 [skill` / `OMO \`skill`
 - `git diff --check`: clean
 
+### Changed (intent-gated build and teaching gate)
+
+`build-gate-visual-review` 改为按用户明确意图触发：普通设计对齐只输出 Markdown / 文本；显式视觉 deck 或教学 deck 才按需使用 `html-ppt`；UI、build phase、项目复杂度和 PWF Phase 3.5 单独出现时默认跳过。
+
+教学 deck 生成委派给运行时 `visual-engineering` 子 Agent，并增加结构化 brief、来源信任边界、子 Agent 读写 / 网络 / 安装限制、renderer preflight 和 Safe HTML 验证约束。
+
+**Files modified (5):** `skills/extra/build-gate-visual-review/SKILL.md`、`evals/cases/build-gate-visual-review.json`、`README.md`、`skills/extra/README.md`、`pwf-integration.md`。
+
+**Verified:** `validate-skills.sh` 20 checked / 0 failed、`check-marketplace.sh` 20 skills in sync、eval JSON valid、`git diff --check` clean、第二轮 OMO `review-work` 五路审查全部通过。
+
 ### Added (v0.5.2 — rollback protocol + review-work critical-severity routing)
 
 Closes the audit gap on "what do we record when code must be rolled back?" — v0.5.1 had requirement-change routing but no symmetric rollback routing. v0.5.2 adds it without inventing a new skill.
