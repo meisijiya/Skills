@@ -7,7 +7,7 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **pwf 硬遵守加强**:装 OpenCode 插件(`pwf-enforcer` 提供模板)把 pwf 的软遵守升级为硬触发 hook。
-- **教学化门控**:build 之前用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 把项目状态生成 HTML slide deck,让用户可视化审视。
+- **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求视觉 deck 或教学 deck 时才按需使用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 渲染 HTML。项目有 UI、即将 build、复杂或使用 PWF 都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
 - **双目录结构**:`core/` 必装集 + `extra/` 选装集。仓库根的 `.claude-plugin/marketplace.json` 是 `vercel-labs/skills` CLI 原生的 skill 发现 + 展示分组 source(`meisijiya-core` / `meisijiya-extra` 两组);它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
@@ -37,7 +37,7 @@ meisijiya-skills/
 │       ├── README.md          ← 12 个 skill + "怎么选" 决策表
 │       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
 │       ├── pwf-enforcer/
-│       ├── build-gate-visual-review/        ← design-alignment gate (HTML slide deck via html-ppt-skill)
+│       ├── build-gate-visual-review/        ← intent-gated pre-build alignment (Markdown by default; html-ppt only for explicit visual/teaching decks)
 │       ├── designer-handoff/
 │       ├── interview-me/                    ← backward-compat alias (canonical: brainstorming)
 │       ├── code-simplification/             ← backward-compat alias (canonical: OMO refactor series)
@@ -177,7 +177,7 @@ cp .opencode/plugins/meisijiya-skills.js \
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`,本 fork 围绕 omo 设计)
 - **planning-with-files**(完整 PWF 工作流推荐):`npx skills add OthmanAdi/planning-with-files --skill planning-with-files -g`。注:`/plugin marketplace add ...` 是 Claude Code 专属命令,OpenCode 用 skills CLI(`npx skills add`)
 - **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
-- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill -g`(build-gate-visual-review 需要,装到 `~/.agents/skills/`)
+- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill -g`(仅 `build-gate-visual-review` 的显式视觉 / 教学 deck 模式需要,装到 `~/.agents/skills/`;文本对齐与默认跳过不需要)
 
 ## 写作规范
 

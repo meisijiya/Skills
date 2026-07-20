@@ -9,7 +9,7 @@
 | 你的项目... | 装这些 |
 |---|---|
 | 任何代码 | `code-simplification` · `security-and-hardening` · `api-and-interface-design` · `improve-codebase-architecture` |
-| 有 UI | `designer-handoff` · `build-gate-visual-review` |
+| 有 UI | `designer-handoff`;仅在明确要求实现前文本对齐、视觉 deck 或教学 deck 时再装 `build-gate-visual-review` |
 | 上线运营 | `observability-and-instrumentation` · `performance-optimization` |
 | 多人 / 长期 | `documentation-and-adrs` |
 | 用了 planning-with-files | `pwf-enforcer`(把 PWF 软遵守升级为硬触发) |
@@ -21,7 +21,7 @@
 |---|---|
 | [`writing-skills`](./writing-skills/) | meta: 创建 / 编辑 skill 用 TDD-for-docs 流程。也用于"我老做 X,把 X 提炼成 skill"(**v0.5.0 从 core/ 迁出**) |
 | [`pwf-enforcer`](./pwf-enforcer/) | 把 PWF 的软遵守变硬触发(OpenCode plugin + AGENTS.md 软提醒) |
-| [`build-gate-visual-review`](./build-gate-visual-review/) | 设计对齐闸门:spec/plan 完成后、任何代码之前用 html-ppt-skill 生成 slide deck,**不是人工 QA**(v0.5.0 明确) |
+| [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求视觉 deck 或教学 deck 时才按需使用 html-ppt;UI、build、复杂度或 PWF phase 单独出现时默认跳过,**不是人工 QA** |
 | [`designer-handoff`](./designer-handoff/) | designer → eng 的 UI/UX spec 交接(用 ui-ux-pro-max) |
 | [`interview-me`](./interview-me/) | **v0.5.0 改为别名**:请直接使用 `brainstorming`(已吸收一问一答规则) |
 | [`code-simplification`](./code-simplification/) | **v0.5.0 改为别名**:请直接使用 OMO 内置 `refactor` / `ponytail-review` / `remove-ai-slops` |
@@ -38,7 +38,7 @@
 
 | Skill | 需要先装 |
 |---|---|
-| `build-gate-visual-review` | `html-ppt-skill` 到 `~/.agents/skills/`(`npx skills add https://github.com/lewislulu/html-ppt-skill`) |
+| `build-gate-visual-review` | 仅显式视觉 / 教学 deck 模式需要 `html-ppt-skill` 到 `~/.agents/skills/`(`npx skills add https://github.com/lewislulu/html-ppt-skill`);文本对齐与默认跳过不需要 |
 | `designer-handoff` | `ui-ux-pro-max-cli` 全局(`npm i -g ui-ux-pro-max-cli`) |
 | `pwf-enforcer` | `planning-with-files` 到 `~/.agents/skills/`(`npx skills add https://github.com/OthmanAdi/planning-with-files`) |
 | `security-and-hardening` Step 6.5 | OMO `security-research` 内置 skill(默认随 omo 安装) |
