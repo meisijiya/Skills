@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 11 个,v0.5.0)
+# Extra Skills(选装集 · 12 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -8,14 +8,14 @@
 
 | 你的项目... | 装这些 |
 |---|---|
-| 任何代码 | `code-simplification` · `security-and-hardening` · `api-and-interface-design` |
+| 任何代码 | `code-simplification` · `security-and-hardening` · `api-and-interface-design` · `improve-codebase-architecture` |
 | 有 UI | `designer-handoff` · `build-gate-visual-review` |
 | 上线运营 | `observability-and-instrumentation` · `performance-optimization` |
 | 多人 / 长期 | `documentation-and-adrs` |
 | 用了 planning-with-files | `pwf-enforcer`(把 PWF 软遵守升级为硬触发) |
 | 创建/编辑 skill | `writing-skills` |
 
-## 11 个 skill 一览
+## 12 个 skill 一览
 
 | Skill | 一句话 |
 |---|---|
@@ -30,6 +30,7 @@
 | [`performance-optimization`](./performance-optimization/) | 后端 profile + 优化(**v0.5.0 卸下 CWV**:前端 CWV 走 OMO `frontend` skill) |
 | [`observability-and-instrumentation`](./observability-and-instrumentation/) | 加日志/metrics/tracing,生产可见性 |
 | [`documentation-and-adrs`](./documentation-and-adrs/) | **v0.5.0 聚焦**:只记录重大架构决策(ADR);日常文档走项目级 AGENTS.md / progress.md |
+| [`improve-codebase-architecture`](./improve-codebase-architecture/) | codebase-wide 健康巡检(weekly / post-surge / on-boarding);Ousterhout deep/shallow 评分;**proposal-only** —— 改架构走 `incremental-implementation` |
 
 ## 依赖关系(顺序装才有效)
 

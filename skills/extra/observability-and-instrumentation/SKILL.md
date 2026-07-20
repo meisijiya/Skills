@@ -21,11 +21,11 @@ Instrument as you build, not after launch.Launch 后再加 = 加错位置(关键
 - 性能 regression 调查中
 - 准备 on-call rotation(需要 alerts + runbooks)
 
-**NOT for:**
+**NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
 - 一次性脚本(用完就丢)
 - 内部工具(用户量小)
 - 还没决定上 prod 的 feature
-- 纯前端静态页面(用前端 RUM)
+- 纯前端静态页面
 
 ## Process
 

@@ -25,9 +25,9 @@ allowed-tools: "Read Edit Bash Glob Grep"
 - 项目仍引用 `code-simplification` 名称(旧配置 / 旧 docs)
 - 你需要 Chesterton's Fence 提醒:**改代码前先搞明白它为什么存在** — 没搞清楚前别删
 
-**NOT for:**
-- 真做 simplification:用 OMO `refactor` / `ponytail-review` / `remove-ai-slops`
-- AI slop 清扫:OMO `remove-ai-slops`(不要在本 skill 里手撸 grep 占位)
+**NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
+- 真做 per-diff simplification(非 backward-compat alias 场景)
+- AI slop 清扫(不要在本 skill 里手撸 grep 占位)
 
 ## Process
 

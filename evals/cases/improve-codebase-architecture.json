@@ -1,0 +1,54 @@
+{
+  "name": "improve-codebase-architecture",
+  "version": "0.1.0",
+  "description": "Codebase-wide architecture health scan producing deepening candidates (proposal-only)",
+  "positive_triggers": [
+    {
+      "input": "I just inherited this 200k-LOC codebase; where should I start letting agents ramp?",
+      "expected_skill": "improve-codebase-architecture",
+      "reason": "On-boarding scan, codebase-wide perspective needed before agent ramp"
+    },
+    {
+      "input": "It's been a month since we last looked at the architecture; let's do a weekly review",
+      "expected_skill": "improve-codebase-architecture",
+      "reason": "Periodic cadence trigger"
+    },
+    {
+      "input": "Agents keep producing garbage; I think the codebase itself is part of the problem",
+      "expected_skill": "improve-codebase-architecture",
+      "reason": "Codebase quality hypothesis, needs full-repo lens"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Refactor this 500-line module, it's hard to read",
+      "expected_no_skill": true,
+      "reason": "Per-diff scope, route to code-simplification / OMO refactor"
+    },
+    {
+      "input": "Our API endpoint is returning 500s, debug it",
+      "expected_no_skill": true,
+      "reason": "Specific bug, route to debugging-and-error-recovery"
+    },
+    {
+      "input": "Add a new feature X to the codebase",
+      "expected_no_skill": true,
+      "reason": "New feature design, route to brainstorming → spec-driven-development"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User inherits 200k-LOC codebase and asks for on-boarding guidance",
+      "expected_behavior": [
+        "Agent first inventories codebase (subsystems, boundaries, concept-sprawl hotspots)",
+        "Agent surfaces 3+ confusion candidates from Matt Pocock's three checks",
+        "Agent scores each candidate on Ousterhout 4-axis deep/shallow framework",
+        "Agent writes output to .planning/<id>/architecture-review.md, NOT task_plan.md",
+        "Agent does NOT run Edit/Bash to apply any refactor — proposal-only",
+        "Agent hands off to user/team for prioritization, defers to incremental-implementation for action"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker. Proposal-only contract enforced by Process § 5 — agent must NOT execute changes inside this skill."
+}

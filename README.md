@@ -9,7 +9,7 @@ Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-s
 - **pwf 硬遵守加强**:装 OpenCode 插件(`pwf-enforcer` 提供模板)把 pwf 的软遵守升级为硬触发 hook。
 - **教学化门控**:build 之前用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 把项目状态生成 HTML slide deck,让用户可视化审视。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
-- **双目录结构**:`core/` 必装集 + `extra/` 选装集,适配 `vercel-labs/skills` CLI。
+- **双目录结构**:`core/` 必装集 + `extra/` 选装集。仓库根的 `.claude-plugin/marketplace.json` 是 `vercel-labs/skills` CLI 原生的 skill 发现 + 展示分组 source(`meisijiya-core` / `meisijiya-extra` 两组);它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
 ## 仓库结构
 
@@ -20,7 +20,7 @@ meisijiya-skills/
 ├── skill-anatomy.md           ← SKILL.md 写作规范
 ├── pwf-integration.md         ← 跟 pwf 协作的约定(8+4+3+2 phase 映射)
 ├── docs/
-│   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(19 SKILL.md 索引)
+│   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(20 SKILL.md 索引)
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
 │   ├── core/                 ← 必装集(8 个)
@@ -33,8 +33,8 @@ meisijiya-skills/
 │   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(11 个,按需装)
-│       ├── README.md          ← 11 个 skill + "怎么选" 决策表
+│   └── extra/                ← 选装集(12 个,按需装)
+│       ├── README.md          ← 12 个 skill + "怎么选" 决策表
 │       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/        ← design-alignment gate (HTML slide deck via html-ppt-skill)
@@ -45,51 +45,52 @@ meisijiya-skills/
 │       ├── security-and-hardening/          ← trust-boundary hardening;depth audit via OMO security-research
 │       ├── performance-optimization/        ← backend profile + measure-first
 │       ├── observability-and-instrumentation/
-│       └── documentation-and-adrs/          ← architectural ADRs only
+│       ├── documentation-and-adrs/          ← architectural ADRs only
+│       └── improve-codebase-architecture/   ← codebase-wide 健康巡检,Ousterhout deep/shallow 评分,proposal-only
 ├── scripts/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查
-│   ├── install.sh                 ← 装到 .opencode/skills/(项目/global,高级)
+│   ├── install.sh                 ← 默认装到 .opencode/skills/(项目级);--global 装到 ~/.agents/skills/(高级)
 │   └── inject-agents-md.sh        ← 把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(19 个)
+    └── cases/                 ← 每个 skill 的 eval case(20 个)
 ```
 
 ## 安装
 
 ### 快速安装(推荐:`vercel-labs/skills` CLI)
 
-`npx skills add <repo>` 自动装到 `~/.agents/skills/`(canonical skills 路径,OpenCode 作为 universal agent 直接读)。与 pwf / html-ppt-skill / ui-ux-pro-max 等其他 skills CLI 装的 skill 在同一位置,便于统一管理。
+`npx skills add <repo>` 默认装到当前目录 `./.agents/skills/`(项目级),加 `-g` 装到 `~/.agents/skills/`(用户级,canonical 路径)。OpenCode 作为 universal agent 直接读 canonical 的 `.agents/skills/`;非 universal agent 可能拿到 canonical 副本的 symlink。
 
 ```bash
-# 装必装集(8 个 core/)
-npx skills add <this-repo> --from skills/core
+# 交互式(展示 meisijiya-core / meisijiya-extra 两组,按需挑选)
+npx skills add meisijiya/Skills
 
 # 装某个选装
-npx skills add <this-repo> --skill pwf-enforcer
+npx skills add meisijiya/Skills --skill pwf-enforcer
 
 # 装多个选装
-npx skills add <this-repo> --skill interview-me --skill security-and-hardening
+npx skills add meisijiya/Skills --skill interview-me --skill security-and-hardening
 
 # 看仓库有哪些 skill 可装
-npx skills add <this-repo> --list
+npx skills add meisijiya/Skills --list
 
 # 装到项目级(cwd 下的 .agents/skills/)
-npx skills add <this-repo> --from skills/core
+npx skills add meisijiya/Skills
 
 # 全局装(到 ~/.agents/skills/)
-npx skills add <this-repo> -g
+npx skills add meisijiya/Skills -g
 ```
 
-vercel-labs/skills CLI 自动处理 dedup / 多 agent harness 兼容 / 符号链接。
+`.agents/skills` 是 `vercel-labs/skills` CLI 的 canonical 路径;**universal agent**(如 OpenCode)直接读它,**non-universal agent** 可能收到 canonical 副本的 symlink。如需强制 direct copy 而不要 symlink,用 `--copy`。
 
 ## Skills
 
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(8 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
-- **选装集**(11 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+- **选装集**(12 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
 
@@ -120,24 +121,24 @@ scripts/install.sh --global
 scripts/install.sh --dry-run
 ```
 
-> 注意:`scripts/install.sh --global` 现在跟 `npx skills add` 装到**同一位置**(`~/.agents/skills/`)。OpenCode 从两个路径都发现 skill,所以即使你从不同来源装,也只会有同一份副本。**project-level 安装**仍走 `<project>/.opencode/skills/`(omo 原生,不被 skills CLI 影响)。
+> 注意:只有 `scripts/install.sh --global` 跟 `npx skills add -g` 共享 `~/.agents/skills/`。**project-level 安装**有两条目标不同的路径:`scripts/install.sh` 项目级默认到 `<project>/.opencode/skills/`(omo 原生),`npx skills add` 项目级到 `<project>/.agents/skills/`(skills CLI 原生)。OpenCode 原生扫描两者 — **但每个项目推荐只选一种安装方法**:同时并存会导致同名 Skill 出现两份副本,且 `update-source` 模糊(不知道该 pull 哪个)。
 
 ### Lite CLI:`bin/meisijiya`(OpenCode plugin 管理)
 
 skill 安装用 `npx skills add`(已存在),**plugin 管理没有现成 CLI**,所以做了个 65 行 lite 工具,只覆盖痛的两件事:
 
 ```bash
-# 列出已装 plugin(在 ~/.config/opencode/plugins/)
+# 列出已装 plugin(在 ~/.config/opencode/plugins/,匹配 *.ts 和 *.js)
 ./bin/meisijiya plugin list
 
-# 验证所有 plugin 的 TypeScript 语法(需要 bun)
+# 验证 .ts plugin(走 bun check;*.js 不在范围内)
 ./bin/meisijiya plugin verify
 
 # 装到 PATH(任意一处)
 ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 ```
 
-**只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check`,没有 bun 会报错提示安装。
+**只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check`,没有 bun 会报错提示安装。**注意:**本 README 文档化的 hard-layer plugin(`meisijiya-skills.js`)是 `.js`,**不被 `plugin verify` 覆盖**。
 
 ### OpenCode Plugin(硬层 skill 注入)
 
@@ -151,15 +152,15 @@ cp .opencode/plugins/meisijiya-skills.js \
    ~/.config/opencode/plugins/meisijiya-skills.js
 ```
 
-> 实测 `ln -sf` 软链接不被 OpenCode plugin loader 拾起,**用 `cp` 实复制**。
+> 本 README 文档化的是 `cp` 实复制路径(经验证可工作);`ln -sf` 软链路径行为未做独立验证,若需使用请自行核对 plugin loader 当前实现。
 
-**Reload:** OpenCode 不会自动重读 plugins 目录。改完插件或 bootstrap 内容后,点面板底部 **"重新加载 OpenCode"** 按钮。
+**Reload:** OpenCode 不会自动重读 plugins 目录。改完插件或 bootstrap 内容后,**退出 / 重启 OpenCode 后重开 session**。
 
 **禁用:** `rm ~/.config/opencode/plugins/meisijiya-skills.js`
 
 **机制**(与 superpowers 同款):
 
-- `config` hook — 注册 `~/.agents/skills` 到 OpenCode skill tool
+- `config` hook — 重新声明 `~/.agents/skills` 到 OpenCode skill tool(OpenCode 已原生扫描该路径,此 re-registration 属 defensive / redundant,不是发现 skill 的前提)
 - `experimental.chat.messages.transform` hook — 每 step 把 bootstrap 内容 unshift 到 `firstUser.parts`
 - **In-memory only,不持久化 DB**:OpenCode 每 step 从 DB 重载 messages,bootstrap 每次重新注入(不是 bug,是 superpowers 同款设计)
 - **bootstrap 锚定在 firstUser**:只第一条 user message 含 bootstrap,后续 user message 不污染;LLM 通过 conversation history 每步都看到
@@ -173,10 +174,10 @@ cp .opencode/plugins/meisijiya-skills.js \
 
 ## 前置依赖
 
-- **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`)
-- **planning-with-files** 必须安装(`/plugin marketplace add OthmanAdi/planning-with-files`)
+- **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`,本 fork 围绕 omo 设计)
+- **planning-with-files**(完整 PWF 工作流推荐):`npx skills add OthmanAdi/planning-with-files --skill planning-with-files -g`。注:`/plugin marketplace add ...` 是 Claude Code 专属命令,OpenCode 用 skills CLI(`npx skills add`)
 - **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
-- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill`(build-gate-visual-review 需要,装到 `~/.agents/skills/`)
+- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill -g`(build-gate-visual-review 需要,装到 `~/.agents/skills/`)
 
 ## 写作规范
 
@@ -195,6 +196,12 @@ MIT
 ## 当前状态
 
 最近 tag: **v0.5.2**(19 个 SKILL.md / 19 个 eval case;**8 `core/` + 11 `extra/`**)
+
+### Unreleased — skill system architecture cleanup
+
+- 20 个 SKILL.md / 20 个 eval case;**8 `core/` + 12 `extra/`**
+- **新增** [`skills/extra/improve-codebase-architecture/`](./skills/extra/improve-codebase-architecture/SKILL.md)(Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 模块评分,**proposal-only** — 改架构仍走 `incremental-implementation`
+- **Refactor**:9 个 SKILL.md 的 NOT for 段去硬指(17 个 skill cross-refs 移除),改为纯场景描述,具体哪个 skill 由 description 匹配决定。`using-meisijiya-skills` Skill Priority 表改软:`First Skill to invoke` → `Consider first`;`Then` → `Possible next`;表头加 soft-hints 说明。**原则**:routing 不写死,AI 按 description 自决(per `docs/skill-design-principles.md` 反对过度工程化)
 
 ### v0.5.2 — 全量 narrative hygiene
 

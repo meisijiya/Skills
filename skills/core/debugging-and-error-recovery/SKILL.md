@@ -23,11 +23,11 @@ allowed-tools: "Read Edit Bash Glob Grep"
 - 行为异常(测试通过但运行错)
 - 用户报"X 不工作了"
 
-**NOT for:**
-- 设计阶段的问题(架构选型——用 spec-driven-development)
+**NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
+- 设计阶段的纯架构选型问题(未触发 bug)
 - 已知 trivial typo
-- 文档错误(直接改)
-- 性能问题(用 performance-optimization)
+- 文档错误
+- 性能问题(非 bug 范畴)
 
 ## Process
 

@@ -29,12 +29,12 @@ allowed-tools: "Read Bash Glob Grep Write"
 - 跨团队 review(把状态发给非技术人员)
 - 复杂项目需要 sanity check
 
-**NOT for:**
+**NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
 - 纯后端 / CLI / 无 UI 项目(无视觉内容,deck 没意义)
 - Trivial 改动(< 1 个 slice)
 - 紧急 hotfix
-- **代码写完后的 QA** → 那是 [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) § 8(OMO `visual-qa` + 亲手运行)
-- **完成声明** → 那是 [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
+- 代码写完后的 QA / 走查
+- 完成声明
 
 ## Process
 

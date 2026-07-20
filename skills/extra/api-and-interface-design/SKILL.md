@@ -21,11 +21,11 @@ omo 没有专门的接口设计 skill —— `frontend-ui-engineering` 偏 UI,`a
 - 发布 SDK / 公共 API
 - 重构现有接口(breaking change)
 
-**NOT for:**
+**NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
 - 内部 helper(私有函数,不需要 contract)
 - 一次性脚本(用完就丢)
-- UI-only 接口(组件 props,用 frontend-ui-engineering)
-- Database schema(用相关 migration skill)
+- UI-only 接口(组件 props)
+- Database schema 本身
 
 ## Process
 

@@ -22,11 +22,11 @@ allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 - 处理文件上传 / 下载
 - 写新 endpoint / 新 public function
 
-**NOT for:**
+**NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
 - 内部 helper(无 user input)
 - 纯展示 UI(无数据流)
 - 已经审过的代码(重复审计浪费时间)
-- **生产前 exploit hunt / CVE 复现** → OMO `security-research`
+- 生产前 exploit hunt / CVE 复现
 
 ## Process
 

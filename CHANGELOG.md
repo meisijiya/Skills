@@ -4,6 +4,49 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (codebase architecture health scan)
+
+新增 `skills/extra/improve-codebase-architecture/`(Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 模块评分,**proposal-only** —— 改架构仍走 `incremental-implementation`。
+
+**Files added (2):**
+
+- `skills/extra/improve-codebase-architecture/SKILL.md` — 6 段标准结构(Ousterhout 4 维度评分 + 三问 confusions + handoff to `incremental-implementation`);`description_chars=325`,`total_lines=135`(process skill target ≤200)
+- `evals/cases/improve-codebase-architecture.json` — 3 positive + 3 negative + 1 behavioral
+
+**Files modified (7):** `.claude-plugin/marketplace.json`(meisijiya-extra 11→12)、`skills/extra/README.md`(counts 11→12、catalog +1、怎么选 +1)、`skills/core/using-meisijiya-skills/SKILL.md`(Skill Priority 表 +1 软触发行)、`AGENTS.md` Section A(catalog .extra/ 行 +1 link;counts 数字不动,由 inject 脚本自动派生)、`pwf-integration.md`(表 3 +1;总数公式 8+12=20;pre-build/meta 3→4 项)、`README.md`(catalog tree +1、选装一览段 +1)、`CHANGELOG.md`(本条目)。
+
+**Boundary 设计**:新 skill 与 `code-simplification` 不写硬 routing 表 —— per-diff 清理和 codebase-wide 巡检是不同视角,具体场景由 description 匹配触发。`using-meisijiya-skills` 路由表只给软触发示例,智能化交给 AI 自决(per `docs/skill-design-principles.md` 反对过度工程化的原则)。
+
+### Refactored (soft routing across skill system)
+
+清理 9 个 SKILL.md 的硬 routing 表,改为软触发 + 场景描述。
+
+**Files modified (10):**
+
+- `skills/core/using-meisijiya-skills/SKILL.md` — Skill Priority 表改软:Header `(hard routing table)` → `(soft hints — not rules)`;列名 `First Skill to invoke` → `Consider first`,`Then` → `Possible next`;表头加 AI-decides-via-description 块
+- 8 个 SKILL.md 的 NOT for 段去硬指(17 个 skill cross-refs 全部移除),改为纯场景描述,具体哪个 skill 由 description 匹配决定:
+  - `skills/core/debugging-and-error-recovery/SKILL.md` — 2 refs 移除
+  - `skills/extra/api-and-interface-design/SKILL.md` — 2 refs 移除
+  - `skills/extra/build-gate-visual-review/SKILL.md` — 2 refs 移除
+  - `skills/extra/security-and-hardening/SKILL.md` — 1 ref 移除
+  - `skills/extra/performance-optimization/SKILL.md` — 2 refs 移除
+  - `skills/extra/observability-and-instrumentation/SKILL.md` — 1 ref 移除
+  - `skills/extra/code-simplification/SKILL.md` — 2 refs 移除
+  - `skills/extra/improve-codebase-architecture/SKILL.md` — 5 refs 移除
+
+**原则**(per `docs/skill-design-principles.md` 反对过度工程化):routing 不写死。`description` field 是 source of truth,AI 按 description 匹配自决;NOT for 只列场景,不指 skill 名;Priority 表是 hint accelerator,不是 routing rule。
+
+**保留为硬**(评估为合理):
+- AGENTS.md / pwf-integration.md 阶段映射 —— **workflow 顺序纪律**(1→2→3 phase),不是 skill 选择路由
+- `skills/extra/README.md` "怎么选"表 —— **install-time** 选哪个装 ≠ invoke-time 用哪个,不同维度
+- SKILL.md "Related Skills" 段 —— 导航引用,不是 routing 规则
+
+**Verified:**
+- `validate-skills.sh`: 20 / 20 OK
+- `check-marketplace.sh`: OK 20 skills in sync
+- Python 正则扫描 8 个 NOT for 段:0 命中 `→ [skill` / `用 [skill` / `OMO \`skill`
+- `git diff --check`: clean
+
 ### Added (v0.5.2 — rollback protocol + review-work critical-severity routing)
 
 Closes the audit gap on "what do we record when code must be rolled back?" — v0.5.1 had requirement-change routing but no symmetric rollback routing. v0.5.2 adds it without inventing a new skill.

@@ -22,20 +22,21 @@ This is not optional. Skills encode team-validated discipline; bypassing them be
 
 Then announce **"Using [skill] to [purpose]"** and follow it exactly. If the Skill has a checklist, create a todo per item.
 
-## Skill Priority (hard routing table)
+## Skill Priority (soft hints — not rules)
 
-When multiple Skills could apply, **process skills come first** — they're the discipline layer; the rest are tools.
+> **AI decides via description match.** Each skill's `description` field is the source of truth for whether to invoke it. This table is a **hint accelerator** for common request patterns — read it as "consider this skill first," not as "must invoke this skill." When multiple skills could apply, **process skills come first** (they're the discipline layer; the rest are tools).
 
-| Trigger (user request pattern) | First Skill to invoke | Then |
+| Trigger (user request pattern) | Consider first | Possible next |
 |---|---|---|
 | "Let's build X" / "implement Y" / new feature | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) → [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) |
 | "Fix this bug" / "X is broken" / "X is wrong" | [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
 | "About to claim done" / "ready to commit/PR" | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | (invoke OMO `review-work` per Stage 2) |
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
+| Codebase health scan / on-boarding unfamiliar codebase / weekly architecture review | [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) | (proposal-only output; defer to `incremental-implementation` for action) |
 | Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
 
-**Project-level AGENTS.md and direct user instructions override this priority** — only skip Skills when the human partner has explicitly told you to.
+**Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
 
 ## Red Flags — STOP, you're rationalizing
 
