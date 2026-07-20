@@ -51,7 +51,7 @@ Read the spec (from [`spec-driven-development`](~/.agents/skills/spec-driven-dev
 - Key screens (dashboard / landing / checkout / etc.)
 - Brand mood (luxury / playful / minimal / brutalist / etc.)
 
-If spec is missing info, use [`interview-me`](~/.agents/skills/interview-me/SKILL.md) to clarify.
+If spec is missing info, use [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) to clarify.
 
 ### 3. Generate design spec via ui-ux-pro-max
 

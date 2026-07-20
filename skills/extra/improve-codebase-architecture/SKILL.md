@@ -104,7 +104,7 @@ handoff 协议:
 | "agent 已经知道要 refactor 哪里,不用写清单" | agent 的判断是局部视角;codebase-wide 视角才能发现跨文件耦合 |
 | "每周都跑太机械了" | 节奏是建议,不是义务;触发场景满足就跑 |
 | "Ousterhout 框架太学术" | 4 维度评分是反"差不多"机制 —— 没有这个,候选清单会塞一堆"我觉得该改" |
-| "已经有 code-simplification 了,干嘛再加一个" | per-diff 清理 vs codebase-wide 巡检 —— 不同视角,具体场景由 description 匹配 |
+| "已经有 OMO refactor 系列了,干嘛再加一个" | OMO `refactor` / `ponytail-review` / `remove-ai-slops` 是 per-diff 清理,本 skill 是 codebase-wide 巡检 —— 不同视角,具体场景由 description 匹配 |
 | "改架构风险太大,等出问题再说" | 出问题再改 = 救火;巡检 = 提前规划 |
 
 ## Red Flags

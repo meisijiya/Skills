@@ -23,7 +23,7 @@
     {
       "input": "Refactor this 500-line module, it's hard to read",
       "expected_no_skill": true,
-      "reason": "Per-diff scope, route to code-simplification / OMO refactor"
+      "reason": "Per-diff scope, route to OMO refactor / ponytail-review / remove-ai-slops"
     },
     {
       "input": "Our API endpoint is returning 500s, debug it",

@@ -161,5 +161,4 @@ See [pwf-integration.md](../../pwf-integration.md) for full phase mapping.
 ## Related Skills
 
 - Successor: [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — refines Design into formal Spec, runs attestation
-- Backward-compat alias: [`interview-me`](~/.agents/skills/interview-me/SKILL.md) — one-question-at-a-time discipline moved here
 - Cross-references meta: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md)

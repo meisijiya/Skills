@@ -37,10 +37,10 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
-**.extra/ — load on demand (11):**
-[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) · [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`interview-me`](~/.agents/skills/interview-me/SKILL.md) · [`code-simplification`](~/.agents/skills/code-simplification/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) · [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md)
+**.extra/ — load on demand (10):**
+[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) · [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) · [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md)
 
-Canonical write-side note: `writing-skills` is meta-only and lives in `extra/`; `interview-me` and `code-simplification` are backward-compat aliases (route to `brainstorming` and OMO refactor series respectively).
+Canonical write-side note: `writing-skills` is meta-only and lives in `extra/`.
 
 ### Skill chains (process order)
 

@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 12 个)
+# Extra Skills(选装集 · 10 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -8,14 +8,14 @@
 
 | 你的项目... | 装这些 |
 |---|---|
-| 任何代码 | `code-simplification` · `security-and-hardening` · `api-and-interface-design` · `improve-codebase-architecture` |
+| 任何代码 | `security-and-hardening` · `api-and-interface-design` · `improve-codebase-architecture` |
 | 有 UI | `designer-handoff`;仅在明确要求实现前文本对齐、视觉 deck 或教学 deck 时再装 `build-gate-visual-review` |
 | 上线运营 | `observability-and-instrumentation` · `performance-optimization` |
 | 多人 / 长期 | `documentation-and-adrs` |
 | 用了 planning-with-files | `pwf-enforcer`(把 PWF 软遵守升级为硬触发) |
 | 创建/编辑 skill | `writing-skills` |
 
-## 12 个 skill 一览
+## 10 个 skill 一览
 
 | Skill | 一句话 |
 |---|---|
@@ -23,8 +23,6 @@
 | [`pwf-enforcer`](./pwf-enforcer/) | 把 PWF 的软遵守变硬触发(OpenCode plugin + AGENTS.md 软提醒) |
 | [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求视觉 deck 或教学 deck 时才按需使用 html-ppt;UI、build、复杂度或 PWF phase 单独出现时默认跳过,**不是人工 QA** |
 | [`designer-handoff`](./designer-handoff/) | designer → eng 的 UI/UX spec 交接(用 ui-ux-pro-max) |
-| [`interview-me`](./interview-me/) | **v0.5.0 改为别名**:请直接使用 `brainstorming`(已吸收一问一答规则) |
-| [`code-simplification`](./code-simplification/) | **v0.5.0 改为别名**:请直接使用 OMO 内置 `refactor` / `ponytail-review` / `remove-ai-slops` |
 | [`api-and-interface-design`](./api-and-interface-design/) | contract-first API 设计(REST/GraphQL/RPC) |
 | [`security-and-hardening`](./security-and-hardening/) | 设计时信任边界检查 + 路由 OMO `security-research` 做深度审计(v0.5.0 纠正 OMO 能力描述) |
 | [`performance-optimization`](./performance-optimization/) | 后端 profile + 优化(**v0.5.0 卸下 CWV**:前端 CWV 走 OMO `frontend` skill) |

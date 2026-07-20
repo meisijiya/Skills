@@ -48,7 +48,7 @@ Options:
 Examples:
   $0                                          # install core/ to cwd
   $0 --target ~/projects/myapp                # install to myapp/.opencode/skills/
-  $0 --extra interview-me --extra security-and-hardening
+  $0 --extra pwf-enforcer --extra security-and-hardening
   $0 --all-extra --dry-run                    # preview all-extra install
 EOF
 }

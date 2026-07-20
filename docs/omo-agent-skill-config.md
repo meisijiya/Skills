@@ -2,7 +2,7 @@
 
 ## Overview
 
-[meisijiya-skills] installs **19 SKILL.md** files(8 `core/` + 11 `extra/`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
+[meisijiya-skills] installs **18 SKILL.md** files(8 `core/` + 10 `extra/`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
 
 本指南为每个 omo agent 推荐应装载的 skill 子集,供希望按 agent 收敛 context 的用户参考。
 
@@ -15,15 +15,15 @@
 - **Less noise** — fewer "which skill applies?" decisions
 - **Clearer intent** — agent's role + skill set align
 
-Sisyphus (main orchestrator) gets **all 19** (it routes everything). All other agents get a subset.
+Sisyphus (main orchestrator) gets **all 18** (it routes everything). All other agents get a subset.
 
 ## Recommended per-agent config
 
 | omo Agent | Recommended skills | Why |
 |---|---|---|
-| **sisyphus** | (all 19) | Main orchestrator — full visibility needed |
+| **sisyphus** | (all 18) | Main orchestrator — full visibility needed |
 | **hephaestus** | brainstorming, spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development | Deep autonomous executor — full discipline stack |
-| **prometheus** | brainstorming, spec-driven-development | Strategic planner — question-quality + spec discipline(`brainstorming` 已吸收原 `interview-me` 的一问一答规则) |
+| **prometheus** | brainstorming, spec-driven-development | Strategic planner — question-quality + spec discipline |
 | **atlas** | using-meisijiya-skills, incremental-implementation | Todo orchestrator — meta + slice guidance |
 | **oracle** | source-driven-development, debugging-and-error-recovery, api-and-interface-design | Read-only consultant — verification + interface design |
 | **librarian** | source-driven-development | Docs/OSS search — needs verification |
@@ -57,7 +57,7 @@ Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-m
     },
     "prometheus": {
       "model": "kimi-for-coding/k2p5",
-      "skills": ["interview-me", "spec-driven-development"]
+      "skills": ["brainstorming", "spec-driven-development"]
     },
     "atlas": {
       "model": "google/gemini-3-flash",
@@ -111,7 +111,7 @@ Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-m
 After applying:
 
 1. Restart omo session.
-2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 19.
+2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 18.
 3. Dispatch a task to `hephaestus` and list its skills — should see only the 5 recommended.
 4. Spot-check 2-3 other agents.
 

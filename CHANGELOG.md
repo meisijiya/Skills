@@ -4,6 +4,23 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Removed (legacy alias deletion + Kanban ticket board)
+
+**Two backward-compat alias SKILL.md and their eval cases removed** because canonical replacements already cover their content and the repo is single-user:
+
+- `skills/extra/interview-me/` (63 行) — canonical: `brainstorming`
+- `skills/extra/code-simplification/` (86 行) — canonical: OMO `refactor` / `ponytail-review` / `remove-ai-slops`
+- `evals/cases/interview-me.json`、`evals/cases/code-simplification.json` — corresponding eval cases
+- `~/.agents/skills/interview-me/`、`~/.agents/skills/code-simplification/` — user-level install copies
+
+**Files modified (11):** `.claude-plugin/marketplace.json`(移除 2 path;counts 12→10)、`AGENTS.md`(catalog 11→10、移除 canonical-note 别名说明)、`README.md`(tree + install examples + Unreleased 计数)、`skills/extra/README.md`(10 个;移除 2 alias 行)、`skills/extra/designer-handoff/SKILL.md`(`interview-me` → `brainstorming`)、`skills/extra/improve-codebase-architecture/SKILL.md`(`code-simplification` → OMO refactor 系列)、`skills/core/brainstorming/SKILL.md`(移除 Related Skills 中 backward-compat alias 行)、`pwf-integration.md`(Phase 6 行删除;alias 段删除;counts 12→10)、`docs/omo-agent-skill-config.md`(counts 19→18 + prometheus 重路由)、`scripts/install.sh`(example `interview-me` → `pwf-enforcer`)、`evals/cases/documentation-and-adrs.json`、`evals/cases/improve-codebase-architecture.json`(active 引用迁移)。
+
+**Enhanced:** `skills/core/incremental-implementation/SKILL.md` 升级为 **Kanban ticket board** —— Phase 3 = ticket DAG;`blockedBy` 构成可执行 frontier(OMO `atlas` 据此排程,`parallel=true` 同 frontier 批量派出)。新增 ticket 字段 `title` / `goal` / `scope` / `acceptance`(Kanban 契约)。新增 `§ 3.1 Ticket DAG 与 executable frontier` / `§ 3.2 NO horizontal decomposition` / `§ 3.3 Tracer Bullet first-ticket` —— 首条 ticket 强制最小范围贯穿 data → service → real consumer。原有切片大小、TDD、rollback、review-work 桥接、状态机全部保留。
+
+**Skill 数量:** 8 `core/` + 10 `extra/` = **18**(从 20 收缩)。`evals/cases/` = **18**。
+
+**Verified:** `validate-skills.sh` 18/0/2(2 个 pre-existing warning,与本次无关);`check-marketplace.sh` 18 skills in sync;`python3 -m json.tool` 18/18 通过;`git diff --check` clean;`~/.agents/skills/{interview-me,code-simplification}` 已删除且 snapshot diff 仅 2 行。
+
 ### Added (codebase architecture health scan)
 
 新增 `skills/extra/improve-codebase-architecture/`(Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 模块评分,**proposal-only** —— 改架构仍走 `incremental-implementation`。

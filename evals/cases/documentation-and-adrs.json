@@ -40,7 +40,7 @@
     {
       "scenario": "User asks: 'PostgreSQL or MongoDB?'",
       "expected_behavior": [
-        "Agent loads interview-me first to extract requirements (read/write ratio, query patterns, scale)",
+        "Agent invokes brainstorming first to extract requirements (read/write ratio, query patterns, scale)",
         "Agent then writes ADR with: Context / Options Considered / Decision / Consequences / Reversibility",
         "Agent documents pros/cons of EACH option considered (not just the chosen one)",
         "Agent states consequences BOTH positive and negative",

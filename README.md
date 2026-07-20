@@ -33,14 +33,12 @@ meisijiya-skills/
 │   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(12 个,按需装)
-│       ├── README.md          ← 12 个 skill + "怎么选" 决策表
+│   └── extra/                ← 选装集(10 个,按需装)
+│       ├── README.md          ← 10 个 skill + "怎么选" 决策表
 │       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/        ← intent-gated pre-build alignment (Markdown by default; html-ppt only for explicit visual/teaching decks)
 │       ├── designer-handoff/
-│       ├── interview-me/                    ← backward-compat alias (canonical: brainstorming)
-│       ├── code-simplification/             ← backward-compat alias (canonical: OMO refactor series)
 │       ├── api-and-interface-design/
 │       ├── security-and-hardening/          ← trust-boundary hardening;depth audit via OMO security-research
 │       ├── performance-optimization/        ← backend profile + measure-first
@@ -54,7 +52,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(20 个)
+    └── cases/                 ← 每个 skill 的 eval case(18 个)
 ```
 
 ## 安装
@@ -71,7 +69,7 @@ npx skills add meisijiya/Skills
 npx skills add meisijiya/Skills --skill pwf-enforcer
 
 # 装多个选装
-npx skills add meisijiya/Skills --skill interview-me --skill security-and-hardening
+npx skills add meisijiya/Skills --skill pwf-enforcer --skill security-and-hardening
 
 # 看仓库有哪些 skill 可装
 npx skills add meisijiya/Skills --list
@@ -90,7 +88,7 @@ npx skills add meisijiya/Skills -g
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(8 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
-- **选装集**(12 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+- **选装集**(10 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
 
@@ -106,7 +104,7 @@ scripts/install.sh
 scripts/install.sh --target /path/to/your-project
 
 # 装 core/ + 指定的几个 extra/
-scripts/install.sh --extra interview-me --extra security-and-hardening
+scripts/install.sh --extra pwf-enforcer --extra security-and-hardening
 
 # 装全部(必装 + 选装)
 scripts/install.sh --all-extra
@@ -199,7 +197,8 @@ MIT
 
 ### Unreleased — skill system architecture cleanup
 
-- 20 个 SKILL.md / 20 个 eval case;**8 `core/` + 12 `extra/`**
+- 18 个 SKILL.md / 18 个 eval case;**8 `core/` + 10 `extra/`**
+- **删除 alias**:`skills/extra/interview-me` 与 `skills/extra/code-simplification` 两个 backward-compat alias 已下线,active 引用全部迁至 `brainstorming` 与 OMO `refactor` / `ponytail-review` / `remove-ai-slops`;`incremental-implementation` 增强为 Kanban ticket board + Tracer Bullet 首条全链路切片
 - **新增** [`skills/extra/improve-codebase-architecture/`](./skills/extra/improve-codebase-architecture/SKILL.md)(Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 模块评分,**proposal-only** — 改架构仍走 `incremental-implementation`
 - **Refactor**:9 个 SKILL.md 的 NOT for 段去硬指(17 个 skill cross-refs 移除),改为纯场景描述,具体哪个 skill 由 description 匹配决定。`using-meisijiya-skills` Skill Priority 表改软:`First Skill to invoke` → `Consider first`;`Then` → `Possible next`;表头加 soft-hints 说明。**原则**:routing 不写死,AI 按 description 自决(per `docs/skill-design-principles.md` 反对过度工程化)
 
