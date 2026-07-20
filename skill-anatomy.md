@@ -129,6 +129,52 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 **CI 会自动跑 step 1-4**。任何漂移 → PR 失败。
 
+## 安装完整性(Install Integrity)
+
+`npx skills add <repo> --skill <name>` 把整个 skill 目录**递归**拷贝到目标位置(默认 `~/.agents/skills/<name>/`),**不只是 `SKILL.md`**。
+
+### 关键事实
+
+- **递归拷贝**:`src/installer.ts` 的 `copyDirectory()` 递归复制所有子目录与文件
+- **硬排除集**(源码 `EXCLUDE_FILES` / `EXCLUDE_DIRS`):
+  - 文件:`metadata.json`
+  - 目录:`.git/`、`__pycache__/`、`__pypackages__/`
+- **目标布局**:`<target>/<skill-name>/` 与源目录**结构完全一致**(子目录、文件名都保留)
+- **全局 vs 项目**:`-g` 全局装到 `~/.agents/skills/`、项目级装到 `./.agents/skills/`,都走相同递归逻辑
+- **current version**:v1.5.19(2026-07-16)非扁平 skill 结构完全支持
+
+### 历史 bug(已修复)
+
+| Issue / PR | 状态 |
+|---|---|
+| Issue #3 "npx skills add only installs SKILL.md, omitting prompts/" | 已修 |
+| Issue #753 "CLI fails to download subdirectories within --skill filter" | 已修 |
+| PR #1609 "fix: install full skill directory for root-level SKILL.md repos" | merged |
+
+### 现有非扁平 skill 范例
+
+- [`skills/extra/pwf-enforcer/templates/pwf-enforcer.ts`](skills/extra/pwf-enforcer/templates/pwf-enforcer.ts) —— SKILL.md 之外的支撑文件,正确由递归拷贝处理
+- [`skills/extra/verify-chain/prompts/{critic,verifier,repairer}.md`](skills/extra/verify-chain/prompts/) —— 3 角色流水线 prompt,作为 subagent 注入内容
+
+### 手验方法
+
+```bash
+# 全局安装
+npx skills add <repo> --skill <name> -g -y -a opencode
+
+# 验证目标目录含全部文件(应该看到 SKILL.md + 任何支撑文件/子目录)
+ls -R ~/.agents/skills/<name>/
+
+# 清理(测试后)
+npx skills remove <name> -g -a opencode
+```
+
+### 命名约束
+
+- YAML frontmatter `name: <kebab-case>` 必须跟 `--skill <name>` 精确匹配(CLI 同时支持匹配 frontmatter `name` 和目录 basename)
+- **不要**在 skill 根目录放名为 `metadata.json` 的文件(会被硬排除)
+- 不在硬排除集中的任意文件名都安全(包括 `prompts/`、`references/`、`scripts/`、`assets/`、`templates/` 等)
+
 ### 已知约束
 
 - `npx skills add` CLI 用 `pluginName` 字段做 group header(`pluginName = name`)

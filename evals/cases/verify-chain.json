@@ -1,0 +1,56 @@
+{
+  "name": "verify-chain",
+  "version": "0.1.0",
+  "description": "3-role article fact-checking pipeline (Critic extracts claims, parallel Verifier subagents verify with web search, Repairer fixes errors). Writes .verification/article-verified.md + .verification/verification-report.md.",
+  "positive_triggers": [
+    {
+      "input": "I just finished writing a K8s upgrade guide, please verify accuracy",
+      "expected_skill": "verify-chain",
+      "reason": "User finished writing IT article + asks for verification"
+    },
+    {
+      "input": "/verify-chain this article about Spring Boot 4 new features",
+      "expected_skill": "verify-chain",
+      "reason": "Explicit slash-command trigger with article context"
+    },
+    {
+      "input": "帮我核查一下这篇文章有没有错误，关于 Docker 网络模式",
+      "expected_skill": "verify-chain",
+      "reason": "Chinese '核查' trigger + IT article domain"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "My Python code has a bug, help me debug",
+      "expected_no_skill": true,
+      "reason": "Code debugging, route to debugging-and-error-recovery"
+    },
+    {
+      "input": "Help me write a K8s tutorial from scratch",
+      "expected_no_skill": true,
+      "reason": "Writing new article, route to brainstorming → spec-driven-development"
+    },
+    {
+      "input": "What's the difference between REST and GraphQL?",
+      "expected_no_skill": true,
+      "reason": "General Q&A, not an article to fact-check"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User provides a finished IT article (e.g., K8s HPA configuration guide) and asks to verify",
+      "expected_behavior": [
+        "Agent invokes Critic system prompt from prompts/critic.md first, extracts ≥5 claims (Fact/Version/CommandConfig/BestPractice/Claim/Gap)",
+        "Agent launches N parallel OMO general subagents, each carrying verifier.md + ONE single claim",
+        "Verifier subagents DO NOT receive Critic's full output, article body, or other claims (context isolation hard constraint)",
+        "Each Verifier uses WebSearch + WebFetch to consult authoritative sources (official docs, GitHub source, MDN/ArchWiki/RFC), avoiding CSDN/juejin/personal blogs",
+        "Verifier subagent output: ✅/⚠️/❌/❓ per claim + URL sources + fix suggestions",
+        "Repairer (prompts/repairer.md) receives only ⚠️/❌/❓ results (NEVER ✅), applies minimal-change fixes per strategy table",
+        "Agent writes .verification/article-verified.md (fixed article) + .verification/verification-report.md (full audit)",
+        "If user said '先审再改' or '只查不改', agent pauses/skips Repairer per mode"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker. The three-role pipeline + context isolation + authoritative-source-only are the load-bearing constraints — verify-chain is useless without them."
+}

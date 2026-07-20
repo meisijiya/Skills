@@ -25,7 +25,8 @@
         "./skills/extra/performance-optimization",
         "./skills/extra/observability-and-instrumentation",
         "./skills/extra/documentation-and-adrs",
-        "./skills/extra/improve-codebase-architecture"
+        "./skills/extra/improve-codebase-architecture",
+        "./skills/extra/verify-chain"
       ]
     }
   ]

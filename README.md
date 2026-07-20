@@ -195,11 +195,13 @@ MIT
 
 最近 tag: **v0.5.2**(19 个 SKILL.md / 19 个 eval case;**8 `core/` + 11 `extra/`**)
 
-### Unreleased — skill system architecture cleanup
+### Unreleased
 
-- 18 个 SKILL.md / 18 个 eval case;**8 `core/` + 10 `extra/`**
-- **删除 alias**:`skills/extra/interview-me` 与 `skills/extra/code-simplification` 两个 backward-compat alias 已下线,active 引用全部迁至 `brainstorming` 与 OMO `refactor` / `ponytail-review` / `remove-ai-slops`;`incremental-implementation` 增强为 Kanban ticket board + Tracer Bullet 首条全链路切片
-- **新增** [`skills/extra/improve-codebase-architecture/`](./skills/extra/improve-codebase-architecture/SKILL.md)(Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 模块评分,**proposal-only** — 改架构仍走 `incremental-implementation`
+- 19 个 SKILL.md / 19 个 eval case;**8 `core/` + 11 `extra/`**
+- **新增 verify-chain**([`skills/extra/verify-chain/`](./skills/extra/verify-chain/SKILL.md)):3 角色文章事实核查流水线 —— Critic 提断言 → Verifier × N 并行联网核查(独立 context)→ Repairer 最小化修复。输入 IT 技术文章,输出 `.verification/article-verified.md` + `.verification/verification-report.md`。`prompts/{critic,verifier,repairer}.md` 3 个支撑文件随 `npx skills add` 完整递归复制(per `vercel-labs/skills` v1.5.19+ `installSkillForAgent` → `copyDirectory` 实现)
+- **skill-anatomy.md 新增** `## 安装完整性(Install Integrity)` 节,说明 `npx skills add` 递归复制原理、硬排除集(`metadata.json` + `.git/` + `__pycache__/` + `__pypackages__/`)、手验方法;引用 `pwf-enforcer/templates/pwf-enforcer.ts` 作为既有非扁平 skill 范例
+- **删除 alias**(`skills/extra/interview-me` 与 `skills/extra/code-simplification`):两个 backward-compat alias 已下线,active 引用全部迁至 `brainstorming` 与 OMO `refactor` / `ponytail-review` / `remove-ai-slops`;`incremental-implementation` 增强为 Kanban ticket board + Tracer Bullet 首条全链路切片
+- **新增 improve-codebase-architecture**([`skills/extra/improve-codebase-architecture/`](./skills/extra/improve-codebase-architecture/SKILL.md),Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 评分,**proposal-only** —— 改架构仍走 `incremental-implementation`
 - **Refactor**:9 个 SKILL.md 的 NOT for 段去硬指(17 个 skill cross-refs 移除),改为纯场景描述,具体哪个 skill 由 description 匹配决定。`using-meisijiya-skills` Skill Priority 表改软:`First Skill to invoke` → `Consider first`;`Then` → `Possible next`;表头加 soft-hints 说明。**原则**:routing 不写死,AI 按 description 自决(per `docs/skill-design-principles.md` 反对过度工程化)
 
 ### v0.5.2 — 全量 narrative hygiene

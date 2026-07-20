@@ -4,6 +4,24 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (verify-chain — 3-role article fact-checking pipeline)
+
+**New skill:** [`skills/extra/verify-chain/`](skills/extra/verify-chain/SKILL.md) —— 3 角色 IT 技术文章事实核查流水线。
+
+- **架构**:Critic(主上下文串行)→ Verifier × N(OMO `general` subagent 并行,每个独立 context window)→ Repairer(主上下文串行)
+- **支撑文件**:`prompts/{critic,verifier,repairer}.md` 3 文件,从源仓库 `qiyisoft001/verify-chain@verify-chain` 字节级拷贝(sha256 一致)
+- **输出**:用户项目根(CWD)的 `.verification/article-verified.md`(修复后文章)+ `.verification/verification-report.md`(完整核查报告)
+- **4 种模式**:全自动 / 先审再改 / 只查不改 / 重点检查
+- **硬约束**:Critic 不评判 / Verifier 独立 context(不接收 Critic 输出、原文、其他断言) / Verifier 仅用 WebSearch+WebFetch 联网核查 / Repairer 只接 ⚠️/❌/❓(不接受 ✅)
+
+**Files modified (5):** `.claude-plugin/marketplace.json`(+1 entry;10→11)、`skills/extra/README.md`(标题 10→11、「怎么选」表 + 1 行、一览表 + 1 行、依赖表 + 1 行)、`README.md`(仓库根,Unreleased 段加 1 条 + 计数 18→19)、`skill-anatomy.md`(新增 `## 安装完整性` 节,说明 `npx skills add` 递归复制原理 + 硬排除集 + 手验方法)、`evals/cases/verify-chain.json`(新增,3 positive + 3 negative + 1 behavioral)。
+
+**Skill 数量:** 8 `core/` + 11 `extra/` = **19**(从 18 增长)。`evals/cases/` = **19**。
+
+**Install 完整性保证**:`prompts/` 子目录被 `npx skills add --skill verify-chain` 递归拷贝到 `~/.agents/skills/verify-chain/prompts/{critic,verifier,repairer}.md`(per `vercel-labs/skills` v1.5.19+ `installSkillForAgent` → `copyDirectory` 实现,硬排除集仅 `metadata.json` + `.git/` + `__pycache__/` + `__pypackages__/`)。
+
+**Verified:** `validate-skills.sh` 19/0/2(2 个 pre-existing warning,与本次无关);`check-marketplace.sh` OK 19 skills in sync;`python3 -m json.tool evals/cases/verify-chain.json` 通过;3 对 prompt 文件 sha256 字节级一致;`git diff --check` clean。
+
 ### Removed (legacy alias deletion + Kanban ticket board)
 
 **Two backward-compat alias SKILL.md and their eval cases removed** because canonical replacements already cover their content and the repo is single-user:
