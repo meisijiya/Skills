@@ -20,6 +20,10 @@ import { join } from "node:path"
 
 const HOME = process.env.HOME || process.env.USERPROFILE || ""
 
+// Per-session dedup state for tool.execute.after reminders.
+const PWF_REMINDER_MARKER = "[pwf-enforcer] Update progress.md"
+const remindedSessions = new Map<string, Set<string>>()
+
 // Resolve PWF directory: user-level first (canonical), project-level fallback.
 // Falls back to project-level copies for dev/debug, vendor copies, CI sandboxes.
 function resolvePwfDir(cwd: string): string {
@@ -89,8 +93,6 @@ const PWF_REMINDER = `
 If a \`task_plan.md\` exists (project root or \`.planning/<id>/\`):
 - **Phase discipline**: stay in the current \`in_progress\` phase; do not jump ahead.
 - **After Write/Edit**: update \`progress.md\` with what you just did. If a phase completes, flip its status in \`task_plan.md\`.
-- **Before /compact**: the plugin pushes plan head into the compaction prompt via \`experimental.session.compacting\` — plan survives context compression.
-- **Stop**: advisory only on OpenCode (Tier 3). If phases incomplete, you decide whether to continue.
 
 If no \`task_plan.md\`: this is a quick task, no PWF required.
 `.trim()
@@ -113,6 +115,11 @@ export const PwfEnforcer: Plugin = async ({ client, directory }) => {
     // 1. Inject PWF reminder into every system prompt turn.
     "experimental.chat.system.transform": async (_input, output) => {
       output.system.push(PWF_REMINDER)
+    },
+
+    // 1b. Reset per-turn dedup state on each new user message.
+    "chat.message": async (input, _output) => {
+      remindedSessions.set(input.sessionID, new Set())
     },
 
     // 2. Rewrite write/edit tool descriptions so the model sees the reminder
@@ -141,9 +148,17 @@ export const PwfEnforcer: Plugin = async ({ client, directory }) => {
     "tool.execute.after": async (input, output) => {
       if (input.tool !== "write" && input.tool !== "edit") return
       if (!planExists(directory)) return
+      if (typeof output?.output !== "string") return
+      const reminded = remindedSessions.get(input.sessionID) ?? new Set<string>()
+      if (reminded.has(input.tool)) return
+      if (output.output.includes(PWF_REMINDER_MARKER)) return
+      reminded.add(input.tool)
+      remindedSessions.set(input.sessionID, reminded)
       output.output =
         output.output +
-        "\n\n[pwf-enforcer] Update progress.md with what you just did. If a phase is now complete, update task_plan.md status."
+        "\n\n" +
+        PWF_REMINDER_MARKER +
+        " with what you just did. If a phase is now complete, update task_plan.md status."
     },
 
     // 5. Compaction — push plan head into the compaction context. The most
