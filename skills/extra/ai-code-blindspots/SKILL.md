@@ -111,9 +111,9 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 - `Promise.then(success)` without `.catch()` — rejection unhandled.
 
 **Grep fallback patterns** (best-effort static layer; LLM scan in Step 2 catches what these miss — see Process § 3 for the full safety-net story):
-- `catch\s*(\([^)]*\))?\s*\{\s*\}` — empty catch body, including ES2019 optional-binding `catch {}` (the `(\(...\))?` group makes the error-binding parens optional).
-- `catch\s*\([^)]*\)\s*\{[^}]*console\.(error|warn|log)[^}]*\}` — single-line catch that only logs; **does NOT span multi-line bodies** (`[^}]*` terminates at the first inner `}`). Use `pcregrep -M` or `git grep -P` with a multi-line regex if your code base has multi-line catch blocks.
-- `console\.(error|warn|log)\([^)]*\)` within 3 lines after `catch` keyword (heuristic fallback for multi-line catches; LLM scan validates intent).
+- `catch\s*(\([^)]*\))?\s*\{\s*\}` — empty catch body, including ES2019 optional-binding `catch {}` (the `(\(...\))?` makes the error-binding parens optional).
+- `catch\s*(\([^)]*\))?\s*\{[\s\S]*?console\.(error|warn|log)[\s\S]*?\}` — catch that only logs (multi-line safe via `[\s\S]*?` lazy match; **run with `grep -Pz`** so the pattern can span newlines). Does NOT confirm whether error is rethrown downstream.
+- `console\.(error|warn|log)\(` within 3 lines after `catch` keyword (heuristic fallback for multi-line matches).
 
 #### Class 4 — Environment compatibility
 
@@ -126,7 +126,9 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 - `crypto.randomUUID()` used in code targeting browsers < Chrome 92 / Safari 15.4.
 
 **Grep fallback patterns:**
-- `(^|[^a-zA-Z])(fs\.|process\.env|Buffer\.|__dirname|__filename)` — Node-only globals/APIs.
+- `(^|[^a-zA-Z])(fs\.|process\.env|Buffer\.|__dirname|__filename)` — Node-only globals/APIs (covers inline usage).
+- `require\(\s*['"](fs|node:fs|node:path|node:os|node:crypto)['"]\s*\)` — CJS `require('fs')` / `require('node:fs')` style.
+- `import\s+.*\s+from\s+['"](fs|node:fs)['"]` — ESM `import {x} from 'fs'` style.
 - `(\.at\(\)|\?\.|\?\?=|#\w+\s*=)` — modern syntax; verify target support.
 
 **browserslist fallback:** if the project has no `browserslist` config (`.browserslistrc` / `package.json#browserslist`), the LLM scan's environment-compat sub-item is marked `unverified - no browserslist config` in the report. Grep patterns still run.
@@ -155,11 +157,12 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 - `sk-...` / `pk-...` style API keys (OpenAI, Stripe, etc.).
 - `Bearer <token>` literals.
 - DB connection strings with embedded passwords.
+- URL hits in code are often false positives — examples, docs, comments. LLM scan must validate intent before flagging.
 
 **Grep fallback patterns:**
-- `(https?://[a-zA-Z0-9./_-]+)` in non-config files (exclude `localhost` / `127.0.0.1` / `0.0.0.0` / test fixtures).
-- `(sk-[a-zA-Z0-9]{20,}|pk-[a-zA-Z0-9]{20,})` — API key shapes.
-- `(Bearer\s+[a-zA-Z0-9._-]{16,})` — bearer tokens in code (not env-var expansion).
+- `https?://[a-zA-Z0-9./_-]+` — non-config-file URLs (filter out: comments via `grep -vE '^\s*(#|//|/\*|\*)'`; test fixtures via file-name glob `*.test.* / *.spec.* / __tests__ / __fixtures__`; localhost / 127.0.0.1 / 0.0.0.0). All hits reported as `[candidate]` (URLs in code are common false positives — examples, docs, comments).
+- `sk-[a-zA-Z0-9]{20,}|pk-[a-zA-Z0-9]{20,}` — API key shapes. Reported as `[confirmed]` (rarely a false positive).
+- `Bearer\s+[a-zA-Z0-9._-]{16,}` — bearer tokens in code (not env-var expansion). Reported as `[confirmed]`.
 
 #### Class 7 — Invisible failures
 

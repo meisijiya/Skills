@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: "Periodic codebase architecture health check that surfaces shallow modules, coupling hotspots, and concept-sprawl, then proposes deepening candidates without forcing edits. Use when on-boarding an unfamiliar codebase, doing a weekly or post-surge review, or when agents seem to produce worse output than the codebase warrants."
+description: "Periodic codebase architecture health check that surfaces shallow modules, coupling hotspots, and concept-sprawl using Ousterhout's deep/shallow scoring (interface area / impl-to-interface ratio / caller cost / test ease), then proposes deepening candidates without forcing edits. Use when on-boarding an unfamiliar codebase, doing a weekly or post-surge review, or when agents seem to produce worse output than the codebase warrants. NOT for single-file refactors (use remove-ai-slops or incremental-implementation), known bugs (use debugging-and-error-recovery), new feature design (use brainstorming + spec-driven-development), performance optimization (use performance-optimization), or security review (use security-and-hardening + security-devsecops). Load by user signal OR weekly-cadence prompt — does not gate any other skill; runs as a sidecar scan. (token cost: medium-to-high — codebase scan via librarian agent or manual grep)"
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 
@@ -128,7 +128,17 @@ handoff 协议:
 
 ## pwf Integration
 
-Sub-phase skill: 输出到 `.planning/<id>/architecture-review.md`。**不入 `task_plan.md` phase**(跟 [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) 同表)。Cadence-agnostic —— 触发条件满足就跑,没有固定 schedule。
+Sub-phase skill — produces an artifact (`.planning/<id>/architecture-review.md`) but does **not** flip any `task_plan.md` phase to `complete`. Cadence-agnostic: triggered by user signal OR a weekly-cadence prompt, no fixed schedule. Runs as a **sidecar scan** — it does not gate any other skill.
+
+| PWF element | Interaction |
+|---|---|
+| Output location | `.planning/<id>/architecture-review.md` (NOT `task_plan.md` — this skill is proposal-only; see Process §4) |
+| `task_plan.md` phase status | Does **not** flip any phase to `complete`. Selected candidates feed `incremental-implementation` Phase 3 ticket board as input, not as a finished phase. |
+| `progress.md` | Append a one-line entry when the review completes: `architecture-review: N candidates (deep: K, shallow: K-h)` — counts only, no diff. |
+| `findings.md` | If a candidate is deferred to a follow-up PWF phase, link it as a `follow-up todo` entry under the relevant phase header. |
+| Cadence trigger | **User signal** is primary. **Weekly-cadence prompt** (e.g. via [`loop-me`](~/.agents/skills/loop-me/SKILL.md)) is optional; the skill is cadence-agnostic — there is no fixed schedule. |
+
+The selected candidates are sliced and executed by [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) using `architecture-review.md` as Phase 3 input. This skill never produces a diff itself.
 
 ## Related Skills
 
