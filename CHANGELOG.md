@@ -4,6 +4,75 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (meisijiya-review-router OpenCode plugin — per-Edit review reminder)
+
+**New OpenCode plugin**: [`.opencode/plugins/meisijiya-review-router.js`](.opencode/plugins/meisijiya-review-router.js) — hard-layer per-Edit reminder injection. 触发条件 `Write` / `Edit` / `apply_patch`;初版 `REMINDERS` 含 `ai-code-blindspots` + `security-and-hardening`,扩展只需在数组里加一行。
+
+**3-hook pattern** (mirrors `pwf-enforcer.ts` skeleton, 79 行 / 2.9K):
+- `chat.message` hook — per-turn state reset via `messageID` mismatch(避免 oh-my-openagent #2994 per-call reminder 浪费 30-50 calls × 12-20K tokens)
+- `tool.execute.after` hook — reminder injection;per-result dedup via `[review-router:<skill>]` marker;per-turn dedup via reminded Set;`input.tool.toLowerCase()` robustness;shape guard for MCP tools(oh-my-openagent #1746 `output.output` may be non-string)
+- `event` hook — per-session cleanup on `session.deleted`(真 SDK 契约 `event.properties.info.id`;legacy/wrong shape safe no-op,不误删状态)
+
+**Per-Edit token 成本**:~46 tokens max per user turn(2 reminders × ~21-23 tokens each)。
+
+**安装**:`cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/`(plugin 不 hot-reload,改完需重启 OpenCode)。
+
+**Files added (1):** `.opencode/plugins/meisijiya-review-router.js`。
+
+**Verified:**
+- `node --check` exits 0(语法 OK)
+- Probe `/tmp/opencode/plugin-probe.mjs`: 9 scenarios / 25 asserts / **25/25 PASS**
+- Real `opencode run "Write /tmp/opencode/qa-test.txt ..."` session 捕获 Write tool result 含 `[review-router:ai-code-blindspots]` + `[review-router:security-and-hardening]` markers
+- Oracle Reviewer Gate Round 3: **unconditional APPROVE**(2 prior rounds REJECT 后修复完成)
+
+**Skipped** (per ponytail): per-call reminder injection(被 oh-my-openagent #2994 标为浪费 token 的反模式);marker prefix `[review-router:]` 而非 `[pwf-enforcer:]`(避免与既有 plugin marker 冲突);bun hot-reload(OpenCode plugin 不支持,需重启);`module type` warning 抑制(在 `~/.config/opencode/package.json` 加 `"type": "module"` 会影响所有 plugin,不动)。
+
+### Changed (post-Phase-2 polish — A1 + A2 description & grep pattern rigor)
+
+**Why**: Phase 2 完成后,`ai-code-blindspots` + `improve-codebase-architecture` 是最被 dispatcher 频繁路由到的 2 个 extra skill,description 字段是 routing 的唯一 source of truth;rigor 不到位会直接导致 dispatcher 误路由或绕过。
+
+**Changes**:
+
+- **`skills/extra/ai-code-blindspots/SKILL.md`** — Class 3 multi-line catch 改 `[\s\S]*?` lazy match + `(\(([^)]*\))?` 可选 catch 参数绑定(ES2019);Class 4 require() 加 `require\(.+?(fs|node:fs|node:path|node:os|node:crypto)` + ESM `import.+from.+['\"](fs|node:fs|...)` 双模式;Class 6 URL filter 加 comment-line + localhost 排除 + `[candidate]` / `[confirmed]` 分级 tag
+- **`skills/extra/improve-codebase-architecture/SKILL.md`** — Description 字段从 ~750 → **939/1024 chars**;加 4 routing hints(Use when / NOT for / Load after / Token note),keywords 与 `ai-code-blindspots` / `remove-ai-slops` 明确区分(architecture health / deep/shallow / concept-sprawl / coupling hotspot);`## pwf Integration` 段从 3 行扩到 13 行 + 6-row table(output location / phase non-flipped / `progress.md` format / `findings.md` link / cadence trigger / sidecar semantics)
+
+**Files modified (2):** `skills/extra/ai-code-blindspots/SKILL.md` + `skills/extra/improve-codebase-architecture/SKILL.md`。
+
+**Skill 数量不变**:23(8 core + 15 extra)。
+
+**Verified:** `bash scripts/validate-skills.sh` 23/0/2(2 pre-existing WARN 与本次无关);`bash scripts/check-marketplace.sh` OK 23 skills in sync;`improve-codebase-architecture` description ≤ 1024 chars(strict gate)。
+
+### Changed (PWF fallback chain + CI plugin syntax check + verified eval keyword coverage)
+
+**Why**: 3 个 post-ship 改进 —— 1) PWF 在 project-level install 场景找不到脚本时回落到 no-op 而不是项目级副本;2) `.opencode/plugins/*.js` 文件不在 CI 覆盖范围(`.ts` 走 `bin/meisijiya plugin verify`);3) `ai-code-blindspots` eval 是 warning-level(documentation only),需要升级为 verified-level(CI 可执行检查)。
+
+**Changes**:
+
+- **`skills/extra/pwf-enforcer/templates/pwf-enforcer.ts`** — 新增 `resolvePwfDir(cwd)` 函数,顶层 `PWF_DIR` / `INJECT_PLAN_SH` / `CHECK_COMPLETE_SH` consts 移到 plugin 函数体内闭包,`injectPlan` / `runCheckComplete` 改为接受 `scriptPath` 参数避免对全局 const 的依赖。Resolve order: `PWF_DIR` env → user-level canonical `~/.agents/skills/planning-with-files/` → project-level fallback `<cwd>/.agents/skills/planning-with-files/` 或 `<cwd>/.opencode/skills/planning-with-files/`(dev/debug / vendor copy / CI sandbox)→ 找不到 → 返回 canonical → 既有 `existsSync` 失败 → 既有 no-op 警告不变
+- **`skills/extra/pwf-enforcer/SKILL.md`** — 3 处同步:§1 加 Resolve order 段;§4b Troubleshooting 加 fallback 验证命令;Verification checkbox 加 fallback 注释
+- **`.github/workflows/validate-skills.yml`** — 新增 2 step:
+  - `Verify .opencode/plugins/*.js parse cleanly (node --check)` — `node --check` 验证 `.js` plugin 语法(`shopt -s nullglob` 处理 0 文件情况;`::error file=$f::JS parse error` 失败定位;node 比 bun 更 portable,GH Actions + 用户开发机都不一定装 bun)
+  - `Verify eval positive keywords map to skill description (verified evals)` — 解析每个 `verified: true` eval,提取 `positive_keywords`(3-8 项),assert 每个都 substring match SKILL.md description body(case-insensitive);missing → `::error` exit 1
+- **`evals/cases/ai-code-blindspots.json`** — 加 `"verified": true` + 8 个 `positive_keywords`(`blindspots` / `AI-generated` / `AI-modified` / `boundary checks` / `error handling` / `hardcoded` / `deprecated API` / `verification stage`);`notes` 重写为 "Verified-level (2026-07-21): CI step ... asserts every entry in positive_keywords is found in the skill's SKILL.md description body. Adding/removing a category requires updating both the description AND positive_keywords in lockstep."
+
+**Files modified (4):** `.github/workflows/validate-skills.yml` + `evals/cases/ai-code-blindspots.json` + `skills/extra/pwf-enforcer/templates/pwf-enforcer.ts` + `skills/extra/pwf-enforcer/SKILL.md`。
+
+**Skill 数量不变**:23(8 core + 15 extra)。
+
+**Verified:**
+- `node --check .opencode/plugins/*.js`: 2/2 OK(`meisijiya-skills.js` + `meisijiya-review-router.js`)
+- New CI step `positive_keywords` coverage: 8/8 PASS in `ai-code-blindspots` description
+- `bash scripts/validate-skills.sh`: 23/0/2(2 pre-existing WARN 与本次无关)
+- `bash scripts/check-marketplace.sh`: OK 23 skills in sync
+- `tsc --noEmit --strict --module nodenext --moduleResolution nodenext --target es2022 --types node` on `pwf-enforcer.ts`: 0 errors(在 `/tmp` 装了 `@opencode-ai/plugin` + `@types/node` + `typescript` 验证)
+
+**Skipped** (per ponytail 'no over-engineering' rule):
+- Repo-wide verified-level upgrade 其他 22 evals — out of scope;需 per-eval keyword curation;按需 promote
+- Negative-keyword coverage(description-creep 防御) — 会 over-constrain description 表达空间;positive-only v1 已足够
+- `behavioral_rubric` 结构化 per-scenario 检查 — 超出当前 scope;documented behavior 仍为 prose guidance
+- `act` 本地跑 GitHub Actions — 100MB+ 安装,纯本地 debug;CI 是 source of truth
+- pwf-enforcer fallback 时打 warning — 会加 noise,`existsSync` 已 informative
+
 ### Changed (OMO-native alignment Phase 2)
 
 **Why**: User explicitly wants meisijiya-skills deeply aligned with omo's architecture (per [omo.dev/zh](https://omo.dev/zh)). Phase 1 added brainstorming / spec-driven-development omo integration. Phase 2 closes the remaining 7 gaps covering dispatcher, docs, and 4 extra skills.
