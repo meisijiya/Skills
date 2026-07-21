@@ -2,8 +2,6 @@
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
-> **v0.5.0 调整**:`writing-skills` 从 `core/` 迁入;`interview-me` 与 `code-simplification` 改为对应 OMO/核心 Skill 的薄别名;`documentation-and-adrs` 聚焦重大架构 ADR;`build-gate-visual-review` 明确为"设计对齐闸门"而非"人工 QA";`security-and-hardening` 路由至 OMO `security-research`;`performance-optimization` 卸下 CWV。
-
 ## 怎么选
 
 | 你的项目... | 装这些 |
@@ -22,17 +20,17 @@
 
 | Skill | 一句话 |
 |---|---|
-| [`writing-skills`](./writing-skills/) | meta: 创建 / 编辑 skill 用 TDD-for-docs 流程。也用于"我老做 X,把 X 提炼成 skill"(**v0.5.0 从 core/ 迁出**) |
+| [`writing-skills`](./writing-skills/) | meta: 创建 / 编辑 skill 用 TDD-for-docs 流程。也用于"我老做 X,把 X 提炼成 skill" |
 | [`pwf-enforcer`](./pwf-enforcer/) | 把 PWF 的软遵守变硬触发(OpenCode plugin + AGENTS.md 软提醒) |
 | [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求视觉 deck 或教学 deck 时才按需使用 html-ppt;UI、build、复杂度或 PWF phase 单独出现时默认跳过,**不是人工 QA** |
 | [`designer-handoff`](./designer-handoff/) | designer → eng 的 UI/UX spec 交接(用 ui-ux-pro-max) |
 | [`api-and-interface-design`](./api-and-interface-design/) | contract-first API 设计(REST/GraphQL/RPC) |
-| [`security-and-hardening`](./security-and-hardening/) | 设计时信任边界检查 + 路由 OMO `security-research` 做深度审计(v0.5.0 纠正 OMO 能力描述);**应用层**代码(input / auth / 集成),supply chain / deployment 走 `security-devsecops` |
+| [`security-and-hardening`](./security-and-hardening/) | 设计时信任边界检查 + 路由 OMO `security-research` 做深度审计;**应用层**代码(input / auth / 集成),supply chain / deployment 走 `security-devsecops` |
 | [`security-devsecops`](./security-devsecops/) | 供应链 + 部署安全(deps / SBOM / secrets rotation / CI/CD / IaC / container / pre-deploy gate);OMO `security-research` + `oracle` + `websearch` + `context7` 增强 |
 | [`security-incident-response`](./security-incident-response/) | 事后响应(detect / triage / contain / eradicate / recover / postmortem,NIST CSF 简化);OMO `security-research` 跑 post-incident PoC + `oracle` 决策链 + `websearch` 查 IOC |
-| [`performance-optimization`](./performance-optimization/) | 后端 profile + 优化(**v0.5.0 卸下 CWV**:前端 CWV 走 OMO `frontend` skill) |
+| [`performance-optimization`](./performance-optimization/) | 后端 profile + 优化(后端 / 数据库 / profiling;前端 CWV 走 OMO `frontend` skill) |
 | [`observability-and-instrumentation`](./observability-and-instrumentation/) | 加日志/metrics/tracing,生产可见性 |
-| [`documentation-and-adrs`](./documentation-and-adrs/) | **v0.5.0 聚焦**:只记录重大架构决策(ADR);日常文档走项目级 AGENTS.md / progress.md |
+| [`documentation-and-adrs`](./documentation-and-adrs/) | 只记录重大架构决策(ADR,跨人 / 跨时 / 不可逆);日常文档走项目级 AGENTS.md / progress.md |
 | [`improve-codebase-architecture`](./improve-codebase-architecture/) | codebase-wide 健康巡检(weekly / post-surge / on-boarding);Ousterhout deep/shallow 评分;**proposal-only** —— 改架构走 `incremental-implementation` |
 | [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic 提断言 → Verifier × N 联网核查 → Repairer 修复);输出 `.verification/article-verified.md` + `.verification/verification-report.md` |
 | [`loop-me`](./loop-me/) | 把反复做的活动形式化成可执行 workflow spec(stateful grilling session;产物 `workflows/*.md` + `NOTES.md`,**不是实现**);`disable-model-invocation: true` 仅用户 `/loop-me` 触发 |

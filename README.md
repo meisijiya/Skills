@@ -138,25 +138,31 @@ ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 
 **只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check`,没有 bun 会报错提示安装。**注意:**本 README 文档化的 hard-layer plugin(`meisijiya-skills.js`)是 `.js`,**不被 `plugin verify` 覆盖**。
 
-### OpenCode Plugin(硬层 skill 注入)
+### OpenCode Plugins(硬层 · 3 个)
 
-`.opencode/plugins/meisijiya-skills.js` 是 hard-layer OpenCode 插件,跟 [`obra/superpowers` 的 `superpowers.js`](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js) 同款机制 — 让 `using-meisijiya-skills` 在 LLM 每个调用前都出现在 firstUser.parts 里,触发模型真正高频 invoke skills(否则只在 `<available_skills>` 列表里软躺着,模型不会主动 invoke)。
+本仓库有 **3 个 OpenCode plugin**(全部 hard-layer, 注入到 LLM 调用层,不是 soft 挂载的 SKILL.md)。三者机制互补、不冲突,可独立装:
 
-**安装:**
+| Plugin | 触发层 | 安装命令 |
+|---|---|---|
+| `meisijiya-skills.js` | 每 session 首条 user message(bootstrap 注入) | `cp .opencode/plugins/meisijiya-skills.js ~/.config/opencode/plugins/` |
+| `meisijiya-review-router.js` | Write/Edit/apply_patch(per-Edit reminder) | `cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/` |
+| `pwf-enforcer.ts`(`templates/`) | 每轮 LLM + write/edit + compaction | `cp skills/extra/pwf-enforcer/templates/pwf-enforcer.ts ~/.config/opencode/plugins/` |
 
-```bash
-mkdir -p ~/.config/opencode/plugins
-cp .opencode/plugins/meisijiya-skills.js \
-   ~/.config/opencode/plugins/meisijiya-skills.js
-```
+**额外依赖:** `pwf-enforcer.ts` 还需要 PWF skill 装到 `~/.agents/skills/planning-with-files/`(`npx skills add https://github.com/OthmanAdi/planning-with-files`);否则 plugin 降级为 no-op + system.transform warning。其他两个 plugin 无外部依赖。
 
-> 本 README 文档化的是 `cp` 实复制路径(经验证可工作);`ln -sf` 软链路径行为未做独立验证,若需使用请自行核对 plugin loader 当前实现。
+> `cp` 实复制路径(经验证可工作);`ln -sf` 软链路径行为未做独立验证,若需使用请自行核对 plugin loader 当前实现。
 
-**Reload:** OpenCode 不会自动重读 plugins 目录。改完插件或 bootstrap 内容后,**退出 / 重启 OpenCode 后重开 session**。
+**Reload:** OpenCode 不会自动重读 plugins 目录。改完 plugin 或 bootstrap 后,**退出 / 重启 OpenCode 后重开 session**。
 
-**禁用:** `rm ~/.config/opencode/plugins/meisijiya-skills.js`
+**禁用:** `rm ~/.config/opencode/plugins/<plugin-name>`
 
-**机制**(与 superpowers 同款):
+**SDK 验证**(2026-07):所有 plugin 的 hook 名 + 签名匹配 OpenCode 官方 [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts)。
+
+#### `meisijiya-skills.js` — skill bootstrap 注入
+
+跟 [`obra/superpowers` 的 `superpowers.js`](https://github.com/obra/superpowers/blob/main/.opencode/plugins/superpowers.js) 同款机制 — 让 `using-meisijiya-skills` 在 LLM 每个调用前都出现在 firstUser.parts 里,触发模型真正高频 invoke skills(否则只在 `<available_skills>` 列表里软躺着,模型不会主动 invoke)。
+
+**机制:**
 
 - `config` hook — 重新声明 `~/.agents/skills` 到 OpenCode skill tool(OpenCode 已原生扫描该路径,此 re-registration 属 defensive / redundant,不是发现 skill 的前提)
 - `experimental.chat.messages.transform` hook — 每 step 把 bootstrap 内容 unshift 到 `firstUser.parts`
@@ -168,7 +174,31 @@ cp .opencode/plugins/meisijiya-skills.js \
 
 **已知限制**(per [superpowers issue #54](https://github.com/obra/superpowers/issues/54)):即使 hard-layer + superpowers-grade 强措辞,调用率仍 ~80-90%,不是 100%。模型有时仍能反 rationalization 绕过。
 
-**SDK 验证**(2026-07):hook 名 + 签名匹配 OpenCode 官方 [`packages/plugin/src/index.ts`](https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/plugin/src/index.ts)。
+#### `meisijiya-review-router.js` — per-Edit reminder 注入
+
+Write/Edit/apply_patch 工具调用完成后,在 tool result 末尾追加 reminder 引导 invoke `ai-code-blindspots` + `security-and-hardening`(REMINDERS 数组可扩展)。
+
+- **per-turn dedup**:同 turn 多次 edit 只一次提醒(`Map<sessionID, Set>` + `chat.message` hook 重置 state)
+- **per-result marker check**:同一次 tool result 已有 marker 跳过
+- 单 reminder ~21-23 tokens,2 skill = ~50 tokens/turn max
+
+#### `pwf-enforcer.ts` — PWF hard enforcement
+
+`skills/extra/pwf-enforcer/templates/pwf-enforcer.ts` 副本,7 hook point 注入 PWF 流程约束:
+
+| Hook | 触发 | 做什么 |
+|---|---|---|
+| `experimental.chat.system.transform` | 每轮 LLM | system prompt 加 PWF reminder(精简 ~40 tokens) |
+| `chat.message` | 每条 user msg | per-turn dedup state reset(`Map<sessionID, Set>`) |
+| `tool.definition` | write/edit 工具定义 | 描述改写"After calling this tool, update progress.md" |
+| `tool.execute.before` | bash | printf plan head 到 stderr(fragile backup channel) |
+| `tool.execute.after` | write/edit | per-turn dedup reminder(同 turn 多次 edit 只一次) |
+| `experimental.session.compacting` | /compact | push plan head 进 compaction context — **killer feature** |
+| `event(session.idle)` | session 闲下来 | 跑 `check-complete.sh`,advisory log warn |
+
+PWF 没装时降级为 no-op + system.transform warning。`PWF_DIR` env override + project-level fallback(`resolvePwfDir` 函数)见 [`skills/extra/pwf-enforcer/SKILL.md`](./skills/extra/pwf-enforcer/SKILL.md)。
+
+**Tier 3 限制**(OpenCode 真实):能强制注入上下文,但不能硬阻止 stop。要 hard block 切 Claude Code / Codex CLI Tier 1。
 
 ## 前置依赖
 
@@ -193,7 +223,7 @@ MIT
 
 ## 当前状态
 
-最近 tag: **v0.5.2**(19 个 SKILL.md / 19 个 eval case;**8 `core/` + 11 `extra/`**)
+最近 tag: **v0.5.2**(详细见下方 Unreleased 段、`CHANGELOG.md` 与 `git log`)
 
 ### Unreleased
 
