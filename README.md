@@ -198,6 +198,7 @@ MIT
 ### Unreleased
 
 - 20 个 SKILL.md / 20 个 eval case;**8 `core/` + 12 `extra/`**
+- **security-and-hardening 瘦身**:从 application-layer + supply chain + deployment 三合一收窄为 application-layer only。删除原 `Step 5` Dependency hygiene(挪至独立 skill);`Step 7` 改名为 `Pre-merge code review gate`,去掉 dependency / deploy 部分;Common Rationalizations / Red Flags / Verification 同步收紧。eval case 第 3 个 behavioral 重写为 app-layer focused(原 "Before deploying our auth refactor" → "Before merging our auth refactor")。
 - **新增 loop-me**([`skills/extra/loop-me/`](./skills/extra/loop-me/SKILL.md)):把反复做的活动形式化成可执行 workflow spec —— stateful grilling session(一问一答、每问带推荐答案),产物 `workflows/*.md` + `NOTES.md`(用户工作区根),**不是实现**。`disable-model-invocation: true` 仅用户 `/loop-me` 触发,防与 `brainstorming` 路由竞争;下游可喂 OMO `/goal`(持续执行)或 `incremental-implementation`(构建脚本)。fork 自 [`mattpocock/skills@in-progress/loop-me`](https://github.com/mattpocock/skills/tree/main/skills/in-progress/loop-me),按 meisijiya-skills 6 段式 + OMO 生态适配。
 - **AGENTS.md 同步修复**:`fdad98a` 加 verify-chain 后 Section A 计数停在 `(10)`(实际 11),本 commit 一并修到 `(12)` 并在 catalog 列表补 verify-chain + loop-me
 - **新增 verify-chain**([`skills/extra/verify-chain/`](./skills/extra/verify-chain/SKILL.md)):3 角色文章事实核查流水线 —— Critic 提断言 → Verifier × N 并行联网核查(独立 context)→ Repairer 最小化修复。输入 IT 技术文章,输出 `.verification/article-verified.md` + `.verification/verification-report.md`。`prompts/{critic,verifier,repairer}.md` 3 个支撑文件随 `npx skills add` 完整递归复制(per `vercel-labs/skills` v1.5.19+ `installSkillForAgent` → `copyDirectory` 实现)

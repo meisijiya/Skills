@@ -4,6 +4,26 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (security-and-hardening narrowed to application-layer only)
+
+**Why**: User is a non-professional individual developer; original 199-line skill mixed application-layer + supply-chain + deployment concerns, making routing strict but scope shallow. Splitting lets each new skill own one phase of the security lifecycle:
+- `security-and-hardening` (this skill) — **app-layer** security while writing/reviewing code
+- `security-devsecops` (new, pending) — **supply chain + deployment** pre-merge/post-merge pre-prod
+- `security-incident-response` (new, pending) — **post-breach** response
+
+**Changes**:
+- `description`: tightened to "application-layer code at trust boundaries (input / authentication / data storage / external integrations)" + added trigger words "credentials, PII, third-party integrations"
+- `Step 5` Dependency hygiene → converted to one-line "Out of scope" handoff (no live link to pending skill yet — references via plain text)
+- `Step 7` Pre-deployment gate → renamed `Pre-merge code review gate`; removed dependency audit line + added handoff line
+- `Red Flags` / `Verification`: removed dependency-CVE item; added "out-of-scope" red flag for mis-routed concerns
+- `eval cases` behavioral 3 reframed: "Before deploying our auth refactor" → "Before merging our auth refactor" (drop deploy-specific framing; clarify app-layer scope)
+
+**Files modified (5):** `skills/extra/security-and-hardening/SKILL.md` + `evals/cases/security-and-hardening.json` + `skills/extra/README.md` (one-liner row refinement + dependency table hint at future skills) + `README.md` (仓库根, Unreleased 段加 1 条) + `CHANGELOG.md` (本条目).
+
+**Skill 数量不变:** 8 `core/` + 12 `extra/` = **20**. (后续 commit 会加 2 个新 extra skill,增至 22。)
+
+**Verified:** `validate-skills.sh` 20/0/2 (2 pre-existing warning 与本次无关);`check-marketplace.sh` OK 20 skills in sync;`python3 -m json.tool evals/cases/security-and-hardening.json` 通过;`git diff --check` clean;Behavioral eval 3 重新设计为 app-layer 焦点 (deploy-specific 走 devsecops)。
+
 ### Added (loop-me — recurring workflow spec designer)
 
 **New skill:** [`skills/extra/loop-me/`](skills/extra/loop-me/SKILL.md) —— 把反复做的活动形式化成可执行 workflow spec。

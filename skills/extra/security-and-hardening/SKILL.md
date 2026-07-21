@@ -1,6 +1,6 @@
 ---
 name: security-and-hardening
-description: "Hardens code against vulnerabilities at trust boundaries. Use when handling user input, authentication, data storage, or external integrations. Under omo, the security-research mode escalates production-critical code (3 vulnerability hunters + 2 PoC engineers in parallel); grep_app MCP searches GitHub for known CVE patterns."
+description: "Hardens application-layer code against vulnerabilities at trust boundaries (input / authentication / data storage / external integrations). Use when writing or reviewing code that handles user input, credentials, PII, or third-party integrations. Under omo, the security-research mode escalates production-critical code (3 vulnerability hunters + 2 PoC engineers in parallel); grep_app MCP searches GitHub for known CVE patterns."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 
@@ -83,15 +83,9 @@ function handleCreateUser(req: Request) {
 - Rotate secrets on suspected compromise
 - Different secrets per environment (dev ≠ staging ≠ prod)
 
-### 5. Dependency hygiene
+### 5. ~~Dependency hygiene~~
 
-```bash
-npm audit            # Node
-pip-audit            # Python
-cargo audit          # Rust
-```
-
-Run in CI on every PR. **Block merge on high-severity vulnerabilities** (don't just warn). Pin major versions in lockfiles; allow patch updates only.
+> **Out of scope.** Dependency and supply-chain security lives in a dedicated skill (see Related Skills). This skill focuses on **code-level application security only**. If you need dep scanning now, run `npm audit` / `pip-audit` / `cargo audit` manually and block merge on high-severity vulnerabilities.
 
 ### 6. Auth checks at every request
 
@@ -134,17 +128,17 @@ This catches CVE fixes that are present in the wild but not yet in your local `n
 
 **Important**: Step 6.5 is **not** a replacement for Steps 1-7 — Always run the standard pre-deployment gate first; OMO `security-research` is for **finding issues the standard checklist misses**(exploit-class, not design-class).
 
-### 7. Pre-deployment gate
+### 7. Pre-merge code review gate
 
-Before merging anything that touches a trust boundary:
+Before merging any change that touches a trust boundary:
 - [ ] Input validated with typed parser at boundary
 - [ ] No string concatenation into SQL / HTML / shell
 - [ ] Secrets read from env, not hardcoded
 - [ ] Auth check present on every protected route
-- [ ] Dependency audit clean
 - [ ] Logs don't contain secrets
 - [ ] Error responses don't leak stack traces / internal paths
 - [ ] For production-critical code, OMO `security-research` audit (Step 6.5) completed
+- [ ] Dependency / IaC / container / deployment pipeline checks: see dedicated skill (out of scope here)
 
 ## Common Rationalizations
 
@@ -167,9 +161,9 @@ Before merging anything that touches a trust boundary:
 - 错误响应包含 stack trace / 文件路径
 - 日志里出现密码 / token / PII
 - Auth 只在 session 开始检查一次(不是 per-request)
-- 依赖里有 known high-severity CVE
 - `/admin` 路由没额外的 auth 检查
 - production-critical 代码没调 OMO `security-research`
+- 关注点越界到 dependency / IaC / container / deployment pipeline(走错 skill 了)
 
 ## Verification
 
@@ -178,11 +172,11 @@ Before declaring secure, confirm:
 - [ ] No string concatenation into SQL / HTML / shell
 - [ ] Secrets from env, not committed
 - [ ] Per-request auth on protected routes
-- [ ] Dependency audit clean (no high/critical)
 - [ ] CSP / security headers set
 - [ ] Logs scrubbed of secrets
 - [ ] Error responses don't leak internals
 - [ ] For production-critical code: OMO `security-research` audit run with working PoC report
+- [ ] Dependency / IaC / container / deployment pipeline concerns routed to dedicated skill (not silently dropped)
 
 ## pwf Integration
 

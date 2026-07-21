@@ -60,14 +60,14 @@
       ]
     },
     {
-      "scenario": "User asks: 'Before deploying our auth refactor, do a thorough security review' (production-critical code, omo environment)",
+      "scenario": "User asks: 'Before merging our auth refactor, do a thorough security review of the new JWT verification code' (auth code, production-impact, omo environment)",
       "expected_behavior": [
-        "Agent identifies this as production-critical (auth code, real user impact)",
+        "Agent identifies this as production-critical auth code (per-request auth, JWT handling, token verification)",
         "Agent asks Sisyphus to invoke /security-research mode (3 vulnerability hunters + 2 PoC engineers in parallel)",
         "Agent waits for all 5 parallel audit reports to complete",
         "Agent synthesizes per-attacker findings with severity classification",
-        "Agent runs the standard pre-deployment gate (Step 7) after the omo audit",
-        "Agent records both audit results in task_plan.md"
+        "Agent runs the standard pre-merge code review gate (Step 7) after the omo audit, focusing on app-layer checks only",
+        "Agent does NOT include dependency / IaC / container / deployment checks — those belong to a separate skill"
       ]
     }
   ],
