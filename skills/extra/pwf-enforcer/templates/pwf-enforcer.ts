@@ -19,18 +19,34 @@ import { existsSync } from "node:fs"
 import { join } from "node:path"
 
 const HOME = process.env.HOME || process.env.USERPROFILE || ""
-const PWF_DIR = process.env.PWF_DIR || join(HOME, ".agents", "skills", "planning-with-files")
-const INJECT_PLAN_SH = join(PWF_DIR, "scripts", "inject-plan.sh")
-const CHECK_COMPLETE_SH = join(PWF_DIR, "scripts", "check-complete.sh")
+
+// Resolve PWF directory: user-level first (canonical), project-level fallback.
+// Falls back to project-level copies for dev/debug, vendor copies, CI sandboxes.
+function resolvePwfDir(cwd: string): string {
+  if (process.env.PWF_DIR) return process.env.PWF_DIR
+
+  const probe = (dir: string) => existsSync(join(dir, "scripts", "inject-plan.sh"))
+  const userDir = join(HOME, ".agents", "skills", "planning-with-files")
+  if (probe(userDir)) return userDir
+
+  for (const dir of [
+    join(cwd, ".agents", "skills", "planning-with-files"),
+    join(cwd, ".opencode", "skills", "planning-with-files"),
+  ]) {
+    if (probe(dir)) return dir
+  }
+
+  return userDir
+}
 
 function shQuote(s: string): string {
   return `'${s.replace(/'/g, "'\\''")}'`
 }
 
-function injectPlan(context: "userprompt" | "pretool" | "precompact"): string {
-  if (!existsSync(INJECT_PLAN_SH)) return ""
+function injectPlan(scriptPath: string, context: "userprompt" | "pretool" | "precompact"): string {
+  if (!existsSync(scriptPath)) return ""
   try {
-    return execSync(`sh ${shQuote(INJECT_PLAN_SH)} --context=${context}`, {
+    return execSync(`sh ${shQuote(scriptPath)} --context=${context}`, {
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],
       timeout: 5000,
@@ -40,10 +56,10 @@ function injectPlan(context: "userprompt" | "pretool" | "precompact"): string {
   }
 }
 
-function runCheckComplete(): string {
-  if (!existsSync(CHECK_COMPLETE_SH)) return ""
+function runCheckComplete(scriptPath: string): string {
+  if (!existsSync(scriptPath)) return ""
   try {
-    return execSync(`sh ${shQuote(CHECK_COMPLETE_SH)}`, {
+    return execSync(`sh ${shQuote(scriptPath)}`, {
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],
       timeout: 5000,
@@ -80,6 +96,9 @@ If no \`task_plan.md\`: this is a quick task, no PWF required.
 `.trim()
 
 export const PwfEnforcer: Plugin = async ({ client, directory }) => {
+  const PWF_DIR = resolvePwfDir(directory)
+  const INJECT_PLAN_SH = join(PWF_DIR, "scripts", "inject-plan.sh")
+  const CHECK_COMPLETE_SH = join(PWF_DIR, "scripts", "check-complete.sh")
   if (!existsSync(PWF_DIR) || !existsSync(INJECT_PLAN_SH)) {
     return {
       "experimental.chat.system.transform": async (_input, output) => {
@@ -111,7 +130,7 @@ export const PwfEnforcer: Plugin = async ({ client, directory }) => {
     //    above is the primary channel. This is a best-effort reinforcement.
     "tool.execute.before": async (input, output) => {
       if (input.tool !== "bash") return
-      const planHead = injectPlan("pretool")
+      const planHead = injectPlan(INJECT_PLAN_SH, "pretool")
       if (!planHead) return
       const original = typeof output.args === "string" ? output.args : ""
       output.args = `printf '%s\\n' ${JSON.stringify(planHead)} >&2; ${original}`
@@ -130,7 +149,7 @@ export const PwfEnforcer: Plugin = async ({ client, directory }) => {
     // 5. Compaction — push plan head into the compaction context. The most
     //    valuable hook: plan survives context compression.
     "experimental.session.compacting": async (_input, output) => {
-      const planHead = injectPlan("precompact")
+      const planHead = injectPlan(INJECT_PLAN_SH, "precompact")
       if (planHead) output.context.push(planHead)
     },
 
@@ -139,7 +158,7 @@ export const PwfEnforcer: Plugin = async ({ client, directory }) => {
     //    OpenCode Tier 3 — notify only, cannot hard-block stop.
     event: async ({ event }) => {
       if (event.type !== "session.idle") return
-      const out = runCheckComplete().trim()
+      const out = runCheckComplete(CHECK_COMPLETE_SH).trim()
       if (out && !/complete|all phases done/i.test(out)) {
         try {
           await client.app.log({

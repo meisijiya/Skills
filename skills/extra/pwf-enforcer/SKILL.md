@@ -42,6 +42,13 @@ test -d ~/.config/opencode/plugins/ && echo "plugin dir exists" || mkdir -p ~/.c
 
 If pwf is missing, prompt user to install before continuing. Plugin without pwf is a no-op (warns at load).
 
+**Resolve order** (encoded in `templates/pwf-enforcer.ts::resolvePwfDir`):
+
+1. `PWF_DIR` env var (absolute override, wins everything)
+2. User-level `~/.agents/skills/planning-with-files/` — canonical install location (recommended)
+3. Project-level fallback — `<cwd>/.agents/skills/planning-with-files/` (skills CLI) or `<cwd>/.opencode/skills/planning-with-files/` (omo-native); used for dev/debug, vendor copies, CI sandboxes
+4. Not found → return canonical user path; `existsSync()` failure triggers the no-op warning
+
 ### 2. Install the hard layer (plugin file)
 
 Copy `templates/pwf-enforcer.ts` (this skill's bundled template) to the OpenCode plugin directory:
@@ -123,6 +130,7 @@ If the plugin does not fire:
 - Check file is at exact path `~/.config/opencode/plugins/pwf-enforcer.ts` (case-sensitive)
 - Run step 4a — TypeScript syntax error breaks plugin load silently
 - Verify pwf is installed (`ls ~/.agents/skills/planning-with-files/scripts/inject-plan.sh`)
+- If user-level copy is missing, check project-level fallback (`ls <cwd>/.agents/skills/planning-with-files/scripts/inject-plan.sh` or `ls <cwd>/.opencode/skills/planning-with-files/scripts/inject-plan.sh`)
 - Check opencode logs for plugin error messages
 
 ## Tier Reality (Honest Limitations)
@@ -183,7 +191,7 @@ If a user complains "pwf-enforcer routes my requests wrong," they're confused ab
 ## Verification
 
 Before declaring enforced:
-- [ ] pwf installed at `~/.agents/skills/planning-with-files/`
+- [ ] pwf installed at `~/.agents/skills/planning-with-files/` (canonical; project-level fallback acceptable for dev/debug)
 - [ ] `pwf-enforcer.ts` copied to `~/.config/opencode/plugins/`
 - [ ] `bun check` 或 `tsc --noEmit` 通过(plugin 文件 TypeScript 合法)
 - [ ] AGENTS.md snippet 已追加到 `~/.config/opencode/AGENTS.md`
