@@ -40,6 +40,8 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 如果连第一步都跑不通(没有 librarian / codegraph),退化为 `ls + find + grep` 的手工 inventory,接受不完整。
 
+**omo Team Mode 加速**(可选):当 `team_mode.enabled = true` 时,Inventory 阶段(§1)可以分发给最多 8 个并行 `explore` 子 agent(每个负责一个 subsystem)。这能把 30 分钟的手工 inventory 压缩到 5 分钟。**默认 OFF** —— 仅当 codebase 有 5+ 个独立 subsystem 时再启用。这不是 proposal-only 纪律的替代;候选清单仍走人工优先级排序。
+
 ### 2. Surface confusions
 
 对每个概念走 Matt Pocock 的三问:

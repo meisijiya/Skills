@@ -60,10 +60,22 @@ For the reverse map (omo feature → skills that use it), see the `meisijiya-ext
 
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — context7 MCP (primary), grep_app MCP
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — oracle agent (escalation), lsp MCP
-- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — git-master skill, atlas agent
+- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — git-master skill, atlas agent, `/start-work` trigger, OMO `review-work` post-impl
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — visual-engineering category, frontend-ui-ux skill
-- [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — security-research mode
-- [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — Sisyphus (executing delegation), atlas (todo orchestration)
+- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — visual-engineering runtime child + frontend-ui-ux + html-ppt for explicit visual/teaching decks
+- [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) + [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) + [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — security-research mode (3 hunters + 2 PoC engineers)
+- [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — OMO `review-work` (Stage 2) + `visual-qa` (UI Taste gate)
+- [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — `general` agent for parallel Verifier subagents (web research + independent context)
+- [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — `analyze` mode, lsp MCP for large-codebase bottleneck tracing
+- [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — Sisyphus (executing delegation), atlas (todo orchestration), IntentGate routing
+- [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — in-context counterpart of Prometheus Mode (Tab / `@plan`); omo users may prefer Prometheus for multi-day projects
+- [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — Spec/PRD pre-Prometheus-plan; Momus reviews the plan, not the Spec
+- [`loop-me`](~/.agents/skills/loop-me/SKILL.md) — output spec handed to OMO `/goal <objective>` for continuous execution
+- [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) — codebase-wide counterpart of per-diff OMO `refactor` / `ponytail-review` / `remove-ai-slops`
+
+**No direct omo bridge** (yet):
+- [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) — PWF plugin model could be mirrored to omo's `boulder.json`; tracked as future enhancement
+- [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — `oracle` agent could design SLI/SLO targets; tracked as future enhancement
 
 ### Conventions
 

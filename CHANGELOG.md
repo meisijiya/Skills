@@ -4,6 +4,26 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (OMO-native alignment Phase 2)
+
+**Why**: User explicitly wants meisijiya-skills deeply aligned with omo's architecture (per [omo.dev/zh](https://omo.dev/zh)). Phase 1 added brainstorming / spec-driven-development omo integration. Phase 2 closes the remaining 7 gaps covering dispatcher, docs, and 4 extra skills.
+
+**Changes**:
+- **`using-meisijiya-skills` Skill Priority table** — added `ulw` / `ultrawork` row (no skill, Sisyphus handles); added omo Intent Gate preamble explaining when the table applies vs. when omo already dispatches; expanded from 6 to 8 rows (covering all common patterns including "scope known" vs "scope unknown" implementation branches)
+- **`AGENTS.md` Section A "omo integration" block** — expanded from 6 to 14 skills (the previous Section A was missing `build-gate-visual-review` / `verification-before-completion` / `verify-chain` / `performance-optimization` / `brainstorming` / `spec-driven-development` / `loop-me` / `improve-codebase-architecture`); added "No direct omo bridge" sub-section for `pwf-enforcer` + `observability-and-instrumentation` (future enhancements)
+- **`observability-and-instrumentation` new `## omo Integration` section** — `oracle` agent for SLI/SLO design decisions; new-skill workflow chain (brainstorming → spec → incremental per slice)
+- **`pwf-enforcer` new `## omo boulder.json Bridge` section** — declares future enhancement (mirror `task_plan.md` phase status into omo's `boulder.json`); explicitly marked "Not implemented" to prevent confusion
+- **`incremental-implementation` §7 update** — explicit `> omo dispatch` blockquote at the top: `/start-work` is the slash command that activates Atlas on the latest Prometheus plan; manual `review-work` bridge documented for non-omo sessions
+- **`improve-codebase-architecture` §1 update** — `omo Team Mode` acceleration note (8 parallel `explore` subagents; default OFF; proposal-only discipline preserved)
+
+**Files modified (8):** `skills/core/using-meisijiya-skills/SKILL.md` + `skills/extra/observability-and-instrumentation/SKILL.md` + `skills/extra/pwf-enforcer/SKILL.md` + `skills/core/incremental-implementation/SKILL.md` + `skills/extra/improve-codebase-architecture/SKILL.md` + `AGENTS.md` + `README.md` + `CHANGELOG.md`(本条目).
+
+**Skill 数量不变:** 22。
+
+**Verified:** `validate-skills.sh` 22/0/2(2 pre-existing warning 与本次无关);`check-marketplace.sh` OK 22 skills in sync;`git diff --check` clean;所有 description 仍 ≤ 1024 字符;`using-meisijiya-skills` 的新表头增加 omo Intent Gate 说明,避免与 omo 内置路由冲突。
+
+**Skipped (Plan-3):** 不写新 `plan-review-handoff` skill(Metis/Momus 已分散到 brainstorming + spec-driven-development 链路);不加 `brainstorming-enforcer.ts` 硬层 plugin(无可机械硬化的触发器);不改 README 主要数字(已正确)。
+
 ### Changed (OMO-native alignment Phase 1)
 
 **Why**: User explicitly wants meisijiya-skills to be deeply aligned with omo's architecture (per [omo.dev/zh](https://omo.dev/zh)). Investigation showed our `brainstorming` and `spec-driven-development` lack explicit omo routing hints, and `docs/omo-agent-skill-config.md` is **stale** (claims 18 skills; we have 22 since v0.5.0+ verify-chain + security-devsecops + security-incident-response + improve-codebase-architecture + loop-me).

@@ -141,6 +141,15 @@ OpenCode is Tier 3 per PWF's own classification (https://github.com/anomalyco/op
 
 For **real hard enforcement on Stop**, switch to Claude Code or Codex CLI (Tier 1). On OpenCode, plan-survives-compaction is guaranteed, but stop-gate is advisory.
 
+## omo boulder.json Bridge (Future Enhancement, Not Implemented)
+
+omo's boulder system persists active work across sessions (`boulder.json` written by Sisyphus / Atlas). pwf-enforcer currently writes its state to `task_plan.md` + `progress.md` only. A future enhancement:
+
+- On `tool.execute.after` (Write to task_plan.md or progress.md), mirror phase status into omo's `boulder.json` location
+- This lets omo resume a PWF-style plan mid-session without losing pwf discipline
+
+**Not implemented** — requires omo boulder.json schema (`code-yeongyu/oh-my-openagent` repo). Tracked as a future plugin enhancement, not a current behavior.
+
 ## Why this is not routing (a note for the user)
 
 Sometimes users confuse "make the model do X at every step" with "route this message to skill/agent Y." They are different:

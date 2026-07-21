@@ -124,6 +124,10 @@ Before shipping any new code path:
 | "用 string format 比 structured 简单" | 简单到 grep 都难。Structured 是 long-term 简单。 |
 | "alert 越多越安全" | 越多 = 越多误报 = alert fatigue = 真实 alert 被忽略。少而准。 |
 
+## omo Integration
+
+For SLI/SLO design decisions (e.g., "is P99 or P95 the right SLO target?", "what's the burn-rate alert threshold for this service?"), dispatch to `oracle` agent for read-only high-IQ reasoning. For instrumenting code that touches hot paths identified by [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md), the workflow chain is `brainstorming` → `spec-driven-development` → `incremental-implementation` (per slice: instrument + test). **No direct omo bridge yet** — proposed: omo's `codegraph` could trace which paths lack coverage.
+
 ## Red Flags
 
 - 日志用 string format,不是 structured fields

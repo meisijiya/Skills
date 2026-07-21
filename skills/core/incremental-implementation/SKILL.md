@@ -143,6 +143,8 @@ Before merging slices, mentally rehearse: "If slice 3 breaks production, can I r
 
 ### 7. After all slices done: hand off to OMO review-work
 
+> **omo dispatch**:`/start-work` is the slash command that activates Atlas on the latest Prometheus plan. Atlas reads this skill's Phase 3 slice table as the executable frontier. If running in omo, invoke `/start-work` once Phase 1 Spec is attested (per omo docs); if not, follow the manual `review-work` bridge below.
+
 **桥接到 OMO 内置 `review-work` skill(不再自己造审查 skill)**:
 
 1. Confirm:所有 slice 都已通过 `verify` 字段测试 + `progress.md` 有 `[slice]` 日志
