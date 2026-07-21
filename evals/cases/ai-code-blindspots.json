@@ -1,6 +1,17 @@
 {
   "name": "ai-code-blindspots",
   "version": "0.1.0",
+  "verified": true,
+  "positive_keywords": [
+    "blindspots",
+    "AI-generated",
+    "AI-modified",
+    "boundary checks",
+    "error handling",
+    "hardcoded",
+    "deprecated API",
+    "verification stage"
+  ],
   "description": "Detects patterns AI code commonly FORGETS to write — missing boundary checks, silent error handling, hardcoded config, deprecated APIs, invisible failures, env-assumption mismatches. Complements omo built-in remove-ai-slops (which catches AI bloat). Layer-3 routing: loaded by verification-before-completion's Process step after Write/Edit produced executable code.",
   "positive_triggers": [
     {
@@ -61,5 +72,5 @@
     }
   ],
   "owner": "meisijiya",
-  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker. Layer 3 routing lives in skills/core/verification-before-completion/SKILL.md Process step (with install guard + executable-code guard so core skill never blocks on a missing optional skill). This skill's description names 'verification-before-completion' as the upstream gate so the dispatcher Priority table echoes the same chain. The 7-category grep fallback patterns live in SKILL.md body — this eval does NOT lock them. Complements (does not replace) the omo built-in remove-ai-slops: ai-code-blindspots catches what AI FORGOT to write (omissions); remove-ai-slops catches what AI wrote that should not exist (bloat). The two together cover both halves of AI's failure surface."
+  "notes": "Verified-level (2026-07-21): CI step `Verify eval positive keywords map to skill description (verified evals)` asserts every entry in positive_keywords is found in the skill's SKILL.md description body. Adding/removing a category requires updating both the description AND positive_keywords in lockstep. Layer 3 routing lives in skills/core/verification-before-completion/SKILL.md Process step (with install guard + executable-code guard so core skill never blocks on a missing optional skill). This skill's description names 'verification-before-completion' as the upstream gate so the dispatcher Priority table echoes the same chain. The 7-category grep fallback patterns live in SKILL.md body — this eval does NOT lock them. Complements (does not replace) the omo built-in remove-ai-slops: ai-code-blindspots catches what AI FORGOT to write (omissions); remove-ai-slops catches what AI wrote that should not exist (bloat). The two together cover both halves of AI's failure surface."
 }

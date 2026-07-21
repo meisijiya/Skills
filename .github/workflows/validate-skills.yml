@@ -52,6 +52,73 @@ jobs:
       - name: Verify marketplace.json in sync with filesystem
         run: bash scripts/check-marketplace.sh
 
+      - name: Verify .opencode/plugins/*.js parse cleanly (node --check)
+        run: |
+          set -e
+          shopt -s nullglob
+          plugins=(.opencode/plugins/*.js)
+          if [ ${#plugins[@]} -eq 0 ]; then
+            echo "(no .opencode/plugins/*.js found; skipping)"
+            exit 0
+          fi
+          for f in "${plugins[@]}"; do
+            node --check "$f" || { echo "::error file=$f::JS parse error"; exit 1; }
+          done
+          echo "All ${#plugins[@]} plugin(s) parse cleanly: ${plugins[*]}"
+
+      - name: Verify eval positive keywords map to skill description (verified evals)
+        run: |
+          python3 << 'PYEOF'
+          import json, re, sys
+          from pathlib import Path
+
+          ok = True
+          checked = 0
+          for eval_path in sorted(Path('evals/cases').glob('*.json')):
+              data = json.loads(eval_path.read_text())
+              if not data.get('verified'):
+                  continue
+              checked += 1
+              name = data['name']
+              keywords = data.get('positive_keywords') or []
+              if not keywords:
+                  print(f'::error file={eval_path}::verified=true but no positive_keywords')
+                  ok = False
+                  continue
+              # Find SKILL.md (core or extra)
+              skill_md = Path(f'skills/core/{name}/SKILL.md')
+              if not skill_md.exists():
+                  skill_md = Path(f'skills/extra/{name}/SKILL.md')
+              if not skill_md.exists():
+                  print(f'::error file={eval_path}::Skill {name} not found')
+                  ok = False
+                  continue
+              # Extract description (frontmatter value, multi-line joined)
+              text = skill_md.read_text()
+              fm_match = re.search(r'^---\n(.*?)\n---', text, re.DOTALL | re.MULTILINE)
+              if not fm_match:
+                  print(f'::error file={skill_md}::No YAML frontmatter')
+                  ok = False
+                  continue
+              fm = fm_match.group(1)
+              # Take everything from 'description:' to next top-level key (or end of frontmatter)
+              desc_match = re.search(r'description:\s*([^\n]+(?:\n\s+[^\n]+)*)', fm)
+              if not desc_match:
+                  print(f'::error file={skill_md}::No description field')
+                  ok = False
+                  continue
+              desc = re.sub(r'\s+', ' ', desc_match.group(1)).lower()
+              missing = [k for k in keywords if k.lower() not in desc]
+              if missing:
+                  print(f'::error file={eval_path}::positive_keywords NOT in {name} description: {missing}')
+                  ok = False
+              else:
+                  print(f'  OK {name}: all {len(keywords)} positive_keywords found in description')
+          if checked == 0:
+              print('(no verified evals; skipping)')
+          sys.exit(0 if ok else 1)
+          PYEOF
+
       - name: Test install.sh
         run: |
           bash scripts/install.sh --list > /dev/null
