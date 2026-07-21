@@ -1,0 +1,70 @@
+{
+  "name": "security-incident-response",
+  "version": "0.1.0",
+  "description": "Post-breach security incident response — detect / triage / contain / eradicate / recover / postmortem (NIST CSF simplified). OMO-augmented with security-research mode + oracle + websearch + review-work.",
+  "positive_triggers": [
+    {
+      "input": "Our monitoring flagged 500 failed login attempts from one IP in 10 minutes — should we be worried?",
+      "expected_skill": "security-incident-response",
+      "reason": "Detection signal (brute force attempt) → Triage phase (severity + scope)"
+    },
+    {
+      "input": "A user emailed saying their account got compromised and they see orders they didn't place",
+      "expected_skill": "security-incident-response",
+      "reason": "User-reported breach → Detect + Triage + Contain + Eradicate full flow"
+    },
+    {
+      "input": "We just got a CVE advisory — our production uses the affected library. Has it been exploited?",
+      "expected_skill": "security-incident-response",
+      "reason": "Third-party CVE disclosure → Detect + Triage (verify if exploited)"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Add a new REST endpoint that accepts user-uploaded files",
+      "expected_no_skill": true,
+      "reason": "App-layer preventive (file upload validation) → security-and-hardening, NOT incident response"
+    },
+    {
+      "input": "I'm adding the new npm package 'lodash-utils' — should I be worried?",
+      "expected_no_skill": true,
+      "reason": "Supply-chain preventive (dep add) → security-devsecops, NOT incident response"
+    },
+    {
+      "input": "Our p95 latency spiked 10x — what's wrong?",
+      "expected_no_skill": true,
+      "reason": "Performance issue, not security incident → performance-optimization or observability-and-instrumentation"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User reports 'A user emailed saying their account got compromised and they see orders they didn't place'",
+      "expected_behavior": [
+        "Agent enters Detect phase: timestamps + freezes evidence + creates .planning/<id>/incident-<id>.md (separate from compromised system logs)",
+        "Agent does NOT immediately reset the affected account (would destroy evidence / prevent further attacker observation)",
+        "Agent enters Triage phase: classifies severity (Major if single-account, Critical if multi-account compromise suspected) + scope assessment (PII / payment data at risk?)",
+        "Agent uses oracle agent for severity / scope / notification timing decisions",
+        "Agent enters Contain phase: freezes the affected account + revokes all session tokens + forces password reset + checks for lateral movement",
+        "Agent enters Eradicate phase: investigates root cause (credential leak? session hijack? CVE in auth flow?) + patches if root cause is code",
+        "Agent invokes /security-research mode for post-incident PoC verification that root cause is fully patched",
+        "Agent enters Recover phase: resets all related credentials (not just the affected user) + enhances monitoring + verifies service normal",
+        "Agent enters Postmortem phase: writes 5-whys + action items + lessons to .planning/<id>/incident-<id>-postmortem.md",
+        "Agent does NOT touch application code unrelated to the root cause (separate skill — incremental-implementation)"
+      ]
+    },
+    {
+      "scenario": "User reports 'A CVE was disclosed for one of our dependencies — log4shell-style critical — has it been exploited?'",
+      "expected_behavior": [
+        "Agent enters Detect phase: searches for IOCs (indicators of compromise) via websearch MCP — public exploit code, attack campaigns",
+        "Agent checks own logs for suspicious patterns matching the exploit signature",
+        "Agent enters Triage phase: classifies based on observed exploitation vs theoretical risk",
+        "Agent enters Contain phase: if exploited, isolates affected systems; if not exploited but vulnerable, applies WAF rule or rate limit as temporary mitigation",
+        "Agent enters Eradicate phase: upgrades dependency to patched version; security-research mode verifies no exploit possible",
+        "Agent enters Recover phase: deploys patched version via blue-green or canary; rolls back if issues",
+        "Agent enters Postmortem phase: documents why the unpatched version was in production (lack of automated SCA? skipped security-devsecops process?) + adds action items to prevent recurrence"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker. This skill is post-breach only; preventive concerns route to security-and-hardening (app-layer) or security-devsecops (supply chain + deployment)."
+}

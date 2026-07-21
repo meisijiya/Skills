@@ -4,6 +4,33 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (security-incident-response — post-breach response)
+
+**New skill:** [`skills/extra/security-incident-response/`](skills/extra/security-incident-response/SKILL.md) —— 已经被攻击 / 怀疑被攻击时的标准响应流程。
+
+- **Process 6 stages** (NIST CSF 简化):
+  1. **Detect** — 时间戳记录 / 冻结证据 / 拉独立笔记(不写受害系统日志)
+  2. **Triage** — 严重度按后果分(critical / major / minor)+ 影响范围
+  3. **Contain** — 最小权限先动(revoke token / 切流量 / 隔离主机);不 patch、不通知、不恢复
+  4. **Eradicate** — 清除后门 + 重置全部凭据 + patch 漏洞;OMO `security-research` 跑 PoC 验证彻底修补
+  5. **Recover** — 从干净 backup 恢复 + 全部凭据重置 + 加强监控 + 验证
+  6. **Postmortem** — blameless 复盘;5 whys 找 root cause;action items 防止下次再来
+- **OMO 集成**: `security-research` mode(post-incident PoC 验证)+ `oracle` agent(影响评估 / 决策链 / 通知时机)+ `websearch` MCP(CVE 公告 / 攻击 IOC)+ `context7` MCP(IR 工具文档)+ `review-work` skill(post-incident code review)
+- **核心防错**:不跳阶段(Triage 不做就 Eradicate = 给攻击者开后门);**全部** 凭据重置(不全 reset = 攻击者 lateral movement);postmortem 必须 5 whys(停在表层 = 下次再来)
+
+**Files modified (6):** `.claude-plugin/marketplace.json`(+1 entry;13→14)、`AGENTS.md`(Section A 计数 `(13)` → `(14)` + catalog 列表加 `security-incident-response`)、`skills/extra/README.md`(标题 13→14、「怎么选」表 +1、一览表 +1、依赖表 +1)、`README.md`(仓库根,Unreleased 段加 1 条 + 计数 21→22)、`CHANGELOG.md`(本条目)、`evals/cases/security-incident-response.json`(新增,3 positive + 3 negative + 2 behavioral)。
+
+**Skill 数量:** 8 `core/` + 14 `extra/` = **22**(从 21 增长)。
+
+**Verified:** `validate-skills.sh` 22/0/2(2 个 pre-existing warning 与本次无关);`check-marketplace.sh` OK 22 skills in sync;`python3 -m json.tool evals/cases/security-incident-response.json` 通过;`git diff --check` clean。
+
+**三分安全生命周期完整:**
+| 阶段 | Skill | 焦点 |
+|---|---|---|
+| 写代码时 | `security-and-hardening` | input / auth / OWASP / secrets-in-code |
+| 写完 → 上线前 | `security-devsecops` | deps / SBOM / rotation / CI/CD / IaC / pre-deploy gate |
+| 被攻击 / 怀疑被攻击 | `security-incident-response` | detect / triage / contain / eradicate / recover / postmortem |
+
 ### Added (security-devsecops — supply-chain + deployment-pipeline security)
 
 **New skill:** [`skills/extra/security-devsecops/`](skills/extra/security-devsecops/SKILL.md) —— 写完代码 → 上线之间的所有安全检查。

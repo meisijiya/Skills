@@ -28,7 +28,8 @@
         "./skills/extra/improve-codebase-architecture",
         "./skills/extra/verify-chain",
         "./skills/extra/loop-me",
-        "./skills/extra/security-devsecops"
+        "./skills/extra/security-devsecops",
+        "./skills/extra/security-incident-response"
       ]
     }
   ]
