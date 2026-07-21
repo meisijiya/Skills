@@ -1,0 +1,66 @@
+{
+  "name": "loop-me",
+  "version": "0.1.0",
+  "description": "Recurring workflow spec designer — stateful grilling session whose only output is the spec, not the implementation. Hand off to OMO /goal or incremental-implementation.",
+  "positive_triggers": [
+    {
+      "input": "/loop-me",
+      "expected_skill": "loop-me",
+      "reason": "Explicit slash command trigger (disable-model-invocation means user MUST invoke manually)"
+    },
+    {
+      "input": "I keep manually triaging GitHub notifications every morning — I want to specify a workflow for it so I don't have to do it by hand anymore",
+      "expected_skill": "loop-me",
+      "reason": "Recurring activity + manual labor + user wants it spec'd (not implemented yet) → loop-me domain"
+    },
+    {
+      "input": "Every Monday I review last week's merged PRs and draft this week's priorities — let's write a spec for this weekly loop",
+      "expected_skill": "loop-me",
+      "reason": "Explicit recurring cadence (every Monday) + user wants a workflow spec for the loop"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Fix the bug in login.ts",
+      "expected_no_skill": true,
+      "reason": "One-shot debug, no recurring activity → debugging-and-error-recovery"
+    },
+    {
+      "input": "Help me design a REST API for managing tasks",
+      "expected_skill": "brainstorming",
+      "reason": "Single design exploration, not a recurring loop spec → brainstorming or spec-driven-development"
+    },
+    {
+      "input": "Implement the new checkout flow with cart, payment, confirmation",
+      "expected_no_skill": true,
+      "reason": "Multi-step implementation, not a spec-design session → incremental-implementation"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User says '/loop-me' without arguments and has an empty NOTES.md",
+      "expected_behavior": [
+        "Agent reads NOTES.md, finds it empty/thin",
+        "Agent does NOT start writing workflow specs immediately",
+        "Agent enters grilling mode to interview the user about their 'world': tools they use, channels they process, their own terminology",
+        "Agent asks ONE question at a time, each with a recommended answer",
+        "Agent sharpens fuzzy terms into canonical ones and writes them back to NOTES.md",
+        "Only after NOTES is populated does agent suggest candidate loops from user's world"
+      ]
+    },
+    {
+      "scenario": "User describes a recurring activity they want spec'd (e.g. 'I do X every morning')",
+      "expected_behavior": [
+        "Agent enters grilling mode: ONE question per turn, each with a recommended answer",
+        "Agent uses Vocabulary only when grilling surfaces need: Trigger (event vs schedule), Checkpoint (HIL points), Push right (defer until last), Brief (decision-ready summary, not raw output)",
+        "Agent does NOT impose structure — workflows may have no AI, no Checkpoint, no Schedule unless grilling shows they need one",
+        "Agent writes spec to workflows/<name>.md at workspace root (NOT .planning/<id>/workflows/)",
+        "Spec includes all 7 required sections: Trigger / Inputs / Steps / Checkpoints / Outputs / Failure modes / Definition of done",
+        "Definition of done: 'an implementer agent could build it without asking a single question' — agent self-verifies this before declaring session done",
+        "Agent suggests hand-off: OMO /goal (continuous execution) or incremental-implementation (build the script) or writing-skills (capture as meta-skill)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "disable-model-invocation: true on the SKILL.md frontmatter — agent must NOT auto-invoke this skill, only user /loop-me triggers it. Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

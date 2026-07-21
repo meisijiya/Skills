@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 11 个)
+# Extra Skills(选装集 · 12 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -14,9 +14,10 @@
 | 多人 / 长期 | `documentation-and-adrs` |
 | 用了 planning-with-files | `pwf-enforcer`(把 PWF 软遵守升级为硬触发) |
 | 写技术文章要核查事实 | `verify-chain` |
+| 把反复做的活动形式化成可执行 spec | `loop-me` |
 | 创建/编辑 skill | `writing-skills` |
 
-## 11 个 skill 一览
+## 12 个 skill 一览
 
 | Skill | 一句话 |
 |---|---|
@@ -31,6 +32,7 @@
 | [`documentation-and-adrs`](./documentation-and-adrs/) | **v0.5.0 聚焦**:只记录重大架构决策(ADR);日常文档走项目级 AGENTS.md / progress.md |
 | [`improve-codebase-architecture`](./improve-codebase-architecture/) | codebase-wide 健康巡检(weekly / post-surge / on-boarding);Ousterhout deep/shallow 评分;**proposal-only** —— 改架构走 `incremental-implementation` |
 | [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic 提断言 → Verifier × N 联网核查 → Repairer 修复);输出 `.verification/article-verified.md` + `.verification/verification-report.md` |
+| [`loop-me`](./loop-me/) | 把反复做的活动形式化成可执行 workflow spec(stateful grilling session;产物 `workflows/*.md` + `NOTES.md`,**不是实现**);`disable-model-invocation: true` 仅用户 `/loop-me` 触发 |
 
 ## 依赖关系(顺序装才有效)
 
@@ -44,6 +46,7 @@
 | `security-and-hardening` Step 6.5 | OMO `security-research` 内置 skill(默认随 omo 安装) |
 | `incremental-implementation` / `verification-before-completion` 的 OMO 桥接 | OMO `review-work` / `visual-qa` 内置 skill(默认随 omo 安装) |
 | `verify-chain` | 仅需要 OMO `general` agent(默认随 omo 安装)用于并行 Verifier subagents;`WebSearch` + `WebFetch` 工具 |
+| `loop-me` | 无外部依赖(状态在用户工作区根 `workflows/` + `NOTES.md`);`disable-model-invocation: true` 仅 `/loop-me` 触发,防与 `brainstorming` 路由竞争;输出 spec 可喂 OMO `/goal` 或 `incremental-implementation` |
 
 ## 安装
 

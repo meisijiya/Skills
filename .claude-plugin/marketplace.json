@@ -26,7 +26,8 @@
         "./skills/extra/observability-and-instrumentation",
         "./skills/extra/documentation-and-adrs",
         "./skills/extra/improve-codebase-architecture",
-        "./skills/extra/verify-chain"
+        "./skills/extra/verify-chain",
+        "./skills/extra/loop-me"
       ]
     }
   ]

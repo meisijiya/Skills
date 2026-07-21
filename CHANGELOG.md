@@ -4,6 +4,32 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (loop-me — recurring workflow spec designer)
+
+**New skill:** [`skills/extra/loop-me/`](skills/extra/loop-me/SKILL.md) —— 把反复做的活动形式化成可执行 workflow spec。
+
+- **模式**:stateful `/grilling` session,一问一答、每问必带推荐答案,**唯一产物是 spec,不是实现**
+- **上游**:fork 自 [`mattpocock/skills@in-progress/loop-me`](https://github.com/mattpocock/skills/tree/main/skills/in-progress/loop-me),按 meisijiya-skills 6 段式(Overview / When to Use / Process / Common Rationalizations / Red Flags / Verification / pwf Integration / Related Skills)+ OMO 生态适配
+- **关键安全属性**:`disable-model-invocation: true` 保留 —— 模型不可自动 invoke,必须用户主动 `/loop-me` 进入,防与 `brainstorming` 自动描述匹配产生路由竞争
+- **输出路径**:用户工作区根 `workflows/*.md` + `NOTES.md`,**不进** `.planning/<id>/`(PWF phase 命名空间);与 PWF **正交**
+- **Definition of done**:implementer agent 拿这份 spec 不需要再问任何问题就能构建 —— agent 写完 spec 后自验证
+- **Vocabulary**(reach-for-when-needed 而非模板):Trigger(event 或 schedule)/ Checkpoint(HIL 点)/ Push right(推到最晚)/ Brief(决策就绪摘要,不展示原始输出)
+- **生态衔接**:
+  - 上游 `brainstorming`(决定"做不做") + `spec-driven-development`(通用 spec)
+  - 下游 OMO `/goal`(持续执行,spec 链接塞进 goal 描述)
+  - 下游 `incremental-implementation`(构建脚本,spec 作 Phase 1 PRD)
+  - meta `writing-skills`(spec 重复成模式时提炼为 skill)
+
+**Files modified (6):** `.claude-plugin/marketplace.json`(+1 entry;11→12)、`skills/extra/README.md`(标题 11→12、「怎么选」+1、一览表 +1、依赖表 +1)、`AGENTS.md`(Section A 计数 `(10)` → `(12)` + catalog 列表补 verify-chain + loop-me,修 `fdad98a` 漏更新 bug)、`README.md`(仓库根,Unreleased 段加 1 条 + 计数 19→20)、`CHANGELOG.md`(本条目)、`evals/cases/loop-me.json`(新增,3 positive + 3 negative + 2 behavioral)。
+
+**AGENTS.md 同步修复**:本 commit 修 `fdad98a` 留下的 Section A 计数漂移(原 `(10)` 应是 `(11)`,加 loop-me 后 `(12)`)。Section B 第 90 行已有"counts auto-derive from marketplace.json"声明,inject 脚本渲染时正确,但源文件计数与目录不一致会误导直接阅读 AGENTS.md 的人。
+
+**Skill 数量:** 8 `core/` + 12 `extra/` = **20**(从 19 增长)。`evals/cases/` = **20**。
+
+**Install 完整性保证**:`loop-me/` 是单文件 skill(无 prompts/ 子目录,不含可执行支撑),`npx skills add --skill loop-me` 递归复制 `~/.agents/skills/loop-me/SKILL.md`(per `vercel-labs/skills` v1.5.19+ `installSkillForAgent` → `copyDirectory` 实现)。
+
+**Verified:** `validate-skills.sh` 20/0/2(2 个 pre-existing warning,与本次无关);`check-marketplace.sh` OK 20 skills in sync;`python3 -m json.tool evals/cases/loop-me.json` 通过;`git diff --check` clean;AGENTS.md 同步计数与 marketplace.json 目录列表一致。
+
 ### Added (verify-chain — 3-role article fact-checking pipeline)
 
 **New skill:** [`skills/extra/verify-chain/`](skills/extra/verify-chain/SKILL.md) —— 3 角色 IT 技术文章事实核查流水线。
