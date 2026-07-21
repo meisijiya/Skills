@@ -1,0 +1,69 @@
+{
+  "name": "security-devsecops",
+  "version": "0.1.0",
+  "description": "Supply-chain + deployment-pipeline security: deps, SBOM, secrets rotation, CI/CD, IaC, container, pre-deploy gate. OMO-augmented with security-research mode + oracle + websearch + context7 + grep_app.",
+  "positive_triggers": [
+    {
+      "input": "I'm adding the new package 'lodash-utils' — should I be worried about anything?",
+      "expected_skill": "security-devsecops",
+      "reason": "Dependency addition triggers supply-chain security review (typosquatting check + npm audit)"
+    },
+    {
+      "input": "Our OAuth client secret hasn't been rotated in 18 months — is that a problem?",
+      "expected_skill": "security-devsecops",
+      "reason": "Secret rotation is explicit security-devsecops domain"
+    },
+    {
+      "input": "I just wrote a Terraform module that creates a public S3 bucket for our static assets",
+      "expected_skill": "security-devsecops",
+      "reason": "IaC + potentially-misconfigured public resource triggers IaC security lint"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Add a new REST endpoint that accepts user-uploaded files",
+      "expected_no_skill": true,
+      "reason": "App-layer (file upload validation) → security-and-hardening"
+    },
+    {
+      "input": "I think we got breached — there are weird API calls in our logs",
+      "expected_skill": "security-incident-response",
+      "reason": "Post-breach detection / triage → security-incident-response, NOT devsecops"
+    },
+    {
+      "input": "Our p95 latency spiked 10x after last deploy",
+      "expected_no_skill": true,
+      "reason": "Post-deploy performance issue → observability-and-instrumentation or performance-optimization"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User is preparing first production deploy of a Node.js app with a Dockerfile and Terraform manifest",
+      "expected_behavior": [
+        "Agent runs dependency scan (npm audit --audit-level=high) — blocks merge on high/critical",
+        "Agent generates SBOM via syft / cdxgen, attaches to release artifact",
+        "Agent lints Terraform via tfsec / checkov — flags any 0.0.0.0/0 SG, public S3, * IAM",
+        "Agent scans container image via trivy image — flags any critical CVE in base image",
+        "Agent verifies secrets not in code (gitleaks detect), recommends secret manager if .env present",
+        "Agent verifies CI/CD has branch protection + OIDC + deploy key least-privilege",
+        "Agent writes pre-deploy checklist to .planning/<id>/deploy-checklist.md",
+        "Agent asks Sisyphus to invoke /security-research mode for production-critical audit (3 hunters + 2 PoC)",
+        "Agent does NOT inspect application code (input validation / auth / OWASP) — that's security-and-hardening's domain"
+      ]
+    },
+    {
+      "scenario": "User adds a new dependency without running npm audit",
+      "expected_behavior": [
+        "Agent identifies this as supply-chain risk (typosquatting, malicious package, vulnerability)",
+        "Agent checks package name against typosquatting patterns (e.g., 'lodash-utils' vs 'lodash')",
+        "Agent runs npm audit --audit-level=high (or higher) on the new dependency",
+        "Agent verifies the package is from a trusted registry (npmjs.com or company private registry)",
+        "Agent recommends npm ci in CI to prevent lockfile drift",
+        "Agent suggests adding npm audit to pre-merge check",
+        "Agent does NOT block on low-severity advisories (signal vs noise)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker. This skill complements security-and-hardening (app-layer) and security-incident-response (post-breach); see Related Skills in SKILL.md for routing chain."
+}

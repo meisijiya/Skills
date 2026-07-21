@@ -1,6 +1,6 @@
 ---
 name: security-and-hardening
-description: "Hardens application-layer code against vulnerabilities at trust boundaries (input / authentication / data storage / external integrations). Use when writing or reviewing code that handles user input, credentials, PII, or third-party integrations. Under omo, the security-research mode escalates production-critical code (3 vulnerability hunters + 2 PoC engineers in parallel); grep_app MCP searches GitHub for known CVE patterns."
+description: "Hardens application-layer code against vulnerabilities at trust boundaries (input / authentication / data storage / external integrations). Use when writing or reviewing code that handles user input, credentials, PII, or third-party integrations. For dependency / supply chain / IaC / container / deployment pipeline security, invoke security-devsecops. For post-breach response, invoke security-incident-response. Under omo, the security-research mode escalates production-critical code (3 vulnerability hunters + 2 PoC engineers in parallel); grep_app MCP searches GitHub for known CVE patterns."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 

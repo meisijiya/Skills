@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 12 个)
+# Extra Skills(选装集 · 13 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -8,7 +8,7 @@
 
 | 你的项目... | 装这些 |
 |---|---|
-| 任何代码 | `security-and-hardening` · `api-and-interface-design` · `improve-codebase-architecture` |
+| 任何代码 | `security-and-hardening` · `security-devsecops` · `api-and-interface-design` · `improve-codebase-architecture` |
 | 有 UI | `designer-handoff`;仅在明确要求实现前文本对齐、视觉 deck 或教学 deck 时再装 `build-gate-visual-review` |
 | 上线运营 | `observability-and-instrumentation` · `performance-optimization` |
 | 多人 / 长期 | `documentation-and-adrs` |
@@ -17,7 +17,7 @@
 | 把反复做的活动形式化成可执行 spec | `loop-me` |
 | 创建/编辑 skill | `writing-skills` |
 
-## 12 个 skill 一览
+## 13 个 skill 一览
 
 | Skill | 一句话 |
 |---|---|
@@ -27,6 +27,7 @@
 | [`designer-handoff`](./designer-handoff/) | designer → eng 的 UI/UX spec 交接(用 ui-ux-pro-max) |
 | [`api-and-interface-design`](./api-and-interface-design/) | contract-first API 设计(REST/GraphQL/RPC) |
 | [`security-and-hardening`](./security-and-hardening/) | 设计时信任边界检查 + 路由 OMO `security-research` 做深度审计(v0.5.0 纠正 OMO 能力描述);**应用层**代码(input / auth / 集成),supply chain / deployment 走 `security-devsecops` |
+| [`security-devsecops`](./security-devsecops/) | 供应链 + 部署安全(deps / SBOM / secrets rotation / CI/CD / IaC / container / pre-deploy gate);OMO `security-research` + `oracle` + `websearch` + `context7` 增强 |
 | [`performance-optimization`](./performance-optimization/) | 后端 profile + 优化(**v0.5.0 卸下 CWV**:前端 CWV 走 OMO `frontend` skill) |
 | [`observability-and-instrumentation`](./observability-and-instrumentation/) | 加日志/metrics/tracing,生产可见性 |
 | [`documentation-and-adrs`](./documentation-and-adrs/) | **v0.5.0 聚焦**:只记录重大架构决策(ADR);日常文档走项目级 AGENTS.md / progress.md |
@@ -43,7 +44,8 @@
 | `build-gate-visual-review` | 仅显式视觉 / 教学 deck 模式需要 `html-ppt-skill` 到 `~/.agents/skills/`(`npx skills add https://github.com/lewislulu/html-ppt-skill`);文本对齐与默认跳过不需要 |
 | `designer-handoff` | `ui-ux-pro-max-cli` 全局(`npm i -g ui-ux-pro-max-cli`) |
 | `pwf-enforcer` | `planning-with-files` 到 `~/.agents/skills/`(`npx skills add https://github.com/OthmanAdi/planning-with-files`) |
-| `security-and-hardening` Step 6.5 | OMO `security-research` 内置 skill(默认随 omo 安装);dependency / IaC / container / deployment pipeline / incident 由独立 skill 处理(随安全体系演进) |
+| `security-and-hardening` Step 6.5 | OMO `security-research` 内置 skill(默认随 omo 安装) |
+| `security-devsecops` Process | OMO `security-research`(production-critical pre-deploy audit) + `oracle`(IaC 架构决策)+ `websearch`(最新 CVE)+ `context7`(安全工具文档)+ `grep_app`(in-the-wild fix 搜索) |
 | `incremental-implementation` / `verification-before-completion` 的 OMO 桥接 | OMO `review-work` / `visual-qa` 内置 skill(默认随 omo 安装) |
 | `verify-chain` | 仅需要 OMO `general` agent(默认随 omo 安装)用于并行 Verifier subagents;`WebSearch` + `WebFetch` 工具 |
 | `loop-me` | 无外部依赖(状态在用户工作区根 `workflows/` + `NOTES.md`);`disable-model-invocation: true` 仅 `/loop-me` 触发,防与 `brainstorming` 路由竞争;输出 spec 可喂 OMO `/goal` 或 `incremental-implementation` |

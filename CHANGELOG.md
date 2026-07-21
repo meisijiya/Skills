@@ -4,6 +4,26 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (security-devsecops — supply-chain + deployment-pipeline security)
+
+**New skill:** [`skills/extra/security-devsecops/`](skills/extra/security-devsecops/SKILL.md) —— 写完代码 → 上线之间的所有安全检查。
+
+- **Process 6 steps**:
+  1. **Dependency scanning** — `npm audit` / `pip-audit` / `cargo audit`;block merge on high/critical;`grep_app` MCP 搜 GitHub in-the-wild fix
+  2. **SBOM + supply chain** — `syft` / `cdxgen` 生成 SBOM;typosquatting 防御;trusted registry 配置
+  3. **Secrets rotation** — API key / DB password / JWT / TLS cert 轮换周期表;secret manager 推荐;`.env` 加 `.gitignore` 历史清理
+  4. **Deployment pipeline security** — CI/CD gitleaks + branch protection + OIDC + deploy key 权限最小化
+  5. **IaC + Container security** — Terraform(`tfsec` / `checkov` / `terrascan`)+ K8s manifest(`kube-score` / `polaris` / `conftest`)+ container image(`trivy` / `grype` / `docker scout`)
+  6. **Pre-deployment gate** — 合并所有 devsecops check 形成 unified gate(Step 7 of `security-and-hardening` 不覆盖 deploy-side)
+- **OMO 集成**: `security-research` mode(3 hunters + 2 PoC 生产前审计)+ `oracle` agent(IaC 架构)+ `websearch` MCP(最新 supply chain CVE)+ `context7` MCP(安全工具文档)+ `grep_app` MCP(in-the-wild fix)+ `review-work` skill(deploy-side code review)
+- **生态衔接**: 上游 `security-and-hardening`(应用层) → **本 skill**(供应链 + 部署)→ 下游 `security-incident-response`(事后)。三分安全生命周期
+
+**Files modified (7):** `.claude-plugin/marketplace.json`(+1 entry;12→13)、`AGENTS.md`(Section A 计数 `(12)` → `(13)` + catalog 列表加 `security-devsecops`)、`skills/extra/README.md`(标题 12→13、「怎么选」表 +1、一览表 +1、依赖表 +1)、`skills/extra/security-and-hardening/SKILL.md`(description 末尾加 handoff 到 devsecops + incident-response)、`README.md`(仓库根,Unreleased 段加 1 条 + 计数 20→21)、`CHANGELOG.md`(本条目)、`evals/cases/security-devsecops.json`(新增,3 positive + 3 negative + 2 behavioral)。
+
+**Skill 数量:** 8 `core/` + 13 `extra/` = **21**(从 20 增长)。
+
+**Verified:** `validate-skills.sh` 21/0/2(2 个 pre-existing warning 与本次无关);`check-marketplace.sh` OK 21 skills in sync;`python3 -m json.tool evals/cases/security-devsecops.json` 通过;`git diff --check` clean。
+
 ### Changed (security-and-hardening narrowed to application-layer only)
 
 **Why**: User is a non-professional individual developer; original 199-line skill mixed application-layer + supply-chain + deployment concerns, making routing strict but scope shallow. Splitting lets each new skill own one phase of the security lifecycle:
