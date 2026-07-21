@@ -4,6 +4,24 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Changed (OMO-native alignment Phase 1)
+
+**Why**: User explicitly wants meisijiya-skills to be deeply aligned with omo's architecture (per [omo.dev/zh](https://omo.dev/zh)). Investigation showed our `brainstorming` and `spec-driven-development` lack explicit omo routing hints, and `docs/omo-agent-skill-config.md` is **stale** (claims 18 skills; we have 22 since v0.5.0+ verify-chain + security-devsecops + security-incident-response + improve-codebase-architecture + loop-me).
+
+**Changes**:
+- **`brainstorming` description** — added omo routing hint: "Under omo, this is the in-context counterpart to Prometheus Mode (Tab / @plan); prefer it when the user has not explicitly invoked Prometheus and you are inside a Sisyphus-driven session." Makes the meta-vs-Prometheus boundary explicit.
+- **`brainstorming` new `## omo Integration` section** — table comparing brainstorming (in-context) vs Prometheus Mode (new subagent context); explicit "do not invoke both in parallel" guidance; downstream chain (Spec → Momus → Slice → `/start-work`) documented.
+- **`spec-driven-development` new `## omo Integration` paragraph** — clarifies Spec (our artifact) vs Prometheus Plan (omo artifact); explains Momus reviews Prometheus plan; attestation still required even if Momus approved Prometheus.
+- **`docs/omo-agent-skill-config.md` stale data fix** — 18→22, 10→14, all per-agent recommendations updated to include the 6 skills missing from the table (`security-devsecops`, `verify-chain`, `security-incident-response`, `improve-codebase-architecture`).
+
+**Files modified (4):** `skills/core/brainstorming/SKILL.md` + `skills/core/spec-driven-development/SKILL.md` + `docs/omo-agent-skill-config.md` + `CHANGELOG.md`(本条目) + `README.md`(Unreleased 段).
+
+**Skill 数量不变:** 22(本 commit 不增/减 skill)。
+
+**Verified:** `validate-skills.sh` 22/0/2;`check-marketplace.sh` OK 22;`git diff --check` clean;`brainstorming` 描述仍≤1024 字符。
+
+### Added (security-incident-response — post-breach response)
+
 ### Added (security-incident-response — post-breach response)
 
 **New skill:** [`skills/extra/security-incident-response/`](skills/extra/security-incident-response/SKILL.md) —— 已经被攻击 / 怀疑被攻击时的标准响应流程。

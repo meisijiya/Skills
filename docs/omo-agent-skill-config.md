@@ -2,7 +2,7 @@
 
 ## Overview
 
-[meisijiya-skills] installs **18 SKILL.md** files(8 `core/` + 10 `extra/`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
+[meisijiya-skills] installs **22 SKILL.md** files(8 `core/` + 14 `extra/`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
 
 本指南为每个 omo agent 推荐应装载的 skill 子集,供希望按 agent 收敛 context 的用户参考。
 
@@ -15,23 +15,23 @@
 - **Less noise** — fewer "which skill applies?" decisions
 - **Clearer intent** — agent's role + skill set align
 
-Sisyphus (main orchestrator) gets **all 18** (it routes everything). All other agents get a subset.
+Sisyphus (main orchestrator) gets **all 22** (it routes everything). All other agents get a subset.
 
 ## Recommended per-agent config
 
 | omo Agent | Recommended skills | Why |
 |---|---|---|
-| **sisyphus** | (all 18) | Main orchestrator — full visibility needed |
-| **hephaestus** | brainstorming, spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development | Deep autonomous executor — full discipline stack |
+| **sisyphus** | (all 22) | Main orchestrator — full visibility needed |
+| **hephaestus** | brainstorming, spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development, **security-devsecops** | Deep autonomous executor — full discipline stack + supply-chain/deployment |
 | **prometheus** | brainstorming, spec-driven-development | Strategic planner — question-quality + spec discipline |
-| **atlas** | using-meisijiya-skills, incremental-implementation | Todo orchestrator — meta + slice guidance |
-| **oracle** | source-driven-development, debugging-and-error-recovery, api-and-interface-design | Read-only consultant — verification + interface design |
+| **atlas** | using-meisijiya-skills, incremental-implementation, **verify-chain** | Todo orchestrator — meta + slice guidance; verify-chain parallel Verifier via `general` agent |
+| **oracle** | source-driven-development, debugging-and-error-recovery, api-and-interface-design, **security-incident-response** | Read-only consultant — verification + interface design + post-incident impact assessment |
 | **librarian** | source-driven-development | Docs/OSS search — needs verification |
 | **explore** | (none) | Codebase grep — already fast, no skill needed |
 | **multimodal-looker** | (none) | Vision — no meisijiya-skill wrapper needed |
 | **metis** | spec-driven-development | Gap analyzer — spec context only |
 | **momus** | (none) | Plan reviewer — direct-use agent |
-| **sisyphus-junior** | incremental-implementation, test-driven-development | Focused executor — slice + TDD |
+| **sisyphus-junior** | incremental-implementation, test-driven-development, **improve-codebase-architecture** | Focused executor — slice + TDD + single-task architecture review |
 
 ## Configuration example
 
@@ -111,8 +111,8 @@ Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-m
 After applying:
 
 1. Restart omo session.
-2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 18.
-3. Dispatch a task to `hephaestus` and list its skills — should see only the 5 recommended.
+2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 22.
+3. Dispatch a task to `hephaestus` and list its skills — should see only the 7 recommended.
 4. Spot-check 2-3 other agents.
 
 ## Caveat: skill discoverability

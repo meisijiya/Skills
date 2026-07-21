@@ -10,6 +10,18 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 写 spec 不是写 PRD —— 是"动手前把目标、边界、交付物、验收标准想清楚"的纪律。omo 的 Prometheus 是 planner 出 plan,但**没有强制 PRD**;plan ≠ spec。Spec 是合同,plan 是排期。
 
+## omo Integration
+
+**Spec vs Prometheus Plan**: Prometheus writes a YAML/structured plan for `atlas` execution. `brainstorming` (or Prometheus interview) writes the Design into `task_plan.md` Phase 0. This skill writes the **PRD/Spec** into `task_plan.md` Phase 1 — the contract that comes BEFORE the Prometheus plan. Order:
+
+1. Phase 0: Design ([`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — or Prometheus Mode)
+2. Phase 1: Spec (this skill, with `attest-plan.sh` attestation)
+3. Momus plan review (omo built-in; `momus` agent validates plan against clarity/verification/context criteria)
+4. Phase 2: Research, Phase 3: Slice ([`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md))
+5. `/start-work` to dispatch to Atlas
+
+**`attest-plan.sh` vs Prometheus**: Prometheus writes its plan to its own format. Our `attest-plan.sh` hashes `task_plan.md` (Phases 0-3). If running under omo, Momus reviews the Prometheus plan; we still attest `task_plan.md` (the source of truth). **Do not skip attestation** because "Prometheus approved it" — those are separate gates.
+
 没有 spec 就动手 = 边写边猜 = 返工概率 100%。Spec 是省 debug 时间的工具,不是负担。
 
 > **职责边界**:

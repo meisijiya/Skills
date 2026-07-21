@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "HARD-GATE pre-design exploration: do NOT write code, scaffold projects, or invoke implementation skills before presenting a design and getting user approval. Applies even to projects that feel 'simple'. Use when starting any non-trivial feature, component, or behavior change, or when the user proposes a plan whose intent is unclear."
+description: "HARD-GATE pre-design exploration: do NOT write code, scaffold projects, or invoke implementation skills before presenting a design and getting user approval. Applies even to projects that feel 'simple'. Use when starting any non-trivial feature, component, or behavior change, or when the user proposes a plan whose intent is unclear. Under omo, this is the in-context counterpart to Prometheus Mode (Tab / @plan); prefer it when the user has not explicitly invoked Prometheus and you are inside a Sisyphus-driven session."
 allowed-tools: "Read Bash Glob Grep"
 ---
 
@@ -157,6 +157,27 @@ Before invoking any implementation skill, confirm:
 Corresponds to **Phase 0: Design** of `task_plan.md`. Output: design section in `task_plan.md`. Transition to Phase 1 (Spec via [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md)) after design approval.
 
 See [pwf-integration.md](../../pwf-integration.md) for full phase mapping.
+
+## omo Integration
+
+This skill is the **in-context** counterpart of omo's **Prometheus Mode**:
+
+| Mode | Trigger | Where it runs |
+|---|---|---|
+| **Prometheus Mode** | Tab / `@plan "task"` | New subagent context (no prior rationalization pollution) |
+| **This skill** (brainstorming) | description match | Current Sisyphus context |
+
+**When to use which:**
+- **Prometheus Mode** — non-trivial projects needing multi-day planning, fresh-context discipline, or when user explicitly wants interview mode
+- **This skill (brainstorming)** — sub-decisions inside an ongoing session, smaller features, or when the user already has a Prometheus plan and needs to drill into one branch
+
+After brainstorming produces the design, the downstream chain is the same in both modes:
+1. Spec via [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md)
+2. Momus plan review (omo built-in; `momus` agent validates plan against clarity/verification/context criteria)
+3. Phase 3: Slice via [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)
+4. `/start-work` to dispatch to Atlas
+
+**NOT**: Do not invoke this skill and Prometheus Mode in parallel — pick one. If user typed Tab or `@plan`, defer to Prometheus. Otherwise, run this skill inline.
 
 ## Related Skills
 
