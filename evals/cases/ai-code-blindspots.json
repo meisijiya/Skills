@@ -1,0 +1,65 @@
+{
+  "name": "ai-code-blindspots",
+  "version": "0.1.0",
+  "description": "Detects patterns AI code commonly FORGETS to write — missing boundary checks, silent error handling, hardcoded config, deprecated APIs, invisible failures, env-assumption mismatches. Complements omo built-in remove-ai-slops (which catches AI bloat). Layer-3 routing: loaded by verification-before-completion's Process step after Write/Edit produced executable code.",
+  "positive_triggers": [
+    {
+      "input": "I just had the AI rewrite the auth flow — review the diff for missing edge cases the model forgot",
+      "expected_skill": "ai-code-blindspots",
+      "reason": "Explicit AI-modified code + user suspects missing boundary coverage → matches Use when 'AI just generated or modified code... in verification stage'"
+    },
+    {
+      "input": "Review the AI-generated diff in this PR for silent catch blocks, swallowed promise rejections, or any catch that only console.errors",
+      "expected_skill": "ai-code-blindspots",
+      "reason": "AI-generated code + targets categories #3 (error visibility) + #7 (invisible failures); the SKILL.md's grep fallback patterns are tuned exactly for this"
+    },
+    {
+      "input": "Before I push this commit, audit the AI-written diff for hardcoded URLs, API keys, or Node-only API usage in browser code",
+      "expected_skill": "ai-code-blindspots",
+      "reason": "AI-modified code + targets categories #4 (env compatibility) + #6 (hardcoded config); use-when 'reviewing a PR where commit history suggests AI assistance'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my hand-written regex for code style and naming consistency",
+      "expected_no_skill": true,
+      "reason": "Manual review of hand-written code (no AI involvement) → matches NOT for 'manual review of purely hand-written code'"
+    },
+    {
+      "input": "Refactor this CSS file to use BEM class names",
+      "expected_no_skill": true,
+      "reason": "Pure style/naming change with no executable logic → matches NOT for 'pure style / formatting / text-only changes'"
+    },
+    {
+      "input": "Lint the diff for verbose comments, redundant abstractions, or AI-isms I should delete",
+      "expected_no_skill": true,
+      "reason": "AI bloat removal (code that exists and should not) — already covered by omo built-in remove-ai-slops; this skill handles the opposite problem → matches NOT for 'code already fully scanned by remove-ai-slops with verified boundaries'"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "AI just finished implementing a 3-file feature change (auth handler + API route + tests) using Write/Edit tool calls, and is about to claim the task complete. The verification-before-completion Iron Law triggers as the always-on gate.",
+      "expected_behavior": [
+        "verification-before-completion Process step checks Write/Edit tool-call ledger for this turn — finds executable code changes → conditionally loads ai-code-blindspots",
+        "If ai-code-blindspots is not installed (extra/, opt-in), skip the load and proceed directly to verification-before-completion Gate Function — the dispatcher does not block on a missing optional skill",
+        "If the changes are pure-docs / test-only / style-only (no executable logic touched), skip the load and proceed to Gate Function",
+        "ai-code-blindspots enumerates the 7 categories and runs its two-layer scan (LLM sub-agent + grep fallback)",
+        "Agent writes ai-blindspots-report.md at workspace root with one section per applicable category, each finding showing file:line + concrete one-line fix",
+        "Report marks any class with zero findings explicitly (proves coverage, not silent skip), and tags Class 4 environment-compat as 'unverified' if no browserslist config exists in the repo",
+        "If sub-agent scan fails/times out, agent falls back to grep-only mode and surfaces 'subagent unavailable, grep-only' in report header — does not claim full coverage",
+        "Agent returns control to verification-before-completion so blindspots findings combine with Stage-1 gates before the final completion claim"
+      ]
+    },
+    {
+      "scenario": "AI is answering a documentation question and made no Write/Edit tool calls this turn. verification-before-completion triggers at end of turn anyway (always-on Iron Law).",
+      "expected_behavior": [
+        "verification-before-completion loads as the always-on gate",
+        "Process step checks Write/Edit tool-call ledger for this turn — finds none → does NOT load ai-code-blindspots (no code to scan)",
+        "Agent reports verification-before-completion result without ai-code-blindspots overhead; no ai-blindspots-report.md is written",
+        "Token cost stays at zero — avoids the 'medium sub-agent scan' cost when there is nothing to scan"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Behavioral evals are warning-level until promoted via upstream issue tracker. Layer 3 routing lives in skills/core/verification-before-completion/SKILL.md Process step (with install guard + executable-code guard so core skill never blocks on a missing optional skill). This skill's description names 'verification-before-completion' as the upstream gate so the dispatcher Priority table echoes the same chain. The 7-category grep fallback patterns live in SKILL.md body — this eval does NOT lock them. Complements (does not replace) the omo built-in remove-ai-slops: ai-code-blindspots catches what AI FORGOT to write (omissions); remove-ai-slops catches what AI wrote that should not exist (bloat). The two together cover both halves of AI's failure surface."
+}

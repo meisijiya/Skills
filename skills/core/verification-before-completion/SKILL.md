@@ -36,6 +36,8 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 
 ### The Gate Function (two-stage)
 
+- [ ] **If this turn produced new code via Write/Edit tool calls** (and not pure-docs / test-only / pure-style-only changes — i.e. the changes include executable logic), AND [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) is **installed** at `~/.agents/skills/ai-code-blindspots/SKILL.md` (it lives in `extra/`, so installation is opt-in), load it for a 7-class blindspot review on the diff before running the Gate Function below. AI tends to under-write: null/undefined boundaries, empty arrays, silent error catches, env incompat (Node-only API in browser), deprecated APIs, hardcoded secrets, invisible promise rejections. **If `ai-code-blindspots` is not installed OR the changes have no executable logic, skip this step and continue with the Gate Function below** — the core verification flow never blocks on a missing optional skill.
+
 ```
 BEFORE any completion claim:
 

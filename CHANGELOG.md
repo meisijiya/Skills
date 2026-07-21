@@ -135,6 +135,34 @@ All notable changes to meisijiya-skills.
 
 **Verified:** `validate-skills.sh` 20/0/2(2 个 pre-existing warning,与本次无关);`check-marketplace.sh` OK 20 skills in sync;`python3 -m json.tool evals/cases/loop-me.json` 通过;`git diff --check` clean;AGENTS.md 同步计数与 marketplace.json 目录列表一致。
 
+### Added (ai-code-blindspots — AI 生成代码盲区审查)
+
+**New skill:** [`skills/extra/ai-code-blindspots/`](skills/extra/ai-code-blindspots/SKILL.md) —— 审查 AI 生成/修改代码时**该写没写**的盲区(边界检查、错误处理可见性、环境兼容、deprecated API、硬编码配置、不可见失败),互补 omo 内置 [`remove-ai-slops`](https://github.com/code-yeongyu/oh-my-openagent)(它管"多写了应该删的",本 skill 管"少写了应该补的")。
+
+- **7 类盲区 checklist**(直接写进 SKILL.md body,无 prompts/ 子目录):
+  1. Null / undefined 边界
+  2. 数组边界
+  3. 错误处理可见性(empty catch / 静默 Promise reject)
+  4. 环境兼容(Node-only API 在浏览器代码 / ES2022+ 浏览器支持)
+  5. Deprecated API(`substr` / `UNSAFE_*` / `componentWillMount`)
+  6. 硬编码配置(URL / token / 密钥)
+  7. 不可见失败(Promise rejection / async throw 静默)
+- **Process 5 步**:1) scope 选定(git diff / caller list / tool calls 三选小);2) sub-agent scan(LLM 语义层,omo `task(category="deep")`);3) grep 静态模式兜底(每条 pattern 排除注释 + 测试文件 + node_modules);4) 7 类 checklist 报告(file:line + 一行 fix);5) `ai-blindspots-report.md` 写到 caller 工作区根
+- **OMO 集成**:`task(category="deep")` sub-agent 跑 LLM 语义扫描;`general` agent 可用;**互补** `remove-ai-slops`(各管一半,合并跑)
+- **4 层软路由触发架构**:
+  - **Layer 1** description 严格化 —— "Use when AI 刚生成/修改代码 + verification 阶段" + "NOT for 手写代码 / 纯样式变更 / 已过 remove-ai-slops 完整审查" + "Load after verification-before-completion" + "(token cost: medium — sub-agent scan)"
+  - **Layer 2** `using-meisijiya-skills` Priority 表新增 1 行 —— "AI 刚生成/编辑代码 → verification-before-completion → ai-code-blindspots (extra/)"
+  - **Layer 3** `verification-before-completion` Process 嵌入 step —— "本轮有 Write/Edit tool call 产生新代码 → 加载 [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) 做专项审查"
+  - **Layer 4** OpenCode plugin hook 暂缓 —— 三层软路由叠加后 AI 漏读概率已低(单一漏读 < 20%,连续漏读 < 5%);Layer 4 改 plugin 是重型改动,留为未来增强(待真实部署后看 AI 调用率 < 80% 再考虑)
+
+**Files modified (9):** `.claude-plugin/marketplace.json`(+1 entry;14→15)、`AGENTS.md`(Section A 计数 `(14)` → `(15)` + catalog 列表加 ai-code-blindspots + omo integration 块加 1 条)、`skills/extra/README.md`(标题 14→15、「怎么选」+1、一览表 +1)、`skills/core/using-meisijiya-skills/SKILL.md`(Priority 表 +1 行)、`skills/core/verification-before-completion/SKILL.md`(Process 嵌入 step)、`README.md`(仓库根,Unreleased 段加 1 条 + 计数 22→23)、`CHANGELOG.md`(本条目)、`skills/extra/ai-code-blindspots/SKILL.md`(新增)、`evals/cases/ai-code-blindspots.json`(新增,3 positive + 3 negative + 1 behavioral)。
+
+**Skill 数量:** 8 `core/` + 15 `extra/` = **23**(从 22 增长)。`evals/cases/` = **23**。
+
+**Install 完整性保证:**`ai-code-blindspots/` 是单文件 skill(无 `prompts/` 子目录,不含可执行支撑),`npx skills add --skill ai-code-blindspots` 递归复制 `~/.agents/skills/ai-code-blindspots/SKILL.md`(per `vercel-labs/skills` v1.5.19+ `installSkillForAgent` → `copyDirectory` 实现)。
+
+**Verified:** `python3 -m json.tool evals/cases/ai-code-blindspots.json` 通过(3 positive + 3 negative + 1 behavioral);dispatcher 4 层软路由 3 处独立引用一致(`SKILL.md` description + `using-meisijiya-skills` Priority 表 + `verification-before-completion` Process step);其余 6 项验证随 Phase 3 集中跑(本 slice 仅做文档元数据同步,不动 skill 本体与 dispatcher)。
+
 ### Added (verify-chain — 3-role article fact-checking pipeline)
 
 **New skill:** [`skills/extra/verify-chain/`](skills/extra/verify-chain/SKILL.md) —— 3 角色 IT 技术文章事实核查流水线。

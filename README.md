@@ -33,8 +33,8 @@ meisijiya-skills/
 │   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(10 个,按需装)
-│       ├── README.md          ← 10 个 skill + "怎么选" 决策表
+│   └── extra/                ← 选装集(15 个,按需装)
+│       ├── README.md          ← 15 个 skill + "怎么选" 决策表
 │       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/        ← intent-gated pre-build alignment (Markdown by default; html-ppt only for explicit visual/teaching decks)
@@ -52,7 +52,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(18 个)
+    └── cases/                 ← 每个 skill 的 eval case(23 个)
 ```
 
 ## 安装
@@ -88,7 +88,7 @@ npx skills add meisijiya/Skills -g
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(8 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
-- **选装集**(10 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+- **选装集**(15 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
 
@@ -197,7 +197,8 @@ MIT
 
 ### Unreleased
 
-- 22 个 SKILL.md / 22 个 eval case;**8 `core/` + 14 `extra/`**
+- 23 个 SKILL.md / 23 个 eval case;**8 `core/` + 15 `extra/`**
+- **新增 ai-code-blindspots**([`skills/extra/ai-code-blindspots/`](skills/extra/ai-code-blindspots/)):AI 生成/修改代码盲区审查工具,互补 omo 内置 `remove-ai-slops`(我们填它不覆盖的盲区);7 类盲区(边界检查 / 错误处理可见性 / 环境兼容 / deprecated API / 硬编码配置 / 不可见失败);4 层软路由触发(description 严格化 + dispatcher Priority + `verification-before-completion` Process 嵌入 + plugin hook 暂缓);`using-meisijiya-skills` Priority 表 +1 行、`verification-before-completion` Process 嵌入 step,AI 在 verification 阶段自动加载
 - **OMO-native alignment Phase 2**:根据 [omo.dev/zh](https://omo.dev/zh) 框架深度融合。`using-meisijiya-skills` Priority 表 8 行,加 `ulw` / `ultrawork` 触发(明示无 skill,Sisyphus ultrawork mode 处理)+ omo Intent Gate 互斥说明;`AGENTS.md` Section A "omo integration" 块从 6→14 个 skill;`observability-and-instrumentation` / `pwf-enforcer` (boulder bridge 占位) / `incremental-implementation` §7 (`/start-work` 显式触发) / `improve-codebase-architecture` §1 (Team Mode 加速) 各加 `## omo Integration` 段。
 - **OMO-native alignment Phase 1**:`brainstorming` description + `## omo Integration` 章节明确"in-context 对应 Prometheus Mode (Tab / `@plan`)";`spec-driven-development` 加 omo 集成段(Spec vs Prometheus Plan / Momus 评审边界);`docs/omo-agent-skill-config.md` 修过期(18→22 + 6 个新 skill 加入 per-agent 表)。
 - **新增 security-incident-response**([`skills/extra/security-incident-response/`](./skills/extra/security-incident-response/SKILL.md)):事后响应流程,按 NIST CSF 简化为 6 阶段(Detect / Triage / Contain / Eradicate / Recover / Postmortem)。OMO 集成:`security-research` mode 跑 post-incident PoC 验证漏洞彻底修补;`oracle` agent 决策链(影响评估 / 通知时机);`websearch` MCP 查 CVE 公告 / 攻击 IOC;`context7` MCP 查 IR 工具文档;`review-work` skill 跑 post-incident code review。**对非专业个人开发者价值**:假设自己会遭遇事件,流程确保"出问题时还能做对事"——blameless postmortem + 5 whys 防止下次同原因再来。
