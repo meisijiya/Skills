@@ -4,6 +4,33 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (contract-strengthening — Phase 1.25 open-world contract review)
+
+**New optional extra skill**: [`skills/extra/contract-strengthening/`](skills/extra/contract-strengthening/) — Phase 1.25 contract review, between attested Spec and downstream implementation. Lives in `extra/`; **missing extra does not block the core flow**.
+
+**Why**: 用户提出 contract-first / CBE 防护深度缺口:普通 L1 测试看不到 contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot 信号;project-local isolation 是默认;global install 必须先 11 字段可行 / 后果评估 + GREEN/YELLOW/RED 信号灯 + 逐字段用户批准;**加载技能绝不安装验证器**。
+
+**Process (6 steps)**:① open-world 风险分类,非穷尽列举 ② 契约 gap 评审(不变量 / 允许禁止转换 / 未编译需求 / 显式不确定性,禁止发明阈值) ③ 每个 gap 设计反例 ④ 按缺口属性选择 L1/L2/L3,L3 强制 6 字段(property / bounded model / env assumptions / backend / evidence / insufficiency reason) ⑤ 工具决策序(relevance → 复用项目工具 → 项目本地 dev/test 依赖 → 项目虚拟/临时环境或项目级容器 → 测量资源 → 受限执行) ⑥ GREEN/YELLOW/RED 同意闸,11 字段评估;越界即停。
+
+**Files added (3)**:`skills/extra/contract-strengthening/SKILL.md`(124 行)+ `skills/extra/contract-strengthening/references/verification-backends.md`(61 行,`verification-backends.md` 含 9 个 backend 路由指导 + 顶部 "Guidance, not an instruction or permission to install" 免责)+ `evals/cases/contract-strengthening.json`(88 行,`verified: true` + 8 positive_keywords + 3/3/6 trigger/behavioral)。
+
+**Core skill 接入(3 个,均不阻塞核心流)**:
+- `skills/core/using-meisijiya-skills/SKILL.md` — Priority 表 +1 行(attested-Spec 后、观察到契约风险时路由,缺装不阻塞);Red Flags +1 行(diff/LOC 大小不是风险信号)
+- `skills/core/spec-driven-development/SKILL.md` — Phase 1 Spec 模板新增 `Risk Review` 块(Risk level / Risk signals / Contract gaps / Phase 1.25 route);§4 加一句 "Delegated judgment may recommend an answer, but never approves unresolved design or contract choices and cannot bypass the user-approved Design gate"
+- `skills/core/verification-before-completion/SKILL.md` — L2/L3 gap 完成门:counterexample + discriminator 可执行证据;Common Failures 表加一行;Verification checkbox 加一行
+
+**Catalog 同步(6 文件计数 8 core + 16 extra = 24)**:`README.md` + `AGENTS.md` + `pwf-integration.md`(新增 Phase 1.25 行)+ `skill-anatomy.md` + `skills/extra/README.md` + `.claude-plugin/marketplace.json`(meisijiya-extra group +1)。
+
+**Skill 总数**:24(8 core + 16 extra)。
+
+**Verified**:
+- `bash scripts/validate-skills.sh` 24/24 OK(2 pre-existing WARN 与本次无关)
+- `bash scripts/check-marketplace.sh` OK 24 skills in sync
+- 24/24 双射(SKILL.md ↔ eval case)成立
+- 8 个 verified positive_keywords 全部命中 description body
+- `node --check` 对 `.opencode/plugins/*.js` exits 0(无 plugin 改动)
+- 递归 install dry-run 复制 SKILL.md + references 成功
+
 ### Added (meisijiya-review-router OpenCode plugin — per-Edit review reminder)
 
 **New OpenCode plugin**: [`.opencode/plugins/meisijiya-review-router.js`](.opencode/plugins/meisijiya-review-router.js) — hard-layer per-Edit reminder injection. 触发条件 `Write` / `Edit` / `apply_patch`;初版 `REMINDERS` 含 `ai-code-blindspots` + `security-and-hardening`,扩展只需在数组里加一行。

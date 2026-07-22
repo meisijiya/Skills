@@ -91,6 +91,12 @@ The [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) skill wrote Phase
 - <风险 1> → <缓解策略>
 - <风险 2> → <缓解策略>
 
+**Risk Review:**
+- Risk level: <L1 | L2 | L3 — minimum verification strength, not a domain label or safety guarantee>
+- Risk signals: <open-world observed/absent/uncertain signals; contract completeness, state/timing/concurrency, boundary/dependency, reversibility, and verification blind spots are explicitly non-exhaustive examples; absence from examples never proves L1>
+- Contract gaps / uncompiled requirements / uncertainty: <stated, inferred, and unknown obligations; do not invent thresholds or data shapes>
+- Phase 1.25 route: <when any signal is observed or uncertain, after attestation load [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) if installed; a missing optional extra does not block the core flow>
+
 **Status:** in_progress
 ```
 
@@ -100,7 +106,7 @@ The Spec lives in `task_plan.md` Phase 1 — Phase 0 (Design) above, Phase 2 (Re
 
 ### 4. Clarify ambiguity (if needed)
 
-If any section can't be filled confidently, return to the [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) one-question-at-a-time protocol. **Do NOT batch-ask five questions.**
+If any section can't be filled confidently, return to the [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) one-question-at-a-time protocol. **Do NOT batch-ask five questions.** Delegated judgment may recommend an answer, but never approves unresolved design or contract choices and cannot bypass the user-approved Design gate.
 
 ### 5. Attest the plan
 

@@ -68,6 +68,15 @@
         "Agent actually runs tests instead of just saying 'should'",
         "Agent reports actual count, not assumption"
       ]
+    },
+    {
+      "scenario": "The attested Spec or contract-review artifact contains L2/L3 gaps and the agent is about to claim completion.",
+      "expected_behavior": [
+        "Agent requires reproducible executable counterexample evidence per L2/L3 gap using a test, property test, or bounded model-check/solver counterexample as appropriate",
+        "Agent runs discriminator evidence showing the intended violation is detected; narrative-only examples and happy-path passes are rejected",
+        "Agent refuses the completion claim when either counterexample or discriminator evidence is missing",
+        "For ordinary L1 work, agent runs the existing gate and does not require formal tools without a risk signal"
+      ]
     }
   ],
   "owner": "meisijiya",

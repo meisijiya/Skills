@@ -39,6 +39,7 @@ Then announce **"Using [skill] to [purpose]"** and follow it exactly. If the Ski
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
 | Codebase health scan / on-boarding unfamiliar codebase / weekly architecture review | [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) | (proposal-only output; defer to `incremental-implementation` for action) |
+| Post-attested-Spec work with observed open-world contract/state/timing/concurrency/boundary/dependency/reversibility/verification-blind-spot signals | If installed, [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) | Missing optional extra never blocks the core flow; continue with the attested Spec, TDD, and completion gate |
 | Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
 
 **Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
@@ -54,6 +55,7 @@ Then announce **"Using [skill] to [purpose]"** and follow it exactly. If the Ski
 | "I remember this skill" | Skills evolve. Read current version. |
 | "This doesn't count as a task" | Action = task. Check for Skills. |
 | "The skill is overkill" | Simple things become complex. Use it. |
+| "The diff/LOC is small, so contract strengthening cannot apply" | Size is not a risk signal; route on the observed contract properties above. |
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "1% chance applies, must load" (removed) | Only invoke when description matches; "not sure" still requires checking the catalog first, but not loading every adjacent Skill. |

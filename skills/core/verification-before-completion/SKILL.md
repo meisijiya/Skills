@@ -37,6 +37,7 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 ### The Gate Function (two-stage)
 
 - [ ] **If this turn produced new code via Write/Edit tool calls** (and not pure-docs / test-only / pure-style-only changes — i.e. the changes include executable logic), AND [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) is **installed** at `~/.agents/skills/ai-code-blindspots/SKILL.md` (it lives in `extra/`, so installation is opt-in), load it for a 7-class blindspot review on the diff before running the Gate Function below. AI tends to under-write: null/undefined boundaries, empty arrays, silent error catches, env incompat (Node-only API in browser), deprecated APIs, hardcoded secrets, invisible promise rejections. **If `ai-code-blindspots` is not installed OR the changes have no executable logic, skip this step and continue with the Gate Function below** — the core verification flow never blocks on a missing optional skill.
+- [ ] **If the attested Spec or `.planning/<id>/contract-review.md` assigns any gap L2/L3**, require per-gap counterexample and discriminator evidence before completion: each counterexample has reproducible executable evidence (test, property test, or bounded model-check/solver counterexample as appropriate), and the discriminator run shows the intended violation is detected. Narrative-only evidence is insufficient. Ordinary L1 work keeps the existing gate and is never forced into formal tools.
 
 ```
 BEFORE any completion claim:
@@ -79,6 +80,7 @@ BEFORE any completion claim:
 | Regression test works | Red-green cycle verified (write → fails → fix → passes) | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist against `task_plan.md` Spec | Tests passing, "looks good" |
+| L2/L3 strengthened gap closed | Reproducible executable counterexample + discriminator run that detects the intended violation | Narrative example, passing happy-path test, or level label alone |
 | Skill loaded | `ls ~/.agents/skills/<name>/SKILL.md` exists | Description matches |
 | **Code reviewed** | OMO `review-work` 5-并行子代理报告已收 + triage 完成 | 自我 declare "code looks good" |
 | **UI passes taste** | OMO `visual-qa` 报告 + 用户亲手确认 OK | "I built the UI, looks fine" |
@@ -161,6 +163,7 @@ Before any completion claim, confirm:
 - [ ] I ran the verification command **in this turn** (not a previous run)
 - [ ] I read the full output (not just the exit code)
 - [ ] The output **confirms** the specific claim I'm about to make
+- [ ] For every L2/L3 gap, reproducible executable counterexample evidence exists and its discriminator run detects the intended violation; L1 was not escalated to formal tooling without a risk signal
 - [ ] Stage 2: 🔴 items classified by severity — minor/major → new Blocking slice; **critical → § 10 Rollback protocol** triggered with `[rollback]` log + slice `rolled_back`
 - [ ] The claim is phrased with the evidence ("X: N/N, exit 0; review-work: 5/5 🟢; user: OK" — not "X looks good")
 - [ ] If verification failed, I state actual status with evidence instead

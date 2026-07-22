@@ -68,6 +68,14 @@
         "Agent proceeds directly without loading any skill",
         "Agent records '[skill-check] no skill needed' in progress.md"
       ]
+    },
+    {
+      "scenario": "An attested Spec for a small cache change exposes shared-state, timing, concurrency, and reversibility risks; contract-strengthening may or may not be installed.",
+      "expected_behavior": [
+        "Agent routes by the observed open-world risk signals rather than diff or LOC size",
+        "If installed, agent loads contract-strengthening through its canonical skill path before implementation slicing",
+        "If the optional extra is missing, agent records that fact and continues the core Spec, TDD, and completion flow without blocking"
+      ]
     }
   ],
   "owner": "meisijiya",
