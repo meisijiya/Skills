@@ -2,6 +2,19 @@
 
 Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), adapted for the [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (omo) + [planning-with-files](https://github.com/OthmanAdi/planning-with-files) (pwf) stack.
 
+## 30 秒上手
+
+```bash
+# 项目级装 6 个最常用 core + 1 个 extra
+npx skills add meisijiya/Skills \
+  --skill brainstorming --skill spec-driven-development \
+  --skill test-driven-development --skill verification-before-completion \
+  --skill incremental-implementation --skill debugging-and-error-recovery \
+  --skill ai-code-blindspots
+```
+
+装好后开新 session,模型会从 `using-meisijiya-skills` dispatcher 自动加载 `brainstorming` 这种 `HARD-GATE` 的 skill;先 brainstorming → spec → 切 implementation,流程骨架才完整。完整列表走 [`skills/core/`](./skills/core/) + [`skills/extra/`](./skills/extra/) 各自的 README。
+
 ## 与上游的差异
 
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
@@ -18,7 +31,7 @@ meisijiya-skills/
 ├── README.md                  ← 本文件
 ├── AGENTS.md                  ← 仓库自描述 + skill 元信息 source(inject 脚本从这里读)
 ├── skill-anatomy.md           ← SKILL.md 写作规范
-├── pwf-integration.md         ← 跟 pwf 协作的约定(8+4+3+2 phase 映射)
+├── pwf-integration.md         ← 跟 pwf 协作的约定
 ├── docs/
 │   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(20 SKILL.md 索引)
 │   └── p0-outline.md              ← 归档(已 ship)
@@ -33,8 +46,8 @@ meisijiya-skills/
 │   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
 │   │   ├── debugging-and-error-recovery/
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(15 个,按需装)
-│       ├── README.md          ← 15 个 skill + "怎么选" 决策表
+│   └── extra/                ← 选装集(16 个,按需装)
+│       ├── README.md          ← 16 个 skill + "怎么选" 决策表
 │       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
 │       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/        ← intent-gated pre-build alignment (Markdown by default; html-ppt only for explicit visual/teaching decks)
@@ -44,7 +57,8 @@ meisijiya-skills/
 │       ├── performance-optimization/        ← backend profile + measure-first
 │       ├── observability-and-instrumentation/
 │       ├── documentation-and-adrs/          ← architectural ADRs only
-│       └── improve-codebase-architecture/   ← codebase-wide 健康巡检,Ousterhout deep/shallow 评分,proposal-only
+│       ├── improve-codebase-architecture/   ← codebase-wide 健康巡检,Ousterhout deep/shallow 评分,proposal-only
+│       └── contract-strengthening/           ← Phase 1.25 open-world contract review (optional extra; complements core spec + verification)
 ├── scripts/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查
 │   ├── install.sh                 ← 默认装到 .opencode/skills/(项目级);--global 装到 ~/.agents/skills/(高级)
@@ -52,7 +66,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(23 个)
+    └── cases/                 ← 每个 skill 的 eval case(24 个)
 ```
 
 ## 安装
@@ -88,7 +102,7 @@ npx skills add meisijiya/Skills -g
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(8 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
-- **选装集**(15 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+- **选装集**(16 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
 
@@ -119,7 +133,7 @@ scripts/install.sh --global
 scripts/install.sh --dry-run
 ```
 
-> 注意:只有 `scripts/install.sh --global` 跟 `npx skills add -g` 共享 `~/.agents/skills/`。**project-level 安装**有两条目标不同的路径:`scripts/install.sh` 项目级默认到 `<project>/.opencode/skills/`(omo 原生),`npx skills add` 项目级到 `<project>/.agents/skills/`(skills CLI 原生)。OpenCode 原生扫描两者 — **但每个项目推荐只选一种安装方法**:同时并存会导致同名 Skill 出现两份副本,且 `update-source` 模糊(不知道该 pull 哪个)。
+> 注意:`scripts/install.sh --global` 与 `npx skills add -g` 共享 `~/.agents/skills/`;**项目级**也有两条路径(`install.sh` → `<project>/.opencode/skills/` omo 原生 / `npx skills add` → `<project>/.agents/skills/` skills CLI 原生),OpenCode 扫描两者。每项目**只选一种** — 否则同名 Skill 双副本 + `update-source` 模糊。
 
 ### Lite CLI:`bin/meisijiya`(OpenCode plugin 管理)
 
@@ -227,7 +241,8 @@ MIT
 
 ### Unreleased
 
-- 23 个 SKILL.md / 23 个 eval case;**8 `core/` + 15 `extra/`**
+- 24 个 SKILL.md / 24 个 eval case;**8 `core/` + 16 `extra/`**
+- **新增 contract-strengthening**([`skills/extra/contract-strengthening/`](skills/extra/contract-strengthening/)):可选装 extra,Phase 1.25 contract review(attested Spec 之后、implementation 之前);open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);resource / isolation-first 工具选择,external verifiers **永不**自动安装;global-install 例外需 GREEN/YELLOW/RED consent gate + 操作特定用户批准;**不做** correctness guarantee;互补 core `spec-driven-development` + `verification-before-completion`;`using-meisijiya-skills` Priority 表 +1 行(已装才路由,缺装不阻塞 core 流)
 - **新增 ai-code-blindspots**([`skills/extra/ai-code-blindspots/`](skills/extra/ai-code-blindspots/)):AI 生成/修改代码盲区审查工具,互补 omo 内置 `remove-ai-slops`(我们填它不覆盖的盲区);7 类盲区(边界检查 / 错误处理可见性 / 环境兼容 / deprecated API / 硬编码配置 / 不可见失败);4 层软路由触发(description 严格化 + dispatcher Priority + `verification-before-completion` Process 嵌入 + plugin hook 暂缓);`using-meisijiya-skills` Priority 表 +1 行、`verification-before-completion` Process 嵌入 step,AI 在 verification 阶段自动加载
 - **新增 meisijiya-review-router.js OpenCode plugin**([`.opencode/plugins/meisijiya-review-router.js`](.opencode/plugins/meisijiya-review-router.js)):per-Edit reminder 注入 hard layer,触发条件 Write/Edit/apply_patch,初版 REMINDERS 含 ai-code-blindspots + security-and-hardening。3-hook pattern(`chat.message` per-turn dedup via `messageID` + `tool.execute.after` injection + `event` per-session cleanup on `session.deleted`,真 SDK 契约 `event.properties.info.id`,legacy/wrong shape safe no-op)。Per-Edit token 成本 ~46 tokens max(2 reminders × ~21-23 tokens)。安装:`cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/`(plugin 不 hot-reload,改完需重启 OpenCode)。扩展:REMINDERS 数组加 1 行
 - **ai-code-blindspots grep 精修 + eval 升至 verified-level**:Class 3 multi-line catch + Class 4 require()/ESM import + Class 6 URL filter 三处 grep 收紧;eval 加 `"verified": true` + 8 个 `positive_keywords`(blindspots / AI-generated / AI-modified / boundary checks / error handling / hardcoded / deprecated API / verification stage),CI step 强制 assert 每个 keyword 出现在 SKILL.md description body,description-rigor discipline 由 aspiration 升级为 executable check
