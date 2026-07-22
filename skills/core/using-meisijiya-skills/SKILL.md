@@ -22,6 +22,10 @@ This is not optional. Skills encode team-validated discipline; bypassing them be
 
 Then announce **"Using [skill] to [purpose]"** and follow it exactly. If the Skill has a checklist, create a todo per item.
 
+## Skill Catalog Source
+
+This file is a routing policy, not a catalog. Consult `<available_skills>` (injected by the harness) before routing — the Priority table below is a hint accelerator, and extras are part of the same system, loaded on demand.
+
 ## Skill Priority (soft hints — not rules)
 
 > **AI decides via description match.** Each skill's `description` field is the source of truth for whether to invoke it. This table is a **hint accelerator** for common request patterns — read it as "consider this skill first," not as "must invoke this skill." When multiple skills could apply, **process skills come first** (they're the discipline layer; the rest are tools).
