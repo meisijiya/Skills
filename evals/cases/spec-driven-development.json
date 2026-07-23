@@ -40,9 +40,9 @@
     {
       "scenario": "User asks: 'Build me a REST API for managing tasks'",
       "expected_behavior": [
-        "Agent checks pwf state (task_plan.md or .planning/)",
-        "If pwf not initialized AND task is non-trivial, prompts user to run init-session.sh",
-        "Agent creates 'Phase 1: Spec' section in task_plan.md",
+        "Agent checks OMO plan state (.omo/plans/<id>/plan.md or in-session Prometheus plan)",
+        "If no OMO plan exists AND task is non-trivial, guides the user to invoke the Prometheus plan flow (Tab / @plan / /goal) before Phase 2",
+        "Agent writes a 'Phase 1: Spec' section into the OMO plan",
         "Agent fills spec template: Goal / Scope / Acceptance Criteria / Commands / Test Strategy / Risks / Risk Review",
         "Agent records L1/L2/L3 as minimum verification strength plus open-world observed/absent/uncertain risk signals",
         "Agent treats listed signals as explicitly non-exhaustive; absence from examples never proves L1",
@@ -50,7 +50,6 @@
         "When any signal is observed or uncertain, agent routes the attested Spec to Phase 1.25 contract-strengthening if installed; missing optional extra does not block the core flow",
         "Agent does not treat delegated judgment as approval of unresolved Design or contract choices",
         "Agent writes concrete acceptance criteria (not TBD)",
-        "Agent runs scripts/attest-plan.sh",
         "Agent shows spec to user and waits for confirmation before Phase 2"
       ]
     },

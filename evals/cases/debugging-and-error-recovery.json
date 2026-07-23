@@ -47,7 +47,7 @@
         "Agent reduces to minimal failing case (step 3: Reduce)",
         "Agent fixes root cause, not symptom (step 4: Fix)",
         "Agent adds regression test that fails without the fix (step 5: Guard)",
-        "Agent records [debug] log lines in progress.md"
+        "Agent records [debug] log lines in the OMO notepad"
       ]
     },
     {

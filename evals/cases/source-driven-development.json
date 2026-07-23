@@ -43,7 +43,7 @@
         "Agent identifies library: react, current version in package.json",
         "Agent queries official docs (react.dev) or context7 MCP",
         "Agent extracts exact signature and behavior of the new API",
-        "Agent writes findings.md with: source URL, access date, exact version, key excerpt",
+        "Agent writes to OMO notepad findings with: source URL, access date, exact version, key excerpt",
         "Agent confirms docs version matches installed version",
         "Agent cites source in code comment when using non-obvious API"
       ]
@@ -54,7 +54,7 @@
         "Agent reads Next.js 15 migration guide from official docs",
         "Agent extracts breaking changes (codemod, deprecated APIs)",
         "Agent checks installed version: 'npm ls next'",
-        "Agent writes findings.md with breaking changes and migration steps",
+        "Agent writes to OMO notepad findings with breaking changes and migration steps",
         "Agent identifies which existing code will break (based on docs, not memory)"
       ]
     }

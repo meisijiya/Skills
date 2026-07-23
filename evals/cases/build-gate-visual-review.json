@@ -38,10 +38,10 @@
   ],
   "behavioral_evals": [
     {
-      "scenario": "User asks for a Markdown-only review of whether task_plan.md, design artifacts, and acceptance criteria agree.",
+      "scenario": "User asks for a Markdown-only review of whether the OMO plan, design artifacts, and acceptance criteria agree.",
       "expected_behavior": [
         "Agent performs a text/Markdown alignment review",
-        "Agent reads task_plan.md, findings.md, progress.md, and explicitly produced sub-phase artifacts as applicable",
+        "Agent reads the OMO plan, OMO notepad findings, OMO notepad, and explicitly produced sub-phase artifacts as applicable",
         "Agent does not check, load, or invoke html-ppt",
         "Agent does not create an HTML file or slide deck",
         "Agent does not delegate deck generation to a child agent"
@@ -51,7 +51,7 @@
       "scenario": "User explicitly asks for an HTML deck to visually review the design before implementation.",
       "expected_behavior": [
         "Agent verifies the renderer dependency only after confirming explicit visual-deck intent",
-        "Agent compiles context from task_plan.md, findings.md, progress.md, and approved design artifacts",
+        "Agent compiles context from the OMO plan, OMO notepad findings, OMO notepad, and approved design artifacts",
         "Agent loads html-ppt via Skill tool when needed",
         "Agent may delegate the bounded deck-author task to a visual-engineering child agent",
         "Agent outputs the deck at .planning/<plan-id>/build-gate-deck/ or an explicitly agreed single-file HTML path",

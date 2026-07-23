@@ -44,7 +44,7 @@
         "Agent reads spec for project type (SaaS / Fintech / E-commerce / etc.), tech stack, mood",
         "Agent invokes ui-ux-pro-max generate with appropriate flags",
         "Agent stores design spec at .planning/<plan-id>/design-spec.md",
-        "Agent adds Phase 1.5: UI Design Spec to task_plan.md",
+        "Agent adds Phase 1.5: UI Design Spec to the OMO plan",
         "Agent documents frontend agent contract (read spec first, follow rules, run pre-delivery checklist)"
       ]
     },

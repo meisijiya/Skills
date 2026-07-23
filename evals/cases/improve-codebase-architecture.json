@@ -43,7 +43,7 @@
         "Agent first inventories codebase (subsystems, boundaries, concept-sprawl hotspots)",
         "Agent surfaces 3+ confusion candidates from Matt Pocock's three checks",
         "Agent scores each candidate on Ousterhout 4-axis deep/shallow framework",
-        "Agent writes output to .planning/<id>/architecture-review.md, NOT task_plan.md",
+        "Agent writes output to .omo/plans/<id>/architecture-review.md, NOT the OMO plan",
         "Agent does NOT run Edit/Bash to apply any refactor — proposal-only",
         "Agent hands off to user/team for prioritization, defers to incremental-implementation for action"
       ]

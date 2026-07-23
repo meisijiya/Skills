@@ -11,7 +11,7 @@
     {
       "input": "Let's plan out the next two weeks of work on the auth refactor",
       "expected_skill": "using-meisijiya-skills",
-      "reason": "Multi-step planning — pwf initialization must be offered"
+      "reason": "Multi-step planning — OMO plan must be offered"
     },
     {
       "input": "Help me debug why this test keeps failing",
@@ -45,11 +45,11 @@
     {
       "scenario": "User asks: 'Build me a REST API for managing tasks'",
       "expected_behavior": [
-        "Agent checks for task_plan.md / .planning/*/task_plan.md",
+        "Agent checks for an OMO plan (.omo/plans/<id>/plan.md) or session-internal plan",
         "Agent identifies spec-driven-development as applicable (new project + multi-file)",
         "Agent loads spec-driven-development via Skill tool BEFORE producing the spec",
         "Agent asks clarifying questions about the API surface (auth? pagination? rate limit?)",
-        "Agent records the skill-check decision in progress.md"
+        "Agent records the skill-check decision in the OMO notepad"
       ]
     },
     {
@@ -66,7 +66,7 @@
         "Agent checks skill catalog",
         "Agent determines no skill applies (single trivial rename)",
         "Agent proceeds directly without loading any skill",
-        "Agent records '[skill-check] no skill needed' in progress.md"
+        "Agent records '[skill-check] no skill needed' in the OMO notepad"
       ]
     },
     {

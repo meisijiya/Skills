@@ -46,7 +46,7 @@
         "Agent uses git worktree or feature branch for isolation",
         "Each slice gets own commit with 'slice:' prefix",
         "Each slice is followed by test-driven-development verification",
-        "Agent updates progress.md with [slice] log lines"
+        "Agent updates the OMO notepad with [slice] log lines"
       ]
     },
     {
