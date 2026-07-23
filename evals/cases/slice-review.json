@@ -1,0 +1,76 @@
+{
+  "name": "slice-review",
+  "version": "0.1.0",
+  "verified": true,
+  "positive_keywords": [
+    "per-slice",
+    "task reviewer",
+    "spec compliance",
+    "code quality",
+    "review package",
+    "task-brief",
+    "ledger",
+    "fresh subagent"
+  ],
+  "description": "Per-slice lightweight review with one reviewer returning two ordered verdicts (spec compliance + code quality). Run after each slice completes in incremental-implementation, before moving to the next slice. Uses fresh sub-agent (oracle / unspecified-high) to avoid inheriting orchestrator context. Complements OMO review-work (whole-branch 5-lane) by catching slice-level mistakes before they cascade across 5 more slices.",
+  "positive_triggers": [
+    {
+      "input": "Slice 2 just completed. Run a per-slice review before I let Atlas dispatch slice 3.",
+      "expected_skill": "slice-review",
+      "reason": "Explicit per-slice review between slices → matches Use when 'after each slice completes, before moving to the next slice'"
+    },
+    {
+      "input": "Generate a task brief and review package for slice-2b-read-user-v2, then dispatch the task reviewer",
+      "expected_skill": "slice-review",
+      "reason": "Calls scripts/sdd/task-brief.sh + review-package.sh then dispatches task reviewer → exact slice-review workflow"
+    },
+    {
+      "input": "Executor returned DONE for the getUserById slice — check spec compliance + code quality against the brief before marking complete",
+      "expected_skill": "slice-review",
+      "reason": "Executor reported DONE → matches Process step 3 'Triage verdict' + 4 'Mark complete in ledger'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my hand-written regex for code style and naming consistency",
+      "expected_no_skill": true,
+      "reason": "Manual review of hand-written code outside a slice execution → matches NOT for 'Whole-branch review at end of slice sequence — use OMO review-work'"
+    },
+    {
+      "input": "We just finished all 10 slices of the user-management plan. Run the final review",
+      "expected_no_skill": true,
+      "reason": "Whole-branch end-of-sequence review → matches NOT for 'Whole-branch review at end of slice sequence — use OMO review-work'"
+    },
+    {
+      "input": "Design question: should we use Postgres triggers or application-level constraints for this audit log?",
+      "expected_no_skill": true,
+      "reason": "Cross-slice design question, not a slice review → matches NOT for 'Cross-slice design questions — escalate to oracle agent'"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Executor returned DONE for slice-2b-read-user-v2 with commits 9a8b7c6..1d2e3f4. The brief contains: 2 acceptance criteria (GET /users returns 200 with created row; GET /users/:id returns null for nonexistent), Interfaces: Produces getUserById(id: string): Promise<User | null>, 5 bite-sized TDD steps with exact code. Orchestrator recorded BASE=9a8b7c6 before dispatch.",
+      "expected_behavior": [
+        "Orchestrator runs scripts/sdd/task-brief.sh T-{uuid} — captures the 5-step TDD brief with exact code at .omo/sdd/<slug>/task-T-{uuid}-brief.md",
+        "Orchestrator runs scripts/sdd/review-package.sh T-{uuid} 9a8b7c6 1d2e3f4 — generates diff package at .omo/sdd/<slug>/task-T-{uuid}-diff.patch",
+        "Orchestrator dispatches task(subagent_type='oracle') with BOTH paths in the prompt — NOT inline diff pasting",
+        "Reviewer returns Part 1 (Spec compliance) AND Part 2 (Code quality) in that order",
+        "Part 1 verifies each acceptance criterion against file:line in the diff package, and confirms getUserById is exported with the declared signature",
+        "Part 2 categorizes findings as Critical / Important / Minor with file:line citations; no pre-rated severity",
+        "If both verdicts pass, orchestrator runs scripts/sdd/slice-progress.sh mark-complete T-{uuid} 9a8b7c6 1d2e3f4 --review-verdict ok",
+        "If either verdict fails, orchestrator dispatches a fixer subagent with the full Critical + Important findings list, then re-reviews — does not skip to mark-complete"
+      ]
+    },
+    {
+      "scenario": "After /clear compaction, orchestrator loses context of which slices are done. The ledger at .omo/sdd/<slug>/progress.md has 4 rows: 3 DONE + 1 BLOCKED.",
+      "expected_behavior": [
+        "Orchestrator reads the ledger before dispatching anything",
+        "Orchestrator does NOT re-dispatch the 3 DONE tasks — they are skipped",
+        "Orchestrator resumes at the BLOCKED task or the first incomplete task",
+        "Orchestrator trusts the ledger + git log over its own recollection"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Verified-level: skill description MUST contain the 8 positive_keywords (CI enforced via scripts/validate-skills.sh). Complements OMO built-in review-work: slice-review is per-slice (catches mistakes before they cascade); review-work is whole-branch 5-lane (final gate). Files: scripts/sdd/task-brief.sh + review-package.sh + slice-progress.sh are siblings that produce the brief and review-package files referenced in the dispatch prompt. Adapted from Superpowers subagent-driven-development v6.0 task-reviewer-prompt.md (which merged the prior two-stage review into one reviewer, two ordered parts). Not a duplicate of review-work — review-work is broader (5 lanes: goal / constraint / code quality / security / context mining); slice-review is narrower (2 verdicts: spec compliance + code quality) and per-slice."
+}

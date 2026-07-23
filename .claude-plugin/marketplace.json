@@ -30,7 +30,8 @@
         "./skills/extra/security-devsecops",
         "./skills/extra/security-incident-response",
         "./skills/extra/ai-code-blindspots",
-        "./skills/extra/contract-strengthening"
+        "./skills/extra/contract-strengthening",
+        "./skills/extra/slice-review"
       ]
     }
   ]

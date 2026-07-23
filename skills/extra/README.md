@@ -48,7 +48,7 @@
 | `security-devsecops` Process | OMO `security-research`(production-critical pre-deploy audit) + `oracle`(IaC 架构决策)+ `websearch`(最新 CVE)+ `context7`(安全工具文档)+ `grep_app`(in-the-wild fix 搜索) |
 | `security-incident-response` Process | OMO `security-research`(post-incident PoC 验证)+ `oracle`(影响评估 / 决策链)+ `websearch`(CVE 公告 / 攻击 IOC)+ `context7`(IR 工具文档)+ `review-work`(post-incident code review) |
 | `incremental-implementation` / `verification-before-completion` 的 OMO 桥接 | OMO `review-work` / `visual-qa` 内置 skill(默认随 omo 安装) |
-| `verify-chain` | 仅需要 OMO `general` agent(默认随 omo 安装)用于并行 Verifier subagents;`WebSearch` + `WebFetch` 工具 |
+| `verify-chain` | 仅需要 OMO `sisyphus-junior` 或 `librarian` agent(默认随 omo 安装)用于并行 Verifier subagents;`WebSearch` + `WebFetch` 工具 |
 | `loop-me` | 无外部依赖(状态在用户工作区根 `workflows/` + `NOTES.md`);`disable-model-invocation: true` 仅 `/loop-me` 触发,防与 `brainstorming` 路由竞争;输出 spec 可喂 OMO `/goal` 或 `incremental-implementation` |
 | `contract-strengthening` | 互补 core `spec-driven-development`(Phase 1.25 contract review)+ `verification-before-completion`(counterexample gate);external verifiers 工具是 optional,**永不**自动安装;可选 OMO `oracle`(候选 verification backend 调研)+ `general`(bounded empirical runs) |
 | `ai-code-blindspots` | 必须先装 `verification-before-completion`(`core/`,默认随 omo 装,Layer 3 路由加载点);可选 OMO `deep` agent category 用于 sub-agent scan(失败时自动降级为 grep-only 模式) |
