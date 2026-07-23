@@ -34,7 +34,7 @@ These scripts add the SDD layer on top of OMO without modifying OMO.
 
 ## Scripts
 
-### `task-brief.sh <task-id> [--output <path>]`
+### `task-brief.sh <task-id> [--output <path>] [--plan <slug>] [--tasks-dir <dir>]`
 
 Reads the OMO task's `metadata` field and writes a brief file containing:
 
@@ -47,6 +47,18 @@ Reads the OMO task's `metadata` field and writes a brief file containing:
 
 Outputs the path. Embed it in the dispatch prompt so the executor does
 one Read of its brief.
+
+**Where it looks for the task JSON** — in this order, first hit wins:
+
+1. `--tasks-dir <dir>` flag (highest precedence, intended for tests and
+   the in-session SDD scripts)
+2. `$OMO_TASKS_DIR` environment variable
+3. `$OPENCODE_CONFIG_DIR/tasks/<list-id>` (the OMO default; `<list-id>`
+   is the project basename by default)
+
+If all three are unset / unresolvable, exit 2 ("task file not found").
+The bare env var **`$TASKS_DIR` is not consulted** — the canonical name
+is `OMO_TASKS_DIR`; the flag is `--tasks-dir`.
 
 Exit code 4 = missing required metadata (brief written anyway as a
 recovery aid; fix the plan and re-run before dispatching).
@@ -77,6 +89,17 @@ Appends a single Markdown row to `.omo/sdd/<slug>/progress.md`:
 Mark a task complete AFTER its task-reviewer returns ✅ + Code quality
 Approved. Never re-dispatch a task whose row already says DONE — check
 the ledger + `git log` after any compaction.
+
+All subcommands accept `--plan <slug>` either before or after the
+subcommand keyword — pre-scanned out of `$@` so positionals reach the
+handler cleanly. Example:
+
+```bash
+slice-progress.sh mark-complete T-x BASE HEAD --review-verdict ok --plan demo
+slice-progress.sh --plan demo mark-complete T-x BASE HEAD
+```
+
+are both equivalent.
 
 ## Example SDD loop
 
@@ -133,16 +156,28 @@ Errors write to stderr and include remediation hints.
 
 ## Tests
 
-After implementing a slice, smoke-test the scripts in the project's
+### Regression tests (run these in CI / before pushing)
+
+```bash
+# 19 cases: positional preservation, --plan-at-any-position,
+# --help short-circuit, quoted reasons, plan-not-found, etc.
+bash test-slice-progress.sh
+
+# 10 cases: brief path substitution, Produces bold markup,
+# biteSizedSteps empty-field rendering, happy/error paths.
+bash test-task-brief.sh
+```
+
+Both exit non-zero on any failure, zero on full pass.
+
+### Smoke tests during a real slice
+
+After implementing a slice, verify the SDD artifacts in the project's
 `.omo/sdd/<slug>/` directory:
 
 ```bash
-# Did the brief get generated?
-ls .omo/sdd/<slug>/task-<id>-brief.md
-
-# Is the ledger coherent?
-./slice-progress.sh list --plan <slug>
-
-# Does the review package contain the diff?
+ls .omo/sdd/<slug>/task-<id>-brief.md          # brief written
+./slice-progress.sh list --plan <slug>          # ledger coherent
 ../slice-review/scripts/review-package.sh <id> <base> <head> | xargs cat | head -50
+```
 ```

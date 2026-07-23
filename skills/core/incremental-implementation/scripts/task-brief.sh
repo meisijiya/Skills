@@ -84,6 +84,8 @@ if [[ -z "$TASK_ID" ]]; then
 fi
 
 # ---------- locate OMO task ----------
+# Precedence: --tasks-dir flag > $OMO_TASKS_DIR env > $OPENCODE_CONFIG_DIR fallback.
+# Note: $TASKS_DIR is NOT consulted; the env name is OMO_TASKS_DIR, the flag is --tasks-dir.
 if [[ -n "$TASKS_DIR_OVERRIDE" ]]; then
   TASKS_DIR="$TASKS_DIR_OVERRIDE"
 elif [[ -n "${OMO_TASKS_DIR:-}" ]]; then
@@ -141,8 +143,13 @@ SUBJECT="$(jq -r '.subject // "(no subject)"' "$TASK_JSON")"
 DESCRIPTION="$(jq -r '.description // ""' "$TASK_JSON")"
 GLOBAL_CONSTRAINTS="$(jq -r '.metadata.globalConstraints // [] | if type=="array" then .[] else . end' "$TASK_JSON" | sed 's/^/- /')"
 INTERFACES_CONSUMES="$(jq -r '.metadata.interfaces.consumes // [] | .[] | "- **\(.symbol)** — `\(.file)`"' "$TASK_JSON")"
-INTERFACES_PRODUCES="$(jq -r '.metadata.interfaces.produces // [] | .[] | "- **\(.symbol)**\(if .signature then "** — `\(.signature)`" else "" end)\(if .file then " — new export in `\(.file)`" else "" end)"' "$TASK_JSON")"
-BITE_SIZED_STEPS="$(jq -r '.metadata.biteSizedSteps // [] | .[] | "- [ ] **Step \(.step): \(.action)**\n\(.code // "")\n\(.verify // "")\n\(.expected // "")\n"' "$TASK_JSON")"
+INTERFACES_PRODUCES="$(jq -r '.metadata.interfaces.produces // [] | .[] | "- **\(.symbol)**\(if .signature then " — `\(.signature)`" else "" end)\(if .file then " — new export in `\(.file)`" else "" end)"' "$TASK_JSON")"
+BITE_SIZED_STEPS="$(jq -r '.metadata.biteSizedSteps // [] | .[] |
+  ("- [ ] **Step \(.step): \(.action)**"),
+  (if .code then "\(.code)" else empty end),
+  (if .verify then "**Verify:** \(.verify)" else empty end),
+  (if .expected then "**Expected:** \(.expected)" else empty end),
+  ""' "$TASK_JSON")"
 STATUS_CONTRACT="$(jq -r '.metadata.statusContract // "DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED"' "$TASK_JSON")"
 NO_PLACEHOLDERS="$(jq -r '.metadata.noPlaceholders // true' "$TASK_JSON")"
 
@@ -210,7 +217,7 @@ BRIEF_TMP="${OUT_PATH}.tmp.$$"
   echo
   echo -e "$STATUS_CONTRACT"
   echo
-  echo "Write a full report to \`${OUT_PATH%.brief.md}report.md\` including:"
+  echo "Write a full report to \`${OUT_PATH%-brief.md}-report.md\` including:"
   echo "- RED command + expected failure + observed failure"
   echo "- GREEN command + observed pass"
   echo "- Commit SHA(s) (or 'no-commit' if project policy does not auto-commit)"
