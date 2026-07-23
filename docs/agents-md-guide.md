@@ -113,4 +113,3 @@ awk '/<!-- meisijiya-skills:start -->/{flag=1; next} /<!-- meisijiya-skills:end 
 - [`AGENTS.md`](../AGENTS.md) Section B — 仓库贡献者指南
 - [`AGENTS.md`](../AGENTS.md) Section C — 项目级 AGENTS.md 使用规范
 - [`skill-anatomy.md`](../skill-anatomy.md) — SKILL.md 写作规范(同源精神,scope 不同)
-- [`pwf-integration.md`](../pwf-integration.md) — pwf 协作约定

@@ -4,6 +4,11 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Migration (ADR 0001 — drop PWF, OMO-native only)
+
+- **OMO-native migration (ADR 0001)**:从 omo + PWF 栈迁至纯 omo 栈。`pwf-enforcer` skill 归档至 `skills-archived/pwf-enforcer/`(含 `templates/pwf-enforcer.ts` 保留以供历史参考);`pwf-integration.md` 已 `git rm`;`AGENTS.md` / `README.md` / `docs/` 全部 PWF-clean。`CHANGELOG.md` 历史 PWF 引用保留(`git log` / `git tag` 同样保留),per [`docs/agents-md-guide.md`](./docs/agents-md-guide.md) 第 86-95 行四载规则。
+- **`pwf-enforcer` 归档**:catalog 8 core + 15 extra(从 16→15);plugins 表 3 → 2(meisijiya-skills.js + meisijiya-review-router.js);23/23 active SKILL.md 全部加 `## omo Integration` 段取代 `## pwf Integration`。
+
 ### Added (contract-strengthening — Phase 1.25 open-world contract review)
 
 **New optional extra skill**: [`skills/extra/contract-strengthening/`](skills/extra/contract-strengthening/) — Phase 1.25 contract review, between attested Spec and downstream implementation. Lives in `extra/`; **missing extra does not block the core flow**.

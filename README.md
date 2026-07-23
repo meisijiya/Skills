@@ -1,6 +1,6 @@
 # meisijiya-skills
 
-Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), adapted for the [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (omo) + [planning-with-files](https://github.com/OthmanAdi/planning-with-files) (pwf) stack.
+Personal fork of [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), adapted for the [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (omo) stack.
 
 ## 30 秒上手
 
@@ -19,8 +19,7 @@ npx skills add meisijiya/Skills \
 
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
-- **pwf 硬遵守加强**:装 OpenCode 插件(`pwf-enforcer` 提供模板)把 pwf 的软遵守升级为硬触发 hook。
-- **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求视觉 deck 或教学 deck 时才按需使用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 渲染 HTML。项目有 UI、即将 build、复杂或使用 PWF 都不会单独触发 HTML 生成。
+- **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求视觉 deck 或教学 deck 时才按需使用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 渲染 HTML。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
 - **双目录结构**:`core/` 必装集 + `extra/` 选装集。仓库根的 `.claude-plugin/marketplace.json` 是 `vercel-labs/skills` CLI 原生的 skill 发现 + 展示分组 source(`meisijiya-core` / `meisijiya-extra` 两组);它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
@@ -31,7 +30,6 @@ meisijiya-skills/
 ├── README.md                  ← 本文件
 ├── AGENTS.md                  ← 仓库自描述 + skill 元信息 source(inject 脚本从这里读)
 ├── skill-anatomy.md           ← SKILL.md 写作规范
-├── pwf-integration.md         ← 跟 pwf 协作的约定
 ├── docs/
 │   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(20 SKILL.md 索引)
 │   └── p0-outline.md              ← 归档(已 ship)
@@ -40,7 +38,7 @@ meisijiya-skills/
 │   │   ├── README.md          ← 8 个 skill 详情 + 必装理由
 │   │   ├── using-meisijiya-skills/
 │   │   ├── brainstorming/                  ← HARD-GATE pre-design exploration(adapted from superpowers)
-│   │   ├── spec-driven-development/        ← spec-before-code,lock PRD to task_plan.md
+│   │   ├── spec-driven-development/        ← spec-before-code,lock PRD
 │   │   ├── incremental-implementation/    ← vertical slices with dep/HITL-AFK metadata,bridge to OMO review-work
 │   │   ├── test-driven-development/
 │   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
@@ -49,7 +47,6 @@ meisijiya-skills/
 │   └── extra/                ← 选装集(16 个,按需装)
 │       ├── README.md          ← 16 个 skill + "怎么选" 决策表
 │       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
-│       ├── pwf-enforcer/
 │       ├── build-gate-visual-review/        ← intent-gated pre-build alignment (Markdown by default; html-ppt only for explicit visual/teaching decks)
 │       ├── designer-handoff/
 │       ├── api-and-interface-design/
@@ -80,10 +77,10 @@ meisijiya-skills/
 npx skills add meisijiya/Skills
 
 # 装某个选装
-npx skills add meisijiya/Skills --skill pwf-enforcer
+npx skills add meisijiya/Skills --skill ai-code-blindspots
 
 # 装多个选装
-npx skills add meisijiya/Skills --skill pwf-enforcer --skill security-and-hardening
+npx skills add meisijiya/Skills --skill security-and-hardening --skill ai-code-blindspots
 
 # 看仓库有哪些 skill 可装
 npx skills add meisijiya/Skills --list
@@ -118,7 +115,7 @@ scripts/install.sh
 scripts/install.sh --target /path/to/your-project
 
 # 装 core/ + 指定的几个 extra/
-scripts/install.sh --extra pwf-enforcer --extra security-and-hardening
+scripts/install.sh --extra security-and-hardening --extra ai-code-blindspots
 
 # 装全部(必装 + 选装)
 scripts/install.sh --all-extra
@@ -154,15 +151,12 @@ ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 
 ### OpenCode Plugins(硬层 · 3 个)
 
-本仓库有 **3 个 OpenCode plugin**(全部 hard-layer, 注入到 LLM 调用层,不是 soft 挂载的 SKILL.md)。三者机制互补、不冲突,可独立装:
+本仓库有 **2 个 OpenCode plugin**(全部 hard-layer, 注入到 LLM 调用层,不是 soft 挂载的 SKILL.md)。二者机制互补、不冲突,可独立装:
 
 | Plugin | 触发层 | 安装命令 |
 |---|---|---|
 | `meisijiya-skills.js` | 每 session 首条 user message(bootstrap 注入) | `cp .opencode/plugins/meisijiya-skills.js ~/.config/opencode/plugins/` |
 | `meisijiya-review-router.js` | Write/Edit/apply_patch(per-Edit reminder) | `cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/` |
-| `pwf-enforcer.ts`(`templates/`) | 每轮 LLM + write/edit + compaction | `cp skills/extra/pwf-enforcer/templates/pwf-enforcer.ts ~/.config/opencode/plugins/` |
-
-**额外依赖:** `pwf-enforcer.ts` 还需要 PWF skill 装到 `~/.agents/skills/planning-with-files/`(`npx skills add https://github.com/OthmanAdi/planning-with-files`);否则 plugin 降级为 no-op + system.transform warning。其他两个 plugin 无外部依赖。
 
 > `cp` 实复制路径(经验证可工作);`ln -sf` 软链路径行为未做独立验证,若需使用请自行核对 plugin loader 当前实现。
 
@@ -196,38 +190,15 @@ Write/Edit/apply_patch 工具调用完成后,在 tool result 末尾追加 remind
 - **per-result marker check**:同一次 tool result 已有 marker 跳过
 - 单 reminder ~21-23 tokens,2 skill = ~50 tokens/turn max
 
-#### `pwf-enforcer.ts` — PWF hard enforcement
-
-`skills/extra/pwf-enforcer/templates/pwf-enforcer.ts` 副本,7 hook point 注入 PWF 流程约束:
-
-| Hook | 触发 | 做什么 |
-|---|---|---|
-| `experimental.chat.system.transform` | 每轮 LLM | system prompt 加 PWF reminder(精简 ~40 tokens) |
-| `chat.message` | 每条 user msg | per-turn dedup state reset(`Map<sessionID, Set>`) |
-| `tool.definition` | write/edit 工具定义 | 描述改写"After calling this tool, update progress.md" |
-| `tool.execute.before` | bash | printf plan head 到 stderr(fragile backup channel) |
-| `tool.execute.after` | write/edit | per-turn dedup reminder(同 turn 多次 edit 只一次) |
-| `experimental.session.compacting` | /compact | push plan head 进 compaction context — **killer feature** |
-| `event(session.idle)` | session 闲下来 | 跑 `check-complete.sh`,advisory log warn |
-
-PWF 没装时降级为 no-op + system.transform warning。`PWF_DIR` env override + project-level fallback(`resolvePwfDir` 函数)见 [`skills/extra/pwf-enforcer/SKILL.md`](./skills/extra/pwf-enforcer/SKILL.md)。
-
-**Tier 3 限制**(OpenCode 真实):能强制注入上下文,但不能硬阻止 stop。要 hard block 切 Claude Code / Codex CLI Tier 1。
-
 ## 前置依赖
 
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`,本 fork 围绕 omo 设计)
-- **planning-with-files**(完整 PWF 工作流推荐):`npx skills add OthmanAdi/planning-with-files --skill planning-with-files -g`。注:`/plugin marketplace add ...` 是 Claude Code 专属命令,OpenCode 用 skills CLI(`npx skills add`)
 - **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
 - **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill -g`(仅 `build-gate-visual-review` 的显式视觉 / 教学 deck 模式需要,装到 `~/.agents/skills/`;文本对齐与默认跳过不需要)
 
 ## 写作规范
 
 参见 [skill-anatomy.md](./skill-anatomy.md)。
-
-## 跟 pwf 的协作
-
-参见 [pwf-integration.md](./pwf-integration.md)。
 
 ## License
 
@@ -246,10 +217,9 @@ MIT
 - **新增 ai-code-blindspots**([`skills/extra/ai-code-blindspots/`](skills/extra/ai-code-blindspots/)):AI 生成/修改代码盲区审查工具,互补 omo 内置 `remove-ai-slops`(我们填它不覆盖的盲区);7 类盲区(边界检查 / 错误处理可见性 / 环境兼容 / deprecated API / 硬编码配置 / 不可见失败);4 层软路由触发(description 严格化 + dispatcher Priority + `verification-before-completion` Process 嵌入 + plugin hook 暂缓);`using-meisijiya-skills` Priority 表 +1 行、`verification-before-completion` Process 嵌入 step,AI 在 verification 阶段自动加载
 - **新增 meisijiya-review-router.js OpenCode plugin**([`.opencode/plugins/meisijiya-review-router.js`](.opencode/plugins/meisijiya-review-router.js)):per-Edit reminder 注入 hard layer,触发条件 Write/Edit/apply_patch,初版 REMINDERS 含 ai-code-blindspots + security-and-hardening。3-hook pattern(`chat.message` per-turn dedup via `messageID` + `tool.execute.after` injection + `event` per-session cleanup on `session.deleted`,真 SDK 契约 `event.properties.info.id`,legacy/wrong shape safe no-op)。Per-Edit token 成本 ~46 tokens max(2 reminders × ~21-23 tokens)。安装:`cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/`(plugin 不 hot-reload,改完需重启 OpenCode)。扩展:REMINDERS 数组加 1 行
 - **ai-code-blindspots grep 精修 + eval 升至 verified-level**:Class 3 multi-line catch + Class 4 require()/ESM import + Class 6 URL filter 三处 grep 收紧;eval 加 `"verified": true` + 8 个 `positive_keywords`(blindspots / AI-generated / AI-modified / boundary checks / error handling / hardcoded / deprecated API / verification stage),CI step 强制 assert 每个 keyword 出现在 SKILL.md description body,description-rigor discipline 由 aspiration 升级为 executable check
-- **improve-codebase-architecture description 严格化**:939/1024 chars;4 routing hints(Use when / NOT for / Load after / Token note);`## pwf Integration` 段从 3 行扩到 13 行 + 6-row table
-- **pwf-enforcer PWF_DIR fallback chain**:`templates/pwf-enforcer.ts` 加 `resolvePwfDir(cwd)` 函数,顶层 const 移到 plugin 函数体内闭包。Resolve order:1) `PWF_DIR` env;2) `~/.agents/skills/planning-with-files/`(canonical,推荐安装位置);3) `<cwd>/.agents/skills/planning-with-files/` 或 `<cwd>/.opencode/skills/planning-with-files/`(dev/debug / vendor copy / CI sandbox fallback);4) 找不到 → 返回 canonical → 既有 `existsSync` 失败 → 既有 no-op 警告不变。SKILL.md §1 加 Resolve order 段、§4b Troubleshooting 加 fallback 验证命令、Verification checkbox 加 fallback 注释
+- **improve-codebase-architecture description 严格化**:939/1024 chars;4 routing hints(Use when / NOT for / Load after / Token note);`## omo Integration` 段从 3 行扩到 13 行 + 6-row table
 - **CI 改进**:workflow 新增 2 step — (a) `node --check` 验证 `.opencode/plugins/*.js` 语法(补 `bin/meisijiya plugin verify` 不覆盖 .js 的缺口;node 最 portable,GH Actions ubuntu-latest + 用户开发机都不一定装 bun);(b) verified eval 的 `positive_keywords` 与 SKILL.md description 关键字覆盖率检查,任何 `verified: true` eval 缺关键词即 `::error` 阻断 merge
-- **OMO-native alignment Phase 2**:根据 [omo.dev/zh](https://omo.dev/zh) 框架深度融合。`using-meisijiya-skills` Priority 表 8 行,加 `ulw` / `ultrawork` 触发(明示无 skill,Sisyphus ultrawork mode 处理)+ omo Intent Gate 互斥说明;`AGENTS.md` Section A "omo integration" 块从 6→14 个 skill;`observability-and-instrumentation` / `pwf-enforcer` (boulder bridge 占位) / `incremental-implementation` §7 (`/start-work` 显式触发) / `improve-codebase-architecture` §1 (Team Mode 加速) 各加 `## omo Integration` 段。
+- **OMO-native alignment Phase 2**:根据 [omo.dev/zh](https://omo.dev/zh) 框架深度融合。`using-meisijiya-skills` Priority 表 8 行,加 `ulw` / `ultrawork` 触发(明示无 skill,Sisyphus ultrawork mode 处理)+ omo Intent Gate 互斥说明;`AGENTS.md` Section A "omo integration" 块从 6→14 个 skill;`observability-and-instrumentation` / `incremental-implementation` §7 (`/start-work` 显式触发) / `improve-codebase-architecture` §1 (Team Mode 加速) 各加 `## omo Integration` 段。
 - **OMO-native alignment Phase 1**:`brainstorming` description + `## omo Integration` 章节明确"in-context 对应 Prometheus Mode (Tab / `@plan`)";`spec-driven-development` 加 omo 集成段(Spec vs Prometheus Plan / Momus 评审边界);`docs/omo-agent-skill-config.md` 修过期(18→22 + 6 个新 skill 加入 per-agent 表)。
 - **新增 security-incident-response**([`skills/extra/security-incident-response/`](./skills/extra/security-incident-response/SKILL.md)):事后响应流程,按 NIST CSF 简化为 6 阶段(Detect / Triage / Contain / Eradicate / Recover / Postmortem)。OMO 集成:`security-research` mode 跑 post-incident PoC 验证漏洞彻底修补;`oracle` agent 决策链(影响评估 / 通知时机);`websearch` MCP 查 CVE 公告 / 攻击 IOC;`context7` MCP 查 IR 工具文档;`review-work` skill 跑 post-incident code review。**对非专业个人开发者价值**:假设自己会遭遇事件,流程确保"出问题时还能做对事"——blameless postmortem + 5 whys 防止下次同原因再来。
 - **新增 security-devsecops**([`skills/extra/security-devsecops/`](./skills/extra/security-devsecops/SKILL.md)):供应链 + 部署安全。6 步 Process(dep scan / SBOM / secrets rotation / CI/CD pipeline / IaC + container / pre-deploy gate)。OMO 集成:`security-research` mode 跑 production-critical pre-deploy audit;`oracle` agent 答 IaC 架构问题;`websearch` MCP 查最新 supply chain CVE;`context7` MCP 查安全工具文档(trivy / gitleaks / OPA);`grep_app` MCP 搜 GitHub 找 CVE in-the-wild fix。与 `security-and-hardening`(应用层)和 `security-incident-response`(事后)三分安全生命周期。
@@ -257,7 +227,6 @@ MIT
 - **新增 loop-me**([`skills/extra/loop-me/`](./skills/extra/loop-me/SKILL.md)):把反复做的活动形式化成可执行 workflow spec —— stateful grilling session(一问一答、每问带推荐答案),产物 `workflows/*.md` + `NOTES.md`(用户工作区根),**不是实现**。`disable-model-invocation: true` 仅用户 `/loop-me` 触发,防与 `brainstorming` 路由竞争;下游可喂 OMO `/goal`(持续执行)或 `incremental-implementation`(构建脚本)。fork 自 [`mattpocock/skills@in-progress/loop-me`](https://github.com/mattpocock/skills/tree/main/skills/in-progress/loop-me),按 meisijiya-skills 6 段式 + OMO 生态适配。
 - **AGENTS.md 同步修复**:`fdad98a` 加 verify-chain 后 Section A 计数停在 `(10)`(实际 11),本 commit 一并修到 `(12)` 并在 catalog 列表补 verify-chain + loop-me
 - **新增 verify-chain**([`skills/extra/verify-chain/`](./skills/extra/verify-chain/SKILL.md)):3 角色文章事实核查流水线 —— Critic 提断言 → Verifier × N 并行联网核查(独立 context)→ Repairer 最小化修复。输入 IT 技术文章,输出 `.verification/article-verified.md` + `.verification/verification-report.md`。`prompts/{critic,verifier,repairer}.md` 3 个支撑文件随 `npx skills add` 完整递归复制(per `vercel-labs/skills` v1.5.19+ `installSkillForAgent` → `copyDirectory` 实现)
-- **skill-anatomy.md 新增** `## 安装完整性(Install Integrity)` 节,说明 `npx skills add` 递归复制原理、硬排除集(`metadata.json` + `.git/` + `__pycache__/` + `__pypackages__/`)、手验方法;引用 `pwf-enforcer/templates/pwf-enforcer.ts` 作为既有非扁平 skill 范例
 - **删除 alias**(`skills/extra/interview-me` 与 `skills/extra/code-simplification`):两个 backward-compat alias 已下线,active 引用全部迁至 `brainstorming` 与 OMO `refactor` / `ponytail-review` / `remove-ai-slops`;`incremental-implementation` 增强为 Kanban ticket board + Tracer Bullet 首条全链路切片
 - **新增 improve-codebase-architecture**([`skills/extra/improve-codebase-architecture/`](./skills/extra/improve-codebase-architecture/SKILL.md),Matt Pocock 风格):codebase-wide 周期性健康巡检,Ousterhout deep/shallow 评分,**proposal-only** —— 改架构仍走 `incremental-implementation`
 - **Refactor**:9 个 SKILL.md 的 NOT for 段去硬指(17 个 skill cross-refs 移除),改为纯场景描述,具体哪个 skill 由 description 匹配决定。`using-meisijiya-skills` Skill Priority 表改软:`First Skill to invoke` → `Consider first`;`Then` → `Possible next`;表头加 soft-hints 说明。**原则**:routing 不写死,AI 按 description 自决(per `docs/skill-design-principles.md` 反对过度工程化)
@@ -275,7 +244,7 @@ MIT
 
 ### v0.5.0 — Skill 系统重构 + OMO 桥接
 
-- 文档漂移修复(`pwf-integration.md` 计数、已删除 skill 引用、构建闸门时序冲突全部对齐)
+- 文档漂移修复(已删 skill 引用、构建闸门时序冲突全部对齐)
 - 核心流程去重:`brainstorming` 吸收 `interview-me` 的一问一答规则;`spec-driven-development` 锁定 PRD 唯一落点;`incremental-implementation` 桥接 OMO `review-work` 新上下文审查;`verification-before-completion` 桥接 OMO `visual-qa`
 - 选装瘦化:`interview-me` / `code-simplification` 改为 OMO 内置薄别名;`documentation-and-adrs` 聚焦重大架构 ADR;`build-gate-visual-review` 明确为设计对齐闸门;`security-and-hardening` 路由至 OMO `security-research`;`performance-optimization` 卸下前端 CWV
 - `writing-skills` 迁出 `core/`(meta-only,按需装):core 9 → 8,extra 10 → 11

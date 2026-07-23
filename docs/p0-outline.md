@@ -20,7 +20,7 @@
 - 用户明确说"先做个最小版看看"
 
 **Process**:
-1. 检查 pwf `task_plan.md`,创建 `Phase 1: Spec`
+1. 检查 `task_plan.md`,创建 `Phase 1: Spec`
 2. 加载 `interview-me` 处理不清楚的部分(可选)
 3. 写 spec 模板:`目标` / `边界` / `验收标准` / `命令清单` / `测试策略` / `风险`
 4. 写到 `.planning/<plan-id>/spec.md`(不进 task_plan.md,避免污染 attestation)
@@ -54,7 +54,7 @@
 - 重构 / 迁移
 
 **Process**:
-1. 在 pwf `task_plan.md` 的 Phase 3 拆出 N 个 slice(每个 ≤ 100 行)
+1. 在 `task_plan.md` 的 Phase 3 拆出 N 个 slice(每个 ≤ 100 行)
 2. 每个 slice 用 `git worktree` 或 feature branch 隔离
 3. slice 完成后跑 `test-driven-development` 红绿循环
 4. slice commit 信息必须包含 `slice: <name>` 前缀
@@ -198,7 +198,6 @@ allowed-tools: "Read Edit Bash Glob Grep"
 ## Common Rationalizations (表格)
 ## Red Flags (列表)
 ## Verification (checkbox)
-## pwf Integration (引用 ../pwf-integration.md)
 ```
 
 行数目标:每个 200~400 行。

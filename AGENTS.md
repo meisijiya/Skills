@@ -17,7 +17,7 @@ The block between the sentinel markers below is what `scripts/inject-agents-md.s
 
 ## meisijiya-skills
 
-Use this skill system for the omo + pwf stack. Invoke skills by matching their `description` field against the user's request; do not invoke skills that don't match.
+Use this skill system for the omo stack. Invoke skills by matching their `description` field against the user's request; do not invoke skills that don't match.
 
 These conventions apply globally unless a project-level AGENTS.md overrides them.
 
@@ -38,7 +38,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
 **.extra/ — load on demand (16):**
-[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) · [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) · [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) · [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) · [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) · [`loop-me`](~/.agents/skills/loop-me/SKILL.md) · [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) · [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md)
+[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) · [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) · [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) · [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) · [`loop-me`](~/.agents/skills/loop-me/SKILL.md) · [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) · [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md)
 
 Canonical write-side note: `writing-skills` is meta-only and lives in `extra/`.
 
@@ -76,7 +76,6 @@ For the reverse map (omo feature → skills that use it), see the `meisijiya-ext
 - [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) — catches AI-generated code blindspots (boundary checks / silent error handling / env compatibility / deprecated API / hardcoded config / invisible failures); complements OMO `remove-ai-slops` (which hunts over-engineering); soft-routes via `verification-before-completion` Process step + 4-layer dispatcher Priority chain
 
 **No direct omo bridge** (yet):
-- [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md) — PWF plugin model could be mirrored to omo's `boulder.json`; tracked as future enhancement
 - [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — `oracle` agent could design SLI/SLO targets; tracked as future enhancement
 
 ### Conventions
@@ -95,7 +94,7 @@ When adding a new skill to this repo, follow the conventions in [`skill-anatomy.
 
 - **YAML frontmatter**: `name` (must match directory) + `description` (≤1024 chars, third-person, "what" + "Use when"). **Do not** include workflow summary in description (let the agent read the full file).
 - **6 standard sections**: Overview / When to Use (with NOT for) / Process / Common Rationalizations (table) / Red Flags (list) / Verification (checkboxes with evidence requirements).
-- **`## pwf Integration` section**: Map the skill to a pwf phase, OR note "no phase mapping" if it's a meta-doc.
+- **`## omo Integration` section**: Map the skill to an OMO capability (Prometheus plan, Boulder, task, notepad, evidence ledger, start-work, review-work, compaction-context-injector, or omo agent/category).
 - **≤ 500 lines**: Move reference material to supporting files.
 - **`allowed-tools`**: Specify in frontmatter when the skill needs tool restrictions.
 - **Eval case**: Add `evals/cases/<skill-name>.json` with 3 positive triggers + 3 negative triggers + ≥ 1 behavioral scenario.
@@ -105,7 +104,7 @@ When adding a new skill to this repo, follow the conventions in [`skill-anatomy.
 
 Existing skills are the reference. When in doubt, copy a similar skill's structure (e.g., [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) for the canonical 6-section pattern).
 
-For multi-harness compatibility, the skill should be readable even without omo or pwf installed. Reference them, but don't hard-depend on their presence.
+For multi-harness compatibility, the skill should be readable even without omo installed. Reference them, but don't hard-depend on their presence.
 
 ---
 
@@ -187,13 +186,13 @@ bash /tmp/mjs-check/scripts/check-marketplace.sh
 
 ### Behavior enforcement: two layers
 
-Some skills (notably [`pwf-enforcer`](~/.agents/skills/pwf-enforcer/SKILL.md)) enforce workflow discipline on OpenCode. They use **two layers**:
+Some skills (notably OMO's `review-work` skill) enforce workflow discipline on OpenCode. They use **two layers**:
 
 | Layer | Where it lives | Strength | Who reads it |
 |---|---|---|---|
 | **Hard** | OpenCode plugin at `~/.config/opencode/plugins/<skill>.ts` | Fires on real events (tool calls, compaction, system-prompt turn); always runs | The plugin runs every event; agent cannot skip it |
 | **Soft** | A short reminder block in `~/.config/opencode/AGENTS.md` (user-level) or your project's `AGENTS.md` | Reminder only — agent reads and may or may not honor | The model reads AGENTS.md every turn |
 
-**Hard layer ≠ routing.** Routing = which skill/agent handles a request (controlled by omo category/agent config). Enforcement = inject extra context at the right moments (plugin hooks). Don't conflate them. See `skills/extra/pwf-enforcer/SKILL.md` for the canonical example.
+**Hard layer ≠ routing.** Routing = which skill/agent handles a request (controlled by omo category/agent config). Enforcement = inject extra context at the right moments (plugin hooks). Don't conflate them. See OMO's `review-work` skill for the canonical example.
 
 Soft-layer content should be **concise** (5–10 lines). For full doc, read the skill.
