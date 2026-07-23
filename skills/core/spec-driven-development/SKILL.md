@@ -211,9 +211,7 @@ Before proceeding to Phase 2, confirm:
 - [ ] At least 1 build / test / lint command listed (real, runnable)
 - [ ] 若 Phase 3 之后做过 amend:每次 amend 都重新跑了 `` 且新 hash 写入 attestation 文件 + `OMO notepad` 含完整 `[amend]` 段(含 sections / hash / affected 字段)
 
-## omo Integration
-
-**Spec vs Prometheus Plan**: Prometheus writes a YAML/structured plan for `atlas` execution. `brainstorming` (or Prometheus interview) writes the Design into `OMO plan` Phase 0.
+## Related Skills
 
 - Predecessor: [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — Design + first approval
 - Successor: [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slicing

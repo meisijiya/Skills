@@ -150,7 +150,3 @@ Before declaring instrumented, confirm:
 - [ ] Dashboards show new metrics
 - [ ] Runbook exists for the new failure modes
 - [ ] On-call rotation acknowledged the new alerts
-
-## omo Integration
-
-Capture SLI/SLO decisions in the Prometheus plan and evidence ledger; use task tools for rollout and oracle/`review-work` for production verification.
