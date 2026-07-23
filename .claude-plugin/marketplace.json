@@ -17,7 +17,6 @@
       "name": "meisijiya-extra",
       "skills": [
         "./skills/extra/writing-skills",
-        "./skills/extra/pwf-enforcer",
         "./skills/extra/build-gate-visual-review",
         "./skills/extra/designer-handoff",
         "./skills/extra/api-and-interface-design",

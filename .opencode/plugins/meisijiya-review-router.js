@@ -4,13 +4,6 @@
  * OpenCode plugin: per-user-turn reminder to invoke review-class skills
  * after Write/Edit/apply_patch tool calls.
  *
- * Pattern adapted from pwf-enforcer.ts:
- *   - 3 hooks: chat.message (reset per-turn state) + tool.execute.after
- *     (inject reminder) + event (cleanup on session.deleted)
- *   - Mutation: output.output += reminder; per-result dedup via marker
- *   - Per-turn dedup: first Write/Edit in a chat turn injects once;
- *     subsequent Writes in the same turn skip until next user message
- *
  * Install:
  *   cp meisijiya-review-router.js ~/.config/opencode/plugins/
  *   # restart opencode (plugins do NOT auto-reload)
