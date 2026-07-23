@@ -40,7 +40,7 @@ Appends a structured line to .omo/sdd/<slug>/progress.md (creating the
 file if absent). The ledger survives compaction — never trust your own
 recollection after /clear, trust this file plus \`git log\`.
 
-Exit codes: 0 ok, 1 usage, 2 plan not found, 3 task JSON not found, 4 ledger write failed
+Exit codes: 0 ok, 1 usage, 2 plan not found, 4 ledger write failed
 USAGE
 }
 
@@ -49,23 +49,39 @@ if [[ $# -lt 1 ]]; then
   usage; exit 1
 fi
 
-for arg in "$@"; do
-  if [[ "$arg" == "-h" || "$arg" == "--help" ]]; then
-    usage; exit 0
-  fi
-done
-
-SUBCOMMAND="$1"; shift
-
-# ---------- common arg parse ----------
+# Pre-scan --plan and --help out of $@ at any position so the per-subcommand
+# handlers see a clean stream of positionals + their own flags.
 PLAN_SLUG=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --plan) PLAN_SLUG="$2"; shift 2 ;;
-    -h|--help) usage; exit 0 ;;
-    *) echo "$PROG: unexpected arg $1" >&2; usage; exit 1 ;;
+ALL_ARGS=("$@")
+SUBCOMMAND_ARGS=()
+i=0
+while [[ $i -lt ${#ALL_ARGS[@]} ]]; do
+  a="${ALL_ARGS[$i]}"
+  case "$a" in
+    --plan)
+      if [[ $((i+1)) -ge ${#ALL_ARGS[@]} ]]; then
+        echo "$PROG: --plan requires <slug>" >&2
+        usage; exit 1
+      fi
+      PLAN_SLUG="${ALL_ARGS[$((i+1))]}"
+      i=$((i+2))
+      ;;
+    -h|--help)
+      usage; exit 0
+      ;;
+    *)
+      SUBCOMMAND_ARGS+=("$a")
+      i=$((i+1))
+      ;;
   esac
 done
+
+# Boundary check below: keeps macOS bash 3.2.57 happy under `set -u`
+# (out-of-bounds array access throws "unbound variable"); bash 4.4+
+# silently returns empty in the same spot.
+[[ ${#SUBCOMMAND_ARGS[@]} -ge 1 ]] || { echo "$PROG: missing subcommand" >&2; usage; exit 1; }
+SUBCOMMAND="${SUBCOMMAND_ARGS[0]}"
+set -- "${SUBCOMMAND_ARGS[@]:1}"
 
 # ---------- locate plan ----------
 if [[ -z "$PLAN_SLUG" ]]; then
