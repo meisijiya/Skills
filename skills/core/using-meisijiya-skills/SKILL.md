@@ -1,6 +1,6 @@
 ---
 name: using-meisijiya-skills
-description: "Dispatcher meta-skill for the meisijiya-skills collection. Forces the agent to check applicable skills before every response, coordinate with oh-my-openagent's Sisyphus + IntentGate, and initialize planning-with-files. Use when starting any session in a project where meisijiya-skills are installed, or when about to take any action on the user's behalf."
+description: "Dispatcher meta-skill for the meisijiya-skills collection. Forces the agent to check applicable skills before every response, coordinate with oh-my-openagent's Sisyphus + IntentGate, and initialize OMO. Use when starting any session in a project where meisijiya-skills are installed, or when about to take any action on the user's behalf."
 allowed-tools: "Read Bash Glob Grep"
 ---
 
@@ -64,10 +64,9 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "1% chance applies, must load" (removed) | Only invoke when description matches; "not sure" still requires checking the catalog first, but not loading every adjacent Skill. |
 
-## pwf Integration
+## omo Integration
 
-This skill runs at session start, before any phase. May prompt for `init-session.sh` if pwf is not active.
-
+OMO dispatcher owns routing; use Prometheus `/plan`, task tools, Boulder, notepads, compaction-context-injector, and `review-work` for execution and verification.
 ## User Instructions
 
 User instructions (AGENTS.md, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.

@@ -159,10 +159,10 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 - <t5>: <recover done>
 
 ## Root cause (5 whys)
-1. Why 1: ...
-2. Why 2: ...
-3. Why 3: ...
-4. Why 4: ...
+1. Why 1:...
+2. Why 2:...
+3. Why 3:...
+4. Why 4:...
 5. Why 5: <根本原因>
 
 ## Action items
@@ -175,7 +175,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 - <一句话核心学习>
 ```
 
-**5 whys 是核心**：不停在表层。例如 "credential 泄漏" 不是 root cause；继续问 "为什么 commit 进 public repo" → "因为 .env 没加 .gitignore" → "因为 dev 不知道要加" → "因为 onboarding 文档没写" → "因为 spec 没要求"。
+**5 whys 是核心**：不停在表层。例如 "credential 泄漏" 不是 root cause；继续问 "为什么 commit 进 public repo" → "因为.env 没加.gitignore" → "因为 dev 不知道要加" → "因为 onboarding 文档没写" → "因为 spec 没要求"。
 
 ## Common Rationalizations
 
@@ -216,18 +216,9 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 - [ ] Runbook 已更新（下次 incident 不再手忙脚乱）
 - [ ] 本 skill 未做任何**未授权的**代码改动（只做最小隔离 + 补丁）
 
-## pwf Integration
+## omo Integration
 
-**Sub-phase skill**：本 skill 是 incident 触发时启动的 sub-phase，不属于常规 PWF phase。输出：
-
-- `.planning/<id>/incident-<id>.md` — timeline + evidence
-- `.planning/<id>/incident-<id>-postmortem.md` — 5 whys + action items
-- `task_plan.md` 加 incident response 段（仅 critical / major 必加）
-
-**联动**：incident 触发的修复（patch / config change）走 [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) 的 Kanban ticket，spec 由本 skill 的 postmortem 提供。
-
-See [pwf-integration.md](../../pwf-integration.md).
-
+Use task tools/Boulder for incident phases, oracle for impact decisions, notepad/evidence ledger for the timeline, and `review-work` for the postmortem gate.
 ## Related Skills
 
 - **写代码时**：[`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — app-layer 预防

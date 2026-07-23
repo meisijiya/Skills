@@ -105,7 +105,7 @@ If actual installation or runtime impact **exceeds the approved boundary**, stop
 - [ ] `bash scripts/validate-skills.sh` reports OK for `skills/extra/contract-strengthening/SKILL.md`.
 - [ ] `bash scripts/check-marketplace.sh` reports OK (entry present in `.claude-plugin/marketplace.json`).
 - [ ] Skill↔eval bijection reports 24 (from CI workflow lines 32-50).
-- [ ] `## pwf Integration` states `Phase 1.25: Contract Review` and `.planning/<id>/contract-review.md`.
+- [ ] `## OMO Integration` states `Phase 1.25: Contract Review` and `.planning/<id>/contract-review.md`.
 - [ ] Every forbidden transition and uncompiled requirement from step 2 has a counterexample in step 3, or is flagged `unaddressed`.
 - [ ] Every L3 selection in step 4 lists all six required fields.
 - [ ] Loading the skill did not install or run any verifier; every chosen tool went through step 5's order.
@@ -115,10 +115,6 @@ If actual installation or runtime impact **exceeds the approved boundary**, stop
 - [ ] Approval binds the exact tool/version/source/commands/privilege/effects/resource+execution bounds/cleanup/rollback/residual risk; broad prior consent is rejected.
 - [ ] If actual installation or runtime impact exceeded the approved boundary, the skill stopped, reported the deviation, and did not continue verification.
 
-## pwf Integration
-
-**Phase 1.25: Contract Review** — runs **after** the attested Phase 1 Spec and **before** any Phase 1.5 ([UI Design Spec](~/.agents/skills/designer-handoff/SKILL.md) by `designer-handoff`, [Interface Contract](~/.agents/skills/api-and-interface-design/SKILL.md) by `api-and-interface-design`) or Phase 2 (Research) work, on tasks whose Spec matches the Use-when signals. Sole default artifact: `.planning/<id>/contract-review.md`. Phase status in `task_plan.md` flips to `complete` only when the contract-review artifact exists with risk axes enumerated, the `uncertain` states recorded, and no observed-signal rows left blank.
-
 ## omo Integration
 
-Soft-routed via [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — the dispatcher now contains the post-attested-Spec open-world risk row and loads this optional extra only when installed; its absence does not block the core flow. No dedicated plugin hook is required: the existing `meisijiya-skills.js` bootstrap reads that dispatcher dynamically. Deep audits of candidate verification backends route through OMO `oracle`; bounded empirical runs route through OMO `general`.
+Soft-routed via [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — the dispatcher now contains the post-attested-Spec open-world risk row and loads this optional extra only when installed; its absence does not block the core flow. No dedicated plugin hook is required: the existing `meisijiya-skills.js` bootstrap reads that dispatcher dynamically. Deep audits of candidate verification backends route through OMO `oracle`; bounded empirical runs route through OMO `general`. Record risks in the OMO notepad/evidence ledger and require consent before `start-work`.

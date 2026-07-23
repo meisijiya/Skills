@@ -8,7 +8,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep"
 
 ## Overview
 
-**收紧范围**:ADR 只记**重大架构决策**(数据模型 / API 契约 / 依赖升降级 / 弃用 / 选型改变),不记日常文档 / README / 注释。这些走项目自己的 `AGENTS.md` 或 `progress.md`,不进 ADR。
+**收紧范围**:ADR 只记**重大架构决策**(数据模型 / API 契约 / 依赖升降级 / 弃用 / 选型改变),不记日常文档 / README / 注释。这些走项目自己的 `AGENTS.md` 或 `OMO notepad`,不进 ADR。
 
 Why: 一个项目动辄 50+ ADRs 时,绝大多数是噪音,真正影响未来工程师的反而被埋住。一个 ADR 应当 5 年后回头看仍能让新人决策一致。
 
@@ -33,7 +33,7 @@ When NOT to write an ADR:
 - 项目 README / 简介 / onboarding — 那是 README + AGENTS.md,不是 ADR
 - 单个函数行为修正 / bug fix — 那是 commit message
 - API endpoint 列表 / 字段映射 / 数据字典 — 那是 spec / OpenAPI 文件
-- 进度日志 / "今天做了什么" — 那是 `progress.md`
+- 进度日志 / "今天做了什么" — 那是 `OMO notepad`
 
 ## Process
 
@@ -82,7 +82,7 @@ Ask:
 
 ### 3. Cross-reference
 
-- 被影响的 Spec / Phase:link 到 `task_plan.md` 对应 Phase
+- 被影响的 Spec / Phase:link 到 `OMO plan` 对应 Phase
 - Supersede 旧 ADR 时:`superseded by ADR-XXXX`,并在 README 列出来
 
 ### 4. Do NOT auto-write ADRs at every phase
@@ -105,7 +105,7 @@ Phase 7 不再是默认必走(已撤出主流程)。只有真的产生"重大架
 - 一周内 5+ ADR — 节奏过快,大多数是噪声
 - ADR 写得像 commit message(短 + 没 context)
 - ADR 里没有 "Alternatives considered" — 决策没权衡就不算 ADR
-- ADR 写到 `task_plan.md`(那是 Phase 表 + status,不是 ADR 仓库)
+- ADR 写到 `OMO plan`(那是 Phase 表 + status,不是 ADR 仓库)
 - 把 ADR 当作 "task work" 写进 Phase 7 — Phase 7 已被撤出主流程
 
 ## Verification
@@ -117,12 +117,11 @@ Before declaring an ADR done:
 - [ ] Cross-ref 到受影响 phase / 旧 ADR(如适用)
 - [ ] 项目 README 列出 ADR 索引(可选,推荐 — 新人一眼能找到)
 
-## pwf Integration
+## omo Integration
 
-不再映射到 `task_plan.md` Phase 7(已撤出主流程)。ADR 是项目长期资产,独立于单次 plan。
-
+Record the ADR decision in the OMO plan/notepad, create a task for implementation if needed, and use `review-work` to verify links and scope.
 ## Related Skills
 
 - 跨时间决策模板:MADR / Nygard (本 skill 用了 Nygard 的微调版)
 - 项目长期文档:`AGENTS.md`(项目级 convention),`README.md`(新人入口)
-- 单次进度:`progress.md`
+- 单次进度:`OMO notepad`

@@ -87,7 +87,7 @@ cdxgen                   # CycloneDX 格式 SBOM
 
 ### 3. Secrets rotation
 
-定期轮换 secrets，绝不长期放 .env：
+定期轮换 secrets，绝不长期放.env：
 
 | Secret 类型 | 轮换周期 | 工具 |
 |---|---|---|
@@ -97,14 +97,14 @@ cdxgen                   # CycloneDX 格式 SBOM
 | TLS certificate | 90 天前（acme.sh / Let's Encrypt） | 自动续期 |
 | OAuth client secret | 365 天 | secret manager |
 
-**Secret manager**：不要手维护 .env。用：
+**Secret manager**：不要手维护.env。用：
 - AWS Secrets Manager / GCP Secret Manager / Azure Key Vault
 - HashiCorp Vault（自托管）
 - Doppler / Infisical（SaaS 友好）
 
 **.env 安全**：
 - `.env` / `.env.*.local` 加进 `.gitignore`（**永远**）
-- 不要把 .env commit 进 git（即使删了 commit，history 仍有）
+- 不要把.env commit 进 git（即使删了 commit，history 仍有）
 - 用 `git rm --cached` 撤出 tracked 状态 + BFG / git-filter-repo 清历史
 
 ### 4. Deployment pipeline security
@@ -121,13 +121,13 @@ CI/CD 是攻击者最喜欢的横向移动入口。**Pipeline 必须**：
 **Pre-deploy hook**：deploy 前跑：
 ```bash
 # 1. Secret scan
-gitleaks detect --source . --verbose
+gitleaks detect --source. --verbose
 
 # 2. Dependency audit
 npm audit --audit-level=high
 
 # 3. IaC lint（如果改了 terraform）
-tfsec .
+tfsec.
 
 # 4. Container scan（如果改了 Dockerfile）
 trivy image <image-name>
@@ -140,8 +140,8 @@ trivy image <image-name>
 #### Terraform / OpenTofu
 
 ```bash
-tfsec .                # 静态扫描
-checkov -d .           # 更细的 policy
+tfsec.                # 静态扫描
+checkov -d.           # 更细的 policy
 terrascan scan         # OPA-based
 ```
 
@@ -205,7 +205,7 @@ For latest supply-chain attacks / CVEs, use OMO `websearch` MCP.
 |---|---|
 | "我们公司小，没人攻击供应链" | typosquatting 是 automated，不需要选目标。任何新装的包都可能踩坑 |
 | "lockfile 跟 package.json 一起 commit 就够了" | lockfile 防漂移但不防漏洞；还需要 npm audit / SBOM scan |
-| ".env 加进 .gitignore 就够了" | 防 commit 不防 secrets leak 进 log / Sentry / debug output。必须 secret manager |
+| ".env 加进.gitignore 就够了" | 防 commit 不防 secrets leak 进 log / Sentry / debug output。必须 secret manager |
 | "Kubernetes 默认配置就够安全" | K8s 默认是**最宽松**配置（privileged containers allowed / host network allowed） |
 | "Docker latest tag 方便" | latest 不可重现，今天 build 的 image 跟明天可能完全不同 |
 | "gitleaks 跑过一次没问题就永远没问题" | secrets leak 可能在任意 commit 后；CI 必须每次跑 |
@@ -218,7 +218,7 @@ For latest supply-chain attacks / CVEs, use OMO `websearch` MCP.
 
 - 添加依赖没跑 `npm audit` / `pip-audit`
 - 没生成 SBOM 就发版
-- .env 文件被 commit 进 git（即使后来删了）
+-.env 文件被 commit 进 git（即使后来删了）
 - `latest` tag 跑生产
 - K8s manifest 跑 `privileged: true` / `hostNetwork: true`
 - IaC 改完没跑 `tfsec` / `conftest`
@@ -235,7 +235,7 @@ For latest supply-chain attacks / CVEs, use OMO `websearch` MCP.
 
 - [ ] Dependency audit 0 high/critical
 - [ ] SBOM 已生成并存储在 release artifact
-- [ ] Secrets 来源 = secret manager，无 .env / 硬编码
+- [ ] Secrets 来源 = secret manager，无.env / 硬编码
 - [ ] CI/CD 配置已 review：branch protection / OIDC / deploy key 权限最小化
 - [ ] IaC 改完跑了 `tfsec` / `checkov` / `conftest`
 - [ ] Container image 跑过 `trivy` / `grype`
@@ -243,17 +243,9 @@ For latest supply-chain attacks / CVEs, use OMO `websearch` MCP.
 - [ ] Rollback plan 已写
 - [ ] For production-critical deploy：OMO `security-research` audit 报告已收
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 5.5: Security Review** sub-phase, **deploy-side half**（`security-and-hardening` handles app-side half）。Outputs:
-
-- `task_plan.md` 加 Pre-deployment gate 段
-- `.planning/<id>/sbom-<release>.json` — generated SBOM
-- `.planning/<id>/deploy-checklist.md` — runbook
-- `.planning/<id>/security-devsecops-report.md` — OMO `security-research` output
-
-See [pwf-integration.md](../../pwf-integration.md).
-
+Use `security-research` and oracle for the pre-deploy audit, record artifacts in the OMO evidence ledger, and require `review-work` before release.
 ## Related Skills
 
 - **写代码时**：[`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — application-layer（input / auth / OWASP / secrets-in-code）

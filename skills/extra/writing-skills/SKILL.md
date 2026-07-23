@@ -176,3 +176,7 @@ Before declaring a skill "done":
 - Builds on: [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — test the skill like you test code
 - Builds on: [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — same RED-GREEN-REFACTOR discipline
 - Cross-ref: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher
+
+## omo Integration
+
+Use OMO task tools to track RED/GREEN/REFACTOR pressure scenarios; record evidence in the notepad and ask `review-work` to verify the skill contract.

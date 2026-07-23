@@ -61,7 +61,7 @@ uipro generate \
   --product-type "SaaS project management tool" \
   --stack "React + Tailwind + shadcn/ui" \
   --mood "minimal professional" \
-  --output .planning/<plan-id>/design-spec.md
+  --output.planning/<plan-id>/design-spec.md
 ```
 
 The generated spec contains:
@@ -76,11 +76,11 @@ The generated spec contains:
 
 ### 4. Store design spec
 
-Write to `.planning/<plan-id>/design-spec.md` (NOT `task_plan.md`).
+Write to `.planning/<plan-id>/design-spec.md` (NOT `OMO plan`).
 
-### 5. Document phase in task_plan.md
+### 5. Document phase in OMO plan
 
-Add to `task_plan.md`:
+Add to `OMO plan`:
 
 ```markdown
 ## Phase 1.5: UI Design Spec
@@ -144,7 +144,7 @@ The frontend agent (omo `visual-engineering` category) commits to:
 - ui-ux-pro-max 没装就启用 skill
 - Design spec 跑出来但前端 agent 没读
 - 前端用 spec 之外的字体 / 颜色 / 风格
-- 改了 design spec 但 task_plan.md 没记录
+- 改了 design spec 但 OMO plan 没记录
 - Pre-delivery checklist 在 commit 前没跑
 - Anti-pattern 出现(spec 明令禁止的)
 - Design spec 只用于某些 view(partial adoption 比不用更糟)
@@ -155,14 +155,12 @@ Before declaring designer-handoff complete, confirm:
 - [ ] ui-ux-pro-max installed and initialized for OpenCode
 - [ ] Spec covers product type / stack / mood
 - [ ] Design spec generated and stored at `.planning/<plan-id>/design-spec.md`
-- [ ] Phase 1.5 added to task_plan.md
+- [ ] Phase 1.5 added to OMO plan
 - [ ] Frontend agent contract documented
 - [ ] Frontend agent (when active) reads design-spec.md before UI code
 - [ ] Pre-delivery checklist run before UI commits
 - [ ] Design spec updated if requirements change mid-flight
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 1.5: UI Design Spec** (between Spec and Build). Design spec lives in `.planning/<plan-id>/design-spec.md` (artifact file), not in `task_plan.md`.
-
-See [pwf-integration.md](../../pwf-integration.md).
+Attach the design spec to the OMO plan, hand implementation to `visual-engineering`, and use `visual-qa` plus `review-work` for acceptance evidence.

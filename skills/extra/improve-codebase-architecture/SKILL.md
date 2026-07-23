@@ -115,7 +115,7 @@ handoff 协议:
 - 候选清单写了一半就开始动刀
 - 用"差不多 deep"评分 —— 要么 deep 要么 shallow
 - Inventory 跳过了直接打分
-- 把 `architecture-review.md` 写到 `task_plan.md` 里(本 skill 是 sub-phase,不入 phase)
+- 把 `architecture-review.md` 写到 `OMO plan` 里(本 skill 是 sub-phase,不入 phase)
 - 跳过 handoff 直接宣称"架构改完了"
 
 ## Verification
@@ -124,22 +124,11 @@ handoff 协议:
 - [ ] `.planning/<id>/architecture-review.md` 已写,含 ≥3 个候选(codebase 太小可 <3,注明原因)
 - [ ] 每个候选按 4 维度评分,**无"差不多"分**
 - [ ] 本 skill 未产生 diff / 未运行 commit
-- [ ] handoff 已同步(用户/团队 或 `progress.md`)
+- [ ] handoff 已同步(用户/团队 或 `OMO notepad`)
 
-## pwf Integration
+## omo Integration
 
-Sub-phase skill — produces an artifact (`.planning/<id>/architecture-review.md`) but does **not** flip any `task_plan.md` phase to `complete`. Cadence-agnostic: triggered by user signal OR a weekly-cadence prompt, no fixed schedule. Runs as a **sidecar scan** — it does not gate any other skill.
-
-| PWF element | Interaction |
-|---|---|
-| Output location | `.planning/<id>/architecture-review.md` (NOT `task_plan.md` — this skill is proposal-only; see Process §4) |
-| `task_plan.md` phase status | Does **not** flip any phase to `complete`. Selected candidates feed `incremental-implementation` Phase 3 ticket board as input, not as a finished phase. |
-| `progress.md` | Append a one-line entry when the review completes: `architecture-review: N candidates (deep: K, shallow: K-h)` — counts only, no diff. |
-| `findings.md` | If a candidate is deferred to a follow-up PWF phase, link it as a `follow-up todo` entry under the relevant phase header. |
-| Cadence trigger | **User signal** is primary. **Weekly-cadence prompt** (e.g. via [`loop-me`](~/.agents/skills/loop-me/SKILL.md)) is optional; the skill is cadence-agnostic — there is no fixed schedule. |
-
-The selected candidates are sliced and executed by [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) using `architecture-review.md` as Phase 3 input. This skill never produces a diff itself.
-
+Run the proposal scan with librarian/oracle or Team Mode, capture candidates in the OMO notepad, then hand approved work to `incremental-implementation` and Boulder.
 ## Related Skills
 
 - 后续动刀:[`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)

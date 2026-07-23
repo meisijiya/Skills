@@ -146,7 +146,7 @@ Repairer 按修复策略表执行：
 | "用户没指定模式，默认全自动就行" | 默认全自动 OK,但若用户明确说"先审再改"/"只查不改",严格按用户指示执行 |
 | "文章太短不用走完整流程" | 即使 5 段文章也有 5+ 个断言可提取;流水线是统一接口,不分长短 |
 | "可以省略修复步骤直接给报告" | 模式"只查不改"才省略;默认全自动必须包含修复 |
-| "输出到 .verification/ 麻烦，直接放 CWD 根" | 用户指定输出到 `.verification/`;改路径需要用户授权 |
+| "输出到.verification/ 麻烦，直接放 CWD 根" | 用户指定输出到 `.verification/`;改路径需要用户授权 |
 
 ## Red Flags
 
@@ -173,12 +173,9 @@ Repairer 按修复策略表执行：
 - [ ] `.verification/verification-report.md` 存在
 - [ ] 若模式为"先审再改"或"只查不改"，Phase 3 / 4 已按模式跳过
 
-## pwf Integration
+## omo Integration
 
-不属于 PWF phase。本 skill 是 sub-phase skill（跟 [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) 同级）—— 输出到 `.verification/`（用户项目根），不入 `task_plan.md`，不写 `.planning/<id>/`。
-
-适用场景：写技术文章（非编程项目）的独立 workflow；PWF 是为编程任务的 phase 划分，与本 skill 无重叠。
-
+Track Critic/Verifier/Repairer tasks in OMO, store sources and results in the notepad/evidence ledger, and use `review-work` for publication readiness.
 ## Related Skills
 
 - 完成门：检查事实类已完成：[`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) —— 编程任务的 Iron Law，本 skill 是写作任务的对应

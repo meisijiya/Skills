@@ -126,9 +126,8 @@ Before shipping any new code path:
 
 ## omo Integration
 
-For SLI/SLO design decisions (e.g., "is P99 or P95 the right SLO target?", "what's the burn-rate alert threshold for this service?"), dispatch to `oracle` agent for read-only high-IQ reasoning. For instrumenting code that touches hot paths identified by [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md), the workflow chain is `brainstorming` → `spec-driven-development` → `incremental-implementation` (per slice: instrument + test). **No direct omo bridge yet** — proposed: omo's `codegraph` could trace which paths lack coverage.
+For SLI/SLO design decisions (e.g., "is P99 or P95 the right SLO target?", "what's the burn-rate alert threshold for this service?"), dispatch to `oracle` agent for read-only high-IQ reasoning. For instrumenting code that touches hot paths identified by [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md), the workflow chain is `brainstorming` → `spec-driven-development` → `incremental-implementation` (per slice: instrument + test). Capture SLI/SLO decisions in the Prometheus plan and evidence ledger; use task tools for rollout and `review-work` for production verification.
 
-## Red Flags
 
 - 日志用 string format,不是 structured fields
 - Log 里出现密码 / token / 信用卡号
@@ -152,8 +151,6 @@ Before declaring instrumented, confirm:
 - [ ] Runbook exists for the new failure modes
 - [ ] On-call rotation acknowledged the new alerts
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 7.5: Instrument** (sub-phase). Telemetry design goes in `.planning/<plan-id>/observability.md` — separate file (not in task_plan.md), so plan attestation doesn't depend on telemetry spec.
-
-See [pwf-integration.md](../../pwf-integration.md).
+Capture SLI/SLO decisions in the Prometheus plan and evidence ledger; use task tools for rollout and oracle/`review-work` for production verification.

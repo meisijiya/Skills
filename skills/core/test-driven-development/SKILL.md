@@ -128,16 +128,6 @@ Per slice, confirm:
 - [ ] `npm test` / `pytest` / equivalent exits 0
 - [ ] Coverage didn't decrease
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 4: Verify per slice**. Each slice's TDD completion updates the phase progress:
-
-```markdown
-### Phase 4: TDD per slice
-| Slice | Red | Green | Refactor | Boundary | Status |
-|-------|-----|-------|----------|----------|--------|
-| create-user | ✓ | ✓ | ✓ | ✓ | complete |
-| read-user | ✓ | ✓ | in_progress | - | in_progress |
-```
-
-See [pwf-integration.md](../../pwf-integration.md).
+Use task tools/Boulder to track the red-green-refactor slice; `start-work` executes it and `review-work` records independent evidence.

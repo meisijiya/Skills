@@ -12,14 +12,14 @@ allowed-tools: "Read Write Edit Bash Glob Grep"
 
 把你反复做的活动**形式化**成可执行的 spec —— 不是写代码，是**写一份 implementer agent 不需要再问问题就能构建的 workflow spec**。
 
-**核心动作**：跑一个 stateful `/grilling` session（一问一答，每问必带推荐答案），产出物是 `workflows/*.md` 与 `NOTES.md`，**不是代码、不是 PWF phase、不是 incremental slice**。
+**核心动作**：跑一个 stateful `/grilling` session（一问一答，每问必带推荐答案），产出物是 `workflows/*.md` 与 `NOTES.md`，**不是代码、不是 OMO phase、不是 incremental slice**。
 
 **与现有 skill 的粒度差异**：
 
 | Skill | 阶段 | 产物 |
 |---|---|---|
 | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | 通用设计前 Q&A | 用户批准的设计意图 |
-| [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) | 任意非平凡任务 spec | `task_plan.md`（编程任务 phase） |
+| [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) | 任意非平凡任务 spec | `OMO plan`（编程任务 phase） |
 | **loop-me** | **recurring workflow spec** | **`workflows/*.md`（活动形式化）** |
 | [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) | 编程任务切片实施 | 原子 commit + slice 元数据 |
 | OMO `/goal <objective>` | 目标执行 | 持续运行的 loop |
@@ -113,7 +113,7 @@ loop-me 与上下游 skill **正交互补**：
 ## Steps
 1. <具体动作 1 — implementer 不需要再问>
 2. <具体动作 2>
-3. ...
+3....
 
 ## Checkpoint(s)
 - 在 <位置> 让用户审 / 决策
@@ -121,11 +121,11 @@ loop-me 与上下游 skill **正交互补**：
 
 ## Outputs
 - <输出 1>: <格式 + 目的地>
-- <输出 2>: ...
+- <输出 2>:...
 
 ## Failure modes
 - <失败 1>: <处理>
-- <失败 2>: ...
+- <失败 2>:...
 
 ## Definition of done
 [Implementer 拿这份 spec 走 incremental-implementation 应不再问任何问题]
@@ -166,7 +166,7 @@ Spec 完成后，把下一步留给用户：
 | "Spec 不需要定义 done，implementer 自己会判断" | Definition of done 是 loop-me session 的退出条件；implementer 没这条会问"什么时候算做完" |
 | "用户 NOTES.md 是空的，先猜几个典型 workflow" | NOTES 空 = 用户的"世界"还没建模。先 grilling 用户的工具/渠道/术语，不在空白处猜 |
 | "spec 写完就够了，不做 hand off 提示" | 下游链路（`/goal` / `incremental-implementation` / `writing-skills`）用户未必知道。spec 写完不告诉用户下一步 = 走一半 |
-| "loop-me 不属于 PWF，写到 `.planning/<id>/workflows/` 算了" | `.planning/` 是 PWF phase 划分；loop-me 是 workflow spec 设计期产物，不进 PWF phase。**用户工作区根 `workflows/`** 是上游规定路径 |
+| "loop-me 不属于 OMO，写到 `.planning/<id>/workflows/` 算了" | `.planning/` 是 OMO phase 划分；loop-me 是 workflow spec 设计期产物，不进 OMO phase。**用户工作区根 `workflows/`** 是上游规定路径 |
 
 ## Red Flags
 
@@ -177,7 +177,7 @@ Spec 完成后，把下一步留给用户：
 - Brief 包含完整日志、原始输出或长清单 —— Brief 不是 draft
 - `NOTES.md` 空但直接 spec workflow —— 用户"世界"没建模，spec 必然猜
 - spec 涉及未列出的工具、API、术语 —— 回 § 1 NOTES
-- 把 `workflows/` 写到 `.planning/<id>/workflows/` —— 越界（PWF phase 命名空间）
+- 把 `workflows/` 写到 `.planning/<id>/workflows/` —— 越界（OMO phase 命名空间）
 - loop-me session 跑完直接进 incremental-implementation 实施 —— **走错 skill 了**；loop-me 只到 spec，实施交给下游
 
 ## Verification
@@ -193,17 +193,9 @@ Spec 完成后，把下一步留给用户：
 - [ ] 已提示用户下一步：OMO `/goal` / `incremental-implementation` / `writing-skills`
 - [ ] 本 session **未**修改代码 / 未跑 commit / 未写 `.planning/<id>/`
 
-## pwf Integration
+## omo Integration
 
-不属于 PWF phase。本 skill 与 PWF 的关系：
-
-- **输出路径在用户工作区根 `workflows/*.md` + `NOTES.md`**，**不**进 `.planning/<id>/`（PWF 的 phase 命名空间）
-- **不写** `task_plan.md`（那是 `spec-driven-development` 的产物）
-- **不桥接** `incremental-implementation` Phase 3 ticket（spec 是 PRD，slice 在 incremental 阶段切）
-- 与 PWF **正交**：loop-me 跑时 PWF 可不启动；PWF 跑时不依赖 loop-me
-
-适用场景：**形式化重复活动**（recurring workflow spec 设计期）；PWF 是为**编程任务**的 phase 划分。两者目标域不同。
-
+The resulting workflow spec can be handed to OMO `/goal` or a Prometheus plan; task tools and `start-work` execute it only after the user approves.
 ## Related Skills
 
 - **上游（决定"做不做"）**：[`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) —— 用户还没确定"想自动化 X"之前先用 brainstorming 收口设计意图

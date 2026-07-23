@@ -62,7 +62,7 @@ For each class, the sub-agent must report:
 After the sub-agent scan, run the grep patterns below against the same scope. These catch **mechanical** omissions the LLM may skip (regex-blind items: a single `process.env` in client code, an empty `catch {}`, an `UNSAFE_*` call). The grep layer is the safety net.
 
 Run each pattern with `grep -rnE '<pattern>' <scope>` and filter out:
-- Lines inside block comments (`/* ... */`) and line comments (`// ...` / `# ...`).
+- Lines inside block comments (`/*... */`) and line comments (`//...` / `#...`).
 - Lines inside test files matching `*.test.*` / `*.spec.*` / `__tests__/` / `*_test.*` — those are expected to probe error paths.
 - Lines inside `node_modules/` / `.git/` / `dist/` / `build/` / `vendor/`.
 
@@ -105,7 +105,7 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 **What AI omits:** empty `catch {}` blocks, `catch` that only `console.error`s, async functions throwing without try/catch upstream, swallowed rejections.
 
 **LLM scan guidance:**
-- `try { ... } catch (e) {}` — empty body; the failure is invisible to caller.
+- `try {... } catch (e) {}` — empty body; the failure is invisible to caller.
 - `catch (e) { console.error(e) }` — logged but not rethrown / not notified; caller has no signal.
 - `async function` that may throw, called without `await` inside `try`.
 - `Promise.then(success)` without `.catch()` — rejection unhandled.
@@ -170,9 +170,9 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 
 **LLM scan guidance:**
 - `Promise.all([...])` where one rejection rejects all; consider `.allSettled` when partial success is acceptable.
-- `async` IIFE (`(async () => { ... })()`) called without `.catch()`.
+- `async` IIFE (`(async () => {... })()`) called without `.catch()`.
 - `setTimeout` / `setInterval` callback that throws synchronously inside an async body.
-- `EventTarget.addEventListener('error', ...)` without a matching `'unhandledrejection'` listener.
+- `EventTarget.addEventListener('error',...)` without a matching `'unhandledrejection'` listener.
 
 **Grep fallback patterns:**
 - `Promise\.all\(` — flag when not paired with `.allSettled` consideration; LLM scan evaluates intent.
@@ -197,10 +197,10 @@ Report template:
 - `path/to/file.ts:51` [candidate] — `<field>` access without explicit guard; needs LLM review to confirm if surrounding context guarantees non-null.
 
 ## Class 2 — Array boundaries
-- ...
+-...
 
 ## Class N — <name>
-- ...
+-...
 
 ## Unverified
 - `<browserslist missing | sub-agent timed out | git diff unavailable>` — class <X> coverage partial.
@@ -270,31 +270,9 @@ done
 bash scripts/check-marketplace.sh  # OK
 ```
 
-## pwf Integration
+## omo Integration
 
-**Verification-stage skill** (Layer 3 wiring). This skill is **loaded by** `verification-before-completion`'s Process step — it is not user-invoked and not a separate dispatch. The single, executable order is:
-
-```
-verification-before-completion Iron Law triggers
-  ↓
-  its Process step checks: (a) did this turn produce executable-code Write/Edit calls?
-                           (b) is ai-code-blindspots installed at ~/.agents/skills/ai-code-blindspots/SKILL.md?
-  ↓ (both positive)
-  load ai-code-blindspots → sub-agent scan + grep fallback → write ai-blindspots-report.md
-  ↓ (return control)
-  verification-before-completion continues with Stage 1 + Stage 2 Gate Function
-```
-
-If either condition (a) or (b) is false, the dispatcher **skips** the load and proceeds directly to the Gate Function — the core verification flow never blocks on a missing optional skill or on non-code changes.
-
-| PWF element | Interaction |
-|---|---|
-| `task_plan.md` Phase status | When this skill is invoked during verification, the parent phase does **not** flip to `complete` until `ai-blindspots-report.md` exists with findings resolved (or explicitly waived). |
-| `progress.md` | Append a one-line entry: "ai-code-blindspots: N findings (Class 1: K, Class 2: K, ...)" |
-| `findings.md` | If a finding becomes a deferred fix, link to it as a follow-up todo under the parent phase. |
-
-This skill does **not** belong to a specific PWF phase (like `security-incident-response` is an incident-triggered sub-phase); it's a verification-stage enhancement. It can be invoked from any phase that ends in a `verification-before-completion` claim.
-
+Run the scan during the OMO verification handoff; attach findings to the evidence ledger and route unresolved risk to oracle or `review-work`.
 ## Related Skills
 
 - **Upstream gate (always runs first):** [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — two-stage verification; `ai-code-blindspots` is invoked **inside** its Process step (with install + executable-code guards) when AI touched executable code in the session.

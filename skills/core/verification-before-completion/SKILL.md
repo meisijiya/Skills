@@ -52,7 +52,7 @@ BEFORE any completion claim:
 
   Stage 2 — fresh-context independent audit (mandatory before "done"):
     5. INVOKE OMO `review-work` skill (new-context, parallel sub-agents)
-       - Pass: full task_plan.md + branch diff (e.g. `git diff main...HEAD`)
+       - Pass: full OMO plan + branch diff (e.g. `git diff main...HEAD`)
        - Wait for 5 parallel sub-agent reports (goal / constraint / code quality / security / context mining)
     6. TRIAGE reports by severity (not all 🔴 are equal):
        - minor / smell                   → convert to new Blocking slice (Step 6a)
@@ -79,7 +79,7 @@ BEFORE any completion claim:
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified (write → fails → fix → passes) | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
-| Requirements met | Line-by-line checklist against `task_plan.md` Spec | Tests passing, "looks good" |
+| Requirements met | Line-by-line checklist against `OMO plan` Spec | Tests passing, "looks good" |
 | L2/L3 strengthened gap closed | Reproducible executable counterexample + discriminator run that detects the intended violation | Narrative example, passing happy-path test, or level label alone |
 | Skill loaded | `ls ~/.agents/skills/<name>/SKILL.md` exists | Description matches |
 | **Code reviewed** | OMO `review-work` 5-并行子代理报告已收 + triage 完成 | 自我 declare "code looks good" |
@@ -175,3 +175,7 @@ Before any completion claim, confirm:
 - Post-impl review: **OMO 内置 `review-work`** — fresh-context 5-parallel-sub-agent audit
 - UI taste: **OMO `visual-qa`** + 用户亲手运行
 - Cross-references meta: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — this discipline applies everywhere
+
+## omo Integration
+
+Require fresh command evidence, then use `review-work` and its oracle/QA agents before claiming completion; store concise evidence in the OMO notepad/evidence ledger.

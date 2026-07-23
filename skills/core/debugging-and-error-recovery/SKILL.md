@@ -42,7 +42,7 @@ npm test -- --grep "specific failing test" 2>&1 | tail -20
 
 Run it. **Confirm it reproduces** before doing anything else. If you can't reproduce, stop and gather more info — don't guess.
 
-Document the reproduce command in `progress.md`:
+Document the reproduce command in `OMO notepad`:
 
 ```
 [debug] reproduce: <command> → <output / exit code>
@@ -148,13 +148,11 @@ Before declaring debug complete, confirm:
 - [ ] Regression test added to test suite
 - [ ] Regression test fails without the fix
 - [ ] Other tests still pass (no regression introduced)
-- [ ] `progress.md` has the `[debug]` log entries
+- [ ] `OMO notepad` has the `[debug]` log entries
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 5: Fix**. The phase's Errors table gets an entry:
-
-```markdown
+Use an OMO task for reproduce/localize/reduce/fix/guard, hand complex localization to oracle, and record evidence in the notepad before `review-work`.
 ## Errors Encountered
 | Error | Attempt | Resolution |
 |-------|---------|------------|
@@ -163,4 +161,4 @@ Maps to `task_plan.md` **Phase 5: Fix**. The phase's Errors table gets an entry:
 
 This builds debugging knowledge across the project — recurring errors are visible patterns, not surprises.
 
-See [pwf-integration.md](../../pwf-integration.md).
+See [OMO-integration.md](../../OMO-integration.md).

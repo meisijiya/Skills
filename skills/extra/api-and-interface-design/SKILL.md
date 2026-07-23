@@ -84,7 +84,7 @@ Input validation belongs at the boundary, not in business logic:
 ### 6. Write contract first (test-first API)
 
 Write the contract as:
-- Type definitions (.d.ts / .pyi / etc.)
+- Type definitions (.d.ts /.pyi / etc.)
 - OpenAPI / GraphQL schema / protobuf
 - Example request/response pairs
 
@@ -125,7 +125,7 @@ Don't wait to add versioning. Retrofitting is painful.
 ## Verification
 
 Before declaring the API designed, confirm:
-- [ ] Contract spec exists (OpenAPI / GraphQL SDL / protobuf / .d.ts)
+- [ ] Contract spec exists (OpenAPI / GraphQL SDL / protobuf /.d.ts)
 - [ ] Every endpoint has typed errors with semantic names
 - [ ] Versioning strategy specified (URL, header, or content type)
 - [ ] Input validation specified at the trust boundary
@@ -134,8 +134,6 @@ Before declaring the API designed, confirm:
 - [ ] Example request + response pairs documented
 - [ ] Contract reviewed by at least one peer before implementation
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 1.5: Interface Contract** (sub-phase of Spec). The contract spec goes in `.planning/<plan-id>/contract.{yaml,json,graphql,proto}` — a separate file, NOT in `task_plan.md` (so it doesn't pollute attestation).
-
-See [pwf-integration.md](../../pwf-integration.md).
+Capture the contract in the Prometheus plan, use task tools for producer/consumer slices, and let `review-work` verify the boundary.

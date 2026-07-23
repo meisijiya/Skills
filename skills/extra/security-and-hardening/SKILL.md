@@ -53,7 +53,7 @@ function handleCreateUser(req: Request) {
 // BAD: validation scattered
 function handleCreateUser(req: Request) {
   const { name, email } = req.body  // trusts shape
-  if (!email.includes('@')) ...  // business logic now knows about HTTP shape
+  if (!email.includes('@'))...  // business logic now knows about HTTP shape
   return userService.create({ name, email })
 }
 ```
@@ -178,14 +178,9 @@ Before declaring secure, confirm:
 - [ ] For production-critical code: OMO `security-research` audit run with working PoC report
 - [ ] Dependency / IaC / container / deployment pipeline concerns routed to dedicated skill (not silently dropped)
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 5.5: Security Review** (sub-phase). Security checklist goes in `.planning/<id>/security-review.md` — separate file so it doesn't pollute attestation but survives plan changes.
-
-OMO `security-research` 输出 → 进 `.planning/<id>/security-research-report.md`。
-
-See [pwf-integration.md](../../pwf-integration.md).
-
+Route production-critical findings to `security-research`/oracle, record evidence in the OMO ledger, and gate implementation and merge through Boulder and `review-work`.
 ## Related Skills
 
 - Production audit: OMO 内置 `security-research` (3 hunters + 2 PoC engineers)

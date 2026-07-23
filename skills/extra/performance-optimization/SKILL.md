@@ -125,12 +125,9 @@ Before declaring optimized, confirm:
 - [ ] Performance budget added to CI / monitoring
 - [ ] Reverted changes that didn't help (not "kept them anyway")
 
-## pwf Integration
+## omo Integration
 
-Maps to `task_plan.md` **Phase 5.7: Performance** (sub-phase). The metric + baseline + result is recorded in `.planning/<plan-id>/perf-baseline.md` — separate file, not in task_plan.md (so plan attestation doesn't depend on perf numbers).
-
-See [pwf-integration.md](../../pwf-integration.md).
-
+Use an OMO task to record baseline, bottleneck evidence, and regression checks; librarian/oracle advise, Boulder tracks the slice, and `review-work` verifies gains.
 ## Related Skills
 
 - **Frontend CWV / Lighthouse / Playwright** → OMO 内置 `frontend` skill(perfection ruleset)
