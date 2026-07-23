@@ -12,7 +12,7 @@ Every project — even "trivial" ones — goes through this. The design can be s
 
 **Core principle:** HARD-GATE. No implementation before design + user approval.
 
-**This skill precedes [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md).** Brainstorm produces the design and writes it into `OMO plan` (Phase 0 → Phase 1, no separate design-doc file); spec-driven-development then refines and attests the same Spec. **One approval gate, not two.**
+**This skill precedes [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md).** Brainstorm produces the design and appends it as **Phase 0** of the Prometheus plan at `.omo/plans/<slug>.md` (or draft at `.omo/drafts/<slug>.md` if you go through `ulw-plan`); spec-driven-development then refines it into **Phase 1 (Spec)** of the same plan file. **One approval gate, not two.**
 
 ## When to Use
 
@@ -34,14 +34,14 @@ Every project — even "trivial" ones — goes through this. The design can be s
 ### 1. Explore project context
 
 Before asking detailed questions, check what's already in flight:
-- `OMO plan` or `.planning/<id>/OMO plan` (OMO state)
+- `.omo/plans/*.md` (Prometheus plans — current OMO state)
 - Recent commits (`git log --oneline -10`)
 - Related files (`grep -r "<keywords>" --include="*.md"`)
 - Existing related specs (search for "spec" or "design" in docs)
 
 If the request describes **multiple independent subsystems** ("build a platform with chat + file storage + billing + analytics"), flag this immediately. Help decompose into sub-projects first; then brainstorm each one through the normal flow. Each sub-project gets its own spec → plan → implementation cycle.
 
-### 2. Ask clarifying questions — one at a time
+### 2. Ask clarifying questions — one at a time, decision-tree convergence
 
 Before asking, form a hypothesis: "I think the user actually wants X, right?" Then:
 
@@ -50,7 +50,10 @@ Before asking, form a hypothesis: "I think the user actually wants X, right?" Th
 - Each option must include a recommended answer (user can reply "agree" to advance).
 - Focus on: purpose, constraints, success criteria, edge cases, non-obvious decisions.
 - **Facts self-check, decisions ask the user.** If you can read code or grep for it, don't ask.
-- 3-7 questions is typical. > 10 questions = scope is wrong; switch to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) with TODOs.
+- **Walk the decision tree, not a fixed questionnaire.** A later question's premise may depend on an earlier answer — batch-asking would force you to assume undecided parent nodes. After each answer, decide whether the open question set has shifted; only ask questions whose prerequisites are settled.
+- **Convergence criterion**: stop when no open question has a prerequisite that is still unresolved AND you can summarize the design space in 2-3 sentences and the user confirms "yes, that's right."
+- **No hard upper bound on questions.** The Matt Pocock `grilling` primitive's philosophy: walk down every branch of the decision tree until shared understanding is reached. The earlier "3-7 typical, >10 → switch to spec-driven" rule was a questionnaire cap — replaced by decision-tree convergence because the cap was forcing closure on undecided branches.
+- **If the tree obviously exceeds one session** (e.g., 15+ open decisions with deep dependency chains), the scope is wrong — switch to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) with TODOs to break into sub-projects, then brainstorm each.
 - When you reach ~95% confidence, summarize in 2-3 sentences and ask "我理解的对吗?" — if yes, proceed.
 
 ### 3. Propose 2-3 approaches
@@ -69,9 +72,9 @@ Cover: architecture, components, data flow, error handling, testing strategy.
 
 **Get user approval after each section**, not just at the end. Don't dump the entire design and ask "ok?" — section-by-section prevents the "I've read 200 lines, just say yes" pattern.
 
-### 5. Write design into `OMO plan` (no separate file)
+### 5. Append design as Phase 0 of the Prometheus plan (no separate file)
 
-Append the validated design as **Phase 0: Design** of `OMO plan`:
+Append the validated design as **Phase 0: Design** of `.omo/plans/<slug>.md` (or `.omo/drafts/<slug>.md` if you went through `ulw-plan --draft-only`):
 
 ```markdown
 ## Phase 0: Design
@@ -88,9 +91,11 @@ Append the validated design as **Phase 0: Design** of `OMO plan`:
 **Status:** design_approved_pending_spec
 ```
 
-**Why no separate file?** `OMO plan` is the durable attestation source (OMO `` hashes it). Splitting design into a sibling file breaks the attestation chain. Phase 1 (Spec) refines the same content; one approval, one artifact.
+**Why no separate file?** `.omo/plans/<slug>.md` is the durable state file OMO reads from. Splitting design into a sibling file means the plan Prometheus / ulw-plan tracks and the design you wrote diverge. Phase 1 (Spec) refines the same content in the same file; one approval, one artifact.
 
-> **Do NOT auto-commit** the design. OMO's attestation is the durable record; commits are governed by the project's git policy (often only on slice-level commits per [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)).
+> **Do NOT auto-commit** the design. OMO's Boulder state (`.omo/boulder.json`) plus the plan file itself are the durable record; commits are governed by the project's git policy (often only on slice-level commits per [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)).
+
+> **append-only for the plan file.** OMO's `notepad-write-guard` hook enforces append-only on `.omo/notepads/*`; for `.omo/plans/*.md` use `Edit` (not `Write`) when adding phases so phase ordering and script-emitted headers are preserved (see `ulw-plan` skill: never rewrite script-emitted headers).
 
 ### 6. Design self-review
 
@@ -107,7 +112,7 @@ Fix any issues inline. No need to re-review.
 Tell the user:
 
 ```
-Design written into OMO plan Phase 0. Next: invoke
+Design appended as Phase 0 of `.omo/plans/<slug>.md`. Next: invoke
 spec-driven-development to refine into the formal PRD/Spec
 (Phase 1), get your final approval, then run.
 No separate design-doc file needed.
@@ -135,7 +140,7 @@ Wait for the user's confirmation, then invoke [`spec-driven-development`](~/.age
 - User asks "how should we do X" and you start coding instead of brainstorming
 - Skipping clarifying questions because "the answer is obvious"
 - Multiple parallel implementation tasks without decomposing first
-- Writing the design into a separate file (`docs/specs/...`, `.planning/<id>/spec.md`) instead of `OMO plan` — breaks attestation
+- Writing the design into a separate file (`docs/specs/...`, `.planning/<id>/spec.md`) instead of `.omo/plans/<slug>.md` — plan and design diverge
 - Producing a long answer without first checking skill catalog
 - Asking 2+ questions in one round (use AskUserQuestion once with mutually exclusive options)
 - Auto-committing the design doc (commits are governed by slice-level policy)
@@ -147,7 +152,7 @@ Before invoking any implementation skill, confirm:
 - [ ] I asked clarifying questions one at a time until requirements are clear (or zero questions if already clear)
 - [ ] I proposed 2-3 approaches with trade-offs + my recommendation
 - [ ] User approved the approach
-- [ ] Design written into `OMO plan` Phase 0 (not a separate file)
+- [ ] Design appended as Phase 0 of `.omo/plans/<slug>.md` (not a separate file)
 - [ ] Design self-review complete (no placeholders, no contradictions)
 - [ ] User approved the written design
 - [ ] Next step is [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) (not implementation skill directly)
@@ -175,5 +180,5 @@ After brainstorming produces the design, the downstream chain is the same in bot
 
 ## Related Skills
 
-- Successor: [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — refines Design into formal Spec, runs attestation
+- Successor: [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — refines Design into formal Spec (Phase 1 of the same plan file)
 - Cross-references meta: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md)

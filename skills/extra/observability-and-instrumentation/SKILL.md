@@ -126,8 +126,9 @@ Before shipping any new code path:
 
 ## omo Integration
 
-For SLI/SLO design decisions (e.g., "is P99 or P95 the right SLO target?", "what's the burn-rate alert threshold for this service?"), dispatch to `oracle` agent for read-only high-IQ reasoning. For instrumenting code that touches hot paths identified by [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md), the workflow chain is `brainstorming` → `spec-driven-development` → `incremental-implementation` (per slice: instrument + test). Capture SLI/SLO decisions in the Prometheus plan and evidence ledger; use task tools for rollout and `review-work` for production verification.
+For SLI/SLO design decisions (e.g., "is P99 or P95 the right SLO target?", "what's the burn-rate alert threshold for this service?"), dispatch to `oracle` agent for read-only high-IQ reasoning. For instrumenting code that touches hot paths identified by [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md), the workflow chain is `brainstorming` → `spec-driven-development` → `incremental-implementation` (per slice: instrument + test). Capture SLI/SLO decisions in the Prometheus plan (`.omo/plans/<slug>.md`) and the per-event evidence stream at `.omo/start-work/ledger.jsonl`; use OMO task tools for rollout and `review-work` for production verification.
 
+## Anti-Patterns
 
 - 日志用 string format,不是 structured fields
 - Log 里出现密码 / token / 信用卡号

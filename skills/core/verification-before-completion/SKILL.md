@@ -37,7 +37,7 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 ### The Gate Function (two-stage)
 
 - [ ] **If this turn produced new code via Write/Edit tool calls** (and not pure-docs / test-only / pure-style-only changes — i.e. the changes include executable logic), AND [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) is **installed** at `~/.agents/skills/ai-code-blindspots/SKILL.md` (it lives in `extra/`, so installation is opt-in), load it for a 7-class blindspot review on the diff before running the Gate Function below. AI tends to under-write: null/undefined boundaries, empty arrays, silent error catches, env incompat (Node-only API in browser), deprecated APIs, hardcoded secrets, invisible promise rejections. **If `ai-code-blindspots` is not installed OR the changes have no executable logic, skip this step and continue with the Gate Function below** — the core verification flow never blocks on a missing optional skill.
-- [ ] **If the attested Spec or `.planning/<id>/contract-review.md` assigns any gap L2/L3**, require per-gap counterexample and discriminator evidence before completion: each counterexample has reproducible executable evidence (test, property test, or bounded model-check/solver counterexample as appropriate), and the discriminator run shows the intended violation is detected. Narrative-only evidence is insufficient. Ordinary L1 work keeps the existing gate and is never forced into formal tools.
+- [ ] **If the approved Spec or `.omo/notepads/<plan-name>/contract-review.md` assigns any gap L2/L3**, require per-gap counterexample and discriminator evidence before completion: each counterexample has reproducible executable evidence (test, property test, or bounded model-check/solver counterexample as appropriate), and the discriminator run shows the intended violation is detected. Narrative-only evidence is insufficient. Ordinary L1 work keeps the existing gate and is never forced into formal tools.
 
 ```
 BEFORE any completion claim:
@@ -52,7 +52,7 @@ BEFORE any completion claim:
 
   Stage 2 — fresh-context independent audit (mandatory before "done"):
     5. INVOKE OMO `review-work` skill (new-context, parallel sub-agents)
-       - Pass: full OMO plan + branch diff (e.g. `git diff main...HEAD`)
+       - Pass: full `.omo/plans/<slug>.md` + branch diff (e.g. `git diff main...HEAD`)
        - Wait for 5 parallel sub-agent reports (goal / constraint / code quality / security / context mining)
     6. TRIAGE reports by severity (not all 🔴 are equal):
        - minor / smell                   → convert to new Blocking slice (Step 6a)
@@ -79,7 +79,7 @@ BEFORE any completion claim:
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified (write → fails → fix → passes) | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
-| Requirements met | Line-by-line checklist against `OMO plan` Spec | Tests passing, "looks good" |
+| Requirements met | Line-by-line checklist against `.omo/plans/<slug>.md` Spec | Tests passing, "looks good" |
 | L2/L3 strengthened gap closed | Reproducible executable counterexample + discriminator run that detects the intended violation | Narrative example, passing happy-path test, or level label alone |
 | Skill loaded | `ls ~/.agents/skills/<name>/SKILL.md` exists | Description matches |
 | **Code reviewed** | OMO `review-work` 5-并行子代理报告已收 + triage 完成 | 自我 declare "code looks good" |
@@ -178,4 +178,6 @@ Before any completion claim, confirm:
 
 ## omo Integration
 
-Require fresh command evidence, then use `review-work` and its oracle/QA agents before claiming completion; store concise evidence in the OMO notepad/evidence ledger.
+Require fresh command evidence, then use `review-work` and its 5 parallel lanes (goal / constraint / code quality / security / context mining) before claiming completion; store concise evidence in `.omo/notepads/<plan-name>/` (`issues.md` for failures, `decisions.md` for triage outcomes) and append per-event records to `.omo/start-work/ledger.jsonl`.
+
+**State-survival mechanism (`compaction-context-injector` hook)**: when OMO triggers a context compaction (`experimental.session.compacting` event), this hook captures the session's agent/model/tools checkpoint, injects an 8-section `COMPACTION_CONTEXT_PROMPT` into the surviving context (User Requests / Final Goal / Work Completed / Remaining Tasks / Active Working Context / Explicit Constraints / Agent Verification State / Delegated Agent Sessions), and restores on `session.compacted` — tail monitor threshold 5 consecutive no-text events + 60s cooldown prevents recovery loops. **Implication for verification**: if you are mid-stage-2 (5 parallel review-work lanes pending) when compaction fires, the prompt explicitly tells the resuming agent **"RESUME, DON'T RESTART"** — use `background_output(task_id="bg_...")` for in-flight lanes, do not re-launch fresh reviewers with stale context.

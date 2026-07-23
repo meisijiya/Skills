@@ -63,7 +63,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch WebSearch"
 
 ### Phase 2: Verifier × N — 并行联网核查
 
-对**每个断言**启动一个**独立的 Verifier subagent**（OMO `general` agent 推荐）：
+对**每个断言**启动一个**独立的 Verifier subagent**（OMO `sisyphus-junior` 或 `librarian`，不要用不存在的 `general` agent）：
 
 - 每个 subagent 的 system prompt = [`prompts/verifier.md`](~/.agents/skills/verify-chain/prompts/verifier.md)
 - 每个 subagent **只携带它负责的那一个断言**（编号 + 原文摘录 + 类别 + 核查问题 + 建议核查路径）

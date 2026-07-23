@@ -12,22 +12,22 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 ## omo Integration
 
-**Spec vs Prometheus Plan**: Prometheus writes a YAML/structured plan for `atlas` execution. `brainstorming` (or Prometheus interview) writes the Design into `OMO plan` Phase 0. This skill writes the **PRD/Spec** into `OMO plan` Phase 1 — the contract that comes BEFORE the Prometheus plan. Order:
+**Spec vs Prometheus Plan**: Prometheus writes the plan as a markdown task list (`- [ ] N. <title>` for implementation rows, `- [ ] F<n>. <title>` for final-verifier rows) for `atlas` execution. `brainstorming` (or Prometheus Mode) writes the Design as **Phase 0** of the same file. This skill writes the **PRD/Spec** as **Phase 1** of the same file — the contract that comes BEFORE the Prometheus task list. Order:
 
-1. Phase 0: Design ([`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — or Prometheus Mode)
-2. Phase 1: Spec (this skill, with `` attestation)
+1. Phase 0: Design ([`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — or Prometheus Mode via `ulw-plan` skill)
+2. Phase 1: Spec (this skill — refines Phase 0 into a verifiable PRD with acceptance criteria + commands)
 3. Momus plan review (omo built-in; `momus` agent validates plan against clarity/verification/context criteria)
-4. Phase 2: Research, Phase 3: Slice ([`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md))
+4. Phase 2: Research + Phase 3: Slice ([`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md))
 5. `/start-work` to dispatch to Atlas
 
-**`` vs Prometheus**: Prometheus writes its plan to its own format. Our `` hashes `OMO plan` (Phases 0-3). If running under omo, Momus reviews the Prometheus plan; we still attest `OMO plan` (the source of truth). **Do not skip attestation** because "Prometheus approved it" — those are separate gates.
+**Spec vs Prometheus task list**: Prometheus task rows encode *what to do* (with file paths and acceptance criteria per row). Our Phase 1 Spec encodes *what done looks like* (acceptance criteria, test strategy, scope boundaries). The Spec is the human contract; the task list is the worker contract. Both live in the same `.omo/plans/<slug>.md`.
 
 没有 spec 就动手 = 边写边猜 = 返工概率 100%。Spec 是省 debug 时间的工具,不是负担。
 
 > **职责边界**:
-> - **唯一落点**:PRD/Spec 写到 `OMO plan` **Phase 1**。不允许独立 `spec.md` / `docs/specs/*.md` 文件(会破坏 OMO attestation 链)。
+> - **唯一落点**:PRD/Spec 写到 `.omo/plans/<slug>.md` **Phase 1**。不允许独立 `spec.md` / `docs/specs/*.md` 文件(plan 和 spec 会分裂,Atlas 找不到上下文)。
 > - **唯一审批门**:本 skill 是 `brainstorming` 之后的唯一一次"Spec 写完请用户确认"。`brainstorming` 已批准 Design,本 skill 只需批准最终 Spec。
-> - **诚实标注**:OpenCode 是 Tier 3,PreToolUse / Stop 不能硬阻断;PreCompact / 实验性 hook 才能注入上下文。
+> - **诚实标注**:OpenCode 是 Tier 3,PreToolUse / Stop 不能硬阻断;`compaction-context-injector`(`experimental.session.compacting`)在 OMO 内自动恢复 plan head 到上下文,但不能硬阻断完整度。
 
 ## When to Use
 
@@ -50,18 +50,18 @@ allowed-tools: "Read Edit Bash Glob Grep"
 ### 1. Check OMO state
 
 ```bash
-test -f OMO plan && echo "OMO legacy" || \
-  ls.planning/*/OMO plan 2>/dev/null && echo "OMO parallel" || \
-  echo "OMO NOT initialized"
+test -f .omo/plans/<slug>.md && echo "plan exists" || \
+  test -f .omo/drafts/<slug>.md && echo "draft exists" || \
+  echo "no plan or draft — start brainstorming first"
 ```
 
-If not initialized AND the task is non-trivial, prompt the user to run `init-session.sh` before proceeding.
+If neither plan nor draft exists AND the task is non-trivial, go back to [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) to seed Phase 0 (Design) — or invoke the `ulw-plan` skill (`/plan` keyword) to scaffold the plan file via `scaffold-plan.mjs`.
 
 ### 2. Read Phase 0: Design (from brainstorming)
 
-The [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) skill wrote Phase 0 into `OMO plan`. Read it; don't re-derive. Your job is to **refine** the design into a verifiable Spec, not redo the conversation.
+The [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) skill wrote Phase 0 into `.omo/plans/<slug>.md`. Read it; don't re-derive. Your job is to **refine** the design into a verifiable Spec, not redo the conversation.
 
-### 3. Append Phase 1: Spec to `OMO plan`
+### 3. Append Phase 1: Spec to `.omo/plans/<slug>.md`
 
 ```markdown
 ## Phase 1: Spec
@@ -76,6 +76,24 @@ The [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) skill wrote Phase
 - [ ] <可验证的交付物 1>
 - [ ] <可验证的交付物 2>
 - [ ] <可验证的交付物 3>
+
+**Global Constraints(verbatim, single source of truth for all slices):**
+- <runtime / version floor: Node ≥ 20.10, Python ≥ 3.11>
+- <dependency limits: no new deps; reuse existing ESM paths>
+- <naming rules: kebab-case files, PascalCase classes, camelCase vars>
+- <platform: server only / browser only / both>
+- <API contracts: error format, auth, rate limits>
+- <test infrastructure: docker-compose.test.yml or equivalent>
+- <anything that EVERY slice must obey — copy verbatim into each slice's `task-brief.sh` output>
+
+**No-Placeholders contract(binding on every Phase 3 slice):**
+- ❌ "TBD" / "TODO" / "implement later" / "fill in details" → forbidden in slice briefs
+- ❌ "Add appropriate error handling" / "add validation" / "handle edge cases" → forbidden
+- ❌ "Similar to Task N" → forbidden; each step must repeat the actual code
+- ❌ "Write tests for the above" without test code → forbidden
+- ❌ References to types/functions not defined in the spec or the codebase → forbidden
+
+These mirror Superpowers `writing-plans` No Placeholders list. The Phase 3 executor brief (via `~/.agents/skills/incremental-implementation/scripts/task-brief.sh`) MUST contain complete code in every step; if it doesn't, dispatch returns NEEDS_CONTEXT instead of inventing.
 
 **Commands to Run:**
 - <构建命令>: 退出 0
@@ -95,37 +113,42 @@ The [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) skill wrote Phase
 - Risk level: <L1 | L2 | L3 — minimum verification strength, not a domain label or safety guarantee>
 - Risk signals: <open-world observed/absent/uncertain signals; contract completeness, state/timing/concurrency, boundary/dependency, reversibility, and verification blind spots are explicitly non-exhaustive examples; absence from examples never proves L1>
 - Contract gaps / uncompiled requirements / uncertainty: <stated, inferred, and unknown obligations; do not invent thresholds or data shapes>
-- Phase 1.25 route: <when any signal is observed or uncertain, after attestation load [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) if installed; a missing optional extra does not block the core flow>
+- Phase 1.25 route: <when any open-world risk signal is observed or uncertain, after the Spec is approved, load [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) if installed; a missing optional extra does not block the core flow>
 
 **Status:** in_progress
 ```
 
 Fill every section — don't leave "TBD". If you don't know something, that's a question for the user via [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) (one at a time), not an excuse to skip.
 
-The Spec lives in `OMO plan` Phase 1 — Phase 0 (Design) above, Phase 2 (Research) below. **No separate spec file.**
+The Spec lives in `.omo/plans/<slug>.md` Phase 1 — Phase 0 (Design) above, Phase 2 (Research) below. **No separate spec file.**
 
 ### 4. Clarify ambiguity (if needed)
 
 If any section can't be filled confidently, return to the [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) one-question-at-a-time protocol. **Do NOT batch-ask five questions.** Delegated judgment may recommend an answer, but never approves unresolved design or contract choices and cannot bypass the user-approved Design gate.
 
-### 5. Attest the plan
+### 5. Lock the Spec in the plan file
 
-Once Spec is complete:
-
-```bash
-sh scripts/
-```
-
-This locks `OMO plan` content (SHA-256). Subsequent hooks will detect tampering.
+Once Spec is complete, append a final `**Status:** spec_approved` line to Phase 1 (do not rewrite the plan — use `Edit` to preserve script-emitted headers per `ulw-plan` rules). The plan file itself is the durable record.
 
 > **Honest tier limits (OpenCode)**:
-> - On OpenCode, the **hash check is advisory** (Tier 3); it doesn't hard-block Write/Edit.
-> - The durable record is `OMO plan` itself, not the plugin gate. Keep the file under VCS.
-> - The OMO `OMO-enforcer` plugin (extra) hard-injects the plan head via `experimental.chat.system.transform` and `experimental.session.compacting` — but cannot hard-stop on incomplete phases.
+> - OMO has **no SHA-256 attestation** for plan content. The durable record is `.omo/plans/<slug>.md` itself; keep it under VCS.
+> - On OpenCode (Tier 3), `PreToolUse` / `Stop` hooks cannot hard-block; only soft-inject context via `compaction-context-injector` (`experimental.session.compacting`) and `notepad-write-guard` (`Write` to `.omo/notepads/*`).
+> - Momus review + `/start-work` are the closest things to a hard gate: Momus rejects unexecutable plans (`[REJECT]` with ≤ 3 blocking issues); `/start-work` reads `.omo/plans/*.md` and refuses non-existent plans.
+
+**Momus review expansion(Superpowers writing-plans self-review absorbed)**:
+
+When dispatching Momus (`task(subagent_type="momus", prompt=".omo/plans/<slug>.md")`),it must check 4 categories:
+
+1. **Reference verification**: each file:line in Phase 3 task rows exists and contains the claimed content. FAIL if any reference is missing or points to wrong content.
+2. **Executability**: each task has a starting point (file, pattern, or clear description). FAIL only if a task is so vague the implementer has no idea where to begin.
+3. **Type / signature consistency**: `Interfaces: Produces` symbols in earlier tasks match the signatures referenced in `Interfaces: Consumes` of later tasks. FAIL if names or types drift between tasks.
+4. **Placeholder + Global Constraints scan**: no "TBD" / "TODO" / "implement later" in any task brief; `Global Constraints` section is verbatim and present; each slice's `task-brief.sh` invocation has Global Constraints copied into its brief.
+
+Momus returns OKAY unless blocking issues exist. PASS: all 4 checks OK. REJECT: ≤ 3 blocking issues (one per category max).
 
 ### 5.5 Amend Spec mid-build
 
-需求进入 Phase 3 后用户改主意 / review-work 报告变更 / 验收标准漂移 — 必走 amend 协议。**禁止**继续按旧 Spec 写,因为旧 hash 仍是 plan head,新改动不被 OMO 注入,attest 失真。
+需求进入 Phase 3 后用户改主意 / review-work 报告变更 / 验收标准漂移 — 必走 amend 协议。**禁止**继续按旧 Spec 写,因为旧 phase 内容仍是 plan head,新改动不被 OMO 注入,后续 task 仍按旧字段名写。
 
 #### 何时调用
 
@@ -133,44 +156,40 @@ This locks `OMO plan` content (SHA-256). Subsequent hooks will detect tampering.
 - **Data-shape / API contract** 改动 → 直接进 § 5.5
 - **Pure addition (orthogonal)** → append 一段到 Phase 1 后也进 § 5.5
 - **WHY changed(feature re-scope)** → 不进 § 5.5;先回 [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) Phase 0 重对齐,完成后再走 § 1-5 全新流程
-- **Cosmetic / HOW** → 不进 § 5.5(只在 `OMO plan` 字面改文字;不重跑 attest,或不 hash 化)
+- **Cosmetic / HOW** → 不进 § 5.5(只在 `.omo/plans/<slug>.md` 字面改文字,改完即可)
 
 #### 流程
 
-1. **对照原 Spec** (`OMO plan` Phase 1) 标出**仅被影响的 section**(Acceptance / Scope / Test Strategy / 等)。**不重写无关段**。
-2. **就地编辑** `OMO plan` Phase 1 的对应 section。`Status: in_progress` 行保留(attest 后再变回 `amended`)。
+1. **对照原 Spec** (`.omo/plans/<slug>.md` Phase 1) 标出**仅被影响的 section**(Acceptance / Scope / Test Strategy / 等)。**不重写无关段**。
+2. **就地编辑** `.omo/plans/<slug>.md` Phase 1 的对应 section(`Edit`,不要 `Write` —— `ulw-plan` 不允许 rewrite script-emitted headers)。`Status:` 行保留,改 `spec_approved` → `amended`。
 3. **同步增量**到 Spec 影响的所有 slice(由 [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) § 9.3 的状态机执行):新 slice append / 旧 slice 标 `superseded` / 旧 slice 改 `verify`。
-4. **Re-attest**(同 § 5):
-   ```bash
-   sh scripts/
-   ```
-   新 SHA-256 写到 `.planning/<id>/` 或 `.plan-attestation`(取决于 parallel / legacy 模式,见 [`OMO-integration.md`](../../OMO-integration.md))。**`OMO-enforcer` 下次 step 会主动重 inject 新 plan head**(因为 hash 变了)。
-5. **Log amendment**:`OMO notepad` 加一段:
+4. **重新跑 Momus review**:`task(subagent_type="momus", prompt=".omo/plans/<slug>.md")`(Momus 验证 reference + QA scenario executability,只接受 `[OKAY]` 或 `[REJECT]` + ≤ 3 blocking issues)。
+5. **Log amendment**:`.omo/notepads/<plan-name>/decisions.md` append 一段:
    ```
    [amend] <type> at <ts> by <actor> reason:<一句话>
         sections: <Phase-1.Section-list>
-        hash:     <新 attestation hash, truncated 8 chars>
+        momus-verdict: <OKAY | REJECT — issues>
         affected: <slice-id-1, slice-id-2...>
    ```
-   这是事后 audit"为什么 Spec 改了"的唯一线索。
+   这是事后 audit"为什么 Spec 改了"的唯一线索(notepad 是 append-only,`notepad-write-guard` hook 强制)。
 
-> **Honest tier limits** 同样适用:`` 在 OpenCode 上是软校验(advise),不能硬阻断 Write/Edit。但 OMO `OMO-enforcer` 插件会在下次 system prompt transform 时**自动用新 hash 替换 plan head** —— 这是 Tier 1 hook 的等价行为。
+> **Honest tier limits** 同样适用:OMO 在 OpenCode 上无硬阻断。`compaction-context-injector` 在 compaction 后自动用新 plan head 重建上下文 —— 不需要 hash,直接读 `.omo/plans/<slug>.md` 内容。
 
 #### 不允许的捷径
 
-- ❌ 跳过 § 5.5 amend、直接告知 Phase 3 "改一下 field 名吧" → 写代码用旧字段名,attest 失效,review-work 必红
+- ❌ 跳过 § 5.5 amend、直接告知 Phase 3 "改一下 field 名吧" → 写代码用旧字段名,后续 task 失真,review-work 必红
 - ❌ amend 时只改 Spec 文字,不动 slice 拓扑 → Phase 3 后端仍引用旧字段名
-- ❌ amend 后不 re-attest → hash 不变 → OMO-enforcer 仍 inject 旧计划 → session 上下文分裂
-- ❌ amend 过程不写 `[amend]` 段 → 事后 audit 无线索
+- ❌ amend 过程不写 `[amend]` 段到 `decisions.md` → 事后 audit 无线索
+- ❌ amend 时用 `Write` 工具而非 `Edit` 覆盖 plan 文件 → 破坏 `ulw-plan` 的 script-emitted headers
 
 ### 6. Get user confirmation (single approval)
 
-> **Note on re-approval**:初次 Spec 已确认后,**日常 amend 不需要再走"用户全量批准"** —— 用户已经在来源(直接说"改成 X")给了批准,§ 5.5 amend 在 `OMO notepad` 留日志即可。仅当 amend 同时触发了 § 5 整段重写、attest 重置、或 Phase 0 WHY 变更时,才需要再次"用户全量批准"。
+> **Note on re-approval**:初次 Spec 已确认后,**日常 amend 不需要再走"用户全量批准"** —— 用户已经在来源(直接说"改成 X")给了批准,§ 5.5 amend 在 `.omo/notepads/<plan-name>/` 留日志即可。仅当 amend 同时触发了 § 5 整段重写、attest 重置、或 Phase 0 WHY 变更时,才需要再次"用户全量批准"。
 
 Show the Spec to the user. Ask once: confirm or modify. **No re-approval in later phases** — downstream phases (incremental-implementation, etc.) follow the attested Spec.
 
 ```
-Spec written into OMO plan Phase 1 + attested.
+Spec appended as Phase 1 of .omo/plans/<slug>.md.
 Please review and confirm or request changes. After approval,
 hand off to incremental-implementation for vertical slicing.
 ```
@@ -183,18 +202,18 @@ The user is the contract holder — not you.
 |---|---|
 | "Spec 太重,直接写代码更快" | Spec 省的是 debug 时间,不是写代码时间。没 spec 的代码 90% 要返工。 |
 | "用户没要求 spec" | 用户没拒绝 spec。提出 spec 跟用户对齐,才是真正的"快"。 |
-| "我心里清楚就行" | 心里的不算交付物,也不在 attestation 保护范围内。 |
+| "我心里清楚就行" | 心里的不算交付物,也不在 plan file 的可审计范围内。 |
 | "这是个 trivial 改动" | 跨 3 文件的改动不 trivial。Trivial 改动不需要 spec 也不需要这个 skill。 |
 | "spec 写完用户还要看,慢" | 用户看 spec 5 分钟,你看错重写 50 分钟,这是杠杆。 |
 | "Plan 不是已经覆盖 spec 了吗" | Plan 是"分几步做",spec 是"做完长什么样"。两者正交。 |
-| "把 Spec 写到独立文件更整洁" | 破坏 OMO attestation 链;`OMO plan` 是 source of truth。 |
+| "把 Spec 写到独立文件更整洁" | Atlas 找不到上下文,review-work 看不到 Phase 1;`.omo/plans/<slug>.md` 是 source of truth。 |
 
 ## Red Flags
 
 - Agent 跳过 spec 直接写代码
 - Spec 写得太抽象(没具体验收标准 / 没具体命令)
 - Spec 留"TBD"或空白字段
-- Spec 没 attestation
+- Spec 没写完就给用户看(没填满的 Phase 1 等于没 spec)
 - Spec 写完没给用户看就开始 Phase 2
 - Spec 里出现代码片段(spec 描述"做什么",不描述"怎么做")
 - **Spec 写到独立文件**(违反唯一落点规则)
@@ -203,16 +222,16 @@ The user is the contract holder — not you.
 ## Verification
 
 Before proceeding to Phase 2, confirm:
-- [ ] `OMO plan` Phase 1 section complete (no TBD)
+- [ ] `.omo/plans/<slug>.md` Phase 1 section complete (no TBD)
 - [ ] Phase 0 (Design from brainstorming) preserved above Phase 1
-- [ ] `scripts/` exited 0, hash recorded (advisory on OpenCode)
+- [ ] `Status: spec_approved` line appended (Edit, not Write)
 - [ ] User has reviewed the Spec and confirmed (single approval, no repeats later)
 - [ ] At least 3 concrete acceptance criteria listed
 - [ ] At least 1 build / test / lint command listed (real, runnable)
-- [ ] 若 Phase 3 之后做过 amend:每次 amend 都重新跑了 `` 且新 hash 写入 attestation 文件 + `OMO notepad` 含完整 `[amend]` 段(含 sections / hash / affected 字段)
+- [ ] 若 Phase 3 之后做过 amend:每次 amend 都重新跑 Momus 拿到 `[OKAY]` verdict + `.omo/notepads/<plan-name>/decisions.md` 含完整 `[amend]` 段(含 sections / momus-verdict / affected 字段)
 
 ## Related Skills
 
 - Predecessor: [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — Design + first approval
 - Successor: [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slicing
-- Companion: [`OMO-enforcer`](~/.agents/skills/OMO-enforcer/SKILL.md) — hard-enforce OMO on OpenCode
+- Plan reviewer: OMO built-in `momus` agent (`task(subagent_type="momus", prompt=".omo/plans/<slug>.md")`) — validates reference + QA scenario executability

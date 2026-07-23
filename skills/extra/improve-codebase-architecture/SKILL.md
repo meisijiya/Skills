@@ -12,7 +12,7 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 **视角**:John Ousterhout 的 deep/shallow 模块框架。deep module = 接口简单 + 功能强大;shallow module = 接口跟实现一样复杂。每个候选按这个维度评分,而不是按"行数"或"美学"。
 
-**为什么 proposal-only**:架构改造是高风险动作,不该在审查 skill 里顺手做。`incremental-implementation` 才是真正动刀的 skill。本 skill 只产出 `.planning/<id>/architecture-review.md`,由你 / 团队决定哪些候选上 Phase 3 切片。
+**为什么 proposal-only**:架构改造是高风险动作,不该在审查 skill 里顺手做。`incremental-implementation` 才是真正动刀的 skill。本 skill 只产出 `.omo/architecture-review/<repo-hash>-<date>/review.md`,由你 / 团队决定哪些候选上 Phase 3 切片。
 
 ## When to Use
 
@@ -65,7 +65,7 @@ Ousterhout 框架 —— 不要按"行数"或"美学"打分:
 
 每个候选按这四个维度逐项评估。**不要给"差不多 deep"打分 —— 要么 deep 要么 shallow**。
 
-### 4. Write candidates to `.planning/<id>/architecture-review.md`
+### 4. Write candidates to `.omo/architecture-review/<repo-hash>-<date>/review.md`
 
 输出模板:
 
@@ -115,20 +115,20 @@ handoff 协议:
 - 候选清单写了一半就开始动刀
 - 用"差不多 deep"评分 —— 要么 deep 要么 shallow
 - Inventory 跳过了直接打分
-- 把 `architecture-review.md` 写到 `OMO plan` 里(本 skill 是 sub-phase,不入 phase)
+- 把 `architecture-review.md` 写到 `.omo/plans/<slug>.md` 里(本 skill 是 sub-phase,不入 phase)
 - 跳过 handoff 直接宣称"架构改完了"
 
 ## Verification
 
 完成本 skill 后确认:
-- [ ] `.planning/<id>/architecture-review.md` 已写,含 ≥3 个候选(codebase 太小可 <3,注明原因)
+- [ ] `.omo/architecture-review/<repo-hash>-<date>/review.md` 已写,含 ≥3 个候选(codebase 太小可 <3,注明原因)
 - [ ] 每个候选按 4 维度评分,**无"差不多"分**
 - [ ] 本 skill 未产生 diff / 未运行 commit
-- [ ] handoff 已同步(用户/团队 或 `OMO notepad`)
+- [ ] handoff 已同步(用户/团队 或 `.omo/notepads/<plan>/`)
 
 ## omo Integration
 
-Run the proposal scan with librarian/oracle or Team Mode, capture candidates in the OMO notepad, then hand approved work to `incremental-implementation` and Boulder.
+Run the proposal scan with `librarian` / `oracle` agents (or Team Mode for adversarial multi-agent audit), capture candidates in `.omo/architecture-review/<repo-hash>-<date>/review.md` (proposal-only; does NOT modify `.omo/plans/<slug>.md`), then hand approved work to [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) + Boulder (`.omo/boulder.json`).
 ## Related Skills
 
 - 后续动刀:[`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md)

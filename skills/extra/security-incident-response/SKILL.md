@@ -59,7 +59,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 **第一次动作（无论触发源）**：
 1. **记录时间戳**：incident 起点 = 你知道的最早可疑时间（不是发现时间）
 2. **冻结证据**：不要立刻修改受影响系统，避免破坏法证（forensic）证据
-3. **拉一份独立笔记**：`.planning/<id>/incident-<id>.md`（不写入受害系统的日志，因为日志可能已被攻陷）
+3. **拉一份独立笔记**：`.omo/incidents/<incident-id>/incident.md`（不写入受害系统的日志，因为日志可能已被攻陷；incident 笔记独立于 `.omo/notepads/<plan>/` 的 per-plan 命名空间，因为 incident 跨 plan）
 
 **不要做**：
 - ❌ 不要先发公开声明（信息不完整会失真）
@@ -138,7 +138,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 
 **blameless postmortem**：目的是学习，不是追责。
 
-**模板**（写入 `.planning/<id>/incident-<id>-postmortem.md`）：
+**模板**（写入 `.omo/incidents/<incident-id>/postmortem.md`）：
 
 ```markdown
 # Postmortem — <incident-id>
@@ -206,7 +206,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 
 完成本 skill 后确认：
 
-- [ ] incident 笔记已写到 `.planning/<id>/incident-<id>.md`（含 timeline + 证据保留段）
+- [ ] incident 笔记已写到 `.omo/incidents/<incident-id>/incident.md`（含 timeline + 证据保留段）
 - [ ] 严重度 + 影响范围 已记录（Triage 段）
 - [ ] Contain 动作已完成 + 记录
 - [ ] Eradicate 验证：OMO `security-research` 跑 post-incident PoC，确认漏洞已彻底修补

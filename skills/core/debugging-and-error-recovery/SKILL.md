@@ -42,7 +42,7 @@ npm test -- --grep "specific failing test" 2>&1 | tail -20
 
 Run it. **Confirm it reproduces** before doing anything else. If you can't reproduce, stop and gather more info — don't guess.
 
-Document the reproduce command in `OMO notepad`:
+Document the reproduce command in `.omo/notepads/<plan>/problems.md` (append-only via `notepad-write-guard` hook):
 
 ```
 [debug] reproduce: <command> → <output / exit code>
@@ -148,11 +148,19 @@ Before declaring debug complete, confirm:
 - [ ] Regression test added to test suite
 - [ ] Regression test fails without the fix
 - [ ] Other tests still pass (no regression introduced)
-- [ ] `OMO notepad` has the `[debug]` log entries
+- [ ] `.omo/notepads/<plan-name>/problems.md` has the `[debug]` log entries
 
 ## omo Integration
 
-Use an OMO task for reproduce/localize/reduce/fix/guard, hand complex localization to oracle, and record evidence in the notepad before `review-work`.
+Use an OMO task (`task_create` / `task_update` for the bug as a task DAG entry) for reproduce/localize/reduce/fix/guard, hand complex localization to the `oracle` agent (read-only high-IQ, gpt-5.6-sol xhigh — escalate to it after 2+ failed fix attempts, not before), and record evidence in `.omo/notepads/<plan-name>/problems.md` (append-only via `notepad-write-guard` hook) before `review-work`.
+
+**State-survival across compaction**: debugging is the most likely workflow to hit `experimental.session.compacting` mid-investigation — long file reads + multiple reproduce attempts easily exceed 1M-token context windows. OMO's `compaction-context-injector` hook handles this in 3 stages:
+
+1. **Capture** (pre-compaction): saves `{agent, model, tools}` checkpoint per session
+2. **Inject** (during compaction): pushes an 8-section `COMPACTION_CONTEXT_PROMPT` into the surviving context — sections include "Active Working Context (For Seamless Continuation)", "Agent Verification State (Critical for Reviewers)", and "Delegated Agent Sessions" with the explicit directive **"RESUME, DON'T RESTART"**
+3. **Restore** (post-compaction, on `session.compacted` event): tail monitor (threshold 5 consecutive no-text events + 60s cooldown) detects stuck sessions and re-dispatches the agent's prior config
+
+**Implication for debugging**: if you launched an `oracle` or `librarian` subagent for localization and compaction fires while it's running, the resuming Sisyphus will see the in-flight task ID and the "RESUME, DON'T RESTART" directive — call `background_output(task_id="bg_...")` to collect its result, do not re-spawn it. Same applies if compaction hits between reproduce/localize/reduce/fix/guard — the surviving context already carries the reproduce command + localized file:line; resume from Step 4 (fix), don't restart at Step 1.
 ## Errors Encountered
 | Error | Attempt | Resolution |
 |-------|---------|------------|
@@ -160,5 +168,3 @@ Use an OMO task for reproduce/localize/reduce/fix/guard, hand complex localizati
 ```
 
 This builds debugging knowledge across the project — recurring errors are visible patterns, not surprises.
-
-See [OMO-integration.md](../../OMO-integration.md).

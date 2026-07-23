@@ -66,7 +66,46 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 
 ## omo Integration
 
-OMO dispatcher owns routing; use Prometheus `/plan`, task tools, Boulder, notepads, compaction-context-injector, and `review-work` for execution and verification.
+OMO dispatcher owns routing; use the `ulw-plan` skill (triggered by `plan this` / `ulw-plan` / `just make it good` / `/plan` keyword), OMO task tools (`task_create` / `task_update` for task DAG at `$OPENCODE_CONFIG_DIR/tasks/<list-id>/T-{uuid}.json`), Boulder (`.omo/boulder.json` schema v2 with multi-work / session_ids / worktree_path), notepads (`.omo/notepads/<plan>/{learnings,decisions,issues,problems}.md` — **append-only** via `notepad-write-guard` hook), `compaction-context-injector` hook (8-section context prompt for state survival across compaction), and `review-work` (5 parallel lanes) for execution and verification.
+
+## Controller vs Executor Identity Contract
+
+When dispatching work via `task(subagent_type="...", ...)`, the **controller** (Sisyphus / Atlas / Sisyphus-Junior) and the **executor** (sisyphus-junior / hephaestus / general agent) have strictly different roles:
+
+| Concern | Controller (session owner) | Executor (dispatched sub-agent) |
+|---|---|---|
+| Plan / spec / brief | Reads full plan, holds cross-task context | Reads only `brief` file (via `task-brief.sh`) — sees NOTHING else |
+| Cross-slice state | Maintains Boulder + notepad | Reads notepad append-only, never edits |
+| Review gates | Schedules `slice-review` (per slice) + `review-work` (whole-branch) | Receives review verdicts; re-dispatches fixers if BLOCKED |
+| Decision authority | Owns design / scope / architectural calls | 4-status return only (DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED) — never invents scope |
+| Context pollution | Stays in session, accumulates | Fresh per dispatch (the whole point of subagent isolation) |
+
+**Why this matters**: this skill is bound by `<SUBAGENT-STOP>` — when
+invoked as a sub-agent, ignore it. The controller is the only entity
+that should ever invoke the meta dispatcher. Executors receive
+domain-specific skills (e.g. `incremental-implementation`, `slice-review`)
+in their dispatch prompt, NOT `using-meisijiya-skills`.
+
+## Model Selection by Task Type (when dispatching sub-agents)
+
+OpenCode does not support per-call dynamic `model` fields
+([issue #1776](https://github.com/code-yeongyu/oh-my-openagent/issues/1776)
+is still open). Instead, OMO routes through **agent / category
+selection** — each agent has a fixed model chain, so picking the agent
+indirectly picks the model.
+
+| Task type | Recommended agent / category | Rationale |
+|---|---|---|
+| Mechanical implementation (1-2 files, complete spec in brief) | `sisyphus-junior` (sonnet-4-6) — or category `quick` (gpt-5.4-mini) | Transcription + testing; cheap model suffices |
+| Integration / coordination (multi-file, dependency awareness) | `sisyphus-junior` (sonnet-4-6) | Mid-tier; can't be cheap because cross-file judgment needed |
+| Architectural / design decisions | `oracle` (gpt-5.6-sol xhigh) — read-only consultant | High judgment; cheapest models recommend DRY as YAGNI per Superpowers cost experiments |
+| Final whole-branch review | OMO built-in `review-work` (5 parallel lanes) | Multi-lane = broader coverage than any single reviewer |
+
+**Cheapest ≠ always-better**: Superpowers' cost experiments showed cheap
+reviewers approve DRY violations as YAGNI and pass tests with no
+assertions. Mid-tier is the floor for reviewers; cheap only works for
+implementers with **complete code in brief** (i.e. transcription, not
+judgment).
 ## User Instructions
 
 User instructions (AGENTS.md, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.

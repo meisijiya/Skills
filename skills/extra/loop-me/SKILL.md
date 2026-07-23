@@ -19,7 +19,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep"
 | Skill | 阶段 | 产物 |
 |---|---|---|
 | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | 通用设计前 Q&A | 用户批准的设计意图 |
-| [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) | 任意非平凡任务 spec | `OMO plan`（编程任务 phase） |
+| [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) | 任意非平凡任务 spec | `.omo/plans/<slug>.md` Phase 1(编程任务 PRD/Spec) |
 | **loop-me** | **recurring workflow spec** | **`workflows/*.md`（活动形式化）** |
 | [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) | 编程任务切片实施 | 原子 commit + slice 元数据 |
 | OMO `/goal <objective>` | 目标执行 | 持续运行的 loop |
@@ -195,7 +195,9 @@ Spec 完成后，把下一步留给用户：
 
 ## omo Integration
 
-The resulting workflow spec can be handed to OMO `/goal` or a Prometheus plan; task tools and `start-work` execute it only after the user approves.
+The resulting workflow spec can be handed to OMO `/goal <objective>` (persistent per-session state at `.omo/goal/<sessionID>.json`) or a Prometheus plan (`.omo/plans/<slug>.md`); OMO task tools and `/start-work` execute it only after the user approves.
+
+> **Deprecation note (OMO PR #6184)**: legacy `/ralph-loop` / `/ulw-loop` / `/cancel-ralph` builtin slash commands were removed in favor of `/goal`. If a downstream consumer still references `ralph-loop`, migrate: `ralph_loop` config auto-migrates to `goal` at load time with a deprecation warning; behavioral parity preserved via `default_max_iterations` (default 100). Don't hand the spec to `/ralph-loop` — it no longer exists.
 ## Related Skills
 
 - **上游（决定"做不做"）**：[`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) —— 用户还没确定"想自动化 X"之前先用 brainstorming 收口设计意图

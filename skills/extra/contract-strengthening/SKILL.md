@@ -105,7 +105,7 @@ If actual installation or runtime impact **exceeds the approved boundary**, stop
 - [ ] `bash scripts/validate-skills.sh` reports OK for `skills/extra/contract-strengthening/SKILL.md`.
 - [ ] `bash scripts/check-marketplace.sh` reports OK (entry present in `.claude-plugin/marketplace.json`).
 - [ ] Skill↔eval bijection reports 24 (from CI workflow lines 32-50).
-- [ ] `## OMO Integration` states `Phase 1.25: Contract Review` and `.planning/<id>/contract-review.md`.
+- [ ] `## omo Integration` states `Phase 1.25: Contract Review` and `.omo/notepads/<plan>/contract-review.md` (or equivalent named file under the per-plan notepad dir).
 - [ ] Every forbidden transition and uncompiled requirement from step 2 has a counterexample in step 3, or is flagged `unaddressed`.
 - [ ] Every L3 selection in step 4 lists all six required fields.
 - [ ] Loading the skill did not install or run any verifier; every chosen tool went through step 5's order.
@@ -117,4 +117,4 @@ If actual installation or runtime impact **exceeds the approved boundary**, stop
 
 ## omo Integration
 
-Soft-routed via [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — the dispatcher now contains the post-attested-Spec open-world risk row and loads this optional extra only when installed; its absence does not block the core flow. No dedicated plugin hook is required: the existing `meisijiya-skills.js` bootstrap reads that dispatcher dynamically. Deep audits of candidate verification backends route through OMO `oracle`; bounded empirical runs route through OMO `general`. Record risks in the OMO notepad/evidence ledger and require consent before `start-work`.
+Soft-routed via [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — the dispatcher now contains the post-attested-Spec open-world risk row and loads this optional extra only when installed; its absence does not block the core flow. No dedicated plugin hook is required: the existing `meisijiya-skills.js` bootstrap reads that dispatcher dynamically. Deep audits of candidate verification backends route through OMO `oracle` agent (read-only high-IQ, gpt-5.6-sol xhigh); bounded empirical runs route through `sisyphus-junior` (focused executor, claude-sonnet-4-6) — note that OMO's Ultimate Edition has no `general` agent; `sisyphus-junior` is the standard delegate-target for empirical/QA work. Record risks in `.omo/notepads/<plan-name>/decisions.md` (append-only via `notepad-write-guard` hook) and `.omo/start-work/ledger.jsonl`, and require consent before `/start-work`.

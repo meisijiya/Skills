@@ -29,7 +29,7 @@ allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 
 **NOT for — expanded NOTs:**
 - 标准库用法(Array / Promise / fetch / dict / iter,语言自带基本不变)
-- 已经熟透的 v0 库(已在 `OMO notepad findings` 查过,且 < 1 周内)
+- 已经熟透的 v0 库(已在 `.omo/notepads/<plan>/learnings.md` 查过,且 < 1 周内)
 - 纯业务逻辑(无外部依赖)
 - 已知 trivial API(`arr.map` / `dict.get` / `try/except` 之类)
 
@@ -69,7 +69,7 @@ Read enough to confirm:
 - Error behavior (what does it throw / return on invalid input)
 - Version when introduced / deprecated
 
-### 4. Write to `OMO notepad findings`
+### 4. Write to `.omo/notepads/<plan>/learnings.md`
 
 ```markdown
 ## <Date> — <library> <version> — <API>
@@ -124,10 +124,10 @@ A doc snippet from version 5 may not apply to your installed version 3.
 | "我用过 X 框架,知道 API" | 你的训练数据有截止日期。React 18 vs 19 的 useEffect 行为变了。 |
 | "文档太啰嗦" | 文档啰嗦比写错 API 强 100x。错 API 的 bug 调试时间 >> 读文档时间。 |
 | "这个 API 简单,不用查" | 简单熟透的 API 不属于本 skill 触发范围。如果还在查,说明它不熟。 |
-| "上下文太长了,先写再说" | 上下文里没有的,你就要去查。OMO notepad findings 是查的产物。 |
+| "上下文太长了,先写再说" | 上下文里没有的,你就要去查。.omo/notepads/<plan>/learnings.md 是查的产物。 |
 | "官方文档过时了,看 GitHub issue 更准" | 偶尔对。但默认走官方文档,issue 作为补充。 |
 | "Context7 没有这个库" | 用 WebFetch 直接抓官方 docs URL。找不到 = 文档没公开,看源码。 |
-| "我要写 5 个 API 调用,每次都查烦死了" | 只有不熟的才查。OMO notepad findings 缓存结果,同 API 7 天内不再查。 |
+| "我要写 5 个 API 调用,每次都查烦死了" | 只有不熟的才查。.omo/notepads/<plan>/learnings.md 缓存结果,同 API 7 天内不再查。 |
 
 ## Red Flags
 
@@ -135,15 +135,15 @@ A doc snippet from version 5 may not apply to your installed version 3.
 - 不引用源 URL
 - 不查版本(用错版本的 API)
 - 调试时凭感觉改 API 参数
-- 把 findings 留在 context 里不写 `OMO notepad findings`
+- 把 findings 留在 context 里不写 `.omo/notepads/<plan>/learnings.md`
 - 引用 2 年前的博客文章当权威
-- `OMO notepad findings` 没记录访问日期(无法判断是否过期)
+- `.omo/notepads/<plan>/learnings.md` 没记录访问日期(无法判断是否过期)
 - 对熟透的 stdlib / 常见 API 也走本 skill,产生大量 findings 噪音
 
 ## Verification
 
 Before writing the API call, confirm:
-- [ ] Source URL recorded in `OMO notepad findings`
+- [ ] Source URL recorded in `.omo/notepads/<plan>/learnings.md`
 - [ ] Access date recorded
 - [ ] Installed version matches doc version
 - [ ] Exact signature quoted from source
@@ -156,4 +156,4 @@ After writing the API call, confirm:
 
 ## omo Integration
 
-Use librarian/context7 research as the OMO notepad handoff, then attach the evidence to the Prometheus plan before `start-work` changes code.
+Use librarian/context7 research as the .omo/notepads/<plan>/ handoff, then attach the evidence to the Prometheus plan before `start-work` changes code.
