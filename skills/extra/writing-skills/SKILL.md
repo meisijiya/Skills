@@ -177,6 +177,47 @@ Before declaring a skill "done":
 - Builds on: [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — same RED-GREEN-REFACTOR discipline
 - Cross-ref: [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher
 
+## Match the Form to the Failure
+
+Different baseline failure modes require different instruction forms. Pick the wrong form and the skill either over-constrains or under-constrains:
+
+| Baseline failure mode | Correct instruction form | Anti-pattern (do NOT use) |
+|---|---|---|
+| Agent knowingly violates a rule under pressure | **Prohibition + Rationalization Table + Red Flags** (e.g. "NEVER delete tests. Rationalization: '...'. Red flag: ...") | Long "best practices" prose the agent hand-waves |
+| Agent produces the wrong output SHAPE (missing sections, wrong order, wrong field names) | **Positive recipe / Output contract** with explicit template (e.g. "Output sections in this order: Goal / Scope / Acceptance") | Stacks of `DON'T` — for shape errors, positive is clearer than negative |
+| Agent omits fields entirely (forgets to fill X) | **Required-field template** + checklist verification step | Buried in prose ("also remember X") |
+| Behavior depends on a condition (do A if X, else B) | **Predicate-based conditional** with the observable signal explicit (e.g. "If user says 'never' to confirmation: cancel; else proceed") | Vague hedges ("if appropriate", "when needed") |
+| Agent treats skill as suggestion, not requirement | **`<HARD-GATE>` block** + verification checklist with no-partial-credits | "Best practice" / "should" / "consider" language |
+
+Adapted from Superpowers `writing-skills/SKILL.md` (v6.1+) Match the Form
+to the Failure table. The wrong form is worse than no skill — agents
+follow the wrong instructions with the same confidence they'd follow
+the right ones.
+
+## Wording Micro-Test (before full pressure scenario)
+
+Before running a full RED/GREEN/REFACTOR pressure scenario, do a quick
+wording micro-test to catch obvious instruction failures:
+
+1. **No-guidance control**: run the same scenario WITHOUT loading the skill.
+   Record observed failures and rationalizations verbatim.
+2. **Variant matrix**: write 3-5 wording variants of the most critical
+   instruction. Examples: positive vs negative phrasing, lead with
+   prohibition vs lead with output shape, hard-gate vs soft-suggestion.
+3. **Fresh-context for each run**: never reuse session context — that
+   inherits prior rationalizations.
+4. **≥ 5 reps per variant**: run-to-run variance is itself a signal —
+   high variance means the wording is ambiguous.
+5. **Manual review of every hit**: read every output, not just the failed
+   ones. Passes that contain "close enough" or "I think this is right"
+   are silent failures.
+6. **Variance-as-metric**: if one variant passes 4/5 and another passes
+   5/5, prefer the latter even if both seem acceptable.
+
+Wording micro-test does NOT replace full pressure scenarios — it
+filters out wording bugs early so the pressure test surfaces real
+discipline bugs (rationalization, edge cases) rather than wording bugs.
+
 ## omo Integration
 
-Use OMO task tools to track RED/GREEN/REFACTOR pressure scenarios; record evidence in the notepad and ask `review-work` to verify the skill contract.
+Use OMO task tools to track RED/GREEN/REFACTOR pressure scenarios; record evidence in the notepad and ask `review-work` to verify the skill contract. Each wording micro-test run is also a task (`task_create` with `metadata.skillBeingTested` + `metadata.variant`) so the variant matrix is auditable across runs.

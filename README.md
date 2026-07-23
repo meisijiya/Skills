@@ -56,10 +56,15 @@ meisijiya-skills/
 │       ├── documentation-and-adrs/          ← architectural ADRs only
 │       ├── improve-codebase-architecture/   ← codebase-wide 健康巡检,Ousterhout deep/shallow 评分,proposal-only
 │       └── contract-strengthening/           ← Phase 1.25 open-world contract review (optional extra; complements core spec + verification)
+│       └── slice-review/                     ← per-slice 轻量审查(1 reviewer / 2 verdicts: spec compliance + code quality),与 OMO `review-work` 互补
 ├── scripts/
-│   ├── validate-skills.sh          ← YAML frontmatter + 结构检查
+│   ├── validate-skills.sh          ← YAML frontmatter + 结构检查(repo 本地工具,不随 skill 一起分发)
+│   ├── check-marketplace.sh        ← marketplace.json ↔ skills/ 双射检查
 │   ├── install.sh                 ← 默认装到 .opencode/skills/(项目级);--global 装到 ~/.agents/skills/(高级)
 │   └── inject-agents-md.sh        ← 把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
+│   └── (per-skill `scripts/` 子目录跟随 skill 一起分发 — `npx skills add` 会复制整目录)
+│       ├── skills/core/incremental-implementation/scripts/{task-brief.sh,slice-progress.sh}
+│       └── skills/extra/slice-review/scripts/{review-package.sh}
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
@@ -213,6 +218,11 @@ MIT
 ### Unreleased
 
 - 24 个 SKILL.md / 24 个 eval case;**8 `core/` + 16 `extra/`**
+- **新增 slice-review**([`skills/extra/slice-review/`](skills/extra/slice-review/)):per-slice 轻量审查 skill,1 reviewer 返 2 verdicts(spec compliance + code quality),融合 Superpowers v6.0 task-reviewer-prompt.md(one reviewer, two ordered parts) + OMO built-in `review-work`(whole-branch 5-lane 不变);配套 3 个 SDD 脚本(task-brief.sh / review-package.sh / slice-progress.sh)放对应 skill 目录下,跟随 `npx skills add` 一起分发,引用路径写在用户级 `~/.agents/skills/...`;每个 slice executor 的 4 态契约(DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED) + TDD Evidence Format(RED/GREEN command + covering tests) 取代 free text "looks good"。Phase 3 slice metadata 加 5 字段(Global Constraints / Interfaces: Consumes · Produces / bite-sized steps with exact code / No Placeholders 强约束 / 4 态契约)。为什么分 per-slice + whole-branch:per-slice 在 source 1 处切断 cascade(接口错 → 后面 5 个 slice 都错),whole-branch 在终点设最终门。
+- **scripts/sdd/ 重组到对应 skill**:原 `scripts/sdd/{task-brief.sh,review-package.sh,slice-progress.sh,README.md}` 移到 `skills/core/incremental-implementation/scripts/{task-brief.sh,slice-progress.sh,README.md}` + `skills/extra/slice-review/scripts/{review-package.sh}`。理由:`npx skills add` 下载 skill 时携带整目录,放在 skill 内的脚本可一起被安装(不放在 skill 内就不能方便地装);引用路径用相对路径(`./scripts/...`)或用户级标准路径(`~/.agents/skills/<skill>/scripts/...`)。SKILL.md 内 9 处引用全部更新。
+- **brainstorming P1:decision-tree convergence 取代 questionnaire cap**:把"3-7 questions typical, >10 → switch to spec-driven"问卷式硬上限改为 Matt Pocock `grilling` primitive 的 decision tree 哲学 — 沿决策依赖走到收敛,无硬上限;只有"决策树明显超出一次 session"才退回 spec-driven 拆子项目。原因:问卷式 cap 会在未决议上强逼 closure,decision-tree convergence 让每个问题的前提都先收敛。
+- **P2 多 skill 补强**:① `test-driven-development` 加 **TDD Evidence Format** 段(SDD executor 必须填 RED/GREEN command + covering tests,revisor 拿证据独立 re-run);② `writing-skills` 加 **Match the Form to the Failure** 表(5 类失败 → 5 类指令形式)+ **Wording Micro-Test** 段(6 步 micro-test 在 full pressure scenario 前过滤 wording bugs);③ `using-meisijiya-skills` 加 **Controller vs Executor Identity Contract** 表(`<SUBAGENT-STOP>` 的实际意义 — executor dispatch prompt 不能含 using-meisijiya-skills)+ **Model Selection** 表(OpenCode 不支持动态 `model` 字段[issue #1776],走 agent/category 间接选 model)。
+- **新 skill 总数:24**(`8 core + 16 extra`),`slice-review` 是 v0.5.x 第 16 个 extra。
 - **新增 contract-strengthening**([`skills/extra/contract-strengthening/`](skills/extra/contract-strengthening/)):可选装 extra,Phase 1.25 contract review(attested Spec 之后、implementation 之前);open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);resource / isolation-first 工具选择,external verifiers **永不**自动安装;global-install 例外需 GREEN/YELLOW/RED consent gate + 操作特定用户批准;**不做** correctness guarantee;互补 core `spec-driven-development` + `verification-before-completion`;`using-meisijiya-skills` Priority 表 +1 行(已装才路由,缺装不阻塞 core 流)
 - **新增 ai-code-blindspots**([`skills/extra/ai-code-blindspots/`](skills/extra/ai-code-blindspots/)):AI 生成/修改代码盲区审查工具,互补 omo 内置 `remove-ai-slops`(我们填它不覆盖的盲区);7 类盲区(边界检查 / 错误处理可见性 / 环境兼容 / deprecated API / 硬编码配置 / 不可见失败);4 层软路由触发(description 严格化 + dispatcher Priority + `verification-before-completion` Process 嵌入 + plugin hook 暂缓);`using-meisijiya-skills` Priority 表 +1 行、`verification-before-completion` Process 嵌入 step,AI 在 verification 阶段自动加载
 - **新增 meisijiya-review-router.js OpenCode plugin**([`.opencode/plugins/meisijiya-review-router.js`](.opencode/plugins/meisijiya-review-router.js)):per-Edit reminder 注入 hard layer,触发条件 Write/Edit/apply_patch,初版 REMINDERS 含 ai-code-blindspots + security-and-hardening。3-hook pattern(`chat.message` per-turn dedup via `messageID` + `tool.execute.after` injection + `event` per-session cleanup on `session.deleted`,真 SDK 契约 `event.properties.info.id`,legacy/wrong shape safe no-op)。Per-Edit token 成本 ~46 tokens max(2 reminders × ~21-23 tokens)。安装:`cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/`(plugin 不 hot-reload,改完需重启 OpenCode)。扩展:REMINDERS 数组加 1 行

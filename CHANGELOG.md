@@ -4,6 +4,73 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (slice-review — SDD layer)
+
+**New optional extra skill**: [`skills/extra/slice-review/`](skills/extra/slice-review/) — per-slice lightweight review with one reviewer returning two ordered verdicts (spec compliance + code quality). Complements OMO built-in `review-work` (whole-branch 5-lane). Adapted from Superpowers v6.0 `task-reviewer-prompt.md` (which merged the prior two-stage review into one reviewer, two ordered parts).
+
+**Why**: Without per-slice review, mistakes compound — slice 1 introduces a wrong interface name, slice 2-10 build on it, whole-branch review at slice 10 finds 5 cascading bugs requiring hours of rewrites. Per-slice review breaks the cascade at slice 1.
+
+**Process**:
+1. Orchestrator (Atlas / Sisyphus) runs `task-brief.sh <task-id>` to extract OMO task `metadata` to a brief file the executor reads in one Read
+2. Records `BASE=$(git rev-parse HEAD)` BEFORE dispatching executor (never use `HEAD~1` — silently drops multi-commit tasks)
+3. Dispatches `task(subagent_type="oracle")` with brief path + review-package path (NOT inline diff pasting)
+4. Reviewer returns Part 1 (Spec compliance: ✅/❌/⚠️) AND Part 2 (Code quality: Approved/Needs fixes)
+5. Triages verdict: ✅+Approved → mark complete in ledger; ❌ → dispatch fixer + re-review; ⚠️ → manual verify
+6. Appends to ledger via `slice-progress.sh mark-complete <id> <base> <head> --review-verdict ok`
+
+### Added (SDD scripts — sibling skill scripts/)
+
+Three shell scripts that fill the gap between OMO's task tools and Superpowers-style per-slice discipline. **Moved from `scripts/sdd/` to per-skill `scripts/` subdirectories** so `npx skills add` distributes them with the skill:
+
+- `skills/core/incremental-implementation/scripts/task-brief.sh` (9K) — extract OMO task `metadata` to brief file (Global Constraints verbatim + Interfaces Consumes/Produces + bite-sized steps with exact code + 4-status contract + No Placeholders binding)
+- `skills/core/incremental-implementation/scripts/slice-progress.sh` (5.3K) — append-only markdown ledger at `.omo/sdd/<slug>/progress.md` (survives compaction; never trust own recollection after `/clear`, trust this file + `git log`)
+- `skills/extra/slice-review/scripts/review-package.sh` (5.7K) — package `git log + git diff --stat + git diff -U10` into single file reviewer reads in one Read
+
+Path conventions in SKILL.md: same-skill scripts use `./scripts/<script>.sh`; cross-skill scripts use `~/.agents/skills/<skill>/scripts/<script>.sh`.
+
+### Added (incremental-implementation — P0 slice contract)
+
+Phase 3 slice metadata now requires 5 binding fields (passed via OMO `task_create({ metadata: {...} })` — NOT free-text `description`):
+
+- **`globalConstraints`**: plan-level verbatim constraints (runtime floor, naming rules, platform limits, API contracts) — executor copies verbatim into brief
+- **`interfaces.consumes`** + **`interfaces.produces`**: exact signatures + `file:line` references — executor's only window into neighbor tasks
+- **`biteSizedSteps`**: TDD 5-step with actual code blocks (Write failing test → Run verify FAIL → Write minimal impl → Run verify PASS → Commit) + exact commands + expected output
+- **`noPlaceholders: true`**: binding contract forbidding TBD / "appropriate error handling" / "similar to Task N" / undefined type references
+- **`statusContract`**: 4-state return (DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED) — free-text status is the phantom-completion failure mode (Superpowers cost-experiment caught "tests pass" on stub code via mandatory re-run)
+
+Why: phase 3 executor dispatch via `task(subagent_type="oracle")` is in fresh context — sees ONLY the brief, not the full plan. Without exact code in every step + exact signatures + 4-state contract, executor either invents scope or returns "looks good" without evidence.
+
+### Added (spec-driven-development — Global Constraints + Momus review)
+
+Phase 1 Spec template now requires 2 new sections:
+
+- **`Global Constraints (verbatim, single source of truth for all slices)`**: runtime / version / dependency / naming / platform / API contract constraints. Each slice's `task-brief.sh` invocation MUST copy this section verbatim into its brief.
+- **`No-Placeholders contract (binding on every Phase 3 slice)`**: 6 forbidden patterns (TBD / "Add appropriate error handling" / "Similar to Task N" / etc) — directly absorbed from Superpowers `writing-plans` No Placeholders list.
+
+Momus review expanded from 3 to 4 categories:
+
+1. Reference verification (each file:line exists)
+2. Executability (each task has a starting point)
+3. **Type / signature consistency** (Interfaces: Produces in earlier tasks match Interfaces: Consumes in later tasks — NEW)
+4. **Placeholder + Global Constraints scan** (no TBD/TODO/implement-later; Global Constraints present and verbatim) — NEW
+
+### Changed (brainstorming — decision tree convergence, P1)
+
+Replaced the questionnaire-cap rule `"3-7 questions typical. > 10 questions = scope is wrong"` with Matt Pocock `grilling` primitive's decision-tree convergence model:
+
+- Walk the decision tree, not a fixed questionnaire (later question's premise may depend on earlier answer — batch-asking forces undecided parent nodes)
+- No hard upper bound on questions — keep asking until shared understanding is reached
+- Convergence criterion: stop when no open question has unresolved prerequisite AND user confirms "yes, that's right"
+- Fallback: if decision tree obviously exceeds one session (15+ open decisions with deep chains), scope is wrong → switch to spec-driven-development with sub-projects
+
+Why the change: the old rule was forcing closure on undecided branches; the new model lets every decision tree branch reach its true resolution.
+
+### Changed (P2 polish — multiple skills)
+
+- **test-driven-development**: added **TDD Evidence Format** section — SDD executors MUST return structured `TDD Evidence: - RED: {command, expected failure, output} - GREEN: {command, passing output, covering tests}` instead of free-text "tests pass". Reviewers re-run the GREEN command and diff against claimed output.
+- **writing-skills**: added **Match the Form to the Failure** table (5 baseline failure modes → 5 instruction forms with anti-patterns) and **Wording Micro-Test** section (6-step micro-test before full pressure scenario: no-guidance control, variant matrix, fresh context, ≥5 reps, manual review of every hit, variance-as-metric). Absorbed from Superpowers `writing-skills/SKILL.md` v6.1+.
+- **using-meisijiya-skills**: added **Controller vs Executor Identity Contract** table (controller holds full plan + cross-task context; executor reads only `brief` file via `task-brief.sh`, returns 4-status only) and **Model Selection** table (OpenCode issue #1776 still open — no dynamic `model` field; route via agent/category). The `<SUBAGENT-STOP>` block's actual meaning: executor dispatch prompts MUST NOT include `using-meisijiya-skills` (that re-triggers the dispatcher in fresh context and breaks isolation).
+
 ### Migration (ADR 0001 — drop PWF, OMO-native only)
 
 - **OMO-native migration (ADR 0001)**:从 omo + PWF 栈迁至纯 omo 栈。`pwf-enforcer` skill 归档至 `skills-archived/pwf-enforcer/`(含 `templates/pwf-enforcer.ts` 保留以供历史参考);`pwf-integration.md` 已 `git rm`;`AGENTS.md` / `README.md` / `docs/` 全部 PWF-clean。`CHANGELOG.md` 历史 PWF 引用保留(`git log` / `git tag` 同样保留),per [`docs/agents-md-guide.md`](./docs/agents-md-guide.md) 第 86-95 行四载规则。
