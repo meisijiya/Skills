@@ -1,6 +1,6 @@
 ---
 name: slice-review
-description: "Per-slice lightweight review (spec compliance + code quality — 2 verdicts in one reviewer). Use after each slice completes in incremental-implementation, before moving to the next slice. Complements OMO `review-work` (which does whole-branch 5-lane review at the end). Adapted from Superpowers subagent-driven-development's `task-reviewer-prompt.md` (v6.0 merged the prior two-stage review into one reviewer, two ordered parts). Triggers: 'review slice', 'slice review', 'task reviewer', 'per-slice review'."
+description: "Per-slice lightweight review (spec compliance + code quality — 2 verdicts in one reviewer). Use after each slice completes in incremental-implementation, before moving to the next slice. The reviewer reads the task-brief and review package produced by `task-brief.sh` and `review-package.sh`, then returns a verdict the orchestrator writes into the slice-progress.sh ledger. Dispatched in fresh subagent context (oracle / sisyphus-junior) so the verdict is not biased by orchestrator memory. Complements OMO `review-work` (which does whole-branch 5-lane review at the end). Triggers: 'review slice', 'slice review', 'task reviewer', 'per-slice review'. Adapted from Superpowers subagent-driven-development's `task-reviewer-prompt.md` (v6.0 merged the prior two-stage review into one reviewer, two ordered parts)."
 allowed-tools: "Read Bash Grep"
 ---
 
