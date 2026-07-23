@@ -6,9 +6,9 @@
 
 | Skill | 做什么 |
 |---|---|
-| [`using-meisijiya-skills`](./using-meisijiya-skills/) | meta dispatcher。每次响应前检查是否要加载其他 skill,初始化 pwf(若未启动),协调 omo Sisyphus |
+| [`using-meisijiya-skills`](./using-meisijiya-skills/) | meta dispatcher。每次响应前检查是否要加载其他 skill,协调 omo Sisyphus + IntentGate routing |
 | [`brainstorming`](./brainstorming/) | **HARD-GATE** pre-design 探索:用户没批准设计前不许写代码。一次一个问题 + 2-3 方案 + 推荐 |
-| [`spec-driven-development`](./spec-driven-development/) | 写代码前先 spec。PRD/Spec 唯一落点 `task_plan.md`;诚实标注 OpenCode Tier 3 限制 |
+| [`spec-driven-development`](./spec-driven-development/) | 写代码前先 spec。Spec 唯一落点为 omo plan (Prometheus / `.omo/plans/*.md`);诚实标注 OpenCode Tier 3 限制 |
 | [`incremental-implementation`](./incremental-implementation/) | 垂直切片(每片 ≤ 100 行),逐片交付 + 验证。Slice 依赖/HITL-AFK 元数据,桥接 OMO `review-work` |
 | [`test-driven-development`](./test-driven-development/) | red-green-refactor。先红,后绿,后重构 |
 | [`verification-before-completion`](./verification-before-completion/) | **Iron Law**:任何完成声明都要新鲜证据。两段验证: in-session self-check + OMO `review-work`(新上下文审查)+ `visual-qa`(人工 QA 闸门) |
