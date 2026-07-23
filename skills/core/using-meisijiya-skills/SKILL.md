@@ -38,6 +38,7 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "Let's build X" / "implement Y" / new feature (scope known) | [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) only if Sisyphus detects hidden ambiguity |
 | "I want to do X but I'm not sure how" / "design X" / "what's the right way" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) → [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) |
 | "Fix this bug" / "X is broken" / "X is wrong" | [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
+| "Review this slice" / "diff against brief" / per-slice review before next slice | If installed, [`slice-review`](~/.agents/skills/slice-review/SKILL.md) (extra/) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
 | "About to claim done" / "ready to commit/PR" | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | (invoke OMO `review-work` per Stage 2) |
 | AI just generated/edited code, in `verification-before-completion` stage | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) (extra/) |
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
@@ -63,6 +64,33 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "1% chance applies, must load" (removed) | Only invoke when description matches; "not sure" still requires checking the catalog first, but not loading every adjacent Skill. |
+
+## Plugin layer (where this bootstrap comes from)
+
+If you see `<EXTREMELY-IMPORTANT>` markup prepended to the first user message of this session, that comes from a hard-layer OpenCode plugin (not from a soft SKILL.md reference). Specifically:
+
+- `~/.config/opencode/plugins/meisijiya-skills.js` reads `~/.agents/skills/using-meisijiya-skills/SKILL.md` on session start, strips frontmatter, wraps in `<EXTREMELY-IMPORTANT>` tags, and `unshift`s into `firstUser.parts` once per session (idempotent against compaction re-fires).
+- `~/.config/opencode/plugins/meisijiya-review-router.js` injects per-Edit reminders for `ai-code-blindspots` + `security-and-hardening` + `verification-before-completion` after `write` / `edit` / `apply_patch` tool calls (deduped per turn).
+
+**Editing rules**:
+
+- Changes to `SKILL.md` here **do not auto-reload** — OpenCode plugins are loaded once at process start. Restart OpenCode after editing SKILL.md or any of the plugin files.
+- If `<EXTREMELY-IMPORTANT>` is missing, the bootstrap plugin is not installed (or skill is missing from `~/.agents/skills/`). Fix the install before assuming this skill is active.
+- If you're a sub-agent, see `<SUBAGENT-STOP>` at the top — the controller should not have forwarded this skill to you.
+
+## Process chains (not just a flat routing table)
+
+The Priority table above is *cross-cutting routing*, but most real work follows a multi-skill **chain**. Common chains (in order — don't skip stages):
+
+```
+design:           brainstorming → spec-driven-development
+implementation:   brainstorming? → incremental-implementation → test-driven-development → verification-before-completion
+slice loop:       incremental-implementation (dispatch) → slice-review (per-slice) → slice-progress.sh mark-complete → whole-branch review-work
+fix:              debugging-and-error-recovery (5-step) → test-driven-development (red-green) → verification-before-completion
+maintenance:      verification-before-completion → ai-code-blindspots → security-and-hardening → review-work
+```
+
+The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.
 
 ## omo Integration
 
