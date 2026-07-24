@@ -20,6 +20,8 @@
 
 ## 26 个 skill 一览(按 group)
 
+**注意**：`teacher-skill` 为本地适配型 skill(8 个含 `meisijiya-domain` 域),不计入 26 的统计;若安装到 `~/.agents/skills/teacher-skill/SKILL.md` 则自动被 OMO skill loader 发现,无需 marketplace 同步。
+
 ### security (9)
 | Skill | 一句话 |
 |---|---|
@@ -55,16 +57,17 @@
 | [`contract-strengthening`](./contract-strengthening/) | Phase 1.25 open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);`disable-model-invocation: true` 仅用户触发 |
 | [`test-guard`](./test-guard/) | 7-check AI 测试质量审计(skip / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness);与 `test-driven-development` 互补 |
 
-### domain (7)
+### domain (8)
 | Skill | 一句话 |
 |---|---|
-| [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求视觉 deck 或教学 deck 时才按需使用 html-ppt |
+| [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求响应式 HTML 页面时通过 OMO 内置 `frontend` 渲染;教学型内容叠加 [`teacher-skill`](./teacher-skill/) pedagogy overlay |
 | [`designer-handoff`](./designer-handoff/) | designer → eng 的 UI/UX spec 交接(用 ui-ux-pro-max) |
 | [`api-and-interface-design`](./api-and-interface-design/) | contract-first API 设计(REST/GraphQL/RPC) |
 | [`documentation-and-adrs`](./documentation-and-adrs/) | 只记录重大架构决策(ADR,跨人 / 跨时 / 不可逆);日常文档走项目级 AGENTS.md / notepad |
 | [`improve-codebase-architecture`](./improve-codebase-architecture/) | codebase-wide 健康巡检(weekly / post-surge / on-boarding);Ousterhout deep/shallow 评分;**proposal-only** —— 改架构走 `incremental-implementation` |
 | [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic → Verifier × N → Repairer);输出 `.verification/article-verified.md` + `.verification/verification-report.md` |
 | [`loop-me`](./loop-me/) | 把反复做的活动形式化成可执行 workflow spec(stateful grilling session;产物 `workflows/*.md` + `NOTES.md`,**不是实现**);`disable-model-invocation: true` 仅用户 `/loop-me` 触发 |
+| [Local] [`teacher-skill`](./teacher-skill/) | meisijiya-adapted 教学编排(6 阶段 SOP / 3 级诊断 / 4 类 quiz / 刻意练习 / 跨学科 / 反蒸馏);不自动加载,仅在 `build-gate-visual-review` HTML page 模式 + §5 reminder 中被提示;`allowed-tools: Read` only;安装在 `~/.agents/skills/teacher-skill/` |
 
 ## 依赖关系(顺序装才有效)
 
@@ -72,7 +75,8 @@
 
 | Skill | 需要先装 |
 |---|---|
-| `build-gate-visual-review` | 仅显式视觉 / 教学 deck 模式需要 `html-ppt-skill` 到 `~/.agents/skills/`(`npx skills add https://github.com/lewislulu/html-ppt-skill`);文本对齐与默认跳过不需要 |
+| `build-gate-visual-review` | 无外部依赖;HTML 页面用 OMO 内置 `frontend`(visual-engineering category);教学型 overlay 通过 [`teacher-skill`](./teacher-skill/) §5 reminder 加载 |
+| `teacher-skill` (local) | 已合入 `~/.agents/skills/teacher-skill/SKILL.md`;上游为 `chentao326/teacher-skill`(MIT),本仓库只搬运教学概念(6 阶段 SOP / 3 级诊断 / 4 类 quiz 等),不带 `allowed-tools: Bash` 与 Python 脚本;不自动加载,仅在 `build-gate-visual-review` 教学 deck 模式中被提示 |
 | `designer-handoff` | `ui-ux-pro-max-cli` 全局(`npm i -g ui-ux-pro-max-cli`) |
 | `security-and-hardening` Step 6.5 | OMO `security-research` 内置 skill(默认随 omo 安装) |
 | `security-devsecops` Process | OMO `security-research`(production-critical pre-deploy audit) + `oracle`(IaC 架构决策)+ `websearch`(最新 CVE)+ `context7`(安全工具文档)+ `grep_app`(in-the-wild fix 搜索) |

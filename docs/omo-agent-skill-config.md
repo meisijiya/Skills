@@ -2,7 +2,7 @@
 
 ## Overview
 
-[meisijiya-skills] installs **35 SKILL.md** files(9 `core/` + 26 `extra/` = `9 security` + `2 cicd` + `4 observability` + `4 meta` + `7 domain`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
+[meisijiya-skills] installs **36 SKILL.md** files(9 `core/` + 27 `extra/` = `9 security` + `2 cicd` + `4 observability` + `4 meta` + `8 domain`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
 
 本指南为每个 omo agent 推荐应装载的 skill 子集,供希望按 agent 收敛 context 的用户参考。
 
@@ -15,13 +15,13 @@
 - **Less noise** — fewer "which skill applies?" decisions
 - **Clearer intent** — agent's role + skill set align
 
-Sisyphus (main orchestrator) gets **all 35** (it routes everything). All other agents get a subset.
+Sisyphus (main orchestrator) gets **all 36** (it routes everything). All other agents get a subset.
 
 ## Recommended per-agent config
 
 | omo Agent | Recommended skills | Why |
 |---|---|---|
-| **sisyphus** | (all 35) | Main orchestrator — full visibility needed |
+| **sisyphus** | (all 36) | Main orchestrator — full visibility needed |
 | **hephaestus** | brainstorming, spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development, diagnosing-bugs, **security-devsecops**, **supply-chain-risk-auditor**, **closed-loop-delivery** | Deep autonomous executor — full discipline stack + supply-chain/deployment + runtime-closure |
 | **prometheus** | brainstorming, spec-driven-development, **contract-strengthening** (optional) | Strategic planner — question-quality + spec discipline + Phase 1.25 contract review |
 | **atlas** | using-meisijiya-skills, incremental-implementation, **slice-review**, **verify-chain** | Todo orchestrator — meta + slice guidance + per-slice review + parallel Verifier via `general` agent |
@@ -112,7 +112,7 @@ Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-m
 After applying:
 
 1. Restart omo session.
-2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 35.
+2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 36.
 3. Dispatch a task to `hephaestus` and list its skills — should see only the ~10 recommended (including 11-skill-series additions).
 4. Spot-check 2-3 other agents.
 

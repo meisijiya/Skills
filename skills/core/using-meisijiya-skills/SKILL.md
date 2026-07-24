@@ -55,6 +55,7 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
 | Codebase health scan / on-boarding unfamiliar codebase / weekly architecture review | [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) | (proposal-only output; defer to `incremental-implementation` for action) |
 | Post-attested-Spec work with observed open-world contract/state/timing/concurrency/boundary/dependency/reversibility/verification-blind-spot signals | If installed, [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) | Missing optional extra never blocks the core flow; continue with the attested Spec, TDD, and completion gate |
+| `@teacher` / "教我" / "teaching-style HTML" / "我想学会 X 的思维方式" (reverse distillation from a public skill / teacher source) | If installed, [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) (extra/) | Emits pedagogy data contract → OMO `frontend`; build-gate HTML page mode §5 reminder for overlay |
 | Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
 
 **Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
@@ -106,6 +107,7 @@ governance:       security-ownership-map (people↔file topology) before major r
 closed loop:      verification-before-completion → pre-ship-gate (deploy evidence) → closed-loop-delivery (24h+ runtime + reachability)
 dep safety:       supply-chain-risk-auditor (trustworthyness) → security-devsecops (CVE scan at install)
 test quality:     test-driven-development → test-guard (post-hoc audit so tests actually test something)
+teaching artifact: brainstorming? → teacher-skill (pedagogy data contract) → OMO `frontend` (single-file responsive HTML)
 ```
 
 The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.

@@ -2,6 +2,21 @@
 
 All notable changes to meisijiya-skills.
 
+## v0.7.0 — html-ppt 完全剔除 + HTML page 模式 (2026-07-24)
+
+**Major change**: 移除 meisijiya 对 `html-ppt-skill` (lewislulu) 的所有依赖。所有 HTML 输出统一为单文件响应式 HTML 页面,由 OMO 内置 `frontend` (visual-engineering category) 渲染;教学型内容通过 `teacher-skill` pedagogy overlay 叠加,不再走独立的 deck 模式。
+
+**Breaking changes:**
+- `build-gate-visual-review`: 4 mode → 3 mode (Visual deck + Teaching deck → HTML page; Pedagogy overlay via §5 reminder)
+- Renderer 从 `html-ppt` 改为 OMO 内置 `frontend` (无 preflight, 无 install)
+- 删除 OMO install `~/.agents/skills/html-ppt/` (用户级)
+- 删除 `meisijiya-skills/~/.agents/skills/build-gate-visual-review/SKILL.md` (字面 `~` 目录的旧备份)
+- 更新 eval case `evals/cases/build-gate-visual-review.json` (v0.3.0 → v0.4.0):所有 "html-ppt" 行为断言改为 "OMO frontend"
+- 更新 root `README.md` `AGENTS.md` `skills/extra/README.md`: 移除所有 `html-ppt-skill` 引用
+
+**Skill updated:**
+- `teacher-skill`: Two modes 表的 deck 行改为 HTML page 行;Related Skills 删 `html-ppt`;用词 "deck mode" → "teaching-style scenario"
+
 ## v0.6.0 — 11-skill roadmap + marketplace 6-group refactor (2026-07-24)
 
 ### Added (2026-07-24 — 11-skill roadmap shipped + marketplace 6-group refactor)

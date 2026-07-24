@@ -19,7 +19,7 @@ npx skills add meisijiya/Skills \
 
 - **omo 之上补足**:omo 已内置的(frontend-ui-ux, git-master, playwright, review-work, remove-ai-slops, init-deep …)不重复。
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
-- **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求视觉 deck 或教学 deck 时才按需使用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 渲染 HTML。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
+- **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求响应式 HTML 页面（项目可视化 / 自学习 / 教学型）时才通过 OMO 内置 `frontend` 渲染单文件 HTML；教学型内容额外叠加 `teacher-skill` pedagogy overlay。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
 - **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (26 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 5 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
@@ -83,7 +83,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(35 个)
+    └── cases/                 ← 每个 skill 的 eval case(36 个)
 ```
 
 ## 安装
@@ -240,7 +240,6 @@ Write/Edit/apply_patch 工具调用完成后,在 tool result 末尾追加 remind
 
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`,本 fork 围绕 omo 设计)
 - **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
-- **可选**:`npx skills add https://github.com/lewislulu/html-ppt-skill -g`(仅 `build-gate-visual-review` 的显式视觉 / 教学 deck 模式需要,装到 `~/.agents/skills/`;文本对齐与默认跳过不需要)
 
 ## 写作规范
 
@@ -258,7 +257,7 @@ MIT
 
 ### v0.6.0 — 11-skill roadmap + marketplace 6-group refactor (2026-07-24)
 
-- **35 个 SKILL.md / 35 个 eval case** — `core/` 9 + `extra/` 26(9 security + 2 cicd + 4 observability + 4 meta + 7 domain)
+- **36 个 SKILL.md / 36 个 eval case** — `core/` 9 + `extra/` 27(9 security + 2 cicd + 4 observability + 4 meta + 8 domain)
 - **11 个新 skill**(源已 cite;description ≤500 chars;6 段式 + `## omo Integration` 段;2 个 eval 升至 verified-level):
   - `gha-security-review` (security) — GHA workflow 文件审计;每条 finding 必带 exploit scenario
   - `pre-ship-gate` (cicd) — 部署前只读审计 + 部署后 smoke 验证,捕"deploy exit 0 ≠ 真在跑"

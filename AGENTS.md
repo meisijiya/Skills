@@ -65,14 +65,15 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality, 2 verdicts); complements OMO `review-work` (whole-branch 5-lane)
 - [`test-guard`](~/.agents/skills/test-guard/SKILL.md) — 7-check AI-test quality audit (skip-detection / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness); pairs with `test-driven-development` to enforce tests actually test something
 
-**domain (7):**
-- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — pre-build design alignment; default Markdown, HTML deck only on explicit visual/teaching request
+**domain (8):**
+- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO `frontend` (visual-engineering category); teaching-style overlay via [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) §5 reminder
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — designer → eng UI/UX spec handoff via `ui-ux-pro-max`
 - [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) — contract-first REST / GraphQL / RPC design
 - [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) — architectural ADRs only (data model / API contracts / dependency upgrades / deprecations)
 - [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) — codebase-wide health scan via Ousterhout deep/shallow scoring; proposal-only
 - [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — 3-role article fact-check pipeline (Critic → Verifier × N → Repairer); OMO `general` agent for parallel Verifier subagents
 - [`loop-me`](~/.agents/skills/loop-me/SKILL.md) — extract a repeated workflow into an executable spec; output feeds OMO `/goal` or `incremental-implementation`
+- [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) — pedagogical data-contract emitter for learning docs and teaching-style HTML pages (6-phase SOP / 3-level diagnosis / 4 quiz types / deliberate practice / cross-disciplinary / reverse distillation); not auto-loaded; loaded via `@teacher` direct or build-gate §5 reminder
 
 (Group counts auto-derive from `.claude-plugin/marketplace.json` on each `scripts/inject-agents-md.sh` run; manifest ↔ files bidirectional check via `scripts/check-marketplace.sh`.)
 
@@ -96,7 +97,7 @@ For the reverse map (omo feature → skills that use it), see the `meisijiya-ext
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — oracle agent (escalation), lsp MCP
 - [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — git-master skill, atlas agent, `/start-work` trigger, OMO `review-work` post-impl
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — visual-engineering category, frontend-ui-ux skill
-- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — visual-engineering runtime child + frontend-ui-ux + html-ppt for explicit visual/teaching decks
+- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO `frontend` (visual-engineering category); teaching-style overlay via [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) §5 reminder
 - [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) + [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) + [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — security-research mode (3 hunters + 2 PoC engineers)
 - [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — `oracle` agent for "is this permissions: block actually minimal?" judgment calls + `grep_app` MCP for known-bad action patterns across GitHub
 - [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — OMO `review-work` (Stage 2) + `visual-qa` (UI Taste gate)
