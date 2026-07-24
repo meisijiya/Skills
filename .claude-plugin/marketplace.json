@@ -10,6 +10,7 @@
         "./skills/core/test-driven-development",
         "./skills/core/verification-before-completion",
         "./skills/core/debugging-and-error-recovery",
+        "./skills/core/diagnosing-bugs",
         "./skills/core/source-driven-development"
       ]
     },
@@ -39,7 +40,8 @@
       "skills": [
         "./skills/extra/observability-and-instrumentation",
         "./skills/extra/performance-optimization",
-        "./skills/extra/k6-load-testing"
+        "./skills/extra/k6-load-testing",
+        "./skills/extra/production-incident-playbook"
       ]
     },
     {

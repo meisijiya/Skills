@@ -1,6 +1,6 @@
 ---
 name: observability-and-instrumentation
-description: "Instruments production systems so behavior is visible and diagnosable. Use when shipping any feature that runs in production, when production issues are reported but no data exists to diagnose, or when adding telemetry to a new service."
+description: "Instruments production systems so behavior is visible and diagnosable. Use when shipping any feature that runs in production, when production issues are reported but no data exists to diagnose, or when adding telemetry to a new service. For active incident handling (runbook phases + postmortem templates), use production-incident-playbook; this skill is the data-source layer (logs / metrics / traces / dashboards), production-incident-playbook is the workflow layer."
 allowed-tools: "Read Edit Bash Glob Grep Write"
 ---
 

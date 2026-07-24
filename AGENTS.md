@@ -35,6 +35,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor
 - [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — no completion claims without fresh evidence; two-stage gate (in-session + OMO `review-work`)
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
+- [`diagnosing-bugs`](~/.agents/skills/diagnosing-bugs/SKILL.md) — symptom-driven diagnosis loop (≥3 hypotheses + distinguishing observation per hypothesis + cheapest observation first); pairs with `debugging-and-error-recovery` as protocol ↔ discipline
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
 **security (6):**
@@ -52,10 +53,11 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) — pre-deploy read-only audit + post-deploy smoke verification that catches 'deploy exit 0 ≠ actually running' (migrations / feature flags / CDN / canary / env / shadow traffic); allowed-tools read-only
 - [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) — 5-gate evidence chain (implemented / reviewed / deployed / healthy-at-runtime / reachable-by-users) so 'done' means running safely in production, not just merged
 
-**observability (3):**
+**observability (4):**
 - [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — log/metrics/tracing for production visibility
 - [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — measure-first backend profile + optimization; frontend CWV routed to OMO `frontend`
 - [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) — pre-deploy performance acceptance gate (smoke / load / stress / spike / soak) with explicit latency-percentile + error-budget thresholds; pairs with `performance-optimization` as front-back
+- [`production-incident-playbook`](~/.agents/skills/production-incident-playbook/SKILL.md) — end-to-end incident handling (in-flight runbook phases + blameless postmortem templates with 5-whys root-cause + structural action items); pairs with `pre-ship-gate` as front-back
 
 **meta (3):**
 - [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — TDD-for-docs for skills; meta-only, lives here not in `core/`

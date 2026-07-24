@@ -1,0 +1,64 @@
+{
+  "name": "production-incident-playbook",
+  "version": "0.1.0",
+  "description": "End-to-end incident handling — runbook templates for in-flight mitigation (detect / triage / mitigate / resolve / communicate) + blameless postmortem templates for after-action review with 5-whys root-cause + structural action items. Use during active incidents or post-incident for the postmortem write-up. Distinct from security-incident-response (security-specific incidents) and pre-ship-gate (pre-deploy catching).",
+  "positive_triggers": [
+    {
+      "input": "Alert just fired — production error rate is 5x baseline. Walk me through what to do in the next 30 minutes.",
+      "expected_skill": "production-incident-playbook",
+      "reason": "Active incident in-flight → matches Use when 'active production incident: alert fired, you're the on-call or named incident commander'"
+    },
+    {
+      "input": "We had a SEV1 last week — outage for 47 minutes. Need to write the postmortem this week before the on-call rotation shifts.",
+      "expected_skill": "production-incident-playbook",
+      "reason": "Postmortem within 5-day window → matches Use when 'postmortem time: 1-5 days since incident'"
+    },
+    {
+      "input": "Build me a runbook template for our checkout service so the next on-call has a checklist.",
+      "expected_skill": "production-incident-playbook",
+      "reason": "Proactive runbook template design → matches Use when 'writing a runbook template for a service / surface'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "API key leaked on a public repo; what's the incident response?",
+      "expected_no_skill": true,
+      "reason": "Security-specific incident (leaked credential) → matches NOT for 'security incidents' → security-incident-response routes here"
+    },
+    {
+      "input": "Just deployed, want to confirm it's not silently failing",
+      "expected_no_skill": true,
+      "reason": "Pre-deploy catching of silent failures → matches NOT for 'pre-deploy catching' → pre-ship-gate routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "On-call engineer receives an alert at 02:00 — production p99 is 4× baseline, error rate climbing. They reach for production-incident-playbook.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using production-incident-playbook'",
+        "Phase 1 (Detect): confirm alert is real (not noisy / test / staging); if false positive, silence + file follow-up",
+        "Phase 2 (Triage): within 5 min, fill incident header (started / detected / severity / affected surface / customer-visible / blameless)",
+        "Phase 3 (Mitigate): within 30 min for SEV1/2 — apply rollback or feature-flag-OFF or rate-limit, document in incident channel",
+        "Phase 4 (Resolve): root cause via debugging-and-error-recovery (5-step triage) + diagnosing-bugs (symptom-driven loop) — fix deployed via normal pre-ship-gate path",
+        "Phase 5 (Communicate): status updates every 30-60 min in incident channel; status page update within 30 min of customer-visible incidents",
+        "Phase 6 (Close): confirm customer impact gone; schedule postmortem within 5 business days; 'all clear' in channel",
+        "Within 5 business days: postmortem with summary, timeline (precise UTC), 5-whys root cause, action items (concrete owner + date + type), blameless tone"
+      ]
+    },
+    {
+      "scenario": "Engineer is asked to write a postmortem for an incident from last week. The skill helps them structure it.",
+      "expected_behavior": [
+        "Skill surfaces the postmortem template (§ Part 2)",
+        "Summary in customer-impact terms (1 paragraph) — not internal jargon",
+        "Timeline with precise UTC timestamps (no 'around' / 'approximately')",
+        "Root cause via 5 whys — keeps asking until structural cause reached (not 'Alice forgot', but 'no check for connection-pool budget in review template')",
+        "What went well / what went poorly / where we got lucky — honest sections, not sugar-coated",
+        "Action items with concrete owner + due date + type — no 'improve monitoring' without an owner",
+        "Blameless tone throughout — no person-blame",
+        "Review-stage-2 (OMO review-work or equivalent) before publishing to org"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Merges antigravity's incident-runbook-templates + postmortem-writing into one workflow with explicit in-flight vs after-action phases. Distinct from security-incident-response (security-specific, NIST CSF simplified). Distinct from pre-ship-gate (pre-deploy catching). 5-day postmortem deadline is generous; SEV1/2 must hit it. Action items with concrete owners + dates are the lever — postmortems without action items are theatre. Quarterly review ensures action items < 90 days old get attention; > 90 days old with no progress escalate."
+}

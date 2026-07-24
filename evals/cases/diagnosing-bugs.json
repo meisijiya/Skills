@@ -1,0 +1,77 @@
+{
+  "name": "diagnosing-bugs",
+  "version": "0.1.0",
+  "verified": true,
+  "positive_keywords": [
+    "diagnosis",
+    "hypothesis",
+    "observation",
+    "symptom",
+    "distinguishing",
+    "regression",
+    "diagnose"
+  ],
+  "description": "Symptom-driven diagnosis loop for hard bugs and performance regressions — narrows down via observation + experiment rather than guessing. Form ≥3 hypotheses about the cause, predict the distinguishing observation for each, make the smallest observation that falsifies one. Pairs with debugging-and-error-recovery (the protocol: reproduce / localize / reduce / fix / guard) by adding the diagnostic discipline inside the localize-and-reduce phases. Core skill because hard bugs are a guaranteed part of every project; the discipline is more universal than the specifics.",
+  "positive_triggers": [
+    {
+      "input": "Checkout endpoint is slow for 1% of requests — no clear cause. Walking through the localize step in debugging-and-error-recovery but the obvious causes don't pan out.",
+      "expected_skill": "diagnosing-bugs",
+      "reason": "Localize step in progress + obvious causes ruled out → matches Use when 'debugging-and-error-recovery's Step 2 (Localize) is in progress and the bug's cause is non-obvious'"
+    },
+    {
+      "input": "Latency regression on the auth service since Tuesday; can't tell if it's a DB issue, dependency issue, or traffic-pattern issue. Multiple observations attempted, no convergence.",
+      "expected_skill": "diagnosing-bugs",
+      "reason": "Performance regression with no clear cause → matches Use when 'performance regression that doesn't match a known failure mode'"
+    },
+    {
+      "input": "We've tried 'maybe it's the cache', 'maybe it's the connection pool', 'maybe it's the new deploy' — none of them fit. Need a structured hypothesis-driven approach.",
+      "expected_skill": "diagnosing-bugs",
+      "reason": "Tried multiple hypotheses without convergence → matches Use when 'tried 1-2 hypotheses and they didn't pan out'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Bug with obvious cause: missing import, typo in env var, syntax error. Just fix it.",
+      "expected_no_skill": true,
+      "reason": "Bug with obvious cause → matches NOT for 'bug with obvious cause' → fix directly without skill invocation"
+    },
+    {
+      "input": "Production alert fired, error rate 5x baseline — what's the runbook?",
+      "expected_no_skill": true,
+      "reason": "Active in-flight incident → matches NOT for 'production incident in-flight' → production-incident-playbook routes here; come back to diagnosing-bugs at Phase 4 if deeper investigation needed"
+    },
+    {
+      "input": "Production p99 regressed to 1s — find the bottleneck.",
+      "expected_no_skill": true,
+      "reason": "Post-hoc performance optimization with no clear repro → matches NOT for 'performance regression hunting post-deploy (no clear repro)' → performance-optimization routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer reaches for diagnosing-bugs on a '1% of checkout requests take 5s' symptom.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using diagnosing-bugs'",
+        "Engineer writes down ≥ 3 hypotheses BEFORE making any observation: e.g. 'Stripe API slow for some payment methods' / 'Inventory check contention on hot row' / 'Fraud-check service slow for specific user cohort'",
+        "For each hypothesis, the engineer predicts the distinguishing observation (cheapest first: Stripe response times by payment method)",
+        "First observation: Stripe response times don't correlate → H1 falsified",
+        "Second observation: end-to-end trace shows 4.8s in inventory check → H2 confirmed",
+        "Localize within inventory: which endpoint? Trace shows /inventory/limited (added 2 weeks ago)",
+        "Reduce: minimum input is 'item with stock_count=1'; /inventory/limited takes 4.8s for stock_count=1 but <100ms for stock_count>=2 — root cause is the new FOR UPDATE on a hot row",
+        "Fix: replace FOR UPDATE with non-blocking read; add test asserting limited-stock checkout latency < 1s under load",
+        "Diagnosis paragraph written (symptom / cause / distinguishing observations / why obvious didn't pan out / fix / guard)",
+        "Total observations: 3 (Stripe SQL, end-to-end trace, intra-inventory trace) — converged in < 2 hours"
+      ]
+    },
+    {
+      "scenario": "Engineer skips writing down hypotheses and just starts 'trying things'.",
+      "expected_behavior": [
+        "Skill explicitly flags this anti-pattern: 'Observation-driven diagnosis requires a hypothesis set BEFORE observing'",
+        "Skill demands: 'Write down 3 hypotheses (specific + testable), predict the distinguishing observation for each, then make the smallest observation'",
+        "If engineer insists 'I have one strong hypothesis': skill flags single-hypothesis debugging as anti-pattern — 'without alternatives, you have no distinguishing observation; you can only confirm your existing belief, not eliminate alternatives'",
+        "Skill offers: 'If you can write down 3 hypotheses in 5 minutes, you save 30+ minutes of random debugging'"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Source adapted from mattpocock/skills diagnosing-bugs. Core skill because hard bugs are a guaranteed part of every project. Pairs with debugging-and-error-recovery (the protocol) by adding the diagnostic discipline inside localize+reduce. The two together form the full debugging cycle: debugging owns the sequence, diagnosing-bugs owns the 'which observation next' question. Verified-level (2026-07-24): positive_keywords assert each appears in description body. Anti-pattern call-outs cover: single-hypothesis debugging, random trying, premature fixing, log-as-diagnosis."
+}
