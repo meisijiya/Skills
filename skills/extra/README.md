@@ -103,7 +103,8 @@ npx skills add https://github.com/meisijiya/Skills \
 # meisijiya-cicd / meisijiya-observability / meisijiya-meta / meisijiya-domain 形式展示
 
 # 装全部(必装 + 选装)
-scripts/install.sh --all-extra
+# 见根 README 的 `## 安装 → 方式二` 段:6 条 group 命令依次复制粘贴执行
+# 或用 interactive picker 逐个勾选:`npx skills add meisijiya/Skills`
 ```
 
 完整写作规范见 [`skill-anatomy.md`](../../skill-anatomy.md)。

@@ -76,7 +76,6 @@ meisijiya-skills/
 ├── scripts/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查(repo 本地工具,不随 skill 一起分发)
 │   ├── check-marketplace.sh        ← marketplace.json ↔ skills/ 双射检查
-│   ├── install.sh                 ← 默认装到 .opencode/skills/(项目级);--global 装到 ~/.agents/skills/(高级)
 │   └── inject-agents-md.sh        ← 把 skill meta-info 追加到 AGENTS.md(opt-in,幂等)
 │   └── (per-skill `scripts/` 子目录跟随 skill 一起分发 — `npx skills add` 会复制整目录)
 │       ├── skills/core/incremental-implementation/scripts/{task-brief.sh,slice-progress.sh}
@@ -89,12 +88,12 @@ meisijiya-skills/
 
 ## 安装
 
-### 快速安装(推荐:`vercel-labs/skills` CLI)
+### 方式一:`vercel-labs/skills` CLI(推荐)
 
-`npx skills add <repo>` 默认装到当前目录 `./.agents/skills/`(项目级),加 `-g` 装到 `~/.agents/skills/`(用户级,canonical 路径)。OpenCode 作为 universal agent 直接读 canonical 的 `.agents/skills/`;非 universal agent 可能拿到 canonical 副本的 symlink。
+默认装到 `<cwd>/.agents/skills/`(项目级),加 `-g` 装到 `~/.agents/skills/`(用户级)。OpenCode 扫描 `.agents/skills/`,这是 skills CLI 的最终落点。
 
 ```bash
-# 交互式(展示 meisijiya-core / meisijiya-extra 两组,按需挑选)
+# 交互式(展示 6 个 group:meisijiya-core / -security / -cicd / -observability / -meta / -domain,按需挑)
 npx skills add meisijiya/Skills
 
 # 装某个选装
@@ -103,17 +102,72 @@ npx skills add meisijiya/Skills --skill ai-code-blindspots
 # 装多个选装
 npx skills add meisijiya/Skills --skill security-and-hardening --skill ai-code-blindspots
 
-# 看仓库有哪些 skill 可装
+# 看有哪些 skill 可装
 npx skills add meisijiya/Skills --list
-
-# 装到项目级(cwd 下的 .agents/skills/)
-npx skills add meisijiya/Skills
 
 # 全局装(到 ~/.agents/skills/)
 npx skills add meisijiya/Skills -g
 ```
 
-`.agents/skills` 是 `vercel-labs/skills` CLI 的 canonical 路径;**universal agent**(如 OpenCode)直接读它,**non-universal agent** 可能收到 canonical 副本的 symlink。如需强制 direct copy 而不要 symlink,用 `--copy`。
+### 方式二:`git clone`(纯 git,无 npm 依赖)
+
+不想用 npm 工具时,直接 clone 仓库 + **平铺**到目标 skills 目录。本仓库是 monorepo,git clone 会带仓库根目录层(`<target>/<repo>/skills/<group>/<skill>/SKILL.md`),**OpenCode 不识别这种带父目录的形式** — 必须把 `<skill>` 目录直接移到 `<target>/` 下才是平铺结构。
+
+> 下面所有命令的逻辑都一样:先 clone 到 `/tmp`,再 `mv` 出内部的 skill 目录,最后 `rm -rf /tmp/...` 清理。
+
+#### 项目级(进项目根目录执行)
+
+```bash
+# 装 meisijiya-core(9 个,工作流骨架)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-core
+mv /tmp/meisijiya-core/skills/core/* .opencode/skills/
+rm -rf /tmp/meisijiya-core
+
+# 装 meisijiya-security(9 个,审计 / 加固)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-security
+mv /tmp/meisijiya-security/skills/extra/{security-and-hardening,security-devsecops,security-incident-response,ai-code-blindspots,gha-security-review,security-threat-model,security-ownership-map,supply-chain-risk-auditor,stack-security-coder} .opencode/skills/
+rm -rf /tmp/meisijiya-security
+
+# 装 meisijiya-cicd(2 个)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-cicd
+mv /tmp/meisijiya-cicd/skills/extra/{pre-ship-gate,closed-loop-delivery} .opencode/skills/
+rm -rf /tmp/meisijiya-cicd
+
+# 装 meisijiya-observability(4 个)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-observability
+mv /tmp/meisijiya-observability/skills/extra/{observability-and-instrumentation,performance-optimization,k6-load-testing,production-incident-playbook} .opencode/skills/
+rm -rf /tmp/meisijiya-observability
+
+# 装 meisijiya-meta(4 个)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-meta
+mv /tmp/meisijiya-meta/skills/extra/{writing-skills,contract-strengthening,slice-review,test-guard} .opencode/skills/
+rm -rf /tmp/meisijiya-meta
+
+# 装 meisijiya-domain(7 个)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-domain
+mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me} .opencode/skills/
+rm -rf /tmp/meisijiya-domain
+```
+
+#### 用户级(全局,所有项目共享)
+
+把上面的 `.opencode/skills` 都换成 `~/.config/opencode/skills`,`mkdir -p` 也对应换成用户目录即可。例如:
+
+```bash
+# 用户级 - 装 meisijiya-core
+mkdir -p ~/.config/opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-core
+mv /tmp/meisijiya-core/skills/core/* ~/.config/opencode/skills/
+rm -rf /tmp/meisijiya-core
+```
+
+> **一次装多组**:把 `mv` 改成 `cp -rn`(已存在的 skill 不覆盖),每个 group 用不同的 `/tmp` 目录名,就能在一次会话里装多组而不冲突。
 
 ## Skills
 
@@ -123,35 +177,6 @@ npx skills add meisijiya/Skills -g
 - **选装集**(26 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 5-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain`) + 依赖关系。`npx skills add` picker 按这 5 个 group 展示,可整组装或单选
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表 + group-aware 章节,按你项目特征对号入座。
-
-### 高级:`scripts/install.sh`(项目级 install / 自定义路径)
-
-仅当你**不能或不想**用 skills CLI、或者需要非标准路径时,才用这个脚本:
-
-```bash
-# 项目级 install: 装到 cwd 的 .opencode/skills/(omo 原生路径)
-scripts/install.sh
-
-# 装到指定项目
-scripts/install.sh --target /path/to/your-project
-
-# 装 core/ + 指定的几个 extra/
-scripts/install.sh --extra security-and-hardening --extra ai-code-blindspots
-
-# 装全部(必装 + 选装)
-scripts/install.sh --all-extra
-
-# 看可选的 extra/
-scripts/install.sh --list
-
-# 全局装(到 ~/.agents/skills/,跟 npx skills add 同位置 — 统一管理)
-scripts/install.sh --global
-
-# 预览但不复制
-scripts/install.sh --dry-run
-```
-
-> 注意:`scripts/install.sh --global` 与 `npx skills add -g` 共享 `~/.agents/skills/`;**项目级**也有两条路径(`install.sh` → `<project>/.opencode/skills/` omo 原生 / `npx skills add` → `<project>/.agents/skills/` skills CLI 原生),OpenCode 扫描两者。每项目**只选一种** — 否则同名 Skill 双副本 + `update-source` 模糊。
 
 ### Lite CLI:`bin/meisijiya`(OpenCode plugin 管理)
 
