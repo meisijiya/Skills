@@ -119,14 +119,7 @@ jobs:
           sys.exit(0 if ok else 1)
           PYEOF
 
-      - name: Test install.sh
-        run: |
-          bash scripts/install.sh --list > /dev/null
-          bash scripts/install.sh --dry-run --target /tmp/ci-test > /dev/null
-          bash scripts/install.sh --target /tmp/ci-test 2>&1 | tail -1
-          test -d /tmp/ci-test/.opencode/skills/using-meisijiya-skills || {
-            echo "::error::install.sh failed to copy using-meisijiya-skills"
-            exit 1
-          }
-          rm -rf /tmp/ci-test
-          echo "install.sh: 4 modes verified (--list, --dry-run, --target, real install)"
+      # install.sh was removed in 7eb7dfb in favor of `npx skills add` (see root README).
+      # The CI step that referenced it was not removed at the time, breaking CI on
+      # every push. Install is now verified by the marketplace sync + bijection
+      # checks above (manifest ↔ filesystem); runtime install is the user's job.
