@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: "Enforces red-green-refactor discipline — write a failing test first, write minimum code to pass, then refactor. Use when implementing any new logic, fixing any bug, or changing any behavior. Anti-pattern: writing code first and 'adding tests later'."
+description: "Enforces red-green-refactor discipline — write a failing test first, write minimum code to pass, then refactor. Use when implementing any new logic, fixing any bug, or changing any behavior. Anti-pattern: writing code first and 'adding tests later'. Pairs with `test-guard` (post-hoc audit so the resulting tests actually test something; TDD writes them, test-guard verifies they aren't tautological or over-mocked)."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

@@ -1,0 +1,64 @@
+{
+  "name": "stack-security-coder",
+  "version": "0.1.0",
+  "description": "Layered security-coding guardrails for frontend (XSS / unsafe-DOM / CSP / cross-origin) / backend (SQL injection / authz-after-authn / SSRF / webhook trust) / mobile (WebView hardening / cert pinning / secure storage). Per-stack checkpoints beyond security-and-hardening's cross-cutting audit. Use when AI-generated code lands in any of the three layers, when a per-layer SOP is needed, or post-incident when a layer-specific gap is identified.",
+  "positive_triggers": [
+    {
+      "input": "AI rewrote our React checkout flow. Walk me through the frontend-specific security checks I should run before merging.",
+      "expected_skill": "stack-security-coder",
+      "reason": "Frontend-specific checks on AI-generated code → matches Use when 'reviewing AI-generated frontend code'"
+    },
+    {
+      "input": "The OWASP audit doesn't catch SSRF in our backend image-proxy endpoint — what should I check there?",
+      "expected_skill": "stack-security-coder",
+      "reason": "Backend-specific SSRF gap that cross-cutting audit misses → matches Use when 'reviewing AI-generated backend code'"
+    },
+    {
+      "input": "Postmortem from last week's mobile incident says we need better WebView hardening — codify the layer-specific checklist.",
+      "expected_skill": "stack-security-coder",
+      "reason": "Post-incident layer-specific checklist codification → matches Use when 'after a security incident in any of the three layers'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my auth middleware for SQL injection and XSS",
+      "expected_no_skill": true,
+      "reason": "Mixed-layer review, no stack-specific focus → matches NOT for 'per-PR cross-cutting trust-boundary audit' → security-and-hardening routes here"
+    },
+    {
+      "input": "Threat-model a new payment processing integration before we start coding",
+      "expected_no_skill": true,
+      "reason": "Pre-design adversarial modeling → matches NOT for 'adversarial boundary modeling' → security-threat-model routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer reviews an AI-generated React checkout component. Each CHECKPOINT F-1 through F-8 should fire or be documented as N/A.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using stack-security-coder'",
+        "§1 layers in scope identified; checkout component = frontend",
+        "§2 CHECKPOINT F-1 (sanitization): grep for dangerouslySetInnerHTML / innerHTML; flag any user-controlled value",
+        "§2 CHECKPOINT F-2 (CSP): read meta + response CSP header; check nonce presence on inline scripts",
+        "§2 CHECKPOINT F-3 (URL handling): every href / src / action with user-controlled value gets explicit protocol allow-list check",
+        "§2 CHECKPOINT F-4 (postMessage): every message handler validates event.origin against allow-list",
+        "§2 CHECKPOINT F-5 (SRI): every third-party script has integrity attribute + crossorigin",
+        "§2 CHECKPOINT F-6 (eval): grep for eval / new Function / setTimeout with string; flag any non-constant",
+        "§2 CHECKPOINT F-7 (cookie flags): Set-Cookie has Secure, HttpOnly, SameSite; session cookies MUST be HttpOnly",
+        "§2 CHECKPOINT F-8 (token storage): if access token in localStorage flag HIGH; preference for HttpOnly cookies",
+        "Output is per-checkpoint finding with file:line + snippet + remediation; CHECKPOINTs marked N/A get a one-line reason"
+      ]
+    },
+    {
+      "scenario": "Engineer audits a Node.js / Express backend image-proxy endpoint that fetches a user-supplied URL. Backend-specific checks B-1 through B-9 should fire.",
+      "expected_behavior": [
+        "Skill flags the endpoint as backend, security-critical (image fetch from user URL = SSRF class)",
+        "CHECKPOINT B-4 (SSRF) is HIGH priority: protocol allow-list + private-IP deny + post-DNS-resolution re-check",
+        "CHECKPOINT B-9 (error responses leak no internals) — image-proxy 4xx errors must not include the upstream URL",
+        "CHECKPOINT B-8 (body size limit) — image URLs themselves aren't bounded, but the request body to the proxy is",
+        "Output emphasizes B-4 as the primary finding with severity calibrated to reachability (image-proxy is exposed to all authenticated users → HIGH; if it were admin-only → CRITICAL)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Source adapted from antigravity front/backend/mobile-security-coder trio, consolidated into one skill with three-layer enumeration (was 3 separate skills — 3 skills × same SKILL.md pattern = noise; 1 skill with 3 sections is the same content + 1/3 the description noise). Pair with security-and-hardening (cross-cutting), security-threat-model (system-level), and ai-code-blindspots (cross-cutting AI blindspots). Each layer's CHECKPOINTs enumerate the stack-specific landmines the cross-cutting audit forgets because surface code doesn't look 'insecure' on first read."
+}

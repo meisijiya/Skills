@@ -45,6 +45,10 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "About to roll out a release" / "canary stuck at 0%" / "deploy exit 0 but suspect silent failure" | If installed, [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) (extra/) | [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) only if the failure already reached users |
 | "About to refactor X" / "author of sensitive code is leaving" / "what's our sensitive-code bus factor?" / "compliance audit asking who owns this" | If installed, [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) for the per-line audit after the refactor lands |
 | "Need perf gate before merging" / "is X endpoint fast enough at 1k RPS" / "find the breaking-point load" | If installed, [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) (extra/) | [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) once the gate fires or for post-hoc regression investigation |
+| "About to declare this done" / "diff is large, must be done" / "bug ticket came back despite green CI" | If installed, [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) (extra/) | [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) for the deploy-side evidence + [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) for the runtime metric data |
+| "Adding a new dep" / "lockfile quarterly review" / "this dep's maintainer signal degraded" | If installed, [`supply-chain-risk-auditor`](~/.agents/skills/supply-chain-risk-auditor/SKILL.md) (extra/) | [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) for CVE scan at install time |
+| "AI wrote our React/Express/Mobile code" / "XSS-prone frontend code" / "SSRF-prone backend URL handling" / "WebView hard to reason about" | If installed, [`stack-security-coder`](~/.agents/skills/stack-security-coder/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) for the cross-cutting audit + [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) for AI-coded diff blindspots |
+| "Tests are 100% green but prod bug slipped" / "audit AI-generated tests" / "set up per-PR test-quality gate" | If installed, [`test-guard`](~/.agents/skills/test-guard/SKILL.md) (extra/) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) for the methodology |
 | AI just generated/edited code, in `verification-before-completion` stage | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) (extra/) |
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
@@ -98,6 +102,9 @@ threat → hard:    security-threat-model (design) → security-and-hardening (i
 ship:             gha-security-review (CI) → pre-ship-gate (deploy evidence) → observability-and-instrumentation (post)
 perf gate:        k6-load-testing (synthetic-load PASS/FAIL) → performance-optimization (post-fire diagnosis)
 governance:       security-ownership-map (people↔file topology) before major refactor + post-incident
+closed loop:      verification-before-completion → pre-ship-gate (deploy evidence) → closed-loop-delivery (24h+ runtime + reachability)
+dep safety:       supply-chain-risk-auditor (trustworthyness) → security-devsecops (CVE scan at install)
+test quality:     test-driven-development → test-guard (post-hoc audit so tests actually test something)
 ```
 
 The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.

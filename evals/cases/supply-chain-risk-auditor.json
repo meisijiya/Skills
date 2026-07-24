@@ -1,0 +1,66 @@
+{
+  "name": "supply-chain-risk-auditor",
+  "version": "0.1.0",
+  "description": "Trustworthyness audit for dependencies — single-maintainer risk, abandoned-repo risk, low-popularity risk, maintainer-identity hygiene, social-engineering resistance. Distinct from security-devsecops (CVE scan at install time): this skill audits the supply side that CVE scanning cannot reach. Run before adding a dependency with non-trivial footprint; quarterly for lockfile-wide review; before committing across releases.",
+  "positive_triggers": [
+    {
+      "input": "We're considering adding `tiny-graphql-client` for our backend. Before we add it to the lockfile, assess its supply-chain risk.",
+      "expected_skill": "supply-chain-risk-auditor",
+      "reason": "Pre-add supply-chain audit on a single dep → matches Use when 'adding a new dependency'"
+    },
+    {
+      "input": "Quarterly review: scan the entire lockfile for any dependency whose maintenance signal has degraded since last review.",
+      "expected_skill": "supply-chain-risk-auditor",
+      "reason": "Quarterly cadence lockfile-wide review → matches Use when 'reviewing the lockfile quarterly'"
+    },
+    {
+      "input": "Just heard about the recent npm package-hijack in our ecosystem. Re-audit similar packages in our lockfile to see if we're exposed.",
+      "expected_skill": "supply-chain-risk-auditor",
+      "reason": "Post-incident re-audit of similar supply-chain risk class → matches Use when 'after a dependency incident in your ecosystem'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Run npm audit on this dep install",
+      "expected_no_skill": true,
+      "reason": "CVE scan at install time → matches NOT for 'per-install CVE scan' → security-devsecops routes here"
+    },
+    {
+      "input": "Audit who knows our crypto and payment code paths",
+      "expected_no_skill": true,
+      "reason": "Audit of your own codebase's people↔file ownership → matches NOT for 'audit of who knows what in your own codebase' → security-ownership-map routes here"
+    },
+    {
+      "input": "Production just got breached via a compromised dep, what do we do?",
+      "expected_no_skill": true,
+      "reason": "Post-breach incident response → matches NOT for 'production runtime incident' → security-incident-response routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer reaches for supply-chain-risk-auditor before adding tiny-graphql-client to the lockfile for the auth-sensitive path.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using supply-chain-risk-auditor'",
+        "§1 inventory: ecosystem=npm, package=tiny-graphql-client, depth=0, used_in=auth/session, security_critical=yes (because session auth)",
+        "§2 per-dep 5-axis scoring with concrete evidence: commits-in-last-90d count, unique-authors-in-history, last release date, stars / downloads / dependents, maintainer account created_at, 2FA flag, PGP signatures on tags, SECURITY.md presence",
+        "Each axis scoring cites the specific evidence (not just 'MEDIUM')",
+        "Aggregate risk score + band per the formula (axis1*2 + axis2*1 + axis3*1 + axis4*2 + axis5*1) / 7",
+        "For depth=0 + security_critical=yes, the band escalates one level (any axis = CRITICAL → REJECT)",
+        "Output saved at <repo>-supply-chain-risk.md with the dep's row visible at the top of direct deps + Recommendations: REJECT / REVIEW / accept",
+        "If risk band is REVIEW or REJECT, the recommendations section lists specific alternatives or fork candidates, not 'consider alternatives'"
+      ]
+    },
+    {
+      "scenario": "Engineer runs the audit and gets axis4 (maintainer identity) = CRITICAL because maintainer account was created < 90 days ago. Engineer asks 'is this real?'",
+      "expected_behavior": [
+        "Skill does NOT dismiss the finding — a recently-created account on a dep with thousands of dependents is the canonical npm-hijack pattern",
+        "Skill offers context: 'the maintainer could be a legitimate new contributor receiving the project, but combined with the bus-factor-1 axis, the trust signal is HIGH RISK'",
+        "Skill recommends: request the previous maintainer announce the transfer on the project page; check if any commit was authored from a new IP; check GitHub for any security advisory opened in the past 30 days; if you proceed, pin + set up Renovate for early-warning",
+        "If the dep is security-critical, default recommendation is replace or fork, not just pin",
+        "Output reports the finding with severity + the specific evidence (account_created_at timestamp) and the recommended action; second reviewer can verify and act"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Source adapted from antigravity supply-chain-risk-auditor. Distinct from security-devsecops (CVE at install time) and security-incident-response (post-breach). Runs before lockfile entry or quarterly for governance review. Methodology reproducibility is mandatory — second reviewer should reach the same scores on the same commands. Scoring matrix documented; per-axis breakdown not just aggregate score."
+}

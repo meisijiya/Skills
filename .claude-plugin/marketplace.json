@@ -22,13 +22,16 @@
         "./skills/extra/ai-code-blindspots",
         "./skills/extra/gha-security-review",
         "./skills/extra/security-threat-model",
-        "./skills/extra/security-ownership-map"
+        "./skills/extra/security-ownership-map",
+        "./skills/extra/supply-chain-risk-auditor",
+        "./skills/extra/stack-security-coder"
       ]
     },
     {
       "name": "meisijiya-cicd",
       "skills": [
-        "./skills/extra/pre-ship-gate"
+        "./skills/extra/pre-ship-gate",
+        "./skills/extra/closed-loop-delivery"
       ]
     },
     {
@@ -44,7 +47,8 @@
       "skills": [
         "./skills/extra/writing-skills",
         "./skills/extra/contract-strengthening",
-        "./skills/extra/slice-review"
+        "./skills/extra/slice-review",
+        "./skills/extra/test-guard"
       ]
     },
     {

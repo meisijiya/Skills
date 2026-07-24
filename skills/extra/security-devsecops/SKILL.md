@@ -1,6 +1,6 @@
 ---
 name: security-devsecops
-description: "Secures the supply-chain + deployment pipeline. Use when adding or upgrading dependencies (npm install / pip install / lockfiles), rotating secrets or API keys, configuring CI/CD, writing IaC (Terraform / Kubernetes / Ansible / Docker), building container images, or preparing a production deployment. Under omo, uses security-research mode for production-critical pre-deploy audits, oracle agent for IaC architecture questions, websearch MCP for latest supply-chain CVEs, context7 MCP for security tool docs."
+description: "Secures the supply-chain + deployment pipeline. Use when adding or upgrading dependencies (npm install / pip install / lockfiles), rotating secrets or API keys, configuring CI/CD, writing IaC (Terraform / Kubernetes / Ansible / Docker), building container images, or preparing a production deployment. Complements `supply-chain-risk-auditor` (which audits the maintainer signal of a dep before adding it; this skill scans for known CVEs at install time). Under omo, uses security-research mode for production-critical pre-deploy audits, oracle agent for IaC architecture questions, websearch MCP for latest supply-chain CVEs, context7 MCP for security tool docs."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 

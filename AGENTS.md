@@ -45,9 +45,12 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — GitHub Actions workflow security audit (action permission / expression injection / unpinned actions / workflow_run / artifact poisoning); each finding ships with concrete exploit scenario
 - [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) — AppSec-grade threat model (trust boundaries + STRIDE + attacker profile + file:line citations + prioritized mitigations); precedes `security-and-hardening` on design / 3rd-party-integration / blast-radius expansion
 - [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) — git-history people↔file topology surfacing orphan sensitive code / hidden owners / bus-factor hotspots / maintainer concentration; precedes major refactors + post-incident governance
+- [`supply-chain-risk-auditor`](~/.agents/skills/supply-chain-risk-auditor/SKILL.md) — dependency trustworthyness audit (single-maintainer / abandoned-repo / low-popularity / identity hygiene / social-engineering); precedes `security-devsecops` for security-critical paths + quarterly governance
+- [`stack-security-coder`](~/.agents/skills/stack-security-coder/SKILL.md) — layer-specific coding checklists (frontend XSS-CSP-cross-origin / backend SQL-NoSQL-authz-SSRF-webhook / mobile WebView-certs-storage-biometric); complements OMO `remove-ai-slops` + `ai-code-blindspots` for per-stack landmines
 
-**ci-cd (1):**
+**ci-cd (2):**
 - [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) — pre-deploy read-only audit + post-deploy smoke verification that catches 'deploy exit 0 ≠ actually running' (migrations / feature flags / CDN / canary / env / shadow traffic); allowed-tools read-only
+- [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) — 5-gate evidence chain (implemented / reviewed / deployed / healthy-at-runtime / reachable-by-users) so 'done' means running safely in production, not just merged
 
 **observability (3):**
 - [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — log/metrics/tracing for production visibility
@@ -58,6 +61,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — TDD-for-docs for skills; meta-only, lives here not in `core/`
 - [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) — open-world / non-exhaustive contract review (Phase 1.25 optional extra; complements `spec-driven-development` + `verification-before-completion`)
 - [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality, 2 verdicts); complements OMO `review-work` (whole-branch 5-lane)
+- [`test-guard`](~/.agents/skills/test-guard/SKILL.md) — 7-check AI-test quality audit (skip-detection / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness); pairs with `test-driven-development` to enforce tests actually test something
 
 **domain (7):**
 - [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — pre-build design alignment; default Markdown, HTML deck only on explicit visual/teaching request

@@ -1,0 +1,67 @@
+{
+  "name": "test-guard",
+  "version": "0.1.0",
+  "description": "Prevents AI-generated tests from passing-for-the-wrong-reasons — over-mocked, tautological, premise-tested, lazy-assertion tests that pass without proving behavior. Seven checks: skip-detection, mocks-the-system-under-test, tautological-assertions, boundary-coverage, fake-dependencies, lazy-assertions, order/timing-flakiness. Pairs with test-driven-development (the methodology); this skill enforces that the resulting tests actually test something.",
+  "positive_triggers": [
+    {
+      "input": "AI wrote tests for the new auth helper. Before merge, audit them for tautologies and over-mocking.",
+      "expected_skill": "test-guard",
+      "reason": "Pre-merge test quality audit on AI-generated tests → matches Use when 'reviewing AI-generated test code before merge'"
+    },
+    {
+      "input": "Test suite is 100% green but our prod bug slipped through. Where's the silent-green failure mode?",
+      "expected_skill": "test-guard",
+      "reason": "Silent-green failure mode is the canonical test-guard domain → matches Use when 'test suite is green but production bugs are escaping'"
+    },
+    {
+      "input": "Establish a CI gate that fails PRs on lazy assertions and over-mocking.",
+      "expected_skill": "test-guard",
+      "reason": "Per-PR CI gate setup on test quality → matches Use when 'establish a per-PR test-quality gate'"
+    },
+    {
+      "input": "Postmortem says the bug slipped because the test was tautological. Teach me what to look for next time.",
+      "expected_skill": "test-guard",
+      "reason": "Post-incident learning on tautological tests → matches Use when 'after a passing-test incident'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Write a failing test for the new feature, then minimum code to pass.",
+      "expected_no_skill": true,
+      "reason": "TDD discipline execution → matches NOT for 'writing the test first per TDD' → test-driven-development routes here"
+    },
+    {
+      "input": "Production p99 regressed to 1s — find the bottleneck.",
+      "expected_no_skill": true,
+      "reason": "Performance regression → matches NOT for 'production-bug root-cause hunt' → debugging-and-error-recovery or performance-optimization routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer runs test-guard against an AI-generated test file for an auth helper. The tests are 100% green.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using test-guard'",
+        "§1 Each test gets a 1-sentence behavior claim: 'this test verifies that the auth helper returns null when password is missing' (example)",
+        "§2 CHECK 1 (skip): grep for skip patterns in test files; any hit gets severity HIGH; flagged test fails the gate",
+        "§2 CHECK 2 (mocks the SUT): for each jest.mock call, verify the mock isn't replacing the function the test claims to test; if so, severity HIGH",
+        "§2 CHECK 3 (tautology): identify tests where assertion matches a literal set up earlier in the test body; severity HIGH",
+        "§2 CHECK 4 (boundary): for security-critical functions (auth / validation / parser), zero adversarial tests is HIGH; report which tests cover boundary / failure / adversarial vs only happy path",
+        "§2 CHECK 5 (fake dependency): report any mock whose return is constant for any input (the mock tests the mock, not the function)",
+        "§2 CHECK 6 (lazy assertion): identify any toBeDefined / toBeTruthy / toBeGreaterThan(0) that wouldn't catch a wrong-but-truthy result; MEDIUM (not HIGH — depends on intent)",
+        "§2 CHECK 7 (flakiness): identify tests with Date.now / sleep / global state / order dependencies; HIGH if cross-test order matters",
+        "Output per-file score; any HIGH = auto-FAIL; engineer can re-run with --medium to also fail on MEDIUM",
+        "Findings table with test name + check + evidence + remediation"
+      ]
+    },
+    {
+      "scenario": "Engineer's test suite uses sqlite-in-memory for the database layer (a best practice). test-guard should NOT flag the DB mock as fake-dependency (it's a real test instance).",
+      "expected_behavior": [
+        "Check 5 (fake dependency) recognizes sqlite-in-memory + testcontainers + wiremock as real test instances, not mocks",
+        "Only mocks that are 'constant return regardless of input' get flagged",
+        "For tests that DO mock the system under test (e.g. test mocks the parser it's supposed to test), flag regardless of the rest of the suite's quality"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Source adapted from antigravity test-guard skill. Complement to test-driven-development (TDD methodology) — test-guard enforces the resulting tests actually test what TDD claims they test. Per-PR CI integration: this skill's findings feed a PR gate that fails on HIGH-severity findings. Pair with ai-code-blindspots (cross-cutting AI blindspots) — test-guard is exclusively about test-code quality. Several existing ai-code-blindspots patterns are also test-guard triggers (over-mocking, toBeDefined lazy assertions); the two skills complement rather than overlap because ai-code-blindspots catches all AI-generated code patterns and test-guard specifically enumerates test-file landmines."
+}

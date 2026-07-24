@@ -1,0 +1,61 @@
+{
+  "name": "closed-loop-delivery",
+  "version": "0.1.0",
+  "description": "Closes the implementation-to-runtime loop so 'done' means evidence running in production, not diff merged. Five gates: implemented / reviewed / deployed / healthy-at-runtime / reachable-by-users. Pairs with verification-before-completion (PR-level) and pre-ship-gate (deploy-time); this skill owns the post-deploy 24h+ runtime evidence + user-reachability evidence that the other two don't cover.",
+  "positive_triggers": [
+    {
+      "input": "We're about to claim this slice is done — the diff is large. What closed-loop evidence do we need before declaring done?",
+      "expected_skill": "closed-loop-delivery",
+      "reason": "Pre-done-claim + 'diff is large' = classic 'done = diff-size' rationalization → matches Use when 'about to merge a slice / feature / change and the natural impulse is diff is N+1, ship it'"
+    },
+    {
+      "input": "CI was green, pre-ship-gate Phase A+B passed, but the bug ticket just came back from a customer. Where did our loop close too early?",
+      "expected_skill": "closed-loop-delivery",
+      "reason": "Bug surfaced despite green CI + pre-ship-gate → matches Use when 'after a deploy that had green CI / Phase-A+B pass but user reports the bug is still present'; the 5-gate framework has an explicit gap on Gate 4/5"
+    },
+    {
+      "input": "Establish a DoD for our team — 'done' should mean running safely in production, not just merged. Help me codify.",
+      "expected_skill": "closed-loop-delivery",
+      "reason": "Definition-of-Done codification request → matches Use when 'establishing or auditing a team's Definition of Done'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review this PR diff for missing auth checks before merge",
+      "expected_no_skill": true,
+      "reason": "Per-PR review of code → matches NOT for 'PR-level evidence gate' → verification-before-completion routes here"
+    },
+    {
+      "input": "Within 5 min of deploy, audit the canary and CDN",
+      "expected_no_skill": true,
+      "reason": "Deploy-time audit (<5 min) → matches NOT for 'within-deploy-time evidence' → pre-ship-gate routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer has just merged a slice that adds a 'bulk PII export' feature. Manager asks 'is it done?' Engineer reaches for closed-loop-delivery.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using closed-loop-delivery'",
+        "§1 enumerates the 5 gates: implemented → reviewed → deployed → healthy-at-runtime → reachable-by-users",
+        "Gate 1 (Implemented) walked: PR + tests + slice review + verification-before-completion + security-and-hardening (PII handling = trust boundary)",
+        "Gate 2 (Reviewed) walked: review-work 5 lanes PASS; multi-slice requires each slice's verdict",
+        "Gate 3 (Deployed) walked: pre-ship-gate Phase A + B all green; specifically the feature-flag-state for the new export must be 100% (or planned rollout %), not stuck at 0%",
+        "Gate 4 (Healthy at runtime): sets the 24h+ monitoring window with specific metrics: error rate, p95 latency, alert count, saturation trend",
+        "Gate 5 (Reachable by users): feature flag state confirmed + cache invalidation confirmed + manual user-journey test confirms admin role can actually export PII (Gate 5 is the gap that explains the original ticket)",
+        "Output is closed-loop-evidence.md saved at workspace root with the 5-gate evidence chain",
+        "If any gate is FAIL, the task is explicitly NOT done; specific remediation for each failed gate is required"
+      ]
+    },
+    {
+      "scenario": "Engineer declares done within 5 min of merge. closed-loop-delivery refuses.",
+      "expected_behavior": [
+        "Skill flags this as a strong indicator of the historical 'done = merged' anti-pattern",
+        "Gate 4 + Gate 5 cannot be PASS within 5 min of merge (24h+ monitoring window + user-reachability test)",
+        "Skill refuses to stamp 'done' until the 24h+ window has elapsed and Gate 5 has a manual user journey confirmation",
+        "Skill surfaces the risk: 'this is the same loop-closing-too-early pattern that produced the original customer ticket' (links to incident if applicable)"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Pairs with verification-before-completion (PR-level) + pre-ship-gate (deploy-time). This skill's specific contribution: 24h+ post-deploy runtime evidence (Gate 4) + user-reachability evidence (Gate 5). Source adapted from antigravity closed-loop-delivery skill. Per-PR cycle: ~24-72h depending on change scope. Quarterly cadence to audit whether DoD is being applied; not all PRs need full 5 gates (routine cleanups may merge without Gates 4/5)."
+}
