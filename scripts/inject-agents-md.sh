@@ -171,14 +171,6 @@ done
 SNIPPET_CONTENT=$(printf '%s\n' "$SNIPPET_CONTENT" | \
   sed -E "/^\\*\\*\\.extra\\/ — load on demand \\([0-9]+\\)\\:\\*\\*\$/d")
 
-# Backward-compat: if AGENTS.md still has the old single `**\.extra\/` header,
-# keep it functional — just rewrite to `meta (NN):**` so old source renders ok.
-# This is a transitional shim; remove after one release.
-if printf '%s' "$SNIPPET_CONTENT" | grep -qE '\*\*\\.extra\\\/'; then
-  # Best-effort: don't change behavior, leave the legacy line alone.
-  : # noop
-fi
-
 if [[ -z "$(printf '%s' "$SNIPPET_CONTENT" | tr -d '[:space:]')" ]]; then
   echo "Error: no content between $MARKER_BEGIN and $MARKER_END in $AGENTS_MD" >&2
   echo "  See Section A of AGENTS.md for the expected format" >&2

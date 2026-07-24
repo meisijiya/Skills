@@ -63,10 +63,6 @@ function loadBootstrap() {
   );
 
   try {
-    if (!fs.existsSync(bootstrapPath)) {
-      _bootstrapCache = null;
-      return null;
-    }
     const fullContent = fs.readFileSync(bootstrapPath, 'utf8');
     const body = stripFrontmatter(fullContent);
 

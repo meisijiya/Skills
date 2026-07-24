@@ -62,8 +62,13 @@ const get = (sid) => {
   return state.get(sid)
 }
 
-const installed = (name) =>
-  existsSync(join(homedir(), '.agents', 'skills', name, 'SKILL.md'))
+const installedCache = new Map()
+const installed = (name) => {
+  if (installedCache.has(name)) return installedCache.get(name)
+  const ok = existsSync(join(homedir(), '.agents', 'skills', name, 'SKILL.md'))
+  installedCache.set(name, ok)
+  return ok
+}
 
 const marker = (name) => `[review-router:${name}]`
 
@@ -109,6 +114,7 @@ export const MeisijiyaReviewRouter = async ({ client, directory }) => {
       if (event?.type !== 'session.deleted') return
       const sessionID = event.properties?.info?.id
       if (sessionID) state.delete(sessionID)
+      installedCache.clear()
     },
   }
 }
