@@ -21,7 +21,7 @@ npx skills add meisijiya/Skills \
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求视觉 deck 或教学 deck 时才按需使用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 渲染 HTML。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
-- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (24 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 5 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
+- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (26 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 5 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
 ## 仓库结构
 
@@ -45,8 +45,8 @@ meisijiya-skills/
 │   │   ├── debugging-and-error-recovery/    ← 5-step triage protocol
 │   │   ├── diagnosing-bugs/                  ← symptom-driven diagnosis loop (pairs with debugging-and-error-recovery)
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(24 个,按 group 组织在 picker 中)
-│       ├── README.md          ← 24 个 skill + group-aware "怎么选" 决策表
+│   └── extra/                ← 选装集(26 个,按 group 组织在 picker 中)
+│       ├── README.md          ← 26 个 skill + group-aware "怎么选" 决策表
 │       ├── security-and-hardening/          # security group (9)
 │       ├── security-devsecops/
 │       ├── security-incident-response/
@@ -84,7 +84,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(24 个)
+    └── cases/                 ← 每个 skill 的 eval case(35 个)
 ```
 
 ## 安装
@@ -120,7 +120,7 @@ npx skills add meisijiya/Skills -g
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(9 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架。`diagnosing-bugs` 在 0.6.x 加入 core(协议 vs 学科二分:`debugging-and-error-recovery` 是 5 步协议,`diagnosing-bugs` 是 symptom-driven 学科)
-- **选装集**(24 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 5-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain`) + 依赖关系。`npx skills add` picker 按这 5 个 group 展示,可整组装或单选
+- **选装集**(26 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 5-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain`) + 依赖关系。`npx skills add` picker 按这 5 个 group 展示,可整组装或单选
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表 + group-aware 章节,按你项目特征对号入座。
 

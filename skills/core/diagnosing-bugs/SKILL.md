@@ -1,6 +1,6 @@
 ---
 name: diagnosing-bugs
-description: "Symptom-driven diagnosis loop for hard bugs and performance regressions — narrows down via observation + experiment rather than guessing. Use when debugging-and-error-recovery's 5-step triage (reproduce / localize / reduce / fix / guard) is in progress and the cause is non-obvious; when you've tried the obvious causes and the bug persists; or when the symptom is a performance regression that doesn't match a known failure mode. Pairs with debugging-and-error-recovery (the protocol) by adding the diagnostic discipline underneath — debugging owns the sequence, diagnosing-bugs owns the 'which observation next' question."
+description: "Symptom-driven diagnosis loop for hard bugs and performance regressions. Form ≥3 candidate hypothesis statements before observing; for each hypothesis, predict the distinguishing observation that would falsify the others; eliminate one. Use when debugging-and-error-recovery's 5-step triage (reproduce / localize / reduce / fix / guard) is in progress and the cause is non-obvious; when you've tried the obvious causes and the bug persists; or when the symptom is a performance regression that doesn't match a known failure mode. Pairs with debugging-and-error-recovery (the protocol) by adding the diagnostic discipline underneath — debugging owns the sequence, this skill owns the 'which observation next' question; together they let you diagnose hard bugs systematically."
 allowed-tools: "Read Bash Glob Grep"
 ---
 

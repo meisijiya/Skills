@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 24 个)
+# Extra Skills(选装集 · 26 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -18,7 +18,7 @@
 | 创建/编辑 skill | `meta` 中加 `writing-skills` |
 | AI 刚生成/修改了代码,要审查盲区 | `security` 中加 `ai-code-blindspots` |
 
-## 24 个 skill 一览(按 group)
+## 26 个 skill 一览(按 group)
 
 ### security (9)
 | Skill | 一句话 |

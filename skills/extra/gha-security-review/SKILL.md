@@ -1,6 +1,6 @@
 ---
 name: gha-security-review
-description: "Audits GitHub Actions workflow files (.github/workflows/*.yml|.yaml) for action-permission misuse, injection vulnerabilities, token leakage, supply-chain risks, and unsafe expression handling. Use when adding or modifying a workflow, reviewing a PR that touches CI files, designing CI step order, hardening an existing workflow, or before any deploy pipeline change. Each finding ships with a concrete exploit scenario, not just a vuln label."
+description: "Audits GitHub Actions workflow (GHA) files (.github/workflows/*.yml|.yaml) for action-permission misuse, expression injection in `${{ }}`, unpinned third-party actions, token leakage, supply chain risks, and artifact poisoning. Use when adding or modifying a workflow, reviewing a PR that touches CI files, designing CI step order, hardening an existing workflow, or before any deploy pipeline change. Each finding ships with a concrete exploit scenario, not just a vuln label; permissions narrowing is the most common recommendation."
 allowed-tools: "Read Grep Glob Bash WebFetch"
 ---
 

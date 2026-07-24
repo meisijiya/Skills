@@ -49,7 +49,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`supply-chain-risk-auditor`](~/.agents/skills/supply-chain-risk-auditor/SKILL.md) — dependency trustworthyness audit (single-maintainer / abandoned-repo / low-popularity / identity hygiene / social-engineering); precedes `security-devsecops` for security-critical paths + quarterly governance
 - [`stack-security-coder`](~/.agents/skills/stack-security-coder/SKILL.md) — layer-specific coding checklists (frontend XSS-CSP-cross-origin / backend SQL-NoSQL-authz-SSRF-webhook / mobile WebView-certs-storage-biometric); complements OMO `remove-ai-slops` + `ai-code-blindspots` for per-stack landmines
 
-**ci-cd (2):**
+**cicd (2):**
 - [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) — pre-deploy read-only audit + post-deploy smoke verification that catches 'deploy exit 0 ≠ actually running' (migrations / feature flags / CDN / canary / env / shadow traffic); allowed-tools read-only
 - [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) — 5-gate evidence chain (implemented / reviewed / deployed / healthy-at-runtime / reachable-by-users) so 'done' means running safely in production, not just merged
 

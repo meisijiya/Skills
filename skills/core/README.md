@@ -1,8 +1,8 @@
-# Core Skills(必装集 · 8 个)
+# Core Skills(必装集 · 9 个)
 
 工作流骨架。所有项目都装。
 
-## 8 个 skill 一览
+## 9 个 skill 一览
 
 | Skill | 做什么 |
 |---|---|

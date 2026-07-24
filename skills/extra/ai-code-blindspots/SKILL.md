@@ -1,6 +1,7 @@
 ---
 name: ai-code-blindspots
 description: "Reviews AI-generated or AI-modified code for blindspots that AI commonly omits — missing boundary checks (null/array), invisible error handling (empty catch / silent Promise rejection), environment compatibility (Node-only APIs in browser code / ES2022+ browser support), deprecated API usage (substr / UNSAFE_* / componentWillMount), and hardcoded configuration (URLs / tokens / secrets). Use when AI just generated or modified code and is in the verification stage, or when the agent itself suspects its own freshly-written code may have boundary / environment / error-handling omissions. NOT for manual review of hand-written code, pure style or text-only changes, code that has already been fully scanned by remove-ai-slops, or layer-specific landmines (frontend XSS / backend SQL injection / mobile WebView) → load `stack-security-coder` for per-stack coding checks. Load after verification-before-completion (core/, always installed). (token cost: medium — sub-agent scan + grep fallback)"
+allowed-tools: "Read Bash Glob Grep"
 ---
 
 # ai-code-blindspots
