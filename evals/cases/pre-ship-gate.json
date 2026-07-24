@@ -1,0 +1,74 @@
+{
+  "name": "pre-ship-gate",
+  "version": "0.1.0",
+  "description": "Read-only pre-deploy audit + post-deploy smoke verification that catches 'deploy exit 0 ≠ actually running' — migrations silently skipped, feature flags stale, CDN serving old bundle, canary stuck at 0%, env vars not propagated, shadow traffic mis-routed. Output is numbered 6-category audit (Phase A) followed by smoke-verification commands (Phase B) per category, with concrete remediation per finding. Complements verification-before-completion (PR-level Iron Law) at the runtime-rollout gate.",
+  "positive_triggers": [
+    {
+      "input": "The deploy job returned exit 0 and we're about to merge the release tag — I want to confirm the new build is actually serving, not just that the artifact was written.",
+      "expected_skill": "pre-ship-gate",
+      "reason": "Release merge/about-to-rollout with explicit 'is it actually serving' concern → matches Use when 'about to roll out a release' + 'just deployed and suspect silent failure'"
+    },
+    {
+      "input": "Canary is at 0% after an hour — figure out what checks would have caught why and what's actually broken.",
+      "expected_skill": "pre-ship-gate",
+      "reason": "Canary stuck-at-0% is a canonical Phase-B 'canary health' finding; this skill explicitly enumerates the diagnostic commands for that scenario"
+    },
+    {
+      "input": "Audit our DB migrations before tomorrow's release. I want to see evidence each migration is idempotent and the previous one actually ran.",
+      "expected_skill": "pre-ship-gate",
+      "reason": "Pre-deploy read-only audit of migrations is Phase A category 1 of this skill; explicit 'evidence idempotent' + 'previous ran' is the migration checklist item"
+    },
+    {
+      "input": "Are our CDN cache headers right for the new bundle? Worried about old hashes still being served to users.",
+      "expected_skill": "pre-ship-gate",
+      "reason": "CDN / cache invalidation is Phase A category 4 + Phase B 'CDN serving new bundle'; explicit cache-header question matches Use when 'CDN / edge cache might be serving old bundle'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my Node.js auth middleware for SQL injection and XSS",
+      "expected_no_skill": true,
+      "reason": "Application-layer source-code review (OWASP for existing code) → matches NOT for 'application-layer source code review' → security-and-hardening routes here"
+    },
+    {
+      "input": "Audit the .github/workflows/release.yml for action-permission and expression-injection issues",
+      "expected_no_skill": true,
+      "reason": "GHA workflow file audit → matches NOT for 'GHA workflow file audit' → gha-security-review routes here"
+    },
+    {
+      "input": "Add a feature flag for the new dashboard rollout",
+      "expected_no_skill": true,
+      "reason": "Implementation / spec phase — creating the feature flag, not auditing the rollout → matches NOT for 'CI green-/red-/purple-checking of the code itself' → incremental-implementation + brainstorming route here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Release v1.7 just deployed. CI green; kubectl rollout status says 'Complete'. Engineer suspects 'exit 0 ≠ actually serving' but doesn't know which Phase B check to start with.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using pre-ship-gate'",
+        "Phase A skipped because deployment already happened — clearly state 'Phase A is for pre-deploy; for post-deploy, jump to Phase B'",
+        "Phase B fires all 6 categories in order: canary health → release pointer → migrations → feature flags → CDN → env vars",
+        "Per-category concrete evidence command — e.g. 'release pointer': kubectl get svc, curl via LB with build-hash marker, expected vs actual response",
+        "Each finding uses stack-specific commands (kubectl for k8s, fly releases for fly.io, vercel rollback for Vercel) — not generic placeholders",
+        "If env var was added in this deploy: kubectl exec env | grep KEY — explicitly check for fallback default (the most common silent failure)",
+        "Phase C failure-hold triggers on any 'wrong' answer; lists concrete rollback command (kubectl rollout undo / helm rollback / vercel rollback)",
+        "Output saved / appended to a deployment-evidence.md alongside release notes (audit trail for next release)"
+      ]
+    },
+    {
+      "scenario": "Pre-release audit before merging a release tag. New release adds: a DB migration, an env var (FEATURE_FLAG_SDK_KEY), a feature flag toggle, and switches bundle hashing to immutable path.",
+      "expected_behavior": [
+        "Phase A is run; all 6 categories captured with status",
+        "Migration (cat 1): capture migration command + idempotency check + previous-run timestamp; confirm the deploy job for the previous release's migration timestamp predates the release merge",
+        "Config (cat 2): capture env diff; explicit check that FEATURE_FLAG_SDK_KEY either has a default or hard-fails the deploy (NOT a silent empty-string fallback)",
+        "Feature flags (cat 3): confirm flags service has the new state ready, not in stale KV; if state is updated_at > 1h ago, flag ⚠ watch",
+        "CDN (cat 4): confirm new bundle uses hash in path (app.<hash>.js, not app.js); HTML has cache-control: no-cache or short TTL",
+        "Release pointer (cat 5): capture current selector / weight / host pre-deploy to a temp file for post-deploy comparison",
+        "Shadow traffic (cat 6): if configured, confirm mirror_percent > 0 and mirror service healthy",
+        "Any 🚫 block — list concrete fix before proceeding; the rollout does NOT advance until Phase A is all ✓ or ⚠ watch with rationale"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Phase A is read-only and should run BEFORE clicking release (scripting this into the deploy template is YAGNI here — the skill's value is forcing the engineer to read the audit, not auto-passing). Phase B should run within 5 minutes of release, not 1 hour later (the verification window is short). Builds on the antigravity pre-release-review + pre-ship-gate pair (merged into one workflow with explicit Phase A/B/C ordering). Complements (does not replace) verification-before-completion (PR-level Iron Law for the code itself). The skill is read-only-by-design: allowed-tools is 'Read Bash WebFetch', no Edit/Write. Stack-specific commands (kubectl / helm / vercel / fly / aws / gcloud) are listed in the Process section as templates; for a different stack, swap the commands but keep the 6-category structure."
+}

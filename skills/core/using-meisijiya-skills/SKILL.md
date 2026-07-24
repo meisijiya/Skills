@@ -41,6 +41,8 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "Review this slice" / "diff against brief" / per-slice review before next slice | If installed, [`slice-review`](~/.agents/skills/slice-review/SKILL.md) (extra/) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
 | "About to claim done" / "ready to commit/PR" | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | (invoke OMO `review-work` per Stage 2) |
 | "Modify GHA workflow" / "audit .github/workflows" / "review a PR with CI changes" / "design CI step order" | If installed, [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) (extra/) | [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) if the workflow change touches supply chain (action swap, pinned SHA, secret pass-through) |
+| "About to design / refactor / integrate X" with a trust-boundary crossing (new feature, third-party, multi-tenant, auth refactor) | If installed, [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) once the design lands |
+| "About to roll out a release" / "canary stuck at 0%" / "deploy exit 0 but suspect silent failure" | If installed, [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) (extra/) | [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) only if the failure already reached users |
 | AI just generated/edited code, in `verification-before-completion` stage | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) (extra/) |
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
@@ -90,6 +92,8 @@ slice loop:       incremental-implementation (dispatch) → slice-review (per-sl
 fix:              debugging-and-error-recovery (5-step) → test-driven-development (red-green) → verification-before-completion
 maintenance:      verification-before-completion → ai-code-blindspots → security-and-hardening → review-work
 ci/cd security:   gha-security-review (workflow audit) → verification-before-completion (PR gate)
+threat → hard:    security-threat-model (design) → security-and-hardening (impl) → pre-ship-gate (deploy)
+ship:             gha-security-review (CI) → pre-ship-gate (deploy evidence) → observability-and-instrumentation (post)
 ```
 
 The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.

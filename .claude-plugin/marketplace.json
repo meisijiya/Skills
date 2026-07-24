@@ -20,7 +20,14 @@
         "./skills/extra/security-devsecops",
         "./skills/extra/security-incident-response",
         "./skills/extra/ai-code-blindspots",
-        "./skills/extra/gha-security-review"
+        "./skills/extra/gha-security-review",
+        "./skills/extra/security-threat-model"
+      ]
+    },
+    {
+      "name": "meisijiya-cicd",
+      "skills": [
+        "./skills/extra/pre-ship-gate"
       ]
     },
     {

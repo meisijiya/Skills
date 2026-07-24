@@ -1,0 +1,75 @@
+{
+  "name": "security-threat-model",
+  "version": "0.1.0",
+  "description": "AppSec-grade threat model for design-stage and significant-architecture-change scenarios. Identifies trust boundaries, attacker profiles, and STRIDE attack paths; each finding cites file:line, attacker action, severity, and concrete mitigation. Output is a single `<repo>-threat-model.md` per session. Distinct from security-and-hardening (per-line code review): threat model decides *which controls are needed*, hardening checks *whether existing code follows them*. Run BEFORE non-trivial features or third-party integrations; re-run after significant authn/authz refactors or blast-radius expansion.",
+  "positive_triggers": [
+    {
+      "input": "We're about to integrate Stripe for payments in our SaaS. Before we start coding, do a threat model of what could go wrong across this boundary.",
+      "expected_skill": "security-threat-model",
+      "reason": "Pre-design third-party integration with money as asset → matches Use when 'integrating a third-party service that handles user data, secrets, or privileged actions'"
+    },
+    {
+      "input": "I'm about to refactor our session handling to switch from JWT to server-side sessions. Threat-model the change first.",
+      "expected_skill": "security-threat-model",
+      "reason": "Refactoring authn/authz is a trust-boundary-changing event → matches Use when 'refactoring authn / authz / session / secret-handling code'"
+    },
+    {
+      "input": "We've outgrown single-tenant. Need to threat-model what changes when we go multi-tenant — especially data isolation.",
+      "expected_skill": "security-threat-model",
+      "reason": "Expanding blast radius across trust boundaries → matches Use when 'expanding blast radius — multi-tenant'"
+    },
+    {
+      "input": "Internal pen test found the prod /debug endpoint reachable from staging. Threat-model the whole prod surface so we know what other exposures to look for.",
+      "expected_skill": "security-threat-model",
+      "reason": "After a security review found a control inadequate, model the system not just the finding → matches Use when 'after a security review … to model the system, not just the finding'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my Express handler for the OWASP Top 10",
+      "expected_no_skill": true,
+      "reason": "Per-line code review of existing code → matches NOT for 'per-line code review of existing code' → security-and-hardening routes here"
+    },
+    {
+      "input": "Audit our npm dependencies for known CVEs before release",
+      "expected_no_skill": true,
+      "reason": "Supply chain / dependency audit → matches NOT for 'supply chain / dep / IaC audit' → security-devsecops routes here"
+    },
+    {
+      "input": "Yesterday's outage was caused by leaked API keys — what do we do now?",
+      "expected_no_skill": true,
+      "reason": "Post-incident (threat materialised) → matches NOT for 'post-incident' → security-incident-response routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer is about to start a non-trivial feature: a new endpoint that lets an admin user bulk-export customer PII for a data subject access request (GDPR DSAR). The endpoint will be called from the admin UI, return a signed-URL download from S3, and audit-log the export.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using security-threat-model'",
+        "§1 Scope: feature = 'DSAR bulk PII export'; sensitivity = HIGH (PII + regulated); trust assignment = admin role only; elevated capability = read-PII, S3 egress, audit-log write",
+        "§2 Trust boundaries: 4 enumerated — admin browser ↔ admin API (RBAC), admin API ↔ S3 (signed-URL issuance), S3 ↔ download client (signed-URL egress), audit sink write (compliance boundary)",
+        "§3 Attacker profiles: compromised admin account, low-priv user probing admin endpoints, malicious S3 download link recipient (if leaked), insider abusing the export path",
+        "§4 STRIDE enumeration includes at least 8-12 paths: spoofed admin session, tampered audit-log, repudiation (no audit for failed exports), info disclosure via long-lived S3 URL, denial-of-resource via repeated exports, privilege escalation from low-priv role",
+        "Each finding cites file:line; severity CRITICAL for unauth/RBAC bypass, HIGH for leaked signed URLs or PII exposure, MEDIUM for audit-log gaps",
+        "§5 mitigations table includes concrete controls (signed-URL TTL=5min, audit-log coverage on both success and failure, RBAC role name mapping, download rate-limit) with owner column",
+        "§6 Open assumptions: at least 2-3 (e.g. 'admin role is double-mapped only from internal SSO'; 'S3 bucket does not allow list via IAM'; 'audit log is append-only'); user is asked to validate",
+        "§7 Out of scope: explicit (e.g. 'GDPR right-to-erasure is handled by a separate flow'; 'encrypted-at-rest is covered by infrastructure layer')",
+        "File saved at <repo>-threat-model.md with §1-§8 structure"
+      ]
+    },
+    {
+      "scenario": "Engineer runs this skill on a single-line change: adding a new logging statement that captures user email for debugging. Looks trivial.",
+      "expected_behavior": [
+        "Skill explicitly flags 'this is a small change but adds a logging sink with PII — running threat model is appropriate (not overkill) per the Common Rationalizations section's 'small feature' rebuttal'",
+        "§1 Scope: trust assignment = any user (logs are written on a hot path); elevated capability = write to log storage which may be world-readable to dev/ops",
+        "§2 Trust boundaries: 3 enumerated — user request ↔ log call site (PII capture boundary), log sink ↔ log storage (write boundary), log storage ↔ log readers (read boundary; might be SRE on-call, off-shore contractors)",
+        "§3 Attacker profiles: log-reader with PII curiosity, log-injection attacker (poisoning logs), insider via stolen log credentials",
+        "§4 findings include: PII in plain logs (HIGH), log injection through control characters in user-controlled fields (MEDIUM), over-retention (MEDIUM, depends on retention policy)",
+        "Findings cite the source line + target log statement; severity calibrated against PII classification",
+        "Mitigations: redact before log, allowlist of permitted fields, structured-log scrubber, retention policy; owners assigned"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Source material adapted from openai's curated .curated/security-threat-model and the Antigravity threat-modeling-expert. Distinct from contract-strengthening: contract-strengthening looks at runtime contract/state/timing/boundary risks in a *contract* sense; this skill looks at *adversarial* risks across trust boundaries. The two skills are complementary — when both apply, run threat-model first to scope, then contract-strengthening to harden the chosen contract. The model file lives at <repo>-threat-model.md and should be committed alongside the implementation PR so the threat model has an audit trail."
+}

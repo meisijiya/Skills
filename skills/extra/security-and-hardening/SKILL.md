@@ -21,12 +21,18 @@ allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 - 调用第三方 API / 集成外部服务
 - 处理文件上传 / 下载
 - 写新 endpoint / 新 public function
+- Following up a [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) — the model decides *which controls are needed*; this skill checks *whether existing code follows them*
 
 **NOT for:**(场景描述 —— 具体用哪个 skill 由 description 匹配决定,不硬指)
 - 内部 helper(无 user input)
 - 纯展示 UI(无数据流)
 - 已经审过的代码(重复审计浪费时间)
 - 生产前 exploit hunt / CVE 复现
+- Designing a new feature with a trust-boundary crossing BEFORE code exists → [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md)
+- Supply chain / IaC / container / pre-deploy → [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md)
+- GHA workflow file audit → [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md)
+- Post-incident response → [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md)
+- Deploy / rollout silent-failure class → [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md)
 
 ## Process
 

@@ -32,6 +32,7 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 - Mid-task status updates (use plain prose, no completion claim)
 - Honest uncertainty ("I think this might work but haven't verified yet" is fine)
 - CI/CD workflow file changes that need action-permission / expression-injection / unpinned-action audit before merging → load [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) first (specific to `.github/workflows/`)
+- Deploy / rollout checks (migrations actually ran, feature flags flipped, CDN serves new bundle, canary progressing, env vars propagated) → use [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) (read-only audit + smoke verification; this skill is for the code-change gate, that skill is for the runtime-rollout gate)
 
 ## Process
 

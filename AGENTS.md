@@ -37,12 +37,16 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
-**security (5):**
+**security (6):**
 - [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — application-layer trust-boundary hardening; depth audit via OMO `security-research`
 - [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) — supply chain + deploy pipeline (deps / SBOM / secrets rotation / CI/CD / IaC / pre-deploy); OMO `security-research` + `oracle` + `websearch` + `context7`
 - [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — post-incident (NIST CSF simplified: detect / triage / contain / eradicate / recover / postmortem); OMO `security-research` post-PoC + `oracle` decision + `websearch` IOC
 - [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) — AI-generated code blindspots (boundary checks / silent error handling / env compatibility / deprecated API / hardcoded config / invisible failures); complements OMO `remove-ai-slops`
 - [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — GitHub Actions workflow security audit (action permission / expression injection / unpinned actions / workflow_run / artifact poisoning); each finding ships with concrete exploit scenario
+- [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) — AppSec-grade threat model (trust boundaries + STRIDE + attacker profile + file:line citations + prioritized mitigations); precedes `security-and-hardening` on design / 3rd-party-integration / blast-radius expansion
+
+**ci-cd (1):**
+- [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) — pre-deploy read-only audit + post-deploy smoke verification that catches 'deploy exit 0 ≠ actually running' (migrations / feature flags / CDN / canary / env / shadow traffic); allowed-tools read-only
 
 **observability (2):**
 - [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — log/metrics/tracing for production visibility
