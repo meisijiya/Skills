@@ -52,6 +52,21 @@ const REMINDERS = [
     text: 'GHA workflow file changed; invoke `gha-security-review` to audit action-permission + expression-injection + supply-chain.',
     matchPath: /(?:^|\/)\.github\/workflows\//i,
   },
+// Test files: AI-generated tests silently pass without test-quality gate
+  // (.test. / .spec. / _test. / test_*.py / *Test.java / tests/ / __tests__/).
+  {
+    name: 'test-guard',
+    text: 'Test file changed; invoke `test-guard` to audit for over-mocking / tautological assertions / lazy `toBeDefined` / fake deps / boundary coverage gaps.',
+    matchPath: /(?:^|\/)(tests?|__tests__)\/|\.(test|spec)\.[a-z]+$|_test\.[a-z]+$|(?:^|\/)test_[^/\\]+\.py$|[Tt]est\.[a-z]+$/i,
+  },
+  // Stack-specific code: frontend UI + mobile native catch the layer
+  // landmines. Backend (.py/.go/.java) is intentionally NOT matched —
+  // description routes there; over-nudging on every .py edit would be noise.
+  {
+    name: 'stack-security-coder',
+    text: 'Stack-specific code changed; invoke `stack-security-coder` for per-layer audit (frontend XSS-CSP-cross-origin / mobile WebView-certs-storage-biometric).',
+    matchPath: /\.(tsx|jsx|vue|svelte|swift|dart)$/i,
+  },
 ]
 
 const TRIGGER_TOOLS = new Set(['write', 'edit', 'apply_patch'])
