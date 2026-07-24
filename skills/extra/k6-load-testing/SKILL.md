@@ -201,6 +201,16 @@ A k6 load test is going wrong if:
 - Comparing runs across different hardware / network paths without noting the env diff
 - "Tests passed locally, will probably pass in prod" — local usually means your laptop, prod is real traffic
 
+## omo Integration
+
+| OMO capability | Used for |
+|---|---|
+| `oracle` agent | Threshold calibration: "Is `p95 < Xms` / `error budget < Y%` actually defensible for THIS endpoint's traffic shape?" (oracle is read-only) |
+| `websearch` MCP | Latest k6 syntax for the script (k6 OSS evolves quickly; v0.50+ has new `scenarios` API); threshold best practices from k6.io/blog |
+| `context7` MCP | k6 official docs for script shape (options / scenarios / thresholds / checks / metrics) |
+| [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) | Post-hoc partner when the gate fires — k6 says "we breached p99"; perf-opt finds WHERE the bottleneck is |
+| `analyze` mode (omo) | Optional: before designing the test, use `analyze` mode to focus the audit on the endpoint's existing bottlenecks (slow query / N+1 / cache miss) so the test exercises the right path |
+
 ## Verification
 
 Before claiming the perf gate is set, produce evidence:

@@ -202,6 +202,14 @@ A workflow audit is going wrong if:
 - You've audited one workflow but skipped the other 5 in `.github/workflows/`
 - You weren't actually shown the workflow file (you're pattern-matching from a description)
 
+## omo Integration
+
+| OMO capability | Used for |
+|---|---|
+| `oracle` agent | Judgment calls on "is this `permissions:` block actually minimal for this workflow's needs?" / "is this expression actually exploitable via PR-title input?" (oracle is read-only, high-IQ) |
+| `grep_app` MCP | Search GitHub for known-bad action patterns (`pull_request_target` + untrusted checkout, `actions/checkout@v2` deprecated `${{ github.event.pull_request.* }}` token handling) |
+| `meisijiya-review-router` plugin | Already auto-loads this skill on `Edit .github/workflows/` files (per `matchPath: /\.github\/workflows\//` in `.opencode/plugins/meisijiya-review-router.js`); no additional wiring needed |
+
 ## Verification
 
 Before claiming audit complete, produce evidence:

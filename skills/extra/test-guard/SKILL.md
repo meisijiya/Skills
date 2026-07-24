@@ -243,6 +243,15 @@ The test-quality audit is going wrong if:
 - Confuses coverage with quality — coverage is necessary but not sufficient
 - Output aggregates per file but not per check — file-level "OK / not OK" loses which check failed
 
+## omo Integration
+
+| OMO capability | Used for |
+|---|---|
+| `oracle` agent | Verdict calibration: "Is this test really tautological, or just minimal-honest?" (oracle is read-only); "Should this `expect.assertions(0)` block count as G-7 lazy-assert?" |
+| [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) | Methodology partner — test-guard audits existing tests; TDD enforces the discipline to write them right (red-green-refactor is the upstream cause; test-guard is the post-hoc audit) |
+| `meisijiya-review-router` plugin | Auto-loads this skill on `Edit` of test files (matches `*test*.{ts,tsx,py,go,rs,swift,...}` per `matchPath` policy in `.opencode/plugins/meisijiya-review-router.js`) |
+| `deep` agent category (omo) | Optional: for large test suites (>50 tests per file), fan out parallel sub-agents per file to scale the audit; without `deep`, fall back to per-file audits in the same agent context |
+
 ## Verification
 
 Before claiming the audit is done, produce evidence:

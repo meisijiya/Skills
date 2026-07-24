@@ -253,6 +253,15 @@ The layer audit is going wrong if:
 - Severity calibration ignores reachability (a SQL injection in an unused-by-production endpoint = MEDIUM; in a hit-by-every-query endpoint = CRITICAL)
 - Report doesn't distinguish layer from cross-cutting findings — security-and-hardening should be run alongside; this skill's findings should be layer-specific
 
+## omo Integration
+
+| OMO capability | Used for |
+|---|---|
+| `oracle` agent | Severity calibration: "Is this SQL finding actually exploitable through the framework's parameter binding?" / "Is this WebView hardcoded-cert bypass reachable in prod?" (oracle is read-only) |
+| `security-research` mode (omo) | Cross-cutting audit run alongside this layer audit (`security-and-hardening` for app-layer trust boundaries, this skill for layer-specific coding landmines); `meisijiya-review-router` reminds both |
+| [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) | If the layer code is AI-generated, run blindspots for boundary / env-compat / hardcoded-config checks that layer checkers may miss (stack-security-coder = pattern-aware, blindspots = AI-failure-mode-aware) |
+| `meisijiya-review-router` plugin | Auto-loads this skill on `Edit` of `.tsx` / `.jsx` / `.vue` / `.svelte` / `.swift` / `.dart` files (per `matchPath` policy in `.opencode/plugins/meisijiya-review-router.js`) |
+
 ## Verification
 
 Before claiming the layer audit is done, produce evidence:

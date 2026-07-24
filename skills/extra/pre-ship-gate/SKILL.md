@@ -149,6 +149,16 @@ A pre-ship gate is going wrong if:
 - Phase B findings are listed without remediation command → call out `kubectl rollout undo` / `helm rollback` / `vercel rollback --to <id>` per stack
 - You're "too tired to do Phase A" → still do it; the audit is automated in your deployment template anyway, the cost is reading it
 
+## omo Integration
+
+| OMO capability | Used for |
+|---|---|
+| `oracle` agent | Phase B "is this rollout actually healthy or just `Complete`?" calibration when smoke results are ambiguous (oracle is read-only) |
+| `context7` MCP | Stack-specific rollback command docs (kubectl / helm / vercel / fly / cloudflare workers) |
+| `websearch` MCP | Latest CVEs for any deploy tool that processes user input (kubectl, helm template, ansible, terraform apply) |
+| [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) | Post-Gate-3 handoff: pre-ship-gate covers deploy-exit + smoke; closed-loop-delivery's Gate 4 (24h+ runtime) + Gate 5 (reachable) extend the evidence chain |
+| (no write-time hook) | This skill is read-only by design (Phase A audit + Phase B verification); no per-Edit reminder needed |
+
 ## Verification
 
 Before claiming the rollout is healthy, produce evidence:

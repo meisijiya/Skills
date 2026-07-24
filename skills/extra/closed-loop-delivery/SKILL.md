@@ -214,6 +214,16 @@ Closed-loop delivery is going wrong if:
 - "Done" claim references CI check names instead of monitoring metric snapshots
 - The same gate (Gate 4 / 5) consistently red — a sign the gate is real and the team is shipping bad changes; investigate, don't drop the gate
 
+## omo Integration
+
+| OMO capability | Used for |
+|---|---|
+| `oracle` agent | "Are these 5 gates sufficient evidence for THIS specific done-claim?" calibration when the gates are all green but the claim feels thin (oracle is read-only) |
+| OMO `review-work` skill | Stage-2 whole-branch review of `closed-loop-evidence.md` — catches missed Gate 4 / 5 evidence + structural claims ("we ship good code" without metric citations) |
+| [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) | Gate 4 source data (24h+ runtime metrics); install before Gate 4 is reachable |
+| [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) | Gate 3 source data (deploy exit + Phase B smoke); install before Gate 3 is reachable |
+| [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | Stage-1 verifier before Gate 1 (Implemented) is reached; this skill then extends the "done" definition beyond `verification-before-completion`'s scope into runtime + user-reachability |
+
 ## Verification
 
 Before claiming "task done", produce evidence:

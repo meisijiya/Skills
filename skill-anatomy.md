@@ -94,16 +94,44 @@ allowed-tools: "Read Edit Bash Glob Grep"
 {
   "plugins": [
     {
-      "name": "meisijiya-core",     // 必装集(8 个)
+      "name": "meisijiya-core",          // 必装集(9 个)
       "skills": [
         "./skills/core/<skill-name>",
         ...
       ]
     },
     {
-      "name": "meisijiya-extra",    // 选装集(16 个)
+      "name": "meisijiya-security",      // 选装集(security group · 9 个)
       "skills": [
-        "./skills/extra/<skill-name>",
+        "./skills/extra/<security-skill-name>",
+        ...
+      ]
+    },
+    {
+      "name": "meisijiya-cicd",          // 选装集(cicd group · 2 个)
+      "skills": [
+        "./skills/extra/<cicd-skill-name>",
+        ...
+      ]
+    },
+    {
+      "name": "meisijiya-observability",  // 选装集(observability group · 4 个)
+      "skills": [
+        "./skills/extra/<observability-skill-name>",
+        ...
+      ]
+    },
+    {
+      "name": "meisijiya-meta",          // 选装集(meta group · 4 个)
+      "skills": [
+        "./skills/extra/<meta-skill-name>",
+        ...
+      ]
+    },
+    {
+      "name": "meisijiya-domain",        // 选装集(domain group · 7 个)
+      "skills": [
+        "./skills/extra/<domain-skill-name>",
         ...
       ]
     }
@@ -113,11 +141,13 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 ### 规则
 
-- `name` 是 picker 里显示的 group header
+- `name` 是 picker 里显示的 group header(`npx skills add` 按 group 展示,可选整组团或单 skill)
 - 每个路径必须以 `./` 起头
 - 路径指向 skill 目录(包含 SKILL.md 的目录),**不是 SKILL.md 文件本身**
-- 必装集(8 个)放 `meisijiya-core`,选装集放 `meisijiya-extra`
+- 必装集(9 个)放 `meisijiya-core`(单 entry 保留必装视觉信号);选装集按 5 个 group(`security` / `cicd` / `observability` / `meta` / `domain`)分开放,共 26 个,5 个 entry
 - 同一 skill 不能出现在多个 plugin 里(否则 pluginName 二义性)
+- 新增 group(罕见):在 `marketplace.json` 加新 plugin entry、`scripts/inject-agents-md.sh:47` 的 `GROUP_SUFFIXES` 数组加对应后缀、`AGENTS.md` Section A 加 `**<group> (N):**` 块(N 自动从 manifest 派生)
+- `core/` 保持单 entry 而**不**按学科拆,因为"必装"是定位信号(group 拆了反而稀释);如需拆 core,先确认会导致 picker UX 变化
 
 ### 添加新 skill 的步骤
 
