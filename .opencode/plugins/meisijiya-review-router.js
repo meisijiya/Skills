@@ -34,17 +34,17 @@ const REMINDERS = [
     name: 'verification-before-completion',
     text: 'Before claiming done, invoke `verification-before-completion`.',
   },
-  // App-layer security: skip pure doc/binary/config
+  // Skip pure doc/binary/lockfile/config (no executable code to audit)
   {
     name: 'security-and-hardening',
     text: 'Before claiming done, invoke `security-and-hardening` to audit trust boundaries in the diff.',
-    skipPath: /\.(md|markdown|txt|rst|env|gitignore|lock|svg|png|jpe?g|gif|ico|woff2?|ttf|eot|map|wasm|pdf)(\.[^/\\]+)?$/i,
+    skipPath: /\.(md|markdown|txt|rst|env|gitignore|lock|svg|png|jpe?g|gif|ico|woff2?|ttf|eot|map|wasm|pdf)(\.[^/\\]+)?$|^(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|composer\.lock|Gemfile\.lock|Cargo\.lock|poetry\.lock|go\.sum|Gopkg\.lock)$/i,
   },
-  // AI blindspots: skip docs only (yaml is in scope — k8s, GHA, configs all surface AI bug patterns)
+  // AI blindspots: same skip set (binary / doc / lockfile carry no AI-generated code to scan)
   {
     name: 'ai-code-blindspots',
     text: 'Before claiming done, invoke `ai-code-blindspots` for an AI-generated-diff blindspot scan.',
-    skipPath: /\.(md|markdown|txt|rst|env|gitignore|lock)(\.[^/\\]+)?$/i,
+    skipPath: /\.(md|markdown|txt|rst|env|gitignore|lock|svg|png|jpe?g|gif|ico|woff2?|ttf|eot|map|wasm|pdf)(\.[^/\\]+)?$|^(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|composer\.lock|Gemfile\.lock|Cargo\.lock|poetry\.lock|go\.sum|Gopkg\.lock)$/i,
   },
   // GHA workflow edits: narrow path — always remind when .github/workflows/** changes
   {
