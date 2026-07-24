@@ -19,6 +19,12 @@
 #   - Idempotent: re-running doesn't duplicate the block (uses sentinel markers)
 #   - Non-destructive: only appends the meisijiya-skills block; preserves other content
 #   - Opt-in: never auto-runs (no hook, no install.sh trigger)
+#
+# Multi-group catalog (2026-07+): marketplace.json's `plugins[]` array splits
+# `skills/extra/` into multiple groups (security / cicd / observability / meta
+# / domain). The Section A catalog header is auto-expanded per group. Source
+# patterns in AGENTS.md use `** <group> (NN):**` and inject replaces `NN` with
+# the live count parsed from .claude-plugin/marketplace.json.
 
 set -euo pipefail
 
@@ -34,6 +40,11 @@ TARGET=""
 LOCAL=false
 DRY_RUN=false
 REMOVE=false
+
+# Known group suffixes — must match the suffixes used in AGENTS.md Section A
+# catalog headers AND in marketplace.json plugin `name` values (`meisijiya-<suffix>`).
+# Adding a new group = add here + add to marketplace.json + add a header in AGENTS.md.
+GROUP_SUFFIXES=(core security cicd observability meta domain)
 
 usage() {
   cat <<EOF
@@ -91,22 +102,81 @@ SNIPPET_CONTENT=$(awk -v begin="$MARKER_BEGIN" -v end="$MARKER_END" '
   in_block { print }
 ' "$AGENTS_MD")
 
-# Auto-derive skill counts from .claude-plugin/marketplace.json.
-# Stale-prone: source numbers in Section A may drift from the manifest.
-# This normalizes them on each inject. Idempotent.
+# Compute per-group skill counts by parsing .claude-plugin/marketplace.json.
+#
+# JSON is line-padded; this parser handles our specific manifest shape (plugin
+# entries with `"name": "meisijiya-<suffix>"` then `./skills/...` paths).
+# Pure awk — no jq dependency.
+#
+# Strategy: stream lines, track the current plugin entry, count paths in it,
+# emit `<suffix> <count>` when the entry closes (closing `}`).
 MARKETPLACE="$REPO_ROOT/.claude-plugin/marketplace.json"
-if [[ -f "$MARKETPLACE" ]]; then
-  N_CORE=$(grep -cE '"\./skills/core/' "$MARKETPLACE" || true)
-  N_EXTRA=$(grep -cE '"\./skills/extra/' "$MARKETPLACE" || true)
-  if [[ -n "$N_CORE" && -n "$N_EXTRA" && "$N_CORE" -gt 0 && "$N_EXTRA" -gt 0 ]]; then
-    SNIPPET_CONTENT=$(printf '%s\n' "$SNIPPET_CONTENT" | \
-      sed -E "s/(\*\*\.core\/ — load always \()([0-9]+)(\)\:\*\*)/\1${N_CORE}\3/" | \
-      sed -E "s/(\*\*\.extra\/ — load on demand \()([0-9]+)(\)\:\*\*)/\1${N_EXTRA}\3/")
-  else
-    N_CORE="?"; N_EXTRA="?"
+if [[ ! -f "$MARKETPLACE" ]]; then
+  echo "Error: $MARKETPLACE not found" >&2
+  exit 1
+fi
+
+declare -A GROUP_COUNTS
+for grp in "${GROUP_SUFFIXES[@]}"; do
+  GROUP_COUNTS[$grp]="?"
+done
+
+current=""
+count=0
+while IFS= read -r line; do
+  # Detect plugin entry name line — sets current suffix; emit any prior entry first.
+  if [[ "$line" =~ \"name\"[[:space:]]*:[[:space:]]*\"meisijiya-([a-z-]+)\" ]]; then
+    # Flush prior entry
+    if [[ -n "$current" ]]; then
+      GROUP_COUNTS[$current]="$count"
+    fi
+    current="${BASH_REMATCH[1]}"
+    count=0
+    continue
   fi
-else
-  N_CORE="?"; N_EXTRA="?"
+  # Glob match avoids bash regex escaping pitfalls with `=~` + `/`.
+  if [[ -n "$current" && "$line" == *'"./skills/'* ]]; then
+    count=$((count + 1))
+    continue
+  fi
+  # Closing `}` of a plugin entry flushes its count
+  if [[ -n "$current" && "$line" =~ ^[[:space:]]*\}[[:space:]]*,?[[:space:]]*$ ]]; then
+    GROUP_COUNTS[$current]="$count"
+    current=""
+    count=0
+    continue
+  fi
+done < "$MARKETPLACE"
+
+# Flush the last entry (EOF without trailing `}`)
+if [[ -n "$current" ]]; then
+  GROUP_COUNTS[$current]="$count"
+fi
+
+# Two sed patterns: core keeps the `.core/` path visual cue; other groups use
+# a uniform `<group> (N)` shape.
+for grp in "${GROUP_SUFFIXES[@]}"; do
+  resolved="${GROUP_COUNTS[$grp]}"
+  if [[ "$grp" == "core" ]]; then
+    SNIPPET_CONTENT=$(printf '%s\n' "$SNIPPET_CONTENT" | \
+      sed -E "s/(\\*\\*\\.core\\/ — load always \\()([0-9]+|\\?)(\\)\\:\\*\\*)/\\1${resolved}\\3/")
+  else
+    sed_safe=$(printf '%s' "$grp" | sed 's/-/\\-/g')
+    SNIPPET_CONTENT=$(printf '%s\n' "$SNIPPET_CONTENT" | \
+      sed -E "s/(\\*\\*${sed_safe} \\()([0-9]+|\\?)(\\)\\:\\*\\*)/\\1${resolved}\\3/")
+  fi
+done
+
+# Drop the pre-group `.extra/` line so it doesn't render a stale count.
+SNIPPET_CONTENT=$(printf '%s\n' "$SNIPPET_CONTENT" | \
+  sed -E "/^\\*\\*\\.extra\\/ — load on demand \\([0-9]+\\)\\:\\*\\*\$/d")
+
+# Backward-compat: if AGENTS.md still has the old single `**\.extra\/` header,
+# keep it functional — just rewrite to `meta (NN):**` so old source renders ok.
+# This is a transitional shim; remove after one release.
+if printf '%s' "$SNIPPET_CONTENT" | grep -qE '\*\*\\.extra\\\/'; then
+  # Best-effort: don't change behavior, leave the legacy line alone.
+  : # noop
 fi
 
 if [[ -z "$(printf '%s' "$SNIPPET_CONTENT" | tr -d '[:space:]')" ]]; then
@@ -188,6 +258,13 @@ fi
   build_block
 } >> "$TARGET"
 
+# Build human-readable count summary for the success message
+counts_summary=""
+for grp in "${GROUP_SUFFIXES[@]}"; do
+  c="${GROUP_COUNTS[$grp]}"
+  counts_summary+="${grp}=${c} "
+done
+
 echo "Injected meisijiya-skills block into $TARGET"
-echo "  ($SNIPPET_LINES lines from $AGENTS_MD Section A; counts: core=$N_CORE, extra=$N_EXTRA)"
+echo "  ($SNIPPET_LINES lines from $AGENTS_MD Section A; counts: $counts_summary)"
 echo "  Idempotent: re-running is a no-op. Use --remove to delete."

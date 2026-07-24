@@ -40,6 +40,7 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "Fix this bug" / "X is broken" / "X is wrong" | [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
 | "Review this slice" / "diff against brief" / per-slice review before next slice | If installed, [`slice-review`](~/.agents/skills/slice-review/SKILL.md) (extra/) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
 | "About to claim done" / "ready to commit/PR" | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | (invoke OMO `review-work` per Stage 2) |
+| "Modify GHA workflow" / "audit .github/workflows" / "review a PR with CI changes" / "design CI step order" | If installed, [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) (extra/) | [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) if the workflow change touches supply chain (action swap, pinned SHA, secret pass-through) |
 | AI just generated/edited code, in `verification-before-completion` stage | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) (extra/) |
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
@@ -88,6 +89,7 @@ implementation:   brainstorming? → incremental-implementation → test-driven-
 slice loop:       incremental-implementation (dispatch) → slice-review (per-slice) → slice-progress.sh mark-complete → whole-branch review-work
 fix:              debugging-and-error-recovery (5-step) → test-driven-development (red-green) → verification-before-completion
 maintenance:      verification-before-completion → ai-code-blindspots → security-and-hardening → review-work
+ci/cd security:   gha-security-review (workflow audit) → verification-before-completion (PR gate)
 ```
 
 The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.

@@ -14,24 +14,40 @@
       ]
     },
     {
-      "name": "meisijiya-extra",
+      "name": "meisijiya-security",
       "skills": [
-        "./skills/extra/writing-skills",
-        "./skills/extra/build-gate-visual-review",
-        "./skills/extra/designer-handoff",
-        "./skills/extra/api-and-interface-design",
         "./skills/extra/security-and-hardening",
-        "./skills/extra/performance-optimization",
-        "./skills/extra/observability-and-instrumentation",
-        "./skills/extra/documentation-and-adrs",
-        "./skills/extra/improve-codebase-architecture",
-        "./skills/extra/verify-chain",
-        "./skills/extra/loop-me",
         "./skills/extra/security-devsecops",
         "./skills/extra/security-incident-response",
         "./skills/extra/ai-code-blindspots",
+        "./skills/extra/gha-security-review"
+      ]
+    },
+    {
+      "name": "meisijiya-observability",
+      "skills": [
+        "./skills/extra/observability-and-instrumentation",
+        "./skills/extra/performance-optimization"
+      ]
+    },
+    {
+      "name": "meisijiya-meta",
+      "skills": [
+        "./skills/extra/writing-skills",
         "./skills/extra/contract-strengthening",
         "./skills/extra/slice-review"
+      ]
+    },
+    {
+      "name": "meisijiya-domain",
+      "skills": [
+        "./skills/extra/build-gate-visual-review",
+        "./skills/extra/designer-handoff",
+        "./skills/extra/api-and-interface-design",
+        "./skills/extra/documentation-and-adrs",
+        "./skills/extra/improve-codebase-architecture",
+        "./skills/extra/verify-chain",
+        "./skills/extra/loop-me"
       ]
     }
   ]

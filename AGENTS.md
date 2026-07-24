@@ -37,10 +37,32 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
-**.extra/ — load on demand (16):**
-[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) · [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) · [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) · [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) · [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) · [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) · [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) · [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) · [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) · [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) · [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) · [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) · [`loop-me`](~/.agents/skills/loop-me/SKILL.md) · [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) · [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md)
+**security (5):**
+- [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — application-layer trust-boundary hardening; depth audit via OMO `security-research`
+- [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) — supply chain + deploy pipeline (deps / SBOM / secrets rotation / CI/CD / IaC / pre-deploy); OMO `security-research` + `oracle` + `websearch` + `context7`
+- [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — post-incident (NIST CSF simplified: detect / triage / contain / eradicate / recover / postmortem); OMO `security-research` post-PoC + `oracle` decision + `websearch` IOC
+- [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) — AI-generated code blindspots (boundary checks / silent error handling / env compatibility / deprecated API / hardcoded config / invisible failures); complements OMO `remove-ai-slops`
+- [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — GitHub Actions workflow security audit (action permission / expression injection / unpinned actions / workflow_run / artifact poisoning); each finding ships with concrete exploit scenario
 
-Canonical write-side note: `writing-skills` is meta-only and lives in `extra/`.
+**observability (2):**
+- [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — log/metrics/tracing for production visibility
+- [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — measure-first backend profile + optimization; frontend CWV routed to OMO `frontend`
+
+**meta (3):**
+- [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — TDD-for-docs for skills; meta-only, lives here not in `core/`
+- [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) — open-world / non-exhaustive contract review (Phase 1.25 optional extra; complements `spec-driven-development` + `verification-before-completion`)
+- [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality, 2 verdicts); complements OMO `review-work` (whole-branch 5-lane)
+
+**domain (7):**
+- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — pre-build design alignment; default Markdown, HTML deck only on explicit visual/teaching request
+- [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — designer → eng UI/UX spec handoff via `ui-ux-pro-max`
+- [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) — contract-first REST / GraphQL / RPC design
+- [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) — architectural ADRs only (data model / API contracts / dependency upgrades / deprecations)
+- [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) — codebase-wide health scan via Ousterhout deep/shallow scoring; proposal-only
+- [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — 3-role article fact-check pipeline (Critic → Verifier × N → Repairer); OMO `general` agent for parallel Verifier subagents
+- [`loop-me`](~/.agents/skills/loop-me/SKILL.md) — extract a repeated workflow into an executable spec; output feeds OMO `/goal` or `incremental-implementation`
+
+(Group counts auto-derive from `.claude-plugin/marketplace.json` on each `scripts/inject-agents-md.sh` run; manifest ↔ files bidirectional check via `scripts/check-marketplace.sh`.)
 
 ### Skill chains (process order)
 
@@ -64,6 +86,7 @@ For the reverse map (omo feature → skills that use it), see the `meisijiya-ext
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — visual-engineering category, frontend-ui-ux skill
 - [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — visual-engineering runtime child + frontend-ui-ux + html-ppt for explicit visual/teaching decks
 - [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) + [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) + [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — security-research mode (3 hunters + 2 PoC engineers)
+- [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — `oracle` agent for "is this permissions: block actually minimal?" judgment calls + `grep_app` MCP for known-bad action patterns across GitHub
 - [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — OMO `review-work` (Stage 2) + `visual-qa` (UI Taste gate)
 - [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — `general` agent for parallel Verifier subagents (web research + independent context)
 - [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — `analyze` mode, lsp MCP for large-codebase bottleneck tracing
@@ -98,9 +121,10 @@ When adding a new skill to this repo, follow the conventions in [`skill-anatomy.
 - **≤ 500 lines**: Move reference material to supporting files.
 - **`allowed-tools`**: Specify in frontmatter when the skill needs tool restrictions.
 - **Eval case**: Add `evals/cases/<skill-name>.json` with 3 positive triggers + 3 negative triggers + ≥ 1 behavioral scenario.
-- **Marketplace manifest** (`.claude-plugin/marketplace.json`): Every new skill must add its path to the corresponding plugin entry's `skills[]` array. `npx skills add` groups by `pluginName`, not by directory. See `skill-anatomy.md` for the full convention. CI `scripts/check-marketplace.sh` enforces this.
+- **Marketplace manifest** (`.claude-plugin/marketplace.json`): Every new skill must add its path to the corresponding plugin entry's `skills[]` array. `npx skills add` groups by `pluginName`, not by directory. The 5 non-core plugin entries map to logical groups: `meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`. Pick the group whose existing members share the same audience and stage in the dev lifecycle. See `skill-anatomy.md` for the full convention. CI `scripts/check-marketplace.sh` enforces this.
+- **Adding a new group** (rare; only when a category is genuinely missing): add the plugin entry in `.claude-plugin/marketplace.json`, append the suffix to `GROUP_SUFFIXES` in `scripts/inject-agents-md.sh`, and add a `**<group> (N):**` header block in Section A. The count auto-derives on each inject.
 - **omo integration** (if applicable): Reference relevant omo MCPs / agents / built-ins. See any existing skill's Process section for the format.
-- **Section A counts auto-derive**: The `(N)` numbers in Section A (`load always` / `load on demand`) are auto-replaced by `scripts/inject-agents-md.sh` from `.claude-plugin/marketplace.json` on each inject. Source numbers may drift; the rendered block always reflects the current manifest.
+- **Section A counts auto-derive**: The `(N)` numbers in Section A (`load always` / `<group>`) are auto-replaced by `scripts/inject-agents-md.sh` from `.claude-plugin/marketplace.json` on each inject. Source numbers may drift; the rendered block always reflects the current manifest.
 
 Existing skills are the reference. When in doubt, copy a similar skill's structure (e.g., [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) for the canonical 6-section pattern).
 

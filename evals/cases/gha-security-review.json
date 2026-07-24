@@ -1,0 +1,72 @@
+{
+  "name": "gha-security-review",
+  "version": "0.1.0",
+  "description": "Audits GitHub Actions workflow files for action-permission misuse, expression injection, unpinned third-party actions, permission scope abuse, secret leakage, cross-workflow attacks via workflow_run, and artifact poisoning. Each finding ships with file:line + attacker input + concrete exploit scenario, not just a vuln label. Complements security-and-hardening (app-layer) and security-devsecops (deps/IaC); targets the CI/CD layer specifically.",
+  "positive_triggers": [
+    {
+      "input": "I just added a new workflow under .github/workflows/ that uses pull_request_target to run a labels bot — can you audit it?",
+      "expected_skill": "gha-security-review",
+      "reason": "New CI workflow + trigger mentions 'pull_request_target' (high-risk trigger) → matches Use when 'adding a new workflow file under .github/workflows/' and 'designing CI step order'"
+    },
+    {
+      "input": "Review this PR that changes the deploy.yml to use a new third-party action 'thomiceli/pack-action' — is the supply chain OK?",
+      "expected_skill": "gha-security-review",
+      "reason": "PR touches workflow + third-party action introduced → matches Use when 'reviewing a PR that touches any .github/workflows/*.yml|.yaml'"
+    },
+    {
+      "input": "I want to harden all our existing workflows before we connect them to production secrets. What should I check?",
+      "expected_skill": "gha-security-review",
+      "reason": "Explicit hardening request for existing workflows → matches Use when 'hardening an existing workflow before public release or before connecting to production secrets'"
+    },
+    {
+      "input": "Our CI job uses 'echo \"${{ github.event.pull_request.title }}\" > log.txt' inside a step — does that look safe?",
+      "expected_skill": "gha-security-review",
+      "reason": "Explicit github.event.* interpolation in shell run block → matches §3.2 'expression injection in ${{ }}' category"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my Node.js auth middleware for SQL injection and XSS",
+      "expected_no_skill": true,
+      "reason": "Application-layer code review (OWASP top 10 for application source) → matches NOT for 'application-layer source code review' → security-and-hardening routes here"
+    },
+    {
+      "input": "Before I deploy, run the pre-deploy checklist on our Terraform and Docker images",
+      "expected_no_skill": true,
+      "reason": "Pre-deploy gate for IaC + container → matches NOT for 'dependency / SBOM / IaC / container / pre-deploy' → security-devsecops routes here"
+    },
+    {
+      "input": "Should this PR be merged? It changes only the README",
+      "expected_no_skill": true,
+      "reason": "Pure docs change with no workflow file touched → matches NOT for 'general PR review without CI-specific scope' → verification-before-completion routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Repo has 5 workflow files in .github/workflows/. User asks 'audit our CI before we go to production'. gha-security-review is loaded.",
+      "expected_behavior": [
+        "Process §1 Inventory runs: ls .github/workflows/ AND find . -name 'action.yml|action.yaml' to enumerate both top-level workflows and reusable/composite actions",
+        "For each workflow, Process §2 captures on:, permissions:, secrets usage, uses: lines and pin state",
+        "Process §3 enumerates all 7 categories — for a 'clean' workflow, output rows for the inapplicable categories are explicitly marked 'not present' (proves coverage, no silent skip)",
+        "Every finding cites file:line + attacker input (the user-controlled value) + exploit primitive + 2-3 sentence concrete scenario",
+        "Severity present on every finding; no abstract 'consider' or 'in theory' prose",
+        "Process §4 scope audit summary table populated per workflow with all 5 columns",
+        "Process §5 hush rules respected — first-party GitHub action version bumps are NOT cited as findings",
+        "Output format matches the §4 markdown template; mitigations are concrete YAML snippets not paragraphs",
+        "If only 1 workflow file is in scope, the audit reports it without silently skipping the other 4"
+      ]
+    },
+    {
+      "scenario": "User adds a workflow with 'on: pull_request_target' and a step 'run: echo ${{ github.event.pull_request.title }}' — classic RCE pattern.",
+      "expected_behavior": [
+        "Audit flags §3.1 finding (pull_request_target + expression interpolation) with file:line",
+        "Attacker input explicitly named: 'github.event.pull_request.title (set by attacker when they open PR)'",
+        "Exploit scenario written as 2-3 sentence narrative: opens fork PR with title containing shell metacharacters, the echo pipes them into shell",
+        "Severity = CRITICAL (arbitrary code execution in CI context with workflow token)",
+        "Mitigation is concrete: 'use on: pull_request for any step that checks out PR code or uses event.* as shell input; restrict pull_request_target to label/comment triage only'"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "CI/CD-layer security audit. Complements the 3 other security skills on different layers: security-and-hardening (app code), security-devsecops (supply chain / deploy), security-incident-response (post-incident). Sourced from the Antigravity agent-skills family (gha-security-review) and StepSecurity HackerBot attack-pattern research. Routes through verification-before-completion dispatcher Priority table when user context is 'reviewing a PR with workflow changes' or 'modifying CI files'. Each finding must cite a concrete exploit scenario — vague vuln labels are red flags per the skill's own Red Flags section. Note: adding permission-deny lists and self-hosted runner hardening are OUT of scope (covered by security-devsecops)."
+}

@@ -43,6 +43,7 @@ allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 - 已经发生攻击 / 需要事后响应 → `security-incident-response`
 - 部署后跑性能 / 可用性监控 → [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md)
 - 纯代码 review（不带 deploy / supply chain 维度）→ [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md)
+- 审计已有 GHA workflow 文件的 action-permission / 表达式注入 / unpinned actions / workflow_run 攻击面 → [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md)（CI/CD-layer 专项）
 
 ## Process
 

@@ -31,6 +31,7 @@ Claiming work is complete without verification is dishonesty, not efficiency.
 **NOT for:**
 - Mid-task status updates (use plain prose, no completion claim)
 - Honest uncertainty ("I think this might work but haven't verified yet" is fine)
+- CI/CD workflow file changes that need action-permission / expression-injection / unpinned-action audit before merging → load [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) first (specific to `.github/workflows/`)
 
 ## Process
 
