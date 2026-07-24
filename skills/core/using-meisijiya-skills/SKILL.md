@@ -43,6 +43,8 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | "Modify GHA workflow" / "audit .github/workflows" / "review a PR with CI changes" / "design CI step order" | If installed, [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) (extra/) | [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) if the workflow change touches supply chain (action swap, pinned SHA, secret pass-through) |
 | "About to design / refactor / integrate X" with a trust-boundary crossing (new feature, third-party, multi-tenant, auth refactor) | If installed, [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) once the design lands |
 | "About to roll out a release" / "canary stuck at 0%" / "deploy exit 0 but suspect silent failure" | If installed, [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) (extra/) | [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) only if the failure already reached users |
+| "About to refactor X" / "author of sensitive code is leaving" / "what's our sensitive-code bus factor?" / "compliance audit asking who owns this" | If installed, [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) for the per-line audit after the refactor lands |
+| "Need perf gate before merging" / "is X endpoint fast enough at 1k RPS" / "find the breaking-point load" | If installed, [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) (extra/) | [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) once the gate fires or for post-hoc regression investigation |
 | AI just generated/edited code, in `verification-before-completion` stage | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) (extra/) |
 | "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
 | "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
@@ -94,6 +96,8 @@ maintenance:      verification-before-completion → ai-code-blindspots → secu
 ci/cd security:   gha-security-review (workflow audit) → verification-before-completion (PR gate)
 threat → hard:    security-threat-model (design) → security-and-hardening (impl) → pre-ship-gate (deploy)
 ship:             gha-security-review (CI) → pre-ship-gate (deploy evidence) → observability-and-instrumentation (post)
+perf gate:        k6-load-testing (synthetic-load PASS/FAIL) → performance-optimization (post-fire diagnosis)
+governance:       security-ownership-map (people↔file topology) before major refactor + post-incident
 ```
 
 The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.

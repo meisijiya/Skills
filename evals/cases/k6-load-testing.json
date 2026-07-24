@@ -1,0 +1,74 @@
+{
+  "name": "k6-load-testing",
+  "version": "0.1.0",
+  "description": "Pre-deploy performance acceptance gate using k6 (smoke / load / stress / spike / soak categories) with explicit latency-percentile + error-budget thresholds. Output is a PASS/FAIL gate decision with concrete percentile numbers + threshold summary, attached as release artifact. Distinct from performance-optimization (post-hoc bottleneck hunting): this skill gates a deploy on synthetic-load evidence before the change hits real users. Adapt the runner to Locust / Gatling / Vegeta if k6 isn't available; the test categories + threshold methodology transfer unchanged.",
+  "positive_triggers": [
+    {
+      "input": "We're rewriting the auth middleware. Need to prove it holds 1k req/s with p95 under 200ms before merging.",
+      "expected_skill": "k6-load-testing",
+      "reason": "Pre-deploy perf gate on a hot-path change with explicit RPS + percentile targets → matches Use when 'about to merge a change that touches a hot path'"
+    },
+    {
+      "input": "New endpoint going live; need to confirm it handles 500 RPS sustained with <0.1% errors before turning on production traffic.",
+      "expected_skill": "k6-load-testing",
+      "reason": "Establishing a baseline for a new endpoint with explicit load + error targets → matches Use when 'adding a new endpoint or surface'"
+    },
+    {
+      "input": "Last release's p99 spiked 200ms. Find the breaking-point load so we know our capacity headroom.",
+      "expected_skill": "k6-load-testing",
+      "reason": "Capacity-planning + breaking-point identification → matches Use when 'existing endpoint's latency-percentile regressed'; stress-test category is the canonical response"
+    },
+    {
+      "input": "Want to add a CI perf gate that fails the build if p95 regresses by 30% on a hot endpoint.",
+      "expected_skill": "k6-load-testing",
+      "reason": "Building a CI perf-gate → matches Use when 'building a CI perf-gate' (this skill's output template is the input your CI gate consumes)"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Production p99 is 2× last week, where's the bottleneck?",
+      "expected_no_skill": true,
+      "reason": "Post-hoc production-bottleneck investigation → matches NOT for 'post-hoc production-bottleneck investigation' → performance-optimization routes here"
+    },
+    {
+      "input": "Audit our LCP and FID on the checkout page",
+      "expected_no_skill": true,
+      "reason": "Frontend CWV → matches NOT for 'frontend Core Web Vitals' → OMO built-in frontend skill routes here"
+    },
+    {
+      "input": "Add unit tests for the auth helper",
+      "expected_no_skill": true,
+      "reason": "Function-level unit test → matches NOT for 'unit-test style' → test-driven-development routes here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer has just shipped a rewrite of the auth middleware and wants to add it to the release. Manager asks 'how much load can it take?' Engineer reaches for k6.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using k6-load-testing'",
+        "§1 Target definition is enforced FIRST: throughput / latency-percentile+ budget / error-budget / steady-state duration are filled in BEFORE writing the script",
+        "If targets are missing or fuzzy (e.g. 'should be fast'), the skill stops and asks: 'what's the SLA you want this gate to enforce?'",
+        "§2 picks the test category: smoke + load for a merge gate; if the engineer also wants capacity headroom, suggest a separate stress run (don't bundle into the merge gate)",
+        "§3 script has explicit `thresholds` block — engineer is asked to justify each threshold value (target vs SLA, with 30-50% headroom)",
+        "Auth tokens / secrets are read from `__ENV` not inlined",
+        "Script uses `http_req_duration`, `http_req_failed`, plus a Trend for the percentile the gate enforces",
+        "§4 run produces summary.json + results.json",
+        "§5 reading the output explicitly: p(50) / p(95) / p(99) / error-rate / iteration-rate; diagnosis tree is used if a threshold breached",
+        "§6 PASS/FAIL gate decision is written with the exact thresholds from §1 + comparison vs the baseline (if one exists)",
+        "If PASS: summary.json archived as the merge evidence artifact",
+        "If FAIL: explicit recommendation is 'do not merge' + handoff to performance-optimization with summary.json as input"
+      ]
+    },
+    {
+      "scenario": "Engineer runs a smoke test only (1-2 VUs, 30s) and asks 'is this enough?'",
+      "expected_behavior": [
+        "Skill flags: smoke test is for verifying the system runs at all; it is NOT a perf gate",
+        "Smoke test passing does NOT give merge evidence",
+        "For a perf gate, the minimum is smoke + load at target RPS sustained",
+        "If the engineer insists smoke is sufficient, the skill surfaces the gate decision: 'no, this does not satisfy the merge evidence requirement; here is what the load test looks like'"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Methodology over tool: the test categories (smoke / load / stress / spike / soak) + threshold framework (latency percentile + error budget + duration) are the actual skill. k6 is the default runner because of single-binary deploy + JS scenarios + threshold breach in stdout; swap to Locust/Gatling/Vegeta if the stack requires it. Pair with performance-optimization: this skill gates deploys; optimization hunts the bottleneck after the gate fires. Build the CI perf-gate by exporting summary.json and failing the build on non-zero k6 exit code. Auth tokens read from __ENV, never inlined."
+}

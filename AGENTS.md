@@ -44,13 +44,15 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) — AI-generated code blindspots (boundary checks / silent error handling / env compatibility / deprecated API / hardcoded config / invisible failures); complements OMO `remove-ai-slops`
 - [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — GitHub Actions workflow security audit (action permission / expression injection / unpinned actions / workflow_run / artifact poisoning); each finding ships with concrete exploit scenario
 - [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) — AppSec-grade threat model (trust boundaries + STRIDE + attacker profile + file:line citations + prioritized mitigations); precedes `security-and-hardening` on design / 3rd-party-integration / blast-radius expansion
+- [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) — git-history people↔file topology surfacing orphan sensitive code / hidden owners / bus-factor hotspots / maintainer concentration; precedes major refactors + post-incident governance
 
 **ci-cd (1):**
 - [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) — pre-deploy read-only audit + post-deploy smoke verification that catches 'deploy exit 0 ≠ actually running' (migrations / feature flags / CDN / canary / env / shadow traffic); allowed-tools read-only
 
-**observability (2):**
+**observability (3):**
 - [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — log/metrics/tracing for production visibility
 - [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — measure-first backend profile + optimization; frontend CWV routed to OMO `frontend`
+- [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) — pre-deploy performance acceptance gate (smoke / load / stress / spike / soak) with explicit latency-percentile + error-budget thresholds; pairs with `performance-optimization` as front-back
 
 **meta (3):**
 - [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — TDD-for-docs for skills; meta-only, lives here not in `core/`

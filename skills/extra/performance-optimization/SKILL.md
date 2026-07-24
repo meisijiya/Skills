@@ -1,6 +1,6 @@
 ---
 name: performance-optimization
-description: "Measure-first performance optimization for backend / database / profiling-heavy code. Under omo, uses lsp MCP for bottleneck localization in large codebases and analyze mode for focused audits. Use when performance requirements exist, when regressions are suspected, or when user-perceived latency is high."
+description: "Measure-first post-hoc performance optimization for backend / database / profiling-heavy code. Under omo, uses lsp MCP for bottleneck localization in large codebases and analyze mode for focused audits. Use when production p99 / p95 has regressed, when a k6 gate has fired and you need to find the bottleneck, or when user-perceived latency is high and you need root-cause diagnosis. For pre-deploy perf gates (synthetic-load evidence before merge), load `k6-load-testing` first — this skill is the post-hoc partner, not the gate."
 allowed-tools: "Read Edit Bash Glob Grep Bash"
 ---
 

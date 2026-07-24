@@ -1,0 +1,72 @@
+{
+  "name": "security-ownership-map",
+  "version": "0.1.0",
+  "description": "Builds a people↔file security-ownership topology from git history to surface orphan sensitive files (no recent contributor), hidden owners (single-author + no CODEOWNERS), bus-factor hotspots, and maintainer concentration. Output is `<repo>-ownership-map.md` plus optional CSV/JSON artifacts. Run before major refactors, after security incidents (to map blast-radius-of-departure), during hiring to identify coverage gaps, and quarterly for governance review. Distinct from per-line code review: this skill audits who-knows-what and who-leaves-is-a-risk, not what-is-wrong.",
+  "positive_triggers": [
+    {
+      "input": "Before we extract auth into a separate module, I want to know which sensitive files are bus-factor-1 right now so we don't orphan anything in the move.",
+      "expected_skill": "security-ownership-map",
+      "reason": "Pre-refactor orphan-risk identification on sensitive code → matches Use when 'before a major refactor that risks orphaning sensitive code'"
+    },
+    {
+      "input": "We just shipped an auth fix and the original author is leaving the team next month. Map who actually owns the auth code today so the next incident isn't a single point of failure.",
+      "expected_skill": "security-ownership-map",
+      "reason": "Post-incident + departure-risk mapping → matches Use when 'after a security incident: map if-the-author-of-the-vulnerable-code-left-tomorrow'"
+    },
+    {
+      "input": "Quarterly governance review — want a current ownership map of our sensitive code paths.",
+      "expected_skill": "security-ownership-map",
+      "reason": "Quarterly cadence governance review → matches Use when 'quarterly security governance review'"
+    },
+    {
+      "input": "Compliance audit asking who has expertise in our encryption and payment code paths.",
+      "expected_skill": "security-ownership-map",
+      "reason": "Compliance / SOC2-style audit asking for sensitive-code ownership evidence → matches Use when 'compliance audit asking who has expertise'"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Review my Express auth middleware for SQL injection and OWASP Top 10",
+      "expected_no_skill": true,
+      "reason": "Per-line code review of existing code → matches NOT for 'per-line code audit of existing code' → security-and-hardening routes here"
+    },
+    {
+      "input": "Threat-model a new Stripe integration before we start coding",
+      "expected_no_skill": true,
+      "reason": "Pre-design threat modeling → matches NOT for 'threat modeling' → security-threat-model routes here"
+    },
+    {
+      "input": "Review this PR's diff for missing auth checks before merge",
+      "expected_no_skill": true,
+      "reason": "Per-PR review of changes → matches NOT for 'per-PR review of changes' → verification-before-completion + slice-review route here"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Engineer asks for an ownership map of a 4-year-old monorepo with 8k files before extracting the auth module into a separate package.",
+      "expected_behavior": [
+        "Skill loads and announces 'Using security-ownership-map'",
+        "§1 sensitive_paths YAML is created at top of run; default list (auth / crypto / secrets / billing / admin) is offered; engineer adjusts for the actual repo before generation",
+        "§2 walks git log per file; excludes binary / generated / fixture / lock files; reconciles authors via .mailmap if present (otherwise warns that bob@gmail.com and bob@corp.com will be treated as distinct)",
+        "§3 Query A surfaces orphan sensitive files (no contributor in 12+ months); lists last_touched + days_since for each",
+        "§3 Query B surfaces hidden owners — sensitive file with single-author + no CODEOWNERS coverage",
+        "§3 Query C surfaces bus-factor-1 hotspots on sensitive paths only (not all files)",
+        "§3 Query D surfaces maintainer concentration; if top-1 share > 40% or top-3 > 85%, flag concentration risk explicitly",
+        "§4 deeper queries offered as opt-in (not auto-run): cross-team coupling, tenure vs recency, off-hours velocity, sensitive-vs-public exposure gap",
+        "§5 output saved at <repo>-ownership-map.md with §1-§5 sections; Recommendations section has concrete actions (specific file + specific remediation), not 'improve documentation'",
+        "§6 CSV/JSON artifacts emitted with `sensitive_yes` column for downstream filtering",
+        "Engineer now has a concrete list of which sensitive files they need to pair-program a current contributor onto before the auth extraction"
+      ]
+    },
+    {
+      "scenario": "Engineer runs the skill on a 5-year-old repo and Query A returns 0 results.",
+      "expected_behavior": [
+        "Skill flags this as suspicious on a 5-year-old repo: either the recency window (12 months) is too short, or the sensitive_paths heuristic is missing real sensitive directories",
+        "Skill surfaces a debug query: 'show me the top 20 files by days_since_touch regardless of sensitivity' so the engineer can see if the recency window is the issue or the heuristic is missing categories",
+        "If sensitive_paths YAML was empty or incomplete, the skill demands it be filled in before re-running"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Source adapted from openai's .curated/security-ownership-map with the YAML / Neo4j / Gephi output formats stripped in favor of CSV / JSON (which covers the same questions without the dependency). The methodology (orphan / hidden-owner / bus-factor / concentration queries) is the actual content — the git commands are reproducible. Pair with security-and-hardening (per-line audit) and security-devsecops (supply chain). Quarterly cadence catches drift; monthly is overkill. Heuristics for sensitive_paths cover ~80% of cases — perfect classification isn't the goal, surfacing concentration risk is."
+}

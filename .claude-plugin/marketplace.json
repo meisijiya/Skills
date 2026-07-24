@@ -21,7 +21,8 @@
         "./skills/extra/security-incident-response",
         "./skills/extra/ai-code-blindspots",
         "./skills/extra/gha-security-review",
-        "./skills/extra/security-threat-model"
+        "./skills/extra/security-threat-model",
+        "./skills/extra/security-ownership-map"
       ]
     },
     {
@@ -34,7 +35,8 @@
       "name": "meisijiya-observability",
       "skills": [
         "./skills/extra/observability-and-instrumentation",
-        "./skills/extra/performance-optimization"
+        "./skills/extra/performance-optimization",
+        "./skills/extra/k6-load-testing"
       ]
     },
     {
