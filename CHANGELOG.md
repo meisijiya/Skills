@@ -4,6 +4,56 @@ All notable changes to meisijiya-skills.
 
 ## Unreleased
 
+### Added (2026-07-24 — 11-skill roadmap shipped + marketplace 6-group refactor)
+
+**Major change**: `meisijiya-skills` grew from 24 → 35 skills (`core/` 8→9, `extra/` 16→24) and `.claude-plugin/marketplace.json` now exposes 6 plugin entries (`meisijiya-core` + 5 extra groups: `meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`) so `npx skills add` picker shows the new structure with sub-headers instead of one flat list.
+
+11 new skills land in this release (sources cited; descriptions ≤500 chars; 6-section pattern; OMO Integration section; verified-level CI on 2 evals):
+
+| # | Skill | Group | Source | One-line |
+|---|---|---|---|---|
+| 1 | `gha-security-review` | security | antigravity | GHA workflow audit; each finding ships with exploit scenario |
+| 2 | `pre-ship-gate` | cicd | antigravity (pre-release-review + pre-ship-gate merged) | "deploy exit 0 ≠ actually running" guard; read-only |
+| 3 | `security-threat-model` | security | openai `.curated` (React refs stripped) | AppSec threat model; STRIDE + file:line |
+| 4 | `k6-load-testing` | observability | antigravity | Pre-deploy perf gate; smoke/load/stress/spike/soak |
+| 5 | `security-ownership-map` | security | openai (Neo4j/Gephi formats stripped) | git-history people↔file; bus-factor / orphans |
+| 6 | `closed-loop-delivery` | cicd | antigravity | 5-gate evidence (run→runtime→reachable) |
+| 7 | `supply-chain-risk-auditor` | security | antigravity | Dep maintainer signal; not CVE scan |
+| 8 | `stack-security-coder` | security | antigravity (3-stack trio merged) | Front/backend/mobile coding checklists |
+| 9 | `test-guard` | meta | antigravity | 7-check AI-test quality audit |
+| 10 | `production-incident-playbook` | observability | antigravity (runbook + postmortem merged) | In-flight + blameless postmortem |
+| 11 | `diagnosing-bugs` (joins core) | core | mattpocock | Symptom-driven observation loop |
+
+**Plugin P0 fix** (`a8d9fae`): `meisijiya-review-router.js` reworked from global `SKIP_PATH_RE` to per-reminder `matchPath` / `skipPath` policy. The prior global regex tripped on `.yml` / `.yaml` paths — meaning `gha-security-review` reminder was always 0% triggered when editing a GHA workflow file. After fix: editing `.github/workflows/ci.yml` fires all 4 reminders (the primary test case). `installed()` per-session cache + `installedCache.clear()` on `session.deleted`. `loadBootstrap` merges `existsSync` + `readFileSync` into one try-readFileSync.
+
+**Plugin P1** (`e3a6511`): per-session cache for `installed()`; merged existsSync+readFileSync into one try-readFileSync.
+
+**Inject script rewrite** (`cf8c722`): `scripts/inject-agents-md.sh` now parses `.claude-plugin/marketplace.json`'s multi-plugin manifest and substitutes each group's `(N)` header from live manifest count. Core keeps the legacy `**.core/ — load always (N):**` pattern (must-install visual cue); other groups use uniform `**<group> (N):**`. Uses awk + bash regex (no jq dependency).
+
+**Eval verified-level** (`e3a6511`): `gha-security-review` + `diagnosing-bugs` evals now have `verified: true` + `positive_keywords`. CI asserts every keyword appears in the description body. Adding/removing a category requires lockstep updates.
+
+**Existing skills touched** (description + NOT-for routes):
+- `verification-before-completion` — NOT-for routes GHA workflows → `gha-security-review`; deploy-evidence → `pre-ship-gate`
+- `security-and-hardening` — NOT-for routes pre-design threat modeling → `security-threat-model`
+- `security-devsecops` — description names `supply-chain-risk-auditor` as the pre-add complement
+- `ai-code-blindspots` — description routes layer-specific landmines → `stack-security-coder`
+- `incremental-implementation` — 职责边界 names `closed-loop-delivery` as the runtime-closure partner
+- `test-driven-development` — description names `test-guard` as the post-hoc partner
+- `performance-optimization` — description names `k6-load-testing` as the pre-deploy partner
+- `contract-strengthening` — description names `security-ownership-map` + `security-threat-model` as siblings
+- `observability-and-instrumentation` — description names `production-incident-playbook` as the workflow partner
+
+**`using-meisijiya-skills` Priority table** gains 9 trigger rows (gha / threat-model / pre-ship-gate / ownership-map / k6 / closed-loop / supply-chain / stack-security / test-guard / production-incident-playbook) plus a single Priority-row tweak on "Fix this bug" to surface `diagnosing-bugs` as the symptom-driven branch.
+
+**Skill chains** expand from 5 to 9: `threat → hard`, `ship`, `perf gate`, `governance`, `closed loop`, `dep safety`, `test quality`, `fix` (now includes diagnosing-bugs).
+
+**CI status (post-release)**:
+- `scripts/check-marketplace.sh` → OK 35 skills in sync
+- `scripts/validate-skills.sh` → 35/35 required, 2 pre-existing warnings unchanged
+- `scripts/inject-agents-md.sh --dry-run` → counts: `core=9 security=9 cicd=2 observability=4 meta=4 domain=7`
+
+**`npx skills add` picker grouping**: 6 group headers in the picker UI, replacing the single meisijiya-extra entry. Pickers now show sub-headers (`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`) so users see "5 of 9" instead of "24 in a flat list".
+
 ### Added (slice-review — SDD layer)
 
 **New optional extra skill**: [`skills/extra/slice-review/`](skills/extra/slice-review/) — per-slice lightweight review with one reviewer returning two ordered verdicts (spec compliance + code quality). Complements OMO built-in `review-work` (whole-branch 5-lane). Adapted from Superpowers v6.0 `task-reviewer-prompt.md` (which merged the prior two-stage review into one reviewer, two ordered parts).

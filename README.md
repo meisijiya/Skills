@@ -21,7 +21,7 @@ npx skills add meisijiya/Skills \
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求视觉 deck 或教学 deck 时才按需使用 [html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) 渲染 HTML。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
-- **双目录结构**:`core/` 必装集 + `extra/` 选装集。仓库根的 `.claude-plugin/marketplace.json` 是 `vercel-labs/skills` CLI 原生的 skill 发现 + 展示分组 source(`meisijiya-core` / `meisijiya-extra` 两组);它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
+- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (24 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 5 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
 ## 仓库结构
 
@@ -34,29 +34,45 @@ meisijiya-skills/
 │   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(20 SKILL.md 索引)
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
-│   ├── core/                 ← 必装集(8 个)
-│   │   ├── README.md          ← 8 个 skill 详情 + 必装理由
+│   ├── core/                 ← 必装集(9 个)
+│   │   ├── README.md          ← 9 个 skill 详情 + 必装理由
 │   │   ├── using-meisijiya-skills/
 │   │   ├── brainstorming/                  ← HARD-GATE pre-design exploration(adapted from superpowers)
 │   │   ├── spec-driven-development/        ← spec-before-code,lock PRD
 │   │   ├── incremental-implementation/    ← vertical slices with dep/HITL-AFK metadata,bridge to OMO review-work
 │   │   ├── test-driven-development/
 │   │   ├── verification-before-completion/  ← Iron Law;bridge to OMO review-work/visual-qa (adapted from superpowers)
-│   │   ├── debugging-and-error-recovery/
+│   │   ├── debugging-and-error-recovery/    ← 5-step triage protocol
+│   │   ├── diagnosing-bugs/                  ← symptom-driven diagnosis loop (pairs with debugging-and-error-recovery)
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(16 个,按需装)
-│       ├── README.md          ← 16 个 skill + "怎么选" 决策表
-│       ├── writing-skills/                 ← meta-only;create/edit skills (TDD-for-docs)
-│       ├── build-gate-visual-review/        ← intent-gated pre-build alignment (Markdown by default; html-ppt only for explicit visual/teaching decks)
+│   └── extra/                ← 选装集(24 个,按 group 组织在 picker 中)
+│       ├── README.md          ← 24 个 skill + group-aware "怎么选" 决策表
+│       ├── security-and-hardening/          # security group (9)
+│       ├── security-devsecops/
+│       ├── security-incident-response/
+│       ├── gha-security-review/
+│       ├── security-threat-model/
+│       ├── security-ownership-map/
+│       ├── supply-chain-risk-auditor/
+│       ├── stack-security-coder/
+│       ├── ai-code-blindspots/
+│       ├── pre-ship-gate/                   # cicd group (2)
+│       ├── closed-loop-delivery/
+│       ├── observability-and-instrumentation/ # observability group (4)
+│       ├── performance-optimization/
+│       ├── k6-load-testing/
+│       ├── production-incident-playbook/
+│       ├── writing-skills/                  # meta group (4)
+│       ├── slice-review/
+│       ├── contract-strengthening/
+│       ├── test-guard/
+│       ├── build-gate-visual-review/        # domain group (7)
 │       ├── designer-handoff/
 │       ├── api-and-interface-design/
-│       ├── security-and-hardening/          ← trust-boundary hardening;depth audit via OMO security-research
-│       ├── performance-optimization/        ← backend profile + measure-first
-│       ├── observability-and-instrumentation/
-│       ├── documentation-and-adrs/          ← architectural ADRs only
-│       ├── improve-codebase-architecture/   ← codebase-wide 健康巡检,Ousterhout deep/shallow 评分,proposal-only
-│       └── contract-strengthening/           ← Phase 1.25 open-world contract review (optional extra; complements core spec + verification)
-│       └── slice-review/                     ← per-slice 轻量审查(1 reviewer / 2 verdicts: spec compliance + code quality),与 OMO `review-work` 互补
+│       ├── documentation-and-adrs/
+│       ├── improve-codebase-architecture/
+│       ├── verify-chain/
+│       └── loop-me/
 ├── scripts/
 │   ├── validate-skills.sh          ← YAML frontmatter + 结构检查(repo 本地工具,不随 skill 一起分发)
 │   ├── check-marketplace.sh        ← marketplace.json ↔ skills/ 双射检查
@@ -103,10 +119,10 @@ npx skills add meisijiya/Skills -g
 
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
-- **必装集**(8 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架
-- **选装集**(16 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含"怎么选"决策表 + 依赖关系
+- **必装集**(9 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架。`diagnosing-bugs` 在 0.6.x 加入 core(协议 vs 学科二分:`debugging-and-error-recovery` 是 5 步协议,`diagnosing-bugs` 是 symptom-driven 学科)
+- **选装集**(24 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 5-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain`) + 依赖关系。`npx skills add` picker 按这 5 个 group 展示,可整组装或单选
 
-> 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表,按你项目特征对号入座。
+> 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表 + group-aware 章节,按你项目特征对号入座。
 
 ### 高级:`scripts/install.sh`(项目级 install / 自定义路径)
 
