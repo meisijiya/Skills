@@ -27,7 +27,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 
 ### Catalog
 
-**.core/ — load always (8):**
+**.core/ — load always (9):**
 - [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher; check before every response
 - [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — pre-design exploration (HARD-GATE: no implementation before user-approved design)
 - [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — spec before non-trivial code
@@ -38,7 +38,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`diagnosing-bugs`](~/.agents/skills/diagnosing-bugs/SKILL.md) — symptom-driven diagnosis loop (≥3 hypotheses + distinguishing observation per hypothesis + cheapest observation first); pairs with `debugging-and-error-recovery` as protocol ↔ discipline
 - [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
 
-**security (6):**
+**security (9):**
 - [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — application-layer trust-boundary hardening; depth audit via OMO `security-research`
 - [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) — supply chain + deploy pipeline (deps / SBOM / secrets rotation / CI/CD / IaC / pre-deploy); OMO `security-research` + `oracle` + `websearch` + `context7`
 - [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — post-incident (NIST CSF simplified: detect / triage / contain / eradicate / recover / postmortem); OMO `security-research` post-PoC + `oracle` decision + `websearch` IOC
@@ -59,7 +59,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) — pre-deploy performance acceptance gate (smoke / load / stress / spike / soak) with explicit latency-percentile + error-budget thresholds; pairs with `performance-optimization` as front-back
 - [`production-incident-playbook`](~/.agents/skills/production-incident-playbook/SKILL.md) — end-to-end incident handling (in-flight runbook phases + blameless postmortem templates with 5-whys root-cause + structural action items); pairs with `pre-ship-gate` as front-back
 
-**meta (3):**
+**meta (4):**
 - [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — TDD-for-docs for skills; meta-only, lives here not in `core/`
 - [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) — open-world / non-exhaustive contract review (Phase 1.25 optional extra; complements `spec-driven-development` + `verification-before-completion`)
 - [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality, 2 verdicts); complements OMO `review-work` (whole-branch 5-lane)

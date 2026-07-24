@@ -2,11 +2,11 @@
 
 All notable changes to meisijiya-skills.
 
-## Unreleased
+## v0.6.0 — 11-skill roadmap + marketplace 6-group refactor (2026-07-24)
 
 ### Added (2026-07-24 — 11-skill roadmap shipped + marketplace 6-group refactor)
 
-**Major change**: `meisijiya-skills` grew from 24 → 35 skills (`core/` 8→9, `extra/` 16→24) and `.claude-plugin/marketplace.json` now exposes 6 plugin entries (`meisijiya-core` + 5 extra groups: `meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`) so `npx skills add` picker shows the new structure with sub-headers instead of one flat list.
+**Major change**: `meisijiya-skills` grew from 24 → 35 skills (`core/` 8→9, `extra/` 16→26) and `.claude-plugin/marketplace.json` now exposes 6 plugin entries (`meisijiya-core` + 5 extra groups: `meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`) so `npx skills add` picker shows the new structure with sub-headers instead of one flat list.
 
 11 new skills land in this release (sources cited; descriptions ≤500 chars; 6-section pattern; OMO Integration section; verified-level CI on 2 evals):
 
