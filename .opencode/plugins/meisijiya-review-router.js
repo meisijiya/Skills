@@ -8,45 +8,76 @@
  *   cp meisijiya-review-router.js ~/.config/opencode/plugins/
  *   # restart opencode (plugins do NOT auto-reload)
  *
- * Extending: add 1 line to REMINDERS array (must match a skill installed
- * at ~/.agents/skills/<name>/SKILL.md).
+ * Reminder model (2026-07+): per-reminder skipPath / matchPath instead of
+ * the prior global SKIP_PATH_RE. Each reminder opts into a path policy:
+ *   - matchPath: ONLY trigger when the changed path matches the regex
+ *                (use for narrow-purpose reminders like gha-security-review
+ *                on .github/workflows/**)
+ *   - skipPath:  trigger UNLESS the changed path matches
+ *                (use for broad-purpose reminders that want to skip pure docs)
+ *   - neither:   trigger on every Write/Edit/apply_patch
  *
- * Per-edit token cost: ~21-23 tokens per reminder × N skills (one
- * reminder per turn per skill); SKIP_PATH_RE cuts noise for non-code
- * edits so real-world cost is much lower than the worst case.
+ * apply_patch note: its args.filePath is not available; reminders with
+ * matchPath cannot fire from apply_patch edits, since the path is hidden
+ * inside the patch body. Use write/edit for security-critical CI files.
+ *
+ * Per-edit token cost: ~21-23 tokens per reminder. Per-turn dedup via
+ * state.reminded; per-result dedup via marker.
  */
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
 
 const REMINDERS = [
-  { name: 'ai-code-blindspots',          text: 'Before claiming done, invoke `ai-code-blindspots`.' },
-  { name: 'security-and-hardening',      text: 'Before claiming done, invoke `security-and-hardening`.' },
-  { name: 'verification-before-completion', text: 'Before claiming done, invoke `verification-before-completion`.' },
+  // Always-on core gate
+  {
+    name: 'verification-before-completion',
+    text: 'Before claiming done, invoke `verification-before-completion`.',
+  },
+  // App-layer security: skip pure doc/binary/config
+  {
+    name: 'security-and-hardening',
+    text: 'Before claiming done, invoke `security-and-hardening` to audit trust boundaries in the diff.',
+    skipPath: /\.(md|markdown|txt|rst|env|gitignore|lock|svg|png|jpe?g|gif|ico|woff2?|ttf|eot|map|wasm|pdf)(\.[^/\\]+)?$/i,
+  },
+  // AI blindspots: skip docs only (yaml is in scope — k8s, GHA, configs all surface AI bug patterns)
+  {
+    name: 'ai-code-blindspots',
+    text: 'Before claiming done, invoke `ai-code-blindspots` for an AI-generated-diff blindspot scan.',
+    skipPath: /\.(md|markdown|txt|rst|env|gitignore|lock)(\.[^/\\]+)?$/i,
+  },
+  // GHA workflow edits: narrow path — always remind when .github/workflows/** changes
+  {
+    name: 'gha-security-review',
+    text: 'GHA workflow file changed; invoke `gha-security-review` to audit action-permission + expression-injection + supply-chain.',
+    matchPath: /(?:^|\/)\.github\/workflows\//i,
+  },
 ]
 
 const TRIGGER_TOOLS = new Set(['write', 'edit', 'apply_patch'])
 
-// Skip reminders when the changed path is clearly not source code:
-// docs / config / data / fixtures / etc. The set mirrors the most common
-// extension mistakes — adding more is a single regex entry.
-const SKIP_PATH_RE = /\.(md|markdown|txt|rst|json|ya?ml|toml|csv|env|gitignore|lock)(\.[^/\\]+)?$/i
+const state = new Map()
+const get = (sid) => {
+  if (!state.has(sid)) state.set(sid, { lastMessageID: null, reminded: new Set() })
+  return state.get(sid)
+}
 
 const installed = (name) =>
   existsSync(join(homedir(), '.agents', 'skills', name, 'SKILL.md'))
 
 const marker = (name) => `[review-router:${name}]`
 
-export const MeisijiyaReviewRouter = async ({ client, directory }) => {
-  // Per-session state: { sessionID -> { lastMessageID, reminded: Set<skill> } }
-  const state = new Map()
-  const get = (sid) => {
-    if (!state.has(sid)) state.set(sid, { lastMessageID: null, reminded: new Set() })
-    return state.get(sid)
-  }
+function shouldTriggerPath(reminder, filePath) {
+  // No filePath (e.g. apply_patch) — matchPath-only reminders cannot decide.
+  // Fire everything else (broad reminders fall back to default).
+  if (!filePath) return !reminder.matchPath
+  if (reminder.matchPath) return reminder.matchPath.test(filePath)
+  if (reminder.skipPath) return !reminder.skipPath.test(filePath)
+  return true
+}
 
+export const MeisijiyaReviewRouter = async ({ client, directory }) => {
   return {
-    // Per-turn reset: when a new user message arrives, clear the reminded set
     'chat.message': async (input, _output) => {
       const s = get(input.sessionID)
       if (input.messageID !== s.lastMessageID) {
@@ -57,22 +88,18 @@ export const MeisijiyaReviewRouter = async ({ client, directory }) => {
 
     'tool.execute.after': async (input, output) => {
       if (!TRIGGER_TOOLS.has(String(input.tool).toLowerCase())) return
-      if (typeof output?.output !== 'string') return  // shape guard (MCP tools)
+      if (typeof output?.output !== 'string') return
 
-      // Skip reminders when the changed path is a doc/config/data file —
-      // those don't belong under code-blindspot review. The shape varies by
-      // tool: write/edit usually expose args.filePath, apply_patch hides
-      // the target inside its patch body (we don't try to parse that).
       const fp = String(input?.args?.filePath ?? input?.args?.filepath ?? '')
-      if (fp && SKIP_PATH_RE.test(fp)) return
-
       const s = get(input.sessionID)
 
-      for (const { name, text } of REMINDERS) {
-        if (!installed(name)) continue                       // graceful skip if missing
-        if (s.reminded.has(name)) continue                   // per-turn dedup
+      for (const reminder of REMINDERS) {
+        const { name, text } = reminder
+        if (!installed(name)) continue
+        if (s.reminded.has(name)) continue
+        if (!shouldTriggerPath(reminder, fp)) continue
         const m = marker(name)
-        if (output.output.includes(m)) continue               // per-result dedup
+        if (output.output.includes(m)) continue
         output.output += `\n\n${m} ${text}`
         s.reminded.add(name)
       }
