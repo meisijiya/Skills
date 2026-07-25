@@ -65,6 +65,14 @@
         "./skills/extra/loop-me",
         "./skills/extra/teacher-skill"
       ]
+    },
+    {
+      "name": "meisijiya-frontend",
+      "skills": [
+        "./skills/extra/meisijiya-frontend-taste",
+        "./skills/extra/meisijiya-redesign-ui",
+        "./skills/extra/meisijiya-minimalist-ui"
+      ]
     }
   ]
 }

@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 26 个)
+# Extra Skills(选装集 · 29 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -12,13 +12,14 @@
 | 有 contract / 状态 / 时序 / 并发 / 不可逆 / verification-blind-spot 风险 | 在 `security` 之外加 `contract-strengthening`(Phase 1.25 open-world / non-exhaustive 风险分类;可选装) |
 | 上线运营 | `cicd` (pre-ship-gate / closed-loop-delivery) + `observability` (observability / performance / k6 / incident-playbook) |
 | 有 UI | `domain` 中加 `designer-handoff`;仅在明确要求视觉 deck 或教学 deck 时再加 `build-gate-visual-review` |
+| 前端 UI(landing / portfolio / marketing / 改造现有 UI) | `frontend`(`meisijiya-frontend-taste` 通用反 slop 规则 + `meisijiya-redesign-ui` 现存改造;brief 命名 Linear/Notion/editorial 时再叠 `meisijiya-minimalist-ui`)|
 | 多人 / 长期 | `meta` 中加 `slice-review` + `test-guard`(测试质量) |
 | 写技术文章要核查事实 | `domain` 中加 `verify-chain` |
 | 把反复做的活动形式化成可执行 spec | `domain` 中加 `loop-me` |
 | 创建/编辑 skill | `meta` 中加 `writing-skills` |
 | AI 刚生成/修改了代码,要审查盲区 | `security` 中加 `ai-code-blindspots` |
 
-## 26 个 skill 一览(按 group)
+## 29 个 skill 一览(按 group)
 
 **注意**：`teacher-skill` 为本地适配型 skill(8 个含 `meisijiya-domain` 域),不计入 26 的统计;若安装到 `~/.agents/skills/teacher-skill/SKILL.md` 则自动被 OMO skill loader 发现,无需 marketplace 同步。
 

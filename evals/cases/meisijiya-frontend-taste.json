@@ -1,0 +1,63 @@
+{
+  "name": "meisijiya-frontend-taste",
+  "version": "0.1.0",
+  "description": "Anti-slop frontend rules for landing pages, portfolios, redesigns. Reads the brief, infers the design language, tunes three dials (variance/motion/density), enforces hard non-default rules on typography, color, layout, CTA, eyebrows, zigzag, motion, and image strategy to keep AI-generated UI from collapsing into AI-default templates.",
+  "positive_triggers": [
+    {
+      "input": "Frontend agent is about to write a SaaS landing page — make sure it doesn't ship the AI-purple-gradient boilerplate",
+      "expected_skill": "meisijiya-frontend-taste",
+      "reason": "Landing page writing with explicit anti-slop requirement"
+    },
+    {
+      "input": "We're generating a portfolio for an Awwwards-style designer. Build it.",
+      "expected_skill": "meisijiya-frontend-taste",
+      "reason": "Portfolio / experimental brief; needs the three-dial framework and hard rules"
+    },
+    {
+      "input": "Frontend keeps reusing Inter + centered hero + 3-col feature cards. Inject real anti-slop discipline before next slice",
+      "expected_skill": "meisijiya-frontend-taste",
+      "reason": "Direct anti-slop rule enforcement request"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Build a React dashboard with sortable tables",
+      "expected_no_skill": true,
+      "reason": "Dashboard / data-table UI is out of scope; route to api-and-interface-design"
+    },
+    {
+      "input": "Audit my existing UI and fix the cheapest items",
+      "expected_no_skill": true,
+      "reason": "Audit-then-fix on existing UI is meisijiya-redesign-ui, not this skill"
+    },
+    {
+      "input": "Help me write the marketing copy only — no code, no layout",
+      "expected_no_skill": true,
+      "reason": "Copywriting without layout / UI code is not a frontend-taste trigger"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Frontend agent is about to write a SaaS landing page — make sure it doesn't ship the AI-purple-gradient boilerplate'",
+      "expected_behavior": [
+        "Agent emits a Design Read line before any code",
+        "Agent sets DESIGN_VARIANCE / MOTION_INTENSITY / VISUAL_DENSITY dials explicitly",
+        "Agent selects a design system (§3) or names an honest aesthetic",
+        "Agent enforces hard rules: anti-center bias when variance > 4, eyebrow ≤ ceil(sections/3), CTA wrap ban, CTA intent dedupe, premium-consumer palette rotation, no Fraunces / Instrument_Serif as default, no em-dashes in visible copy",
+        "Agent runs the §6 pre-flight checklist before declaring the slice done"
+      ]
+    },
+    {
+      "scenario": "Frontend agent starts a new slice within incremental-implementation",
+      "expected_behavior": [
+        "Agent reads meisijiya-frontend-taste/SKILL.md before writing any UI file",
+        "Agent pairs the read with designer-handoff project spec (if one exists)",
+        "Agent emits a Design Read at the top of the slice",
+        "Agent applies typography, color, layout, motion rules from §5 to every component",
+        "Agent runs the pre-flight checklist before commit"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "v0.1.0 — based on Leonxlnx/taste-skill taste-skill (MIT). Behavioral evals are warning-level until promoted via upstream issue tracker."
+}

@@ -67,6 +67,26 @@ const REMINDERS = [
     text: 'Stack-specific code changed; invoke `stack-security-coder` for per-layer audit (frontend XSS-CSP-cross-origin / mobile WebView-certs-storage-biometric).',
     matchPath: /\.(tsx|jsx|vue|svelte|swift|dart)$/i,
   },
+  // Frontend UI code (anti-slop second contract): fire alongside stack-security-coder.
+  // Loads meisijiya-frontend-taste so the agent reads anti-AI-slop rules (Design Read +
+  // three dials + non-default typography / color / layout / CTA / eyebrow / zigzag /
+  // motion / image rules) before continuing. Pairs with designer-handoff spec as the
+  // second contract layer; minimalist-ui fires when brief names Linear / Notion / editorial.
+  {
+    name: 'meisijiya-frontend-taste',
+    text: 'Frontend UI file changed; load `meisijiya-frontend-taste` for anti-slop rules (Design Read + three dials + non-default typography / color / layout / CTA / eyebrow / zigzag / motion / image strategy) before continuing. Stack as the second contract on top of any `designer-handoff` spec.',
+    matchPath: /\.(tsx|jsx|vue|svelte)$/i,
+  },
+  // Frontend UI / stylesheet changes on existing projects: audit-then-fix.
+  // Fires alongside meisijiya-frontend-taste; the agent reads the 9-layer audit
+  // (typography / color / layout / interactivity / content / components / icons / code
+  // / strategic-omissions) + fix-priority ladder if the work is on existing UI rather
+  // than greenfield.
+  {
+    name: 'meisijiya-redesign-ui',
+    text: 'Frontend UI / stylesheet changed; load `meisijiya-redesign-ui` if this is an upgrade to existing UI (not greenfield) — 9-layer audit + fix-priority ladder (fonts → color → states → layout → components → states → polish) without migrating frameworks.',
+    matchPath: /\.(tsx|jsx|vue|svelte|css|scss|less)$/i,
+  },
 ]
 
 const TRIGGER_TOOLS = new Set(['write', 'edit', 'apply_patch'])

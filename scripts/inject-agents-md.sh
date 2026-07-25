@@ -44,7 +44,7 @@ REMOVE=false
 # Known group suffixes — must match the suffixes used in AGENTS.md Section A
 # catalog headers AND in marketplace.json plugin `name` values (`meisijiya-<suffix>`).
 # Adding a new group = add here + add to marketplace.json + add a header in AGENTS.md.
-GROUP_SUFFIXES=(core security cicd observability meta domain)
+GROUP_SUFFIXES=(core security cicd observability meta domain frontend)
 
 usage() {
   cat <<EOF

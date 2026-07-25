@@ -107,6 +107,12 @@ Category + skill combo rationale:
 - **visual-engineering category** — Gemini is better at design-consistent UI than Claude/GPT
 - **frontend-ui-ux omo skill** — already has design intelligence baked in
 - **our design-spec.md** — provides project-specific rules (color palette, typography, anti-patterns)
+
+6.5 **Stack `meisijiya-frontend-taste` as the second contract layer** (when installing `meisijiya-frontend` group is in scope):
+- `designer-handoff` provides project-specific tokens (color / type / component) via `design-spec.md`
+- [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) provides the anti-slop rules the frontend agent reads on top of the spec (Design Read + three dials + hard rules against AI-default fonts / palette / layout / CTA / eyebrows / zigzag / motion / image strategy)
+- **Both must be loaded before any UI code.** If the brief names a specific aesthetic (Linear / Notion / editorial / premium-utilitarian), also load [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md) as the active direction.
+- If the work is upgrading existing UI rather than greenfield, load [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) first to drive the audit-then-fix cycle, then apply `meisijiya-frontend-taste` during the fix.
 - **order**: read spec → apply omo skill → use category routing
 
 ### 7. Verify frontend compliance

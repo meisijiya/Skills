@@ -2,6 +2,50 @@
 
 All notable changes to meisijiya-skills.
 
+## v0.8.0 — meisijiya-frontend triad (Leonxlnx/taste-skill absorption) (2026-07-25)
+
+**Major change**: 吸收 [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT, Leon Linnx / Leonxlnx) 3 个核心子 skill,新开 `meisijiya-frontend` plugin group,补强 LLM 前端写作中 3 个具体缺口(避免同质化 / 避免 AI 味过重 / 增强审美)。
+
+**Added (3 skills · 1 group):**
+
+| Skill | 来源 Leonxlnx/taste-skill | 我们的 frontmatter name | 一句话 |
+|---|---|---|---|
+| `taste-skill` (v2 主) → | `design-taste-frontend` | `meisijiya-frontend-taste` | 反 slop 输入侧规则合集;Brief 推断 + 三拨盘 + 硬规则;与 `designer-handoff` 叠加 |
+| `redesign-skill` → | `redesign-existing-projects` | `meisijiya-redesign-ui` | 现存 UI 9 层审计 + 修复优先级阶梯;不迁移框架 |
+| `minimalist-skill` → | `minimalist-ui` | `meisijiya-minimalist-ui` | Linear/Notion editorial 美学方向;warm monochrome + 三段字体 + 不对称 bento |
+
+**吸收选择 rationale**:原 taste-skill 11 个子 skill 中只挑 3 个,理由:
+- 补强 3 个缺口(反 AI 味输入规则 / 现存 UI 改造 / 具体美学方向 starter)
+- 不增加 skill 系统复杂度(catalog 仍只多 1 个 group)
+- 其他 8 个暂不吸收(`taste-skill-v1` / `soft-skill` / `brutalist-skill` / `gpt-tasteskill` / `image-to-code-skill` / `output-skill` / `stitch-skill` / 3 个 `imagegen-*`):理由详见 README v0.8.0 段(单选性美学 / 与 main 重叠 / 依赖外部工具 / 与体系无关)
+
+**Marketplace refactor**: `.claude-plugin/marketplace.json` 第 7 个 plugin entry `meisijiya-frontend`;`scripts/inject-agents-md.sh` `GROUP_SUFFIXES` 加 `frontend` 后缀;自动派生 `(3)` 计数。**`extra/` 26 → 29(总数 `core/` 9 + `extra/` 29 = 38 SKILL.md / 39 eval case;eval 数 39 是因为 `using-meisijiya-skills` 在 `.agents/skills/` 里多 1 个本地分支)**。
+
+**归 属**: 每篇 SKILL.md 顶部加完整归属段 + 来源链接,README + CHANGELOG 加致谢。
+
+**Critical files updated:**
+- `skills/extra/meisijiya-frontend-taste/SKILL.md` (new)
+- `skills/extra/meisijiya-redesign-ui/SKILL.md` (new)
+- `skills/extra/meisijiya-minimalist-ui/SKILL.md` (new)
+- `evals/cases/meisijiya-frontend-taste.json` (new)
+- `evals/cases/meisijiya-redesign-ui.json` (new)
+- `evals/cases/meisijiya-minimalist-ui.json` (new)
+- `.claude-plugin/marketplace.json` (新增 plugin entry)
+- `scripts/inject-agents-md.sh` (`GROUP_SUFFIXES` 加 `frontend`)
+- `AGENTS.md` (Section A 加 `**frontend (3):**` 块;omo Integration 段加 triad 行)
+- `README.md` (26 → 29 选装 + 第 7 个 plugin + 新装命令 + v0.8.0 release notes + 致谢)
+
+**Plugin reminders 扩到 8(串联补强):**
+- `.opencode/plugins/meisijiya-review-router.js` 的 REMINDERS 数组加 2 个 reminder:
+  - `meisijiya-frontend-taste` (`matchPath: /\.(tsx|jsx|vue|svelte)$/i`) — 写前端 UI 文件时强制提醒加载反 slop 规则,与 `stack-security-coder` 共存
+  - `meisijiya-redesign-ui` (`matchPath: /\.(tsx|jsx|vue|svelte|css|scss|less)$/i`) — 改前端 / 样式时强制提醒跑 9 层审计 + 修复阶梯
+- 同步串联补强(soft 层):
+  - `using-meisijiya-skills` Priority Table 加 frontend 行(landing / portfolio / marketing / 升级现有 UI 的 trigger)
+  - `using-meisijiya-skills` Process chains 加 `ui front-end` 链(designer-handoff → meisijiya-frontend-taste → [minimalist-ui if aesthetic] → incremental-implementation → [redesign-ui if existing] → verification-before-completion + visual-qa)
+  - `designer-handoff` §6.5 加 "第二合同层" 段落,明确 frontend-taste 与 designer-handoff 的合同关系
+
+**触发强度:** 软串联→硬串联。`matchPath` 限定 UI 文件扩展名,纯后端项目零影响;每 turn token 成本增加 ~50 tokens(2 个 reminder)。Plugin 语法 `node --check` 通过。
+
 ## v0.7.0 — html-ppt 完全剔除 + HTML page 模式 (2026-07-24)
 
 **Major change**: 移除 meisijiya 对 `html-ppt-skill` (lewislulu) 的所有依赖。所有 HTML 输出统一为单文件响应式 HTML 页面,由 OMO 内置 `frontend` (visual-engineering category) 渲染;教学型内容通过 `teacher-skill` pedagogy overlay 叠加,不再走独立的 deck 模式。

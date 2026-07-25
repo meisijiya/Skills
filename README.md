@@ -21,7 +21,7 @@ npx skills add meisijiya/Skills \
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求响应式 HTML 页面（项目可视化 / 自学习 / 教学型）时才通过 OMO 内置 `frontend` 渲染单文件 HTML；教学型内容额外叠加 `teacher-skill` pedagogy overlay。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
-- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (26 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 5 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
+- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (29 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 6 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain` / `meisijiya-frontend`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
 ## 仓库结构
 
@@ -45,8 +45,8 @@ meisijiya-skills/
 │   │   ├── debugging-and-error-recovery/    ← 5-step triage protocol
 │   │   ├── diagnosing-bugs/                  ← symptom-driven diagnosis loop (pairs with debugging-and-error-recovery)
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(26 个,按 group 组织在 picker 中)
-│       ├── README.md          ← 26 个 skill + group-aware "怎么选" 决策表
+│   └── extra/                ← 选装集(29 个,按 group 组织在 picker 中)
+│       ├── README.md          ← 29 个 skill + group-aware "怎么选" 决策表
 │       ├── security-and-hardening/          # security group (9)
 │       ├── security-devsecops/
 │       ├── security-incident-response/
@@ -83,7 +83,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(36 个)
+    └── cases/                 ← 每个 skill 的 eval case(39 个)
 ```
 
 ## 安装
@@ -93,7 +93,7 @@ meisijiya-skills/
 默认装到 `<cwd>/.agents/skills/`(项目级),加 `-g` 装到 `~/.agents/skills/`(用户级)。OpenCode 扫描 `.agents/skills/`,这是 skills CLI 的最终落点。
 
 ```bash
-# 交互式(展示 6 个 group:meisijiya-core / -security / -cicd / -observability / -meta / -domain,按需挑)
+# 交互式(展示 7 个 group:meisijiya-core / -security / -cicd / -observability / -meta / -domain / -frontend,按需挑)
 npx skills add meisijiya/Skills
 
 # 装某个选装
@@ -153,6 +153,12 @@ mkdir -p .opencode/skills
 git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-domain
 mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me} .opencode/skills/
 rm -rf /tmp/meisijiya-domain
+
+# 装 meisijiya-frontend(3 个,反 AI 味 + 美学方向)
+mkdir -p .opencode/skills
+git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-frontend
+mv /tmp/meisijiya-frontend/skills/extra/{meisijiya-frontend-taste,meisijiya-redesign-ui,meisijiya-minimalist-ui} .opencode/skills/
+rm -rf /tmp/meisijiya-frontend
 ```
 
 #### 用户级(全局,所有项目共享)
@@ -174,7 +180,7 @@ rm -rf /tmp/meisijiya-core
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(9 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架。`diagnosing-bugs` 在 0.6.x 加入 core(协议 vs 学科二分:`debugging-and-error-recovery` 是 5 步协议,`diagnosing-bugs` 是 symptom-driven 学科)
-- **选装集**(26 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 5-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain`) + 依赖关系。`npx skills add` picker 按这 5 个 group 展示,可整组装或单选
+- **选装集**(29 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 6-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain` / `frontend`) + 依赖关系。`npx skills add` picker 按这 6 个 group 展示,可整组装或单选
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表 + group-aware 章节,按你项目特征对号入座。
 
@@ -253,7 +259,7 @@ MIT
 
 ## 当前状态
 
-最近 tag: **v0.6.0** — 11-skill roadmap + marketplace 6-group refactor(详细见 [`CHANGELOG.md`](./CHANGELOG.md) 与 `git log`)
+最近 tag: **v0.8.0** — meisijiya-frontend triad (Leonxlnx/taste-skill absorption)(详细见 [`CHANGELOG.md`](./CHANGELOG.md) 与 `git log`)
 
 ### v0.6.0 — 11-skill roadmap + marketplace 6-group refactor (2026-07-24)
 
@@ -273,8 +279,19 @@ MIT
 - **Marketplace 拆为 6 group**:`.claude-plugin/marketplace.json` 现在 6 个 plugin entry(`meisijiya-core` + `meisijiya-security` / `-cicd` / `-observability` / `-meta` / `-domain`),`npx skills add` picker 按 group 展示,可选整组团或单 skill。`scripts/inject-agents-md.sh` 自动从 manifest 派生每组 `(N)` 计数
 - **Plugin P0 fix**(`a8d9fae`):`meisijiya-review-router.js` 从全局 `SKIP_PATH_RE` 改成 per-reminder `matchPath` / `skipPath`;原 `.yml` 路径会让 `gha-security-review` reminder 0% 触发,现在改 `.github/workflows/ci.yml` 会同时 fire 4 个 reminder
 - **Plugin reminders 扩到 6**:在初版 `ai-code-blindspots` + `security-and-hardening` 基础上加 `verification-before-completion`(per Edit 触发)+ `gha-security-review`(`.github/workflows/`)+ `test-guard`(test files)+ `stack-security-coder`(`.tsx/.jsx/.vue/.svelte/.swift/.dart`)
+- **Plugin reminders 扩到 8 (v0.8.0)**:加 `meisijiya-frontend-taste`(`.tsx/.jsx/.vue/.svelte`)+ `meisijiya-redesign-ui`(`.tsx/.jsx/.vue/.svelte/.css/.scss/.less`);与 `stack-security-coder` 共存于同 path 上,模型一次收到多个 reminder 按顺序读
 - **CI 改进**:verified eval 的 `positive_keywords` 关键字覆盖率检查(任何 `verified: true` eval 缺关键词即 `::error` 阻断 merge)
 - **Oracle audit**:release 前跑全面审查,patch 了 2 个 BLOCKER(`gha-security-review` + `diagnosing-bugs` description 关键词缺失导致 CI 红)+ 1 个 GROUP_SUFFIXES 不匹配(`ci-cd` → `cicd`)+ 2 个 MAJOR stale count + 3 个 MINOR;全 9 项 finding 在 commit `baf5529` + `51d1c81` 闭合
+
+### v0.8.0 — meisijiya-frontend triad (Leonxlnx/taste-skill absorption) (2026-07-25)
+
+- **3 个新 skill** 入新 group `meisijiya-frontend`(共 7 个 plugin entry:`core` + 6 extra,SKILL.md 总数 36 → 39),针对 LLM 前端写作的同质化 / AI 味 / 审美塌化三个缺口:
+  - `meisijiya-frontend-taste` — 反 slop 输入侧规则合集;Brief 推断 + 三拨盘(variance / motion / density) + 硬规则(禁 lila 渐变 / 禁 premium-beige 默认 / 禁 eyebrow 每段 / 禁 zigzag 超过 2 段 / 禁 Fraunces / Instrument_Serif 默认 / 禁半角破折号 / 禁 Inter 默认 / 禁 Lucide 默认 / 禁 pure-black 背景 / 禁 `h-screen` 等);与 `designer-handoff` 叠加为项目规范上的"反 slop 第二合同"
+  - `meisijiya-redesign-ui` — 现存 UI 的 audit-then-fix 工作流;9 层审计清单(typography / color / layout / interactivity / content / components / icons / code / strategic-omissions)+ 修复优先级阶梯;不迁移框架 / 不破坏功能
+  - `meisijiya-minimalist-ui` — Linear/Notion 风格的具体美学方向;warm monochrome + spot pastels + 三段字体(sans body + serif display + mono)+ 不对称 bento + 8–12px 边框 + 静默 spring 动作
+- **Marketplace 第 7 个 plugin entry**:`.claude-plugin/marketplace.json` 加 `meisijiya-frontend` plugin,`scripts/inject-agents-md.sh` `GROUP_SUFFIXES` 加 `frontend` 后缀,自动派生 `(3)` 计数;`scripts/check-marketplace.sh` 现在管 39 个 skill 双向同步
+- **归 属**:3 个 skill 全部基于 [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT, Leon Linnx / Leonxlnx);每篇 SKILL.md 顶部加完整归属段 + 来源链接,README + CHANGELOG 加致谢。原 taste-skill 仓库 11 个子 skill,我们**只吸收 3 个核心**(补 3 个缺口),其他 `soft-skill` / `brutalist-skill` / `image-to-code-skill` / `gpt-taste` / `output-skill` / `stitch-skill` / `imagegen-*` / `taste-skill-v1` 暂不吸收(单选性美学 / 与 main 重叠 / 依赖外部工具 / 与体系无关)
+- **新装命令**:README 加 `meisijiya-frontend` 组的 git clone / mv 流程;`npx skills add meisijiya/Skills` picker 现在展示 7 个 group
 
 ### v0.5.3 — Plugin runtime sync
 

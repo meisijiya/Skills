@@ -57,6 +57,7 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | Post-attested-Spec work with observed open-world contract/state/timing/concurrency/boundary/dependency/reversibility/verification-blind-spot signals | If installed, [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) | Missing optional extra never blocks the core flow; continue with the attested Spec, TDD, and completion gate |
 | `@teacher` / "教我" / "teaching-style HTML" / "我想学会 X 的思维方式" (reverse distillation from a public skill / teacher source) | If installed, [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) (extra/) | Emits pedagogy data contract → OMO `frontend`; build-gate HTML page mode §5 reminder for overlay |
 | Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
+| "Build a landing / portfolio / marketing page" / "frontend agent is about to write UI code" / "ship a SaaS hero that doesn't look AI-default" / "redesign our existing site to premium quality" | If installed, [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) (extra/) — anti-slop rules + three dials + non-default hard rules | [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) for the project-specific spec contract (loads first; frontend-taste is the second contract layer on top). If the brief names a specific aesthetic (Linear / Notion / editorial / premium-utilitarian), stack [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md) as the active direction. If upgrading existing UI rather than greenfield, load [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) first. |
 
 **Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
 
@@ -96,6 +97,7 @@ The Priority table above is *cross-cutting routing*, but most real work follows 
 ```
 design:           brainstorming → spec-driven-development
 implementation:   brainstorming? → incremental-implementation → test-driven-development → verification-before-completion
+ui front-end:     designer-handoff (project-specific spec) → meisijiya-frontend-taste (anti-slop rules) → [meisijiya-minimalist-ui if aesthetic named] → incremental-implementation → meisijiya-redesign-ui (if existing UI) → verification-before-completion + visual-qa
 slice loop:       incremental-implementation (dispatch) → slice-review (per-slice) → slice-progress.sh mark-complete → whole-branch review-work
 fix:              debugging-and-error-recovery (5-step protocol) → diagnosing-bugs (symptom-driven observation loop when cause is non-obvious) → test-driven-development (red-green for the guard test) → verification-before-completion
 maintenance:      verification-before-completion → ai-code-blindspots → security-and-hardening → review-work

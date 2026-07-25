@@ -1,0 +1,57 @@
+{
+  "name": "meisijiya-minimalist-ui",
+  "version": "0.1.0",
+  "description": "Premium utilitarian minimalist & editorial UI protocol for Linear/Notion-style product surfaces. Enforces high-contrast warm monochrome palette + spot pastels, bespoke typographic hierarchy (sans body + serif display), asymmetric CSS Grid bento layouts, ultra-flat bordered components with crisp 8–12px radius, understated spring motion.",
+  "positive_triggers": [
+    {
+      "input": "Build a Linear-style task management interface with editorial typography",
+      "expected_skill": "meisijiya-minimalist-ui",
+      "reason": "Linear aesthetic named; this is the active direction skill"
+    },
+    {
+      "input": "Make our product UI feel Notion-clean — monochrome + bento + restrained motion",
+      "expected_skill": "meisijiya-minimalist-ui",
+      "reason": "Notion aesthetic named; minimalist-ui is the direction"
+    },
+    {
+      "input": "Design a premium utilitarian editorial console for our customers",
+      "expected_skill": "meisijiya-minimalist-ui",
+      "reason": "Premium-utilitarian minimalist direction triggered"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Premium consumer cookware marketing landing — palette should feel warm and craft",
+      "expected_no_skill": true,
+      "reason": "Marketing landing without a named Linear/Notion aesthetic; route to meisijiya-frontend-taste"
+    },
+    {
+      "input": "Awwwards-style experimental site with bold motion and asymmetric overflow",
+      "expected_no_skill": true,
+      "reason": "Awwwards is the opposite direction (chaos vs utilitarian calm)"
+    },
+    {
+      "input": "Brutalist industrial terminal site with halftone + monospace + CRT scanlines",
+      "expected_no_skill": true,
+      "reason": "Brutalist uses a separate aesthetic family"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User asks: 'Build a Linear-style task management interface with editorial typography'",
+      "expected_behavior": [
+        "Agent has loaded meisijiya-frontend-taste first; this skill is loaded AFTER",
+        "Agent narrows dials to variance 5–6, motion 3–4, density 3",
+        "Agent applies macro-whitespace (py-24+, max-w-4xl to max-w-5xl)",
+        "Agent uses three-tier typography (sans body + serif display + mono) consistently",
+        "Agent restricts colors to warm monochrome + spot pastels or named brand; no neon, no gradients on body",
+        "Agent keeps card radius 8–12px; primary CTA radius 4–6px; no rounded-full on either",
+        "Agent uses ONE icon family (Phosphor Bold or Radix) at one stroke weight",
+        "Agent uses IntersectionObserver / motion/react whileInView for entry; never useState driving scroll",
+        "Agent runs verification (§Verification) before declaring done"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "v0.1.0 — based on Leonxlnx/taste-skill minimalist-skill (MIT). Behavioral evals are warning-level until promoted via upstream issue tracker."
+}
