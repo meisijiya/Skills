@@ -279,6 +279,38 @@ rm -rf ~/.opencode/skills/ui-ux-pro-max/
 
 > **不是 meisijiya skill**:ui-ux-pro-max 不是本仓库 skill,不上 `npx skills add`,不计入 9 + 29 的 SKILL.md 总数;只通过 npm CLI 分发。
 
+### Hallmark(营销 / 落地页 · 与 UI/UX Pro Max 并列)
+
+[`hallmark`](https://github.com/Nutlope/hallmark)(Nutlope / Together AI, MIT, 17.4k★) 是反 AI 味落地的另一条路线 — **直接产出 self-contained HTML + CSS 落地页**(20 套主题 + Custom 分支 + **57 个 slop-test 闸门** + 发射前自审)。**与 UI/UX Pro Max 不重叠、不替代**,按 brief 类型二选一:
+
+| brief 类型 | 走哪个 |
+|---|---|
+| 营销页 / 落地页 / portfolio / 个人主页 | **hallmark**(输出即产物) |
+| 产品 UI / dashboard / 设计系统 / 接口契约 | UI/UX Pro Max(`designer-handoff` 默认路由,产出 spec) |
+| 现存 UI 改造 / 重做 | `meisijiya-redesign-ui`(9 层审计 + 优先级修复) |
+| 任何"反 AI 味"输出 | 二者皆可;hallmark 闸门更密 |
+
+**4 verbs**:`(default)` build new UI / `hallmark audit <target>` / `hallmark redesign <target>` / `hallmark study <url|screenshot>`(抽 design DNA 到 portable `design.md`,拒绝像素克隆)。
+
+```bash
+# 装(vercel-labs/skills CLI 全局模式,落到 ~/.agents/skills/,与本仓库 meisijiya 系同路径)
+npx skills add -g -y nutlope/hallmark
+
+# 验证:SKILL.md 落到 ~/.agents/skills/hallmark/SKILL.md(67KB / 558 行 + references/ 25 子目录)
+test -f ~/.agents/skills/hallmark/SKILL.md && echo "✓ hallmark ready"
+
+# 卸载(只卸 hallmark,不影响其他 npx skills add 装的 skill)
+npx skills remove hallmark
+# 或
+rm -rf ~/.agents/skills/hallmark/
+```
+
+> **Skills CLI 落点 = `~/.agents/skills/`**:`npx skills add -g` 是 vercel-labs/skills CLI 的全局模式,落 `~/.agents/skills/<skill>/`,与本仓库 meisijiya 系同路径;**不要**用 `uipro init`(那是 UI/UX Pro Max 的专属 CLI,落到 `~/.opencode/skills/`,无 `--skills-dir` 选项)。
+
+> **不是 meisijiya skill**:hallmark 不在 `9 + 29` 仓库总数里,上游独立维护。
+
+> **安全审计**:Gen / Socket / Snyk 均评 Safe / 0 alerts / Low Risk,详见 [skills.sh/nutlope/hallmark](https://skills.sh/nutlope/hallmark)。输出纯 HTML+CSS,无运行时副作用。
+
 ### 可选
 
 - **Python 3.x**(ui-ux-pro-max 内置 BM25 搜索脚本依赖;装 Node 22 + 上面的 npm CLI 时通常已自带,缺则单独装)

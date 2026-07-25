@@ -26,6 +26,7 @@ allowed-tools: "Read Bash Glob Grep Write WebFetch"
 - 一次性 mockup / spike
 - 用户明确说"随便做"
 - 已经有 design spec(designer 已经出图)
+- **营销落地页 / portfolio / 个人主页 brief** — 这些直接走 [`hallmark`](~/.agents/skills/hallmark/SKILL.md),不走 ui-ux-pro-max → spec → frontend 三段式;详见 §2.5 路由决策
 
 ## Process
 
@@ -60,6 +61,18 @@ Read the spec (from [`spec-driven-development`](~/.agents/skills/spec-driven-dev
 - Brand mood (luxury / playful / minimal / brutalist / etc.)
 
 If spec is missing info, use [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) to clarify.
+
+### 2.5. Route by brief type (marketing landing vs product UI)
+
+Before §3, classify the brief. This skill's default path (ui-ux-pro-max → `design-spec.md` → frontend agent) is **product UI optimized**. Marketing / landing / portfolio briefs should bypass §3-§6 and route to [`hallmark`](~/.agents/skills/hallmark/SKILL.md) (Nutlope / Together AI, MIT, 17.4k★) — it emits self-contained HTML + CSS directly with 20 themes + Custom branch + 57 slop-test gates:
+
+| Brief | Route |
+|---|---|
+| Marketing / landing / portfolio / personal site | **hallmark** (skip §3-§6; output is the artifact) |
+| Product UI / dashboard / design system / component library | Continue to §3 (ui-ux-pro-max default) |
+| Existing UI rework | [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) 9-layer audit, then re-enter §3 |
+
+Install hallmark via `npx skills add -g -y nutlope/hallmark` (lands at `~/.agents/skills/hallmark/`; uses vercel-labs/skills CLI, not `uipro init`). Invoke with `(default) build new UI` or `hallmark audit / redesign / study <target>` per its skill body.
 
 ### 3. Generate design spec via ui-ux-pro-max
 
