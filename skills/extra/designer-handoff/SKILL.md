@@ -64,7 +64,7 @@ If spec is missing info, use [`brainstorming`](~/.agents/skills/brainstorming/SK
 
 ### 2.5. Route by brief type (marketing landing vs product UI)
 
-Before §3, classify the brief. This skill's default path (ui-ux-pro-max → `design-spec.md` → frontend agent) is **product UI optimized**. Marketing / landing / portfolio briefs should bypass §3-§6 and route to [`hallmark`](~/.agents/skills/hallmark/SKILL.md) (Nutlope / Together AI, MIT, 17.4k★) — it emits self-contained HTML + CSS directly with 20 themes + Custom branch + 57 slop-test gates:
+Before §3, classify the brief. This skill's default path (ui-ux-pro-max → `design-spec.md` → frontend agent) is **product UI optimized**. Marketing / landing / portfolio briefs should bypass §3-§6 and route to [`hallmark`](~/.agents/skills/hallmark/SKILL.md) (Nutlope / Together AI, MIT, 17.4k★) — it emits self-contained HTML + CSS directly with 20 themes + Custom branch + 58 slop-test gates:
 
 | Brief | Route |
 |---|---|

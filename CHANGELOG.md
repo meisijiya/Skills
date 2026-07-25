@@ -13,7 +13,7 @@ All notable changes to meisijiya-skills.
 ### Added — hallmark(Nutlope / Together AI, MIT, 17.4k★)
 
 - 新增 [`hallmark`](https://github.com/Nutlope/hallmark) 到 `~/.agents/skills/hallmark/`,通过 `npx skills add -g -y nutlope/hallmark` 装(vercel-labs/skills CLI 全局模式,与本仓库 meisijiya 系同落点)。**不要用 `uipro init`**(那是 UI/UX Pro Max 的 CLI,落到 `~/.opencode/skills/`)。Gen/Socket/Snyk 均评 Safe / 0 alerts / Low Risk
-- 分工与 UI/UX Pro Max 不重叠:营销落地页 / portfolio / 个人主页 → hallmark(one-shot HTML+CSS 输出,57 个 slop-test 闸门);产品 UI / dashboard / 设计系统 → UI/UX Pro Max(designer-handoff 默认);现存 UI 改造 → `meisijiya-redesign-ui`。4 verbs: `(default)` build / `audit` / `redesign` / `study`
+- 分工与 UI/UX Pro Max 不重叠:营销落地页 / portfolio / 个人主页 → hallmark(one-shot HTML+CSS 输出,58 个 slop-test 闸门);产品 UI / dashboard / 设计系统 → UI/UX Pro Max(designer-handoff 默认);现存 UI 改造 → `meisijiya-redesign-ui`。4 verbs: `(default)` build / `audit` / `redesign` / `study`
 - `skills/extra/designer-handoff/SKILL.md` §2.5 新增 "Route by brief type" 决策表(营销 brief → hallmark,跳过 §3-§6);NOT for 列表追加同条说明
 - `README.md` `## 前置依赖` 段新增 `### Hallmark` 子段,含 install / verify / uninstall + 安全审计 + 分工对照表
 

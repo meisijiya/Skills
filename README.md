@@ -281,7 +281,7 @@ rm -rf ~/.opencode/skills/ui-ux-pro-max/
 
 ### Hallmark(营销 / 落地页 · 与 UI/UX Pro Max 并列)
 
-[`hallmark`](https://github.com/Nutlope/hallmark)(Nutlope / Together AI, MIT, 17.4k★) 是反 AI 味落地的另一条路线 — **直接产出 self-contained HTML + CSS 落地页**(20 套主题 + Custom 分支 + **57 个 slop-test 闸门** + 发射前自审)。**与 UI/UX Pro Max 不重叠、不替代**,按 brief 类型二选一:
+[`hallmark`](https://github.com/Nutlope/hallmark)(Nutlope / Together AI, MIT, 17.4k★) 是反 AI 味落地的另一条路线 — **直接产出 self-contained HTML + CSS 落地页**(20 套主题 + Custom 分支 + **58 个 slop-test 闸门** + 发射前自审)。**与 UI/UX Pro Max 不重叠、不替代**,按 brief 类型二选一:
 
 | brief 类型 | 走哪个 |
 |---|---|
@@ -296,11 +296,11 @@ rm -rf ~/.opencode/skills/ui-ux-pro-max/
 # 装(vercel-labs/skills CLI 全局模式,落到 ~/.agents/skills/,与本仓库 meisijiya 系同路径)
 npx skills add -g -y nutlope/hallmark
 
-# 验证:SKILL.md 落到 ~/.agents/skills/hallmark/SKILL.md(67KB / 558 行 + references/ 25 子目录)
+# 验证:SKILL.md 落到 ~/.agents/skills/hallmark/SKILL.md(67KB / 558 行 + references/ 29 子目录)
 test -f ~/.agents/skills/hallmark/SKILL.md && echo "✓ hallmark ready"
 
 # 卸载(只卸 hallmark,不影响其他 npx skills add 装的 skill)
-npx skills remove hallmark
+npx skills remove -g hallmark
 # 或
 rm -rf ~/.agents/skills/hallmark/
 ```
