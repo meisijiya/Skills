@@ -2,6 +2,16 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — ui-ux-pro-max install path corrected (d752b37)
+
+### Fixed
+
+- 实测当前上游 `uipro init --ai opencode --global`(CLI v2.11.0)落到 `~/.opencode/skills/`,非 v0.1.3 假设的 `~/.agents/skills/`;上游 CLI 无 `--skills-dir` 选项,无法切路径。两路径都让 skill 可被 OpenCode 发现,后者基于旧版行为的不准确假设。
+- `skills/extra/designer-handoff/SKILL.md` §1 verify 升级为双路径检查(`~/.opencode/skills/` 或 `~/.agents/skills/` 任一即通过);4 处 `uipro init --ai opencode` 引用补 `--global`。
+- `README.md` `## 前置依赖` 段从一行 bullet 重写为完整 `UI/UX Pro Max` 子段,含 install / init / verify / uninstall 命令 + 上游同捆 6 个同伴 skill 说明。
+
+No tag bump(doc-only)。已装副本 `~/.agents/skills/designer-handoff/SKILL.md` 与 source 偏离,通过下次 `npx skills add meisijiya/Skills --skill designer-handoff` 自动同步;上游同捆的 `banner-design` / `brand` / `design-system` / `design` / `slides` / `ui-styling` 默认随主 skill 装到 `~/.opencode/skills/`,按需 `rm -rf ~/.opencode/skills/<name>/` 删除。
+
 ## v0.8.0 — meisijiya-frontend triad (Leonxlnx/taste-skill absorption) (2026-07-25)
 
 **Major change**: 吸收 [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT, Leon Linnx / Leonxlnx) 3 个核心子 skill,新开 `meisijiya-frontend` plugin group,补强 LLM 前端写作中 3 个具体缺口(避免同质化 / 避免 AI 味过重 / 增强审美)。
