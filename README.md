@@ -244,8 +244,45 @@ Write/Edit/apply_patch 工具调用完成后,在 tool result 末尾追加 remind
 
 ## 前置依赖
 
+### 必装
+
 - **oh-my-openagent** 必须安装(`bunx oh-my-openagent install`,本 fork 围绕 omo 设计)
-- **可选**:`npm i -g ui-ux-pro-max-cli`(designer-handoff 需要)
+- **Node.js 18+**(`ui-ux-pro-max-cli` 需要 npm 全局安装能力)
+
+### UI/UX Pro Max(`designer-handoff` 的硬依赖)
+
+[`designer-handoff`](./skills/extra/designer-handoff/) skill 通过 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 的 reasoning engine(161 行业规则 / 84 样式 / 192 调色板 / 74 字体配对 / 22 框架)生成 design spec。**项目有 UI 且要走 build 流程就必须装**;不装则 `designer-handoff` 跑不动,只能 fallback 到 `meisijiya-frontend-taste` 单 layer。
+
+```bash
+# 1. 装 CLI(全局,~30MB,纯 Python 标准库,无网络调用以外的副作用)
+npm install -g ui-ux-pro-max-cli
+
+# 2. 初始化到 OpenCode(skill 文件落到 ~/.opencode/skills/ui-ux-pro-max/)
+uipro init --ai opencode --global
+
+# 3. 验证:SKILL.md 落到 ~/.opencode/skills/ui-ux-pro-max/SKILL.md
+test -f ~/.opencode/skills/ui-ux-pro-max/SKILL.md && echo "✓ ui-ux-pro-max ready"
+
+# 4. 装好后**重启 OpenCode** 开新 session,模型会发现并自动加载
+```
+
+**调用入口**:`designer-handoff` 内部用 `uipro generate --product-type ... --stack ... --mood ... --output ...` 生成 spec。CLI 自带 BM25 search,不需要任何外部网络/数据库。
+
+**卸载**:
+```bash
+uipro uninstall --ai opencode --global
+# 或只删本 skill,保留其他(见下):
+rm -rf ~/.opencode/skills/ui-ux-pro-max/
+```
+
+> **同伴 skill**:`uipro init --ai opencode --global` 会同步装 6 个同伴 skill 到 `~/.opencode/skills/`:`banner-design` / `brand` / `design` / `design-system` / `slides` / `ui-styling`。与本 fork 体系不重叠、由上游独立维护,按需保留或单独 `rm -rf ~/.opencode/skills/<name>/` 删除。
+
+> **不是 meisijiya skill**:ui-ux-pro-max 不是本仓库 skill,不上 `npx skills add`,不计入 9 + 29 的 SKILL.md 总数;只通过 npm CLI 分发。
+
+### 可选
+
+- **Python 3.x**(ui-ux-pro-max 内置 BM25 搜索脚本依赖;装 Node 22 + 上面的 npm CLI 时通常已自带,缺则单独装)
+- **bun**(跑 `./bin/meisijiya plugin verify` 用;`.js` plugin 不在 verify 范围内)
 
 ## 写作规范
 

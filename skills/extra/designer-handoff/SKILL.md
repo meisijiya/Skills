@@ -36,11 +36,19 @@ allowed-tools: "Read Bash Glob Grep Write WebFetch"
 npm list -g ui-ux-pro-max-cli 2>/dev/null || which uipro
 
 # OpenCode integration initialized?
-test -d ~/.agents/skills/ui-ux-pro-max && echo "installed" || \
-  uipro init --ai opencode
+# Accepts both canonical install locations — `uipro init --ai opencode --global`
+# lands in ~/.opencode/skills/, `npx skills add ... --skill ui-ux-pro-max` (or a
+# manual copy) lands in ~/.agents/skills/. Either path makes the skill
+# discoverable to OpenCode; we check both so this step doesn't fail on a
+# convention mismatch.
+if [ -d ~/.opencode/skills/ui-ux-pro-max ] || [ -d ~/.agents/skills/ui-ux-pro-max ]; then
+  echo "installed"
+else
+  uipro init --ai opencode --global
+fi
 ```
 
-If not installed, prompt user to run `npm install -g ui-ux-pro-max-cli && uipro init --ai opencode`.
+If not installed, prompt user to run `npm install -g ui-ux-pro-max-cli && uipro init --ai opencode --global`.
 
 ### 2. Gather requirements
 
@@ -139,7 +147,7 @@ The frontend agent (omo `visual-engineering` category) commits to:
 | Excuse | Reality |
 |---|---|
 | "frontend 知道怎么做 UI" | frontend agent 不知道**你**要的 UI。Design spec 是你跟它的合同。 |
-| "ui-ux-pro-max 装起来麻烦" | `npm i -g ui-ux-pro-max-cli && uipro init --ai opencode` 一行命令。 |
+| "ui-ux-pro-max 装起来麻烦" | `npm i -g ui-ux-pro-max-cli && uipro init --ai opencode --global` 一行命令。 |
 | "design spec 太长,agent 不会读" | Agent 必须读。Skip = 后续返工。 |
 | "我不想绑死风格" | 不绑死 ≠ 不要 spec。"随便做" = 返工。 |
 | "AI 默认会选好看的颜色" | AI 默认选"AI purple/pink gradient" — 这正是 anti-pattern。 |
