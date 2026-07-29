@@ -31,6 +31,16 @@ HTML 输出统一为**单文件响应式 HTML 页面**，由 OMO 内置 [`fronte
 
 ## Process
 
+### 0. List stale HTML artifacts (A2 startup hook)
+
+Before classifying intent, list recursive `.omo/**/*.{html,htm}` artifacts older than 30 days:
+
+```bash
+find .omo -type f \( -name '*.html' -o -name '*.htm' \) -mtime +30 -print
+```
+
+Treat the output as stale candidates only. Prompt exactly `Archive stale HTML? y/n`; never auto-delete. `n`, empty input, or interruption leaves every artifact untouched; `y` authorizes only a separately recorded per-file archive action.
+
 ### 1. Classify explicit intent
 
 先按用户原话选择模式；没有明确请求时选择 **Default skip**，不要猜测。
@@ -148,6 +158,9 @@ output_path: <明确的目标路径>
 ## Verification
 
 Before reporting the selected mode's result, confirm:
+
+**Startup cleanup**
+- [ ] 已列出 30 天以上的 HTML / HTM stale candidates,显示 `y/n` prompt,且未自动删除
 
 **Mode selection**
 - [ ] 用户原话提供了该模式的显式意图；否则已选择 Default skip

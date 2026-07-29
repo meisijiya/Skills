@@ -31,6 +31,15 @@ Every project — even "trivial" ones — goes through this. The design can be s
 
 ## Process
 
+### 0. Sanitize the plan slug (A4 hard gate)
+
+Before any Phase 0 design work or `.omo/` write, validate `<slug>` against the exact regex `^[a-z0-9][a-z0-9-]{0,39}$`.
+
+- A conforming slug starts with a lowercase letter or digit, then uses only lowercase letters, digits, and hyphens, with a maximum length of 40.
+- Reject every non-conforming value with this literal response: `REFUSE: slug must match ^[a-z0-9][a-z0-9-]{0,39}$; offer transliterate fallback.`
+- Offer to transliterate the requested title to lowercase ASCII kebab-case as the fallback, or let the user provide a manual slug.
+- Re-run the same regex after transliteration. Do not create a plan, draft, notepad, or design artifact until it passes.
+
 ### 1. Explore project context
 
 Before asking detailed questions, check what's already in flight:
@@ -148,6 +157,7 @@ Wait for the user's confirmation, then invoke [`spec-driven-development`](~/.age
 ## Verification
 
 Before invoking any implementation skill, confirm:
+- [ ] `<slug>` passed `^[a-z0-9][a-z0-9-]{0,39}$` before any Phase 0 design work or `.omo/` write
 - [ ] I explored project context (commits, plans, related files)
 - [ ] I asked clarifying questions one at a time until requirements are clear (or zero questions if already clear)
 - [ ] I proposed 2-3 approaches with trade-offs + my recommendation

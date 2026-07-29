@@ -1,0 +1,70 @@
+{
+  "name": "prototype",
+  "version": "0.1.0",
+  "verified": true,
+  "positive_keywords": [
+    "prototype",
+    "visual fidelity",
+    "spec authoring",
+    "throwaway UI variants"
+  ],
+  "description": "Prototype / visual-decision skill for spec authoring. Generates throwaway UI variants (default 3, max 5, MIN 2 valid else NEEDS_CONTEXT) to resolve layout / density / motion questions that text-only specs cannot answer. Brownfield uses ?variant=A|B|C|E + floating switcher; greenfield generates static HTML at .omo/prototypes/<plan>/. Records [proto] decisions in decisions.md and replaces [PROTO-RESOLVE] markers in the spec. NOT for production UI, deploy, or design-token handoff.",
+  "positive_triggers": [
+    {
+      "input": "The spec has [PROTO-RESOLVE: should the dashboard use bento grid or sidebar navigation?] and we need to pick a layout before spec_approved. Show me three prototype variants for visual fidelity.",
+      "expected_skill": "prototype",
+      "reason": "Explicit [PROTO-RESOLVE] marker + visual fidelity + prototype variant request matches Phase 1.2 visual gating"
+    },
+    {
+      "input": "I am spec authoring the marketing landing page and need to compare layout / density / motion alternatives before locking the spec. Generate three throwaway prototype variants A/B/C.",
+      "expected_skill": "prototype",
+      "reason": "Spec authoring context with explicit prototype variant generation request"
+    },
+    {
+      "input": "Run /prototype for the on-checkout-flow feature so I can visually pick between compact and spacious density on the brownfield checkout route.",
+      "expected_skill": "prototype",
+      "reason": "Direct /prototype invocation in brownfield context with switcher requirement"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Implement the production dashboard with the chosen bento grid layout. Use meisijiya-frontend-taste rules and ship it.",
+      "expected_no_skill": true,
+      "reason": "Implement production feature is incremental-implementation territory, not throwaway prototype scaffolding"
+    },
+    {
+      "input": "Deploy the chosen variant to production and run pre-ship-gate before rolling out the canary.",
+      "expected_no_skill": true,
+      "reason": "Deploy / rollout is pre-ship-gate / closed-loop-delivery territory, not prototype"
+    },
+    {
+      "input": "Generate design tokens and a UI/UX spec so the designer can build the marketing page in Figma.",
+      "expected_no_skill": true,
+      "reason": "Ship / design-token handoff is designer-handoff + meisijiya-frontend-taste, not prototype throwaway scaffolds"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Brownfield behavioral: existing route at .opencode/plugins/meisijiya-skills.js must accept ?variant=A|B|C|E and serve three prototype variants with a floating switcher; status.json transitions to awaiting_selection with at least 2 valid variants.",
+      "expected_behavior": [
+        "Agent reads the existing route and writes throwaway scaffold under .omo/throwaway/<feature>/",
+        "Agent generates 3 prototype variants differing on at least one axis (layout / density / motion)",
+        "Agent creates floating bottom-bar switcher for live variant comparison",
+        "Agent initializes .omo/prototypes/<plan>/status.json with state=awaiting_selection and variants[] array listing 3 entries with render:ok",
+        "Agent pauses for explicit user selection; does not auto-resolve"
+      ]
+    },
+    {
+      "scenario": "Greenfield behavioral: plan slug qa-proto-demo with no existing route; agent generates static HTML prototypes at .omo/prototypes/qa-proto-demo/{variant-A,B,C,index}.html with status=awaiting_selection.",
+      "expected_behavior": [
+        "Agent creates .omo/prototypes/qa-proto-demo/ directory",
+        "Agent writes three variant HTML files + index.html listing all variants",
+        "Agent does NOT delegate to build-gate-visual-review (its <script> ban is incompatible with the switcher)",
+        "Agent initializes status.json with state=awaiting_selection and 3 valid variants",
+        "After QA, agent tears down .omo/prototypes/qa-proto-demo/ and the status.json"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "v0.1.0 — initial TODO 3 slice. Three positive triggers cover [PROTO-RESOLVE] marker, spec authoring context, and direct /prototype invocation. Three negative triggers cover production implementation, deployment, and design-token handoff. Two behavioral scenarios cover brownfield (existing route) and greenfield (own HTML generator) paths. Status state machine: triggered -> generating -> awaiting_selection -> resolved (alt: need_context, bypassed). [proto] decisions.md format documented in SKILL.md Process §6."
+}

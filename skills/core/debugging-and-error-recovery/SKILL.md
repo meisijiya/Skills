@@ -31,6 +31,16 @@ allowed-tools: "Read Edit Bash Glob Grep"
 
 ## Process
 
+### 0. Protect long notepads (A3)
+
+After any append to `.omo/notepads/<plan>/<file>.md`, count the resulting lines. When the file has **≥ 500 lines**, append this banner with the real UTC timestamp substituted:
+
+```markdown
+<!-- WARNING: notepad exceeded 500 lines at <iso8601> -->
+```
+
+Never auto-truncate the notepad. The warning is append-only and preserves all investigation evidence; compaction or archival requires a separate user-authorized action.
+
 ### 1. Reproduce
 
 写一个**能稳定复现的最小命令**(一行能跑):
@@ -139,6 +149,7 @@ Test: <test name that guards against regression>
 ## Verification
 
 Before declaring debug complete, confirm:
+- [ ] 每次 notepad append 后已检查行数;达到 500 行时追加 WARNING banner,且未截断内容
 - [ ] Reproduce command written down and runnable by anyone
 - [ ] Reproduce command **failed** before fix
 - [ ] Reproduce command **passes** after fix

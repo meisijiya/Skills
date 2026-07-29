@@ -65,7 +65,7 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality, 2 verdicts); complements OMO `review-work` (whole-branch 5-lane)
 - [`test-guard`](~/.agents/skills/test-guard/SKILL.md) — 7-check AI-test quality audit (skip-detection / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness); pairs with `test-driven-development` to enforce tests actually test something
 
-**domain (8):**
+**domain (11):**
 - [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO `frontend` (visual-engineering category); teaching-style overlay via [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) §5 reminder
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — designer → eng UI/UX spec handoff via `ui-ux-pro-max`
 - [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) — contract-first REST / GraphQL / RPC design
@@ -74,6 +74,9 @@ Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification
 - [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — 3-role article fact-check pipeline (Critic → Verifier × N → Repairer); OMO `general` agent for parallel Verifier subagents
 - [`loop-me`](~/.agents/skills/loop-me/SKILL.md) — extract a repeated workflow into an executable spec; output feeds OMO `/goal` or `incremental-implementation`
 - [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) — pedagogical data-contract emitter for learning docs and teaching-style HTML pages (6-phase SOP / 3-level diagnosis / 4 quiz types / deliberate practice / cross-disciplinary / reverse distillation); not auto-loaded; loaded via `@teacher` direct or build-gate §5 reminder
+- [`prototype`](~/.agents/skills/prototype/SKILL.md) — visual / interaction decision skill for spec authoring; generates throwaway UI variants (MIN 2, max 5) to resolve `[PROTO-RESOLVE]` markers in Phase 1.2 specs; decisions logged to `decisions.md`, never ships to production
+- [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) — multi-session planning for scopes that exceed a single brainstorming session; opens `.omo/wayfinder/<slug>/`, drives resolution across sessions, on close generates Phase 0 of `.omo/plans/<slug>.md`
+- [`research`](~/.agents/skills/research/SKILL.md) — investigates planning / design questions against high-trust primary sources; writes cited Markdown findings to `.omo/research/<plan>/<topic>.md`; requires plan context, refuses plan-less invocations
 
 **frontend (3):**
 - [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) — anti-slop frontend rules for landing / portfolio / marketing code; brief inference + three dials (variance/motion/density) + hard non-default rules on typography / color / layout / CTA / eyebrows / zigzag / motion / image strategy; pairs with `designer-handoff` as the second contract layer

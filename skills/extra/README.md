@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 29 个)
+# Extra Skills(选装集 · 33 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -19,7 +19,7 @@
 | 创建/编辑 skill | `meta` 中加 `writing-skills` |
 | AI 刚生成/修改了代码,要审查盲区 | `security` 中加 `ai-code-blindspots` |
 
-## 29 个 skill 一览(按 group)
+## 33 个 skill 一览(按 group)
 
 **注意**：`teacher-skill` 为本地适配型 skill(8 个含 `meisijiya-domain` 域),不计入 26 的统计;若安装到 `~/.agents/skills/teacher-skill/SKILL.md` 则自动被 OMO skill loader 发现,无需 marketplace 同步。
 
@@ -58,7 +58,7 @@
 | [`contract-strengthening`](./contract-strengthening/) | Phase 1.25 open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);`disable-model-invocation: true` 仅用户触发 |
 | [`test-guard`](./test-guard/) | 7-check AI 测试质量审计(skip / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness);与 `test-driven-development` 互补 |
 
-### domain (8)
+### domain (11)
 | Skill | 一句话 |
 |---|---|
 | [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求响应式 HTML 页面时通过 OMO 内置 `frontend` 渲染;教学型内容叠加 [`teacher-skill`](./teacher-skill/) pedagogy overlay |
@@ -69,6 +69,9 @@
 | [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic → Verifier × N → Repairer);输出 `.verification/article-verified.md` + `.verification/verification-report.md` |
 | [`loop-me`](./loop-me/) | 把反复做的活动形式化成可执行 workflow spec(stateful grilling session;产物 `workflows/*.md` + `NOTES.md`,**不是实现**);`disable-model-invocation: true` 仅用户 `/loop-me` 触发 |
 | [Local] [`teacher-skill`](./teacher-skill/) | meisijiya-adapted 教学编排(6 阶段 SOP / 3 级诊断 / 4 类 quiz / 刻意练习 / 跨学科 / 反蒸馏);不自动加载,仅在 `build-gate-visual-review` HTML page 模式 + §5 reminder 中被提示;`allowed-tools: Read` only;安装在 `~/.agents/skills/teacher-skill/` |
+| [`prototype`](./prototype/) | 视觉 / 交互决策 skill(spec 编写阶段用);生成可丢弃的 UI 变体(MIN 2,max 5)解析 `[PROTO-RESOLVE]` markers;决策落到 `decisions.md`,**绝不**上线 |
+| [`wayfinder`](./wayfinder/) | 多 session 规划(scope 超过单次 brainstorming);打开 `.omo/wayfinder/<slug>/`,跨 session 推进;关闭时生成 `.omo/plans/<slug>.md` Phase 0 |
+| [`research`](./research/) | 对规划 / 设计问题做权威来源调查;写入 `.omo/research/<plan>/<topic>.md` 带引用;要求 plan context,无 plan 直接拒绝 |
 
 ## 依赖关系(顺序装才有效)
 

@@ -58,6 +58,9 @@ This file is a routing policy, not a catalog. Consult `<available_skills>` (inje
 | `@teacher` / "教我" / "teaching-style HTML" / "我想学会 X 的思维方式" (reverse distillation from a public skill / teacher source) | If installed, [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) (extra/) | Emits pedagogy data contract → OMO `frontend`; build-gate HTML page mode §5 reminder for overlay |
 | Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
 | "Build a landing / portfolio / marketing page" / "frontend agent is about to write UI code" / "ship a SaaS hero that doesn't look AI-default" / "redesign our existing site to premium quality" | If installed, [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) (extra/) — anti-slop rules + three dials + non-default hard rules | [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) for the project-specific spec contract (loads first; frontend-taste is the second contract layer on top). If the brief names a specific aesthetic (Linear / Notion / editorial / premium-utilitarian), stack [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md) as the active direction. If upgrading existing UI rather than greenfield, load [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) first. |
+| Use when a Phase 1.2 spec contains `[PROTO-RESOLVE]` markers or has a visual-fidelity gap | If installed, [`prototype`](~/.agents/skills/prototype/SKILL.md) (extra/) — generate throwaway UI variants | Return to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) §3.5; `NEEDS_CONTEXT` on <2 valid variants; `[proto:bypass] reason` required |
+| Use when scope exceeds a single brainstorming session | If installed, [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) (extra/) — DAG ticket graph for multi-session exploration | Close → Phase 0 of `.omo/plans/<slug>.md`, consumed by [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) |
+| Use when a planning/design decision requires authoritative information from official docs / RFCs / source-repo / spec | If installed, [`research`](~/.agents/skills/research/SKILL.md) (extra/) — plan-required, 4-type citation whitelist, Stack Overflow REFUSED | Uses the OMO `librarian` under the hood (async or sync); findings feed the plan decision |
 
 **Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
 
@@ -95,7 +98,8 @@ If you see `<EXTREMELY-IMPORTANT>` markup prepended to the first user message of
 The Priority table above is *cross-cutting routing*, but most real work follows a multi-skill **chain**. Common chains (in order — don't skip stages):
 
 ```
-design:           brainstorming → spec-driven-development
+design:           brainstorming → wayfinder → spec-driven-development (wayfinder is the alternative Phase 0 for multi-session scope)
+spec phase 1.2:   spec-driven-development §3.5 → /prototype (NEEDS_CONTEXT if <2 valid) → decisions.md [proto]
 implementation:   brainstorming? → incremental-implementation → test-driven-development → verification-before-completion
 ui front-end:     designer-handoff (project-specific spec) → meisijiya-frontend-taste (anti-slop rules) → [meisijiya-minimalist-ui if aesthetic named] → incremental-implementation → meisijiya-redesign-ui (if existing UI) → verification-before-completion + visual-qa
 slice loop:       incremental-implementation (dispatch) → slice-review (per-slice) → slice-progress.sh mark-complete → whole-branch review-work

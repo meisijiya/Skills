@@ -63,7 +63,10 @@
         "./skills/extra/improve-codebase-architecture",
         "./skills/extra/verify-chain",
         "./skills/extra/loop-me",
-        "./skills/extra/teacher-skill"
+        "./skills/extra/teacher-skill",
+        "./skills/extra/prototype",
+        "./skills/extra/wayfinder",
+        "./skills/extra/research"
       ]
     },
     {

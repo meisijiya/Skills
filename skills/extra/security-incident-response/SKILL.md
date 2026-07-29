@@ -177,6 +177,22 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 
 **5 whys 是核心**：不停在表层。例如 "credential 泄漏" 不是 root cause；继续问 "为什么 commit 进 public repo" → "因为.env 没加.gitignore" → "因为 dev 不知道要加" → "因为 onboarding 文档没写" → "因为 spec 没要求"。
 
+### 7. Close incident and publish cleanup state
+
+Only after Recover and Postmortem verification, close the incident with the real slug and UTC timestamp substituted:
+
+```bash
+printf '%s\n' '{"status":"closed","closed_at":"<iso8601>"}' > .omo/incidents/<slug>/closed.json
+```
+
+Then append this row to `.omo/notepads/<plan>/decisions.md`:
+
+```text
+[incident:closed] ts=<iso8601> incident=<slug> closed=.omo/incidents/<slug>/closed.json
+```
+
+Writing `.omo/incidents/<slug>/closed.json` is the close signal consumed by the A1 state-index hook. Do not emit either record before all close checks pass, and do not delete the incident evidence directory.
+
 ## Common Rationalizations
 
 | Excuse | Reality |
@@ -214,6 +230,8 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 - [ ] 用户通知已按法律时限发送（critical / major 必须）
 - [ ] Postmortem 已写：5 whys + action items + lessons
 - [ ] Runbook 已更新（下次 incident 不再手忙脚乱）
+- [ ] `.omo/incidents/<slug>/closed.json` 已写入,且 `.omo/notepads/<plan>/decisions.md` 已追加 `[incident:closed]` row
+- [ ] A1 state-index hook 已看到 close signal;incident evidence directory 仍保留
 - [ ] 本 skill 未做任何**未授权的**代码改动（只做最小隔离 + 补丁）
 
 ## omo Integration

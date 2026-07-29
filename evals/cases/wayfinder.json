@@ -1,0 +1,86 @@
+{
+  "name": "wayfinder",
+  "version": "0.1.0",
+  "description": "Multi-session exploration and decision-mapping for projects whose scope exceeds a single brainstorming session. Opens a wayfinder map, drives resolution across sessions via prototype/research/decision tickets (NO generic 'task' type) arranged as a ticket DAG with blockedBy edges, and on close generates Phase 0 of .omo/plans/<slug>.md then archives to .omo/wayfinder-archive/. Use when the user says 'wayfinder', 'decision mapping', 'multi-session planning', or when scope clearly spans multiple sessions with tickets blocking each other. NOT for single-session scope (use brainstorming), hotfixes / one-file changes (no design phase), known-shape work (go straight to spec-driven-development), or pure debugging (use debugging-and-error-recovery).",
+  "positive_triggers": [
+    {
+      "input": "/wayfinder",
+      "expected_skill": "wayfinder",
+      "reason": "Explicit slash command trigger — opens a new multi-session decision-mapping session."
+    },
+    {
+      "input": "Let's open a decision map for the auth migration — there's JWT vs session cookie research, three prototype variants, and a HITL decision on the rate-limit policy; this will take several sessions.",
+      "expected_skill": "wayfinder",
+      "reason": "Multi-session scope with mixed prototype / research / decision tickets blocking each other → wayfinder is the right slot."
+    },
+    {
+      "input": "I want to plan the dashboard redesign across multiple sittings — first prototype variants, then research density findings, then decide on CTA copy, then greenlight build",
+      "expected_skill": "wayfinder",
+      "reason": "Explicit multi-session cadence + ticket DAG with blockedBy-style ordering → wayfinder."
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Let's brainstorm whether to add a settings panel",
+      "expected_skill": "brainstorming",
+      "reason": "Single design exploration (one session's worth) → brainstorming, NOT wayfinder."
+    },
+    {
+      "input": "Fix the broken CI workflow file",
+      "expected_no_skill": true,
+      "reason": "Hotfix / single-file change → skip design phase entirely; no wayfinder / no brainstorming."
+    },
+    {
+      "input": "Implement the login form",
+      "expected_no_skill": true,
+      "reason": "Known-shape implementation work → spec-driven-development / incremental-implementation, not wayfinder."
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User has 3 tickets — ticket 01 blockedBy 02, ticket 02 blockedBy 01 (cycle). They run scripts/wayfinder-close.sh.",
+      "expected_behavior": [
+        "Script reads all ticket YAML frontmatter",
+        "Script builds blockedBy graph",
+        "Script runs DFS / Tarjan cycle detection and finds the 01↔02 cycle",
+        "Script exits non-zero with 'blocking_cycles=true' error",
+        "No .omo/plans/<slug>.md generated",
+        "No .omo/wayfinder-archive/<slug>/ move performed",
+        "User must refactor the blockedBy edges (e.g. drop one of the edges or split a ticket) before re-running close"
+      ]
+    },
+    {
+      "scenario": "User has a single-session scope and tries to use wayfinder for it.",
+      "expected_behavior": [
+        "Agent detects single-session scope (one decision's worth, no blockedBy edges, no research prototype decisions mixed in)",
+        "Agent does NOT open .omo/wayfinder/<slug>/ — instead routes to brainstorming",
+        "If user explicitly insists on /wayfinder, agent opens scaffold but flags the mismatch in the [wayfinder] log so the next session can decide"
+      ]
+    },
+    {
+      "scenario": "User tries to add a ticket with type='task' to escape the 3-type taxonomy.",
+      "expected_behavior": [
+        "Agent refuses the ticket",
+        "Agent explains: only prototype / research / decision are allowed; if the work is not classifiable, it is not ticket-shaped yet (defer to a follow-up wayfinder session)",
+        "Agent does not write the ticket file"
+      ]
+    },
+    {
+      "scenario": "User closes a wayfinder with all tickets resolved; then re-runs scripts/wayfinder-close.sh <slug>.",
+      "expected_behavior": [
+        "First close: validates types + DAG + status, generates .omo/plans/<slug>.md, moves .omo/wayfinder/<slug>/ to .omo/wayfinder-archive/<slug>/, appends [wayfinder] entry to .omo/notepads/<slug>/decisions.md, exits 0",
+        "Second close: detects existing archive directory, prints 'already closed', exits 0 without re-generating plan.md or double-appending to decisions.md"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "positive_keywords": [
+    "wayfinder",
+    "decision mapping",
+    "multi-session planning",
+    "ticket DAG",
+    "blockedBy",
+    "wayfinder-archive"
+  ],
+  "notes": "Lifecycle is owned by scripts/wayfinder-{init,close}.sh (deterministic, tested via scripts/test-wayfinder-lifecycle.sh covering T1 init tree+schema, T2 invalid slug refused, T3 idempotent init, T4 3 valid types accepted, T5 task type refused, T6 cycle refused, T7 unresolved refused, T8 archive + plan generated, T9 idempotent close). TODO 1's omo-state-index plugin auto-updates .omo/.index.json when [wayfinder] entries land in decisions.md. Catalog placement in meisijiya-domain is owned by TODO 6 — this skill does NOT edit marketplace.json / AGENTS.md / README."
+}

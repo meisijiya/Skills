@@ -122,6 +122,14 @@ Fill every section — don't leave "TBD". If you don't know something, that's a 
 
 The Spec lives in `.omo/plans/<slug>.md` Phase 1 — Phase 0 (Design) above, Phase 2 (Research) below. **No separate spec file.**
 
+### 3.5 Visual/Interaction Decisions
+
+When a visual or interaction choice cannot be resolved faithfully in text, mark it in Phase 1 as `[PROTO-RESOLVE: <question>]`, where `<question>` is one concrete, one-sentence decision. This marker is the only temporary carve-out from the No-Placeholders contract.
+
+- Resolve each marker during Phase 1.2 with the approved prototype workflow, then replace it with the selected decision and rationale.
+- A recorded bypass must also replace the marker with the bypass date and reason; leaving the marker in place is not a bypass.
+- `spec_approved` requires zero remaining `[PROTO-RESOLVE: <question>]` markers.
+
 ### 4. Clarify ambiguity (if needed)
 
 If any section can't be filled confidently, return to the [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) one-question-at-a-time protocol. **Do NOT batch-ask five questions.** Delegated judgment may recommend an answer, but never approves unresolved design or contract choices and cannot bypass the user-approved Design gate.
@@ -129,6 +137,22 @@ If any section can't be filled confidently, return to the [`brainstorming`](~/.a
 ### 5. Lock the Spec in the plan file
 
 Once Spec is complete, append a final `**Status:** spec_approved` line to Phase 1 (do not rewrite the plan — use `Edit` to preserve script-emitted headers per `ulw-plan` rules). The plan file itself is the durable record.
+
+#### Phase 1 draft cleanup lock block
+
+If `.omo/drafts/<slug>.md` exists when the Spec locks, archive it instead of deleting it:
+
+```bash
+mkdir -p .omo/sdd/<slug>/drafts/ && mv .omo/drafts/<slug>.md .omo/sdd/<slug>/drafts/
+```
+
+After the move succeeds, append this audit row to `.omo/notepads/<slug>/decisions.md`:
+
+```text
+[cleanup] ts=<iso8601> source=.omo/drafts/<slug>.md destination=.omo/sdd/<slug>/drafts/<slug>.md action=moved
+```
+
+If the destination already exists or the move fails, stop the lock and ask for resolution; never overwrite or delete either draft automatically.
 
 > **Honest tier limits (OpenCode)**:
 > - OMO has **no SHA-256 attestation** for plan content. The durable record is `.omo/plans/<slug>.md` itself; keep it under VCS.
@@ -224,7 +248,8 @@ The user is the contract holder — not you.
 Before proceeding to Phase 2, confirm:
 - [ ] `.omo/plans/<slug>.md` Phase 1 section complete (no TBD)
 - [ ] Phase 0 (Design from brainstorming) preserved above Phase 1
-- [ ] `Status: spec_approved` line appended (Edit, not Write)
+- [ ] `Status: spec_approved` line appended (Edit, not Write), with zero `[PROTO-RESOLVE: <question>]` markers remaining
+- [ ] 若 `.omo/drafts/<slug>.md` existed at lock, it moved to `.omo/sdd/<slug>/drafts/` and `[cleanup]` was appended to decisions.md
 - [ ] User has reviewed the Spec and confirmed (single approval, no repeats later)
 - [ ] At least 3 concrete acceptance criteria listed
 - [ ] At least 1 build / test / lint command listed (real, runnable)

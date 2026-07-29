@@ -1,0 +1,78 @@
+{
+  "name": "research",
+  "version": "0.1.0",
+  "verified": true,
+  "positive_keywords": [
+    "high-trust",
+    "official docs",
+    "RFC",
+    "source-repo",
+    "spec",
+    "cited Markdown",
+    "plan context",
+    "Plan context required"
+  ],
+  "description": "High-trust-source research with cited Markdown findings on planning / design questions, written to .omo/research/<plan>/<topic>.md. Thin contract layer over OMO librarian agent: this skill enforces a 4-type source whitelist (official docs, RFC, source-repo code, project ADRs / spec), inline citation format, plan-required invocation, async dispatch, and the decisions.md audit entry. Use when a planning decision needs an authoritative answer that should outlive the session as a citable record and candidate sources are official docs, RFCs, source-repo code, or project ADRs / spec. NOT for casual questions (use agent default tools), non-authoritative sources like Stack Overflow or blogs (link in See Also only — never cite as [ref]), or plan-less invocations (refuse: 'Plan context required.').",
+  "positive_triggers": [
+    {
+      "input": "I need to know what the latest Vue 3.5 RFC says about prop inheritance defaults — get an authoritative answer I can cite in the spec",
+      "expected_skill": "research",
+      "reason": "Explicit 'authoritative answer I can cite' → matches 4-type whitelist (official docs / RFC / source-repo / spec) and a planning-context question → research"
+    },
+    {
+      "input": "Investigate the IANA header reservation rule for `Foo-Bar` so we can document it in the API contract",
+      "expected_skill": "research",
+      "reason": "Investigate + IANA (official-docs / rfc) + planning context (API contract) → research"
+    },
+    {
+      "input": "Wayfinder ticket of type `research` — async-dispatch it and drop the findings path in the ticket Resolution",
+      "expected_skill": "research",
+      "reason": "Wayfinder `research` ticket type → matches the documented dispatch target (async by default); the `task_id` is consumed by the ticket Resolution"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "What's Next.js? I've never used it.",
+      "expected_skill": null,
+      "reason": "Casual knowledge question; no plan-scoped citable record needed → agent default tools, NOT research"
+    },
+    {
+      "input": "Look up the Stack Overflow answer for how to debounce in React and write a cited finding",
+      "expected_skill": null,
+      "reason": "Stack Overflow is non-authoritative; even if cited, the test suite refuses it. Goes in `See Also` at best, not `[ref]`"
+    },
+    {
+      "input": "/research topic=oauth2-flow without a plan open — just answer inline",
+      "expected_skill": null,
+      "reason": "Plan-less invocation → refuse with the verbatim literal `Plan context required. Open a plan first with /brainstorming or /ulw-plan.`"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User is mid-plan on `skills-extension-v1` and asks: 'Investigate the citation discipline for me so the spec can cite it later. Mode: async — I want to keep planning.'",
+      "expected_behavior": [
+        "Agent verifies plan slug is present (skills-extension-v1) — does NOT refuse",
+        "Agent verifies topic is new — does NOT find .omo/research/skills-extension-v1/citation-discipline.md, so dispatches fresh",
+        "Agent picks mode=async per the user's explicit request and the heuristic (multi-source investigation)",
+        "Agent dispatches librarian with the verbatim dispatch prompt template (whitelist + format + section contract + refusal rule)",
+        "Agent returns IMMEDIATELY with the exact JSON shape {\"status\": \"running\", \"task_id\": \"<id>\"} — does NOT block on librarian",
+        "Background librarian writes .omo/research/skills-extension-v1/citation-discipline.md with required frontmatter (topic, plan, ts, mode: async, status: complete, sources_used) and the 5 body sections in order",
+        "Background librarian uses ONLY the 4 whitelisted [ref:*] types — Stack Overflow / blog links go to See Also as plain markdown",
+        "Agent appends the audit entry `[research] ts=<iso8601> topic=citation-discipline findings=.omo/research/skills-extension-v1/citation-discipline.md mode=async` to .omo/notepads/skills-extension-v1/decisions.md",
+        "Hook updates .omo/.index.json field `research_complete` with the (plan, topic) tuple — idempotent re-invocation reuses the existing record and does not double-append decisions.md",
+        "Agent surfaces the >5KB distill prompt to the user IF the output exceeds 5KB; user response (y/n) is recorded; original file is preserved either way"
+      ]
+    },
+    {
+      "scenario": "User invokes /research with no plan context: '/research topic=foo' (no plan slug in current session)",
+      "expected_behavior": [
+        "Agent refuses IMMEDIATELY with the verbatim literal: `Plan context required. Open a plan first with /brainstorming or /ulw-plan.`",
+        "Agent does NOT propose /tmp or any other fallback path — there is no plan-scoped place to land the output",
+        "Agent does NOT call librarian — refusal is upstream of dispatch",
+        "Agent does NOT create .omo/research/<any>/foo.md — the output file path requires a plan slug"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Verified-level (2026-07-29): positive_keywords must appear in skills/extra/research/SKILL.md description body (CI gate from slice-review / ai-code-blindspots pattern). Source whitelist additions (new high-trust source types) require a brainstorming amend — see SKILL.md 'Source Whitelist' table for the 4 exact types. Librarian agent is the execution body; this skill does NOT modify librarian. The dispatch prompt template in SKILL.md § 'Dispatch Prompt Template' is the entire contract surface. Async dispatch is verified to return the exact `{\"status\": \"running\", \"task_id\": \"<id>\"}` shape within 100ms — see scripts/test-citation-discipline.sh case (f). Idempotency on (plan, topic) is verified by case (g) of the same script."
+}

@@ -5,7 +5,6 @@ allowed-tools: "Read Edit Bash Glob Grep"
 ---
 
 # incremental-implementation
-
 ## Overview
 
 纵向切片 —— 每个 slice 独立可交付、可回滚、可单独 ship。横向分层(一口气全写完)是大忌,因为 debug 时找不到边界,rollback 时丢一片,review 时读 1000 行 diff。
@@ -18,7 +17,6 @@ Slice 的大小不是越小越好 —— 太碎浪费 commit overhead,太大失�
 > - **后置闭环**:Phase 3 全部完成后,**桥接 OMO 内置 `review-work`**——以全新上下文 5 个并行子代理审 diff 与 spec 对齐;不重复造新审查 skill。slice 全部 ship 后,运行时证据(24h+ 健康 + 用户可达)由 [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) 单独负责 —— 本 skill 停在 PR 闭环,不在运行时闭环
 > - **中途变更路由**:见 § 9(五档分类 + 状态机 + amend 协议)
 > - **回滚审计**:见 § 10(`[rollback]` 日志模板 + 6 态状态机扩展)
-
 ## When to Use
 
 **Use when:**
@@ -33,9 +31,14 @@ Slice 的大小不是越小越好 —— 太碎浪费 commit overhead,太大失�
 - 纯文档 / 配置修改
 - 用户明确说"一次性写完"
 - 已知 trivial 重命名(用 IDE rename)
-
 ## Process
+### 0. Phase 2 startup state sweep (A2)
 
+Before reading the executable frontier, run this non-destructive inventory:
+```bash
+ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway,wayfinder,wayfinder-archive,research,architecture-review,incidents}/* 2>/dev/null
+```
+Cross-check every result against `.omo/.index.json` field `stale_artifacts`. Show the filesystem-only, index-only, and matched stale candidates before any action. Prompt exactly `Delete stale artifacts? y/n`; never auto-delete. `n`, empty input, a missing/corrupt index, or an interrupted prompt preserves every path; `y` only authorizes the explicitly listed paths for a separate, auditable cleanup action.
 ### 1. Decompose into slices
 
 Phase 3 是 Kanban ticket board —— 每条 ticket 是 § 3 的可执行单元,`blockedBy` 构成 DAG,`status` 跟踪生命周期。Read `.omo/plans/<slug>.md` Phase 3 (Prometheus task rows),按 **vertical capability** 切片(同一条 ticket 贯穿 data / service / consumer),而非按技术层切:
@@ -53,7 +56,6 @@ Each slice breaks the system end-to-end. After slice 1 the app doesn't work.
 - Slice 3: Add "update user" feature
 
 Each slice ships a working capability. After slice 1 users can create accounts.
-
 ### 2. Size each slice
 
 | Indicator | Target |
@@ -65,7 +67,6 @@ Each slice ships a working capability. After slice 1 users can create accounts.
 | Slice atomic commits | 0–1 (commit 时机由 git 策略决定,不强制每 slice commit) |
 
 If a slice exceeds these, decompose further.
-
 ### 3. Annotate each slice with metadata
 
 为每条 slice 写一份 OMO `atlas` / `team_task` 能消费的元数据(等同 Kanban ticket 契约):
@@ -96,25 +97,20 @@ If a slice exceeds these, decompose further.
 | slice-2b-read-user-v2 | Read user list v2 | [slice-1-create-user] | ❌ | AFK | sisyphus-junior | pytest tests/test_user_read_v2.py | GET /users → 200 contains created row | 50 | ✓ | in_progress | null |
 | slice-3-error-taxonomy | Map error codes | [slice-2b-read-user-v2] | ❌ | HITL | hephaestus | pytest | 400/404/500 map to documented codes | 30 | ✓ | pending | null |
 | slice-old-rest-api | Maintain legacy REST API | [slice-1-create-user] | ❌ | AFK | sisyphus-junior | pytest tests/test_legacy_api.py | Legacy /api/v1/* returns 200/4xx as before; CI green | 40 | ✓ | **deprecated** | null |
-
 #### 3.1 Ticket DAG 与 executable frontier
 
 ticket 集合是 DAG:`blockedBy` 是有向边,跨 ticket 的环 = 错。**executable frontier = 所有 `status=pending` 且 `blockedBy` 全部 `complete` 的 ticket**,OMO `atlas` 据此排程 + 决定同 frontier 内 `parallel=true` 的 ticket 一并派出。frontier 空 ⇒ Phase 3 收尾,转 § 7 review-work。`deprecated` / `superseded` / `rolled_back` 的 ticket 自动从 frontier 排除。
-
 #### 3.2 NO horizontal decomposition
 
 禁止按技术层切分 ticket:`slice-db-schema`、`slice-api-endpoint`、`slice-ui-form`、`slice-frontend-page` 是**反例** —— slice 1 完成后系统仍不可运行,集成反馈推迟到最后。Phase 3 的每条 ticket 必须跨至少 **data + service + 真实 consumer(API caller / UI / CLI)** 三层中的两层,见 § 1 正例。
-
 #### 3.3 Tracer Bullet first-ticket
 
 **第一条 ticket 必须是 Tracer Bullet**:最小范围贯穿 data → service → real consumer(可用最简 UI / curl / CLI 触发),跑通整条调用链,产出最早的全链路集成反馈。范围小于完整业务功能,允许 stub 数据 / 假数据 / TODO 边界;目的是验证集成假设而非交付价值。后续 ticket 在 tracer 路径上加深。
 
 **HITL slice 的特殊规则**:HITL slice 在执行前后都需要用户确认(对齐 spec 后才能跑、跑完后用户确认交付)。
-
 #### 3.4 Plan-level Global Constraints(Superpowers 吸收)
 
 **每个 slice 的元数据之上,必须有一个 plan-level 段**显式列出全局约束 — 这是 sub-agent 执行时唯一可信赖的"上下文边界"。子 agent 在不同上下文里工作,只能读 brief,看不到 plan 全貌,所以 brief 里**必须**把以下约束 verbatim 复制:
-
 ```markdown
 ## Global Constraints
 
@@ -126,13 +122,10 @@ ticket 集合是 DAG:`blockedBy` 是有向边,跨 ticket 的环 = 错。**execut
 - API 契约:`POST /api/users` 必须返回 RFC 7807 problem+json 错误格式
 - 不要 mock 数据库;使用 docker-compose.test.yml 的真实 Postgres
 ```
-
 **WHY**(来自 Superpowers writing-plans 实证):子 agent "几乎不懂我们的工具集",plan 假设"implementer 是 skilled developer but knows almost nothing about our toolset or problem domain"。Global Constraints 是把跨 slice 的隐性约束转成显性契约,防止 executor 重复发明或偏离。
-
 #### 3.5 Slice Interfaces: Consumes / Produces
 
 每个 slice 必须有精确的接口契约,**这是 executor 知道"邻居依赖什么"的唯一通道**(executor 不读完整 plan,只看 brief):
-
 ```markdown
 ### Slice: slice-2b-read-user-v2
 
@@ -146,23 +139,19 @@ ticket 集合是 DAG:`blockedBy` 是有向边,跨 ticket 的环 = 错。**execut
   - `getUserById(id: string): Promise<User | null>` — `src/users/service.ts` new export
   - `GET /api/users/:id` handler — `src/api/users/[id].ts` new file
 ```
-
 **强约束**:
 - **exact signature**:函数名 / 参数类型 / 返回类型 / 抛错类型**逐字**写,executor 不会发明
 - **file:line 引用**:Consumes 引用已存在的 symbol,**禁止**"用 service layer 的方法"这种模糊引用
 - **Produces 也要写**:后续 slice 依赖的 contract,executor 看不到,所以 brief 必须替它声明
 
 如果 slice 之间接口不匹配(consumes 期望的方法名 vs produces 导出的方法名不一致),executor 跑挂。**MUST** 在 § 5 实施前用 `~/.agents/skills/slice-review/scripts/review-package.sh --check-interfaces` 验证一致性。
-
 #### 3.6 Bite-sized steps: TDD 5 步 + exact code
 
 **每个 slice 必须用 TDD 5 步分解**(每步 2-5 分钟):
-
 ```markdown
 **Steps:**
 
 - [ ] **Step 1: Write the failing test**
-
 ```typescript
 // tests/users/getUserById.test.ts
 import { getUserById } from '@/users/service';
@@ -184,14 +173,12 @@ describe('getUserById', () => {
   });
 });
 ```
-
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test tests/users/getUserById.test.ts`
 Expected: FAIL with "Cannot find module '@/users/service' or its corresponding type declarations." (or "getUserById is not a function")
 
 - [ ] **Step 3: Write minimal implementation**
-
 ```typescript
 // src/users/service.ts
 export async function getUserById(id: string): Promise<User | null> {
@@ -199,20 +186,17 @@ export async function getUserById(id: string): Promise<User | null> {
   return row ? toUser(row) : null;
 }
 ```
-
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test tests/users/getUserById.test.ts`
 Expected: PASS — 2/2 tests
 
 - [ ] **Step 5: Commit**
-
 ```bash
 git add tests/users/getUserById.test.ts src/users/service.ts
 git commit -m "feat(users): add getUserById"
 ```
 ```
-
 **强约束**(从 Superpowers No Placeholders 直接吸收):
 
 - ❌ 禁止 "TBD" / "TODO" / "implement later" / "fill in details"
@@ -226,7 +210,6 @@ git commit -m "feat(users): add getUserById"
 - ✅ exact commands with expected output(每个 command 必带 Expected: PASS/FAIL 行)
 
 **WHY**:executor 在 fresh context,看不到 plan 全貌,无法"参考前面步骤",只能照猫画虎。每步必须独立可执行。
-
 #### 3.7 Executor status contract(4 态)
 
 executor 跑完 slice **必须**返回 4 态之一,不是 free text:
@@ -241,11 +224,9 @@ executor 跑完 slice **必须**返回 4 态之一,不是 free text:
 **实现**:executor 在 dispatch prompt 里**只能**返回 4 态 + 1 行总结(< 200 字符)。详细 RED/GREEN evidence、commit、concerns 写到 report 文件(`~/.agents/skills/incremental-implementation/scripts/task-brief.sh` 生成 brief,executor 写 report)。
 
 **WHY**(来自 Superpowers 实验):允许 free text status 时,executor 会写"looks good" / "should pass" 等 self-assessment,controller 盲信导致 phantom completion(实测案例:verifier 报告 "tests pass" 但代码是 stub,只有独立 run test 才能抓到)。4 态契约 + 强制 report 文件 + mandatory re-run by reviewer 是反 phantom completion 的核心机制。
-
 #### 3.8 OMO task metadata 结构化字段(我们的实现)
 
 OMO `task_create` 工具已经支持 `metadata: record<string, unknown>` 字段。我们**用 metadata 传结构化 brief** 而不是塞 free text description:
-
 ```typescript
 task_create({
   subject: "slice-2b-read-user-v2: Read user list v2",
@@ -270,19 +251,14 @@ task_create({
   }
 })
 ```
-
 **为什么不写 `description` 字段**:OMO 的 task description 是 free text,executor 看到的是 description 而不是 metadata。**metadata 是结构化的、可被脚本读取的**。我们的 `~/.agents/skills/incremental-implementation/scripts/task-brief.sh` 直接从 metadata 提取 brief 文件,executor 拿到的 brief 包含完整 step-by-step 代码。
-
 ### 4. Isolate each slice
 
 For slices > 50 lines, use a feature branch or git worktree:
-
 ```bash
 git worktree add../project-slice-2 -b feat/slice-2-name
 ```
-
 This lets you switch context, run tests in isolation, and rollback cleanly.
-
 ### 5. Implement + verify per slice
 
 For each slice, follow the loop:
@@ -299,11 +275,9 @@ For each slice, follow the loop:
    [slice] <id> → <commit-sha 或 "no-commit"> | <LOC> | verify: <stdout 节选>
    ```
    `notepad-write-guard` hook 强制 `.omo/notepads/*` 只能 append(用 `Edit`,不要 `Write`),保留 audit trail。
-
 ### 6. Rollback drill
 
 Before merging slices, mentally rehearse: "If slice 3 breaks production, can I revert just slice 3?" If no, the slice isn't actually independent — re-decompose.
-
 ### 7. After all slices done: hand off to OMO review-work
 
 > **omo dispatch**:`/start-work` is the slash command that activates Atlas on the latest Prometheus plan. Atlas reads this skill's Phase 3 slice table as the executable frontier. If running in omo, invoke `/start-work` once Phase 1 Spec has `Status: spec_approved`; if not, follow the manual `review-work` bridge below.
@@ -317,7 +291,6 @@ Before merging slices, mentally rehearse: "If slice 3 breaks production, can I r
 5. 把 🔴 转化为新 slice(via § 1-5 重新 spec + 实现);🟢 走 `verification-before-completion` 出最终结论。
 
 如果该项目不安装 OMO `review-work`,降级为人工 review checklist(见 `verification-before-completion` § Red Flags)。
-
 ### 8. For UI-bearing changes: human visual QA
 
 如果 slice 涉及 UI,**`build-gate-visual-review` 只管"代码前的设计对齐"**;真正的"代码后人工 QA + Taste 注入"由你(人)亲自跑:
@@ -326,11 +299,9 @@ Before merging slices, mentally rehearse: "If slice 3 breaks production, can I r
 2. 手动走完本次 slice 的关键用户路径
 3. 用 OMO `visual-qa`(浏览器/Playwright 截图 + 像素 diff)做客观对比;主观 taste 由人判断
 4. 不合品味 → 新增 Blocking slice(§ 1-5 重做);合品味 → 走 `verification-before-completion`
-
 ### 9. Mid-build requirement changes
 
 需求进入实施阶段后用户说"改成 X" / "其实应该是 Y" / "再加一条 Z"。**禁止假装没听见,继续按 Spec 写** —— 这等于把 Spec 与代码漂移、attest 失真、后续 review-work 必红的循环里。
-
 #### 9.1 Classify the change (5 个类型 → 5 个路由)
 
 | 改动类型 | 例 | 路由 | 副作用 |
@@ -340,7 +311,6 @@ Before merging slices, mentally rehearse: "If slice 3 breaks production, can I r
 | **Data-shape / API contract (WHAT)** | 加字段 / 改 schema / 改 endpoint 签名 | **重入 Phase 1 Spec**;amend + 重新跑 Momus 拿 `[OKAY]`;旧 slice 标 `superseded` 由新 slice 替换 | 旧 slice 走 `git revert`(项目 git policy 下)+ 标 `status=superseded` 并填 `superseded_by`;新 slice 入 frontier |
 | **Feature re-scope (WHY)** | 用户说"其实我们要做的不是 X,是 Y" | **重入 Phase 0 Brainstorming**;只保留 Phase 0 Design 的设计骨架;再走 § Phase 1 Spec 重写 | 大部分已有 slice 走 `status=superseded` 或 `deprecated`;新设计产出新 Phase 1 Spec |
 | **Pure addition (orthogonal)** | "再加一个 Y,不影响已存在的 X" | append 到 Phase 1 Spec(amend + Momus);**仅在 frontier 末尾追加新 slice**,旧 slice 不动 | frontier 增长;不改既有 `blockedBy` 拓扑 |
-
 #### 9.2 Process for any requirement change
 
 1. **Detect**:用户或 review-work 🔴 报告"需求 / 验收标准变了"。
@@ -362,9 +332,7 @@ Before merging slices, mentally rehearse: "If slice 3 breaks production, can I r
    ```
    这是事后 audit"为什么 X 被作废"的唯一线索。`sections` + `momus-verdict` 是必备字段:前者定位改动位置,后者证明 amend 经过了 Momus 评审(防止"amend 后忘了评审")。
 7. **Resume**:**只在 Momus 通过新 plan + 新 slice 表上**继续 frontier work。任何 `in_progress` 的旧 slice 必须 halt 并 supersede,绝不允许续写半成品。
-
 #### 9.3 Slice status machine(含 halted 路径)
-
 ```
 pending  ──► in_progress ──► complete
                 │                  │
@@ -375,7 +343,6 @@ pending  ──► in_progress ──► complete
                 amendment 是合法
                 路径,见 § 9.2 step 3 + 5)
 ```
-
 **写代码纪律**:
 
 - 禁止 `deprecated` ↔ `superseded` 的来回切换 — deprecated 是"被废弃保留",superseded 是"被替换",方向感不一样。
@@ -386,13 +353,11 @@ pending  ──► in_progress ──► complete
   - 退回 `pending`(若变更撤回) — 但这等于放弃已做的工作,通常由 OMO `git stash` 配合。
   - 不要从 `in_progress` 直接进 `complete`(已 halt 的不算完成)。
 - 任何 status 变更必须 append 到 `.omo/notepads/<plan-name>/` 的 `[amend]` 段。
-
 ### 10. Rollback protocol
 
 Slice 上线后被判定需要回收时(数据丢失 / 安全洞 / correctness regression / 用户主动撤回 / fix-the-fix 反效果),按本协议收尾。
 
 **注意**:rollback 是 § 9 amend 的姐妹协议 —— § 9 处理"需求变了,spec 与 slice 还没坏";本协议处理"已落地的 slice 必须撤回"。两者状态机独立,但共用 `.omo/notepads/<plan-name>/` 日志约定。
-
 #### 10.1 触发条件
 
 满足下列任一即触发本协议:
@@ -402,7 +367,6 @@ Slice 上线后被判定需要回收时(数据丢失 / 安全洞 / correctness r
 3. [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) Step 4 fix 引入新 regression(reproduce 命令倒过来了)
 4. § 9 amend 反向:某个 spec amendment 决定撤回上线分支
 5. Pre-merge 检查发现主线 cherry-pick 错位(合并前最后一道关)
-
 #### 10.2 协议(必须按顺序)
 
 1. **HALT frontier** — 任何并行 slice 立即停下:`.omo/notepads/<plan-name>/decisions.md` append `[halt] <slice-id> reason:<一句话>`。正在 `in_progress` 的 slice 必须 halt 后才走后续步骤(进 `rolled_back`,不要直接 `complete`)。
@@ -416,9 +380,7 @@ Slice 上线后被判定需要回收时(数据丢失 / 安全洞 / correctness r
 5. **(critical severity 必做)** Postmortem — 在 `[rollback]` 行后 append 一句"如何防再次发生"(action item:新增防漏测试 / 新 checklist / 新 spec 段落)。
 6. **修 Spec(若根因是 spec 错)**:走 [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) Step 5.5 amend,re-attest 后再继续。任何"只回退代码不修 Spec"的捷径见 § 10.6 Red Flags。
 7. **验证回滚真完成**:`[rollback]` 行写齐 7 个字段 / `verify` 命令重跑且退出 0 / 受影响的 sibling slice `verify` 仍过。
-
 #### 10.3 slice 状态机扩展
-
 ```
 pending  ──► in_progress ──► complete
                 │   │              │
@@ -432,7 +394,6 @@ pending  ──► in_progress ──► complete
                 ▼
               (rollback 流程见 § 10)
 ```
-
 **写代码纪律**(rollback 专属):
 
 - 禁止无 `[rollback]` 日志就改 git 历史(`git reset` / `git rebase --interactive`)。
@@ -440,9 +401,7 @@ pending  ──► in_progress ──► complete
 - 禁止"只回退代码不回退 spec 假设" —— 若根因是 spec 错,amend 必走。
 - `rolled_back` slice 不允许再回 `complete`(除非 amend 一遍后整个 acceptance 重做)。
 - 多个 slice 同时被影响的"事件级 rollback":`[rollback]` 里 `affected:` 字段列多个,`postmortem` 写在最后一条。
-
 #### 10.4 `[rollback]` 日志模板
-
 ```
 [rollback] <slice-id | commit-sha> at <ts> by <actor>
      trigger:    <review-work-crit | user-request | fix-the-fix | spec-retro | pre-merge-cherry-pick>
@@ -454,7 +413,6 @@ pending  ──► in_progress ──► complete
 [postmortem] <一句话如何防再次发生>  ← critical severity 必写
 [test-gap]    <新测试名 / 新 checklist / 新 spec 段落>  ← optional
 ```
-
 #### 10.5 Common Rationalizations
 
 | Excuse | Reality |
@@ -464,7 +422,6 @@ pending  ──► in_progress ──► complete
 | "[rollback] 之后再补日志吧,先恢复代码" | 事故发生时补日志最容易遗漏(上下文已切换)。本协议要求 revert 与 log 同步:revert 完立刻写 `.omo/notepads/<plan-name>/`。 |
 | "spec 不需要 amend,只是某个 edge case" | 如果触发是 spec 没覆盖到该 edge case,这就是"spec 错",amend 必走。否则下次同一个 edge case 又会出现。 |
 | "rolled_back 跟 complete 差不多" | **错**:`rolled_back` 的 slice **不算** shipping 成功的能力,3 个月后看 planner 的人若把它当 `complete` 引用,会引入回归。状态机分清这两态是为了 audit,不是冗余。 |
-
 #### 10.6 Red Flags
 
 - `git reset --hard` 在 main 分支上
@@ -475,7 +432,6 @@ pending  ──► in_progress ──► complete
 - rollback 后没跑 sibling slice `verify`(确认没有牵连破坏)
 - critical rollback 没写 postmortem
 - rollback 但没 amend spec(若 spec 是根因之一)
-
 ## Common Rationalizations
 
 | Excuse | Reality |
@@ -493,7 +449,6 @@ pending  ──► in_progress ──► complete
 | "amend 写一段 [amend] + 改 slice status 就够了,不必 re-review" | **错**:Momus 不重跑 → plan 未验证 → 下一轮 session 仍 inject **旧** plan → audit 与运行时分裂。每次 amend 必须重跑 Momus 拿 `[OKAY]`。 |
 | "用户说改完了,我就改一下,然后说 OK" | amend 必须改 Spec 文字 + 改 slice 拓扑 + 写 `[amend]` log,三件齐了才算 amend。少任何一步 = 漂移。 |
 | "[halt] 之后再决定怎么办,先停着" | halt 必须立即进 § 9.2 step 5(deprecate/supersede/append)之一 —— 不允许`in_progress` 长期悬挂。 |
-
 ## Red Flags
 
 - 单个 slice > 100 行 net diff
@@ -510,10 +465,10 @@ pending  ──► in_progress ──► complete
 - 把 `deprecated` / `superseded` 乱标(无 `superseded_by` 的 superseded,或被 deprecated ↔ superseded 来回切换)
 - 改完 Spec 不重跑 Momus → 下一轮 session 仍 inject 旧 plan head
 - 中途变更不在 `.omo/notepads/<plan-name>/` 写 `[amend]` 段 → 事后 audit 无线索
-
 ## Verification
 
 Before moving to the next slice, confirm:
+- [ ] Phase 2 startup sweep 已列出并对照 `stale_artifacts`;任何清理前都收到显式 `y`,且未自动删除
 - [ ] Slice metadata 完整(`title` / `goal` / `scope` / `acceptance` / `id` / `blockedBy` / `parallel` / `HITL|AFK` / `owner` / `verify` / **`status`** / **`superseded_by`**)
 - [ ] Slice net diff ≤ 100 lines
 - [ ] Slice has ≥ 1 test file
@@ -529,7 +484,6 @@ Before declaring task complete:
 - [ ] **OMO `review-work` 已跑,5 份并行报告已收**(`🔴` 已转新 slice,`🟢` 已 summary)
 - [ ] **如有 UI:用户已亲手运行一次关键路径,确认 Taste OK**
 - [ ] 本任务期间若有中途需求变更,`.omo/notepads/<plan-name>/` 有完整 `[amend]` log(包含 affected / action / spec-hash 字段)
-
 ## omo Integration
 
 Record vertical slices in an .omo/plans/<slug>.md, create the task DAG with task tools, and hand approved slices to `start-work`; atlas/Boulder track execution and `review-work` closes each slice.
