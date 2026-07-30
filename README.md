@@ -159,10 +159,9 @@ git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-meta
 mv /tmp/meisijiya-meta/skills/extra/{writing-skills,contract-strengthening,slice-review,test-guard} .opencode/skills/
 rm -rf /tmp/meisijiya-meta
 
-# 装 meisijiya-domain(10 个,teacher-skill 为本地适配型,**刻意未列**,见 skills/extra/README.md)
+# 装 meisijiya-domain(10 个,teacher-skill 已合入 marketplace,因 `allowed-tools: Read` only 刻意未在 mv 中列出;如需强制包含可加 ,teacher-skill)
 mkdir -p .opencode/skills
 git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-domain
-# 注:teacher-skill 在 marketplace.json meisijiya-domain 中,但其 README 自标注"本地适配型,不计入 26 的统计";如需强制包含可加 ,teacher-skill
 mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me,prototype,wayfinder,research} .opencode/skills/
 rm -rf /tmp/meisijiya-domain
 

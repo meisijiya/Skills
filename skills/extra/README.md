@@ -21,7 +21,7 @@
 
 ## 33 个 skill 一览(按 group)
 
-**注意**：`teacher-skill` 为本地适配型 skill(8 个含 `meisijiya-domain` 域),不计入 26 的统计;若安装到 `~/.agents/skills/teacher-skill/SKILL.md` 则自动被 OMO skill loader 发现,无需 marketplace 同步。
+**注意**：`teacher-skill` 已合入 `meisijiya-domain` group(11 个中之一);`allowed-tools: Read` only(无 Bash / Python / 网络访问);通常通过 `build-gate-visual-review` 的 §5 teaching deck reminder 间接触发,极少直接 invoke。
 
 ### security (9)
 | Skill | 一句话 |
@@ -68,7 +68,7 @@
 | [`improve-codebase-architecture`](./improve-codebase-architecture/) | codebase-wide 健康巡检(weekly / post-surge / on-boarding);Ousterhout deep/shallow 评分;**proposal-only** —— 改架构走 `incremental-implementation` |
 | [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic → Verifier × N → Repairer);输出 `.verification/article-verified.md` + `.verification/verification-report.md` |
 | [`loop-me`](./loop-me/) | 把反复做的活动形式化成可执行 workflow spec(stateful grilling session;产物 `workflows/*.md` + `NOTES.md`,**不是实现**);`disable-model-invocation: true` 仅用户 `/loop-me` 触发 |
-| [Local] [`teacher-skill`](./teacher-skill/) | meisijiya-adapted 教学编排(6 阶段 SOP / 3 级诊断 / 4 类 quiz / 刻意练习 / 跨学科 / 反蒸馏);不自动加载,仅在 `build-gate-visual-review` HTML page 模式 + §5 reminder 中被提示;`allowed-tools: Read` only;安装在 `~/.agents/skills/teacher-skill/` |
+| [`teacher-skill`](./teacher-skill/) | meisijiya-adapted 教学编排(6 阶段 SOP / 3 级诊断 / 4 类 quiz / 刻意练习 / 跨学科 / 反蒸馏);不自动加载,仅在 `build-gate-visual-review` HTML page 模式 + §5 reminder 中被提示;`allowed-tools: Read` only;安装在 `~/.agents/skills/teacher-skill/` |
 | [`prototype`](./prototype/) | 视觉 / 交互决策 skill(spec 编写阶段用);生成可丢弃的 UI 变体(MIN 2,max 5)解析 `[PROTO-RESOLVE]` markers;决策落到 `decisions.md`,**绝不**上线 |
 | [`wayfinder`](./wayfinder/) | 多 session 规划(scope 超过单次 brainstorming);打开 `.omo/wayfinder/<slug>/`,跨 session 推进;关闭时生成 `.omo/plans/<slug>.md` Phase 0 |
 | [`research`](./research/) | 对规划 / 设计问题做权威来源调查;写入 `.omo/research/<plan>/<topic>.md` 带引用;要求 plan context,无 plan 直接拒绝 |
