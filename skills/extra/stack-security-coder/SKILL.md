@@ -3,6 +3,7 @@ name: stack-security-coder
 description: "Per-stack security-coding checkpoints for the three layers where AI-generated code drifts most — frontend (XSS / CSP / cross-origin), backend (parameterized queries / authz / SSRF), mobile (WebView / cert pinning / biometric). Use when writing or reviewing code in these layers or when a per-line audit reveals stack-specific gaps. Complements security-and-hardening (cross-cutting trust boundaries)."
 allowed-tools: "Read Bash Glob Grep"
 ---
+version: 0.1.0
 
 # stack-security-coder
 

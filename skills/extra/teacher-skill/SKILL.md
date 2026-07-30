@@ -13,11 +13,7 @@ description: >
   Do NOT use for simple explanations, generic code help, single-page
   non-pedagogical content, or anything that does not produce a multi-unit
   artifact.
-argument-hint: "[topic or paste materials]"
-version: 0.2.0
-user-invocable: true
 allowed-tools: "Read"
-triggers: []
 ---
 
 # teacher-skill (meisijiya-adapted)

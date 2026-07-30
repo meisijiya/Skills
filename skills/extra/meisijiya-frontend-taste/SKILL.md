@@ -1,7 +1,9 @@
 ---
 name: meisijiya-frontend-taste
 description: "Anti-slop frontend rules for landing pages, portfolios, redesigns. Reads brief, infers design language, tunes three dials (variance/motion/density), enforces hard non-default rules on typography, color, layout, CTA, motion, image strategy. Use when frontend agent writes marketing-grade UI code (React/Vue/Svelte/Tailwind). NOT for dashboards, data tables, product UI. Pairs with designer-handoff."
+allowed-tools: "Read"
 ---
+version: 0.1.0
 
 # meisijiya-frontend-taste
 

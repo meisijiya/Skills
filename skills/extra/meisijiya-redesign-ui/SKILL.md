@@ -1,7 +1,9 @@
 ---
 name: meisijiya-redesign-ui
 description: "Audit-then-fix workflow for existing web/mobile UI in any framework. Layered audit (typography / color / layout / interactivity / content / components / icons / code / a11y / strategic omissions); fixes highest-leverage items in priority order without breaking functionality or migrating frameworks. Use to upgrade existing UI to premium quality. NOT for greenfield designs (meisijiya-frontend-taste), dashboards / data tables, or bug fixes."
+allowed-tools: "Read"
 ---
+version: 0.1.0
 
 # meisijiya-redesign-ui
 

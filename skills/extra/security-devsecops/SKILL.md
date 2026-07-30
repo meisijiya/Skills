@@ -3,6 +3,7 @@ name: security-devsecops
 description: "Secures supply-chain + deployment pipeline. Use when adding/upgrading deps, rotating secrets, configuring CI/CD, writing IaC (Terraform / Kubernetes / Ansible / Docker), building container images, or preparing production deploys. Scans CVEs at install time; complements supply-chain-risk-auditor (maintainer signal)."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
+version: 0.1.0
 
 # security-devsecops
 

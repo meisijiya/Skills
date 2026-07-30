@@ -1,7 +1,9 @@
 ---
 name: meisijiya-minimalist-ui
 description: "Premium utilitarian minimalist & editorial UI protocol for Linear/Notion-style product surfaces. Enforces high-contrast warm monochrome palette + spot pastels, bespoke typographic hierarchy (sans body + serif display), asymmetric CSS Grid bento layouts, ultra-flat bordered components with crisp 8–12px radius, understated spring motion. Use when the brief names Linear / Notion / editorial / minimalist / premium-utilitarian aesthetic for a product UI. Pairs as the active aesthetic direction under meisijiya-frontend-taste."
+allowed-tools: "Read"
 ---
+version: 0.1.0
 
 # meisijiya-minimalist-ui
 

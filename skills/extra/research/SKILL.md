@@ -3,6 +3,7 @@ name: research
 description: "Investigates planning/design questions against high-trust primary sources (official docs, RFCs, source-repo, project ADRs); writes cited Markdown findings to `.omo/research/<plan>/<topic>.md`. Use when a decision requires authoritative information as a citable record. Requires plan context — refuses plan-less. NOT for casual questions or Stack Overflow / blogs."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
+version: 0.1.0
 
 # research
 

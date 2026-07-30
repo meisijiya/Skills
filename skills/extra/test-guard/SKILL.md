@@ -3,6 +3,7 @@ name: test-guard
 description: "Prevents AI-assisted test code from passing-for-the-wrong-reasons — over-mocked, tautological, or premise-tested tests that pass without proving behavior. Use when reviewing AI-generated tests before merge, when a test suite is silently green but bugs are escaping to production, when TDD's red-green-refactor has been confused with 'ask the model to write tests that pass', or when establishing a per-PR test-quality gate. Pairs with test-driven-development (the methodology); this skill enforces that the resulting tests actually test something."
 allowed-tools: "Read Bash Glob Grep"
 ---
+version: 0.1.0
 
 # test-guard
 

@@ -3,6 +3,7 @@ name: spec-driven-development
 description: "Forces the agent to write a spec (goal, boundaries, acceptance criteria, command list, test strategy, risks) before any code on a non-trivial task. Use when starting a new project, new feature, or significant change; refactoring across modules; or any work touching 3+ files."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
+version: 0.1.0
 
 # spec-driven-development
 

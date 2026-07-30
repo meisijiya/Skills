@@ -3,6 +3,7 @@ name: incremental-implementation
 description: "Decomposes a task into vertical slices — each slice is independently committable, testable, and rollback-safe. Under omo, delegates slice todo tracking to atlas agent and uses git-master skill for atomic commits. Use when any change touches more than one file, when the task has 3+ steps, or when refactoring/migrating existing code."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
+version: 0.1.0
 
 # incremental-implementation
 ## Overview

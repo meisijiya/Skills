@@ -3,6 +3,7 @@ name: security-incident-response
 description: "Handles security incidents after detection — breached credentials, exploited CVE, anomalous behavior, leaked secret, ransomware. Use when an actual or suspected breach is discovered, regardless of whether the trigger was a monitoring alert, user report, or third-party CVE disclosure. Under omo, uses security-research mode for post-incident root cause analysis, oracle agent for impact assessment, websearch MCP for CVE disclosures / attack IOCs, review-work skill for post-incident code review."
 allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 ---
+version: 0.1.0
 
 # security-incident-response
 

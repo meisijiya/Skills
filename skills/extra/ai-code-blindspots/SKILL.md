@@ -3,6 +3,7 @@ name: ai-code-blindspots
 description: "Reviews AI-generated or AI-modified code for blindspots AI commonly omits — missing boundary checks (null/array), invisible error handling (empty catch / silent Promise rejection), env compatibility, deprecated APIs, hardcoded configuration. Use in verification stage after AI generated or modified code. NOT for hand-written code review, style changes, or layer-specific landmines (load stack-security-coder). Complements omo `remove-ai-slops`."
 allowed-tools: "Read Bash Glob Grep"
 ---
+version: 0.1.0
 
 # ai-code-blindspots
 
