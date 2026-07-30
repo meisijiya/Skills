@@ -31,12 +31,12 @@ meisijiya-skills/
 ├── AGENTS.md                  ← 仓库自描述 + skill 元信息 source(inject 脚本从这里读)
 ├── skill-anatomy.md           ← SKILL.md 写作规范
 ├── docs/
-│   ├── omo-agent-skill-config.md   ← 各 omo agent 的 skill 列表配置指南(20 SKILL.md 索引)
+│   ├── omo-agent-skill-config.md   ← omo skill 配置参考(3 层加载机制 + 真实 schema;using-meisijiya-skills 的姊妹文档)
 │   └── p0-outline.md              ← 归档(已 ship)
 ├── skills/
 │   ├── core/                 ← 必装集(9 个)
 │   │   ├── README.md          ← 9 个 skill 详情 + 必装理由
-│   │   ├── using-meisijiya-skills/
+│   │   ├── using-meisijiya-skills/      ← **dispatcher**(Sisyphus 路由唯一决策点;含 Category × Skill Matrix + Dispatch Protocol)
 │   │   ├── brainstorming/                  ← HARD-GATE pre-design exploration(adapted from superpowers)
 │   │   ├── spec-driven-development/        ← spec-before-code,lock PRD
 │   │   ├── incremental-implementation/    ← vertical slices with dep/HITL-AFK metadata,bridge to OMO review-work
@@ -332,7 +332,9 @@ rm -rf ~/.agents/skills/hallmark/
 
 ## 写作规范
 
-参见 [skill-anatomy.md](./skill-anatomy.md)。
+- **SKILL.md 写作规范** — 参见 [skill-anatomy.md](./skill-anatomy.md)(frontmatter / 6 段结构 / 行数限制 / 命名 / marketplace 同步 / 安全约束)
+- **Sisyphus Dispatcher 协议** — 参见 [`using-meisijiya-skills`](./skills/core/using-meisijiya-skills/SKILL.md) § Sisyphus Dispatch Protocol + Category × Skill Matrix(Sisyphus 在 `task(category=..., load_skills=[...])` 时读此协议)
+- **OMO 配置参考** — 参见 [`docs/omo-agent-skill-config.md`](./docs/omo-agent-skill-config.md)(3 层加载机制 + 真实 schema + 6 个新 skill 全局配置示例)
 
 ## License
 
@@ -343,6 +345,19 @@ MIT
 ## 当前状态
 
 最近 tag: **v0.8.0** — meisijiya-frontend triad (Leonxlnx/taste-skill absorption)(详细见 [`CHANGELOG.md`](./CHANGELOG.md) 与 `git log`)
+
+### Unreleased — skill audit & dispatch protocol (R1-R4, 2026-07-30)
+
+- **R1 9 项合规修复**: description 触发条件(`documentation-and-adrs`) / 6 段结构(`slice-review` 加 Overview + Rationalizations) / 我方文档一致性(`skill-anatomy.md` 描述规则 + 安全段) / 删 untracked 空目录(`git-worktree-isolation`) / 4 个 eval case 各 +1 negative / `validate-skills.sh` 加 §8 allowed-tools 一致性 + name 正则(WARN 级)
+- **R2 清理 + 数字漂移**: `teacher-skill` frontmatter 清理(移除 Claude Code/Codex 扩展字段 `argument-hint` / `user-invocable` / `triggers` / 旧 `version`) / `skill-anatomy.md` 数字修复(domain 7→11 / 补 frontend group / 共 33 个 7 entry) / 3 个 frontend triad 加 `allowed-tools: "Read"` / 13 个 ≥250 行 skill 加 `version: 0.1.0`(Anthropic best-practices 推荐)
+- **R3 文档同步**: README + `skills/extra/README.md` 删 "teacher-skill 不计入 26"过时注释 / `docs/omo-agent-skill-config.md` 数字 36→42 / §8 WARN 负面词表(50% false positive → 0%)
+- **R4 Dispatch 协议**(核心架构变更): `using-meisijiya-skills` 加 4 个新段(Sisyphus Dispatch Protocol + Category × Skill Matrix 8 omo category × 推荐 `load_skills` + Common Dispatch Patterns 6 个新 skill 模板 + 扩展 Red Flags) / `docs/omo-agent-skill-config.md` 整段重写(基于 omo 真实 schema,删错误 `agents.<name>.skills` 假设)
+
+**关键架构变化**: 所有 skill 路由收敛到 `using-meisijiya-skills` 一个 dispatcher skill(SOT);omo schema 不支持 per-agent skill 列表,实际靠 `<available_skills>` 全可见 + `task(load_skills=[...])` 显式加载 + `meisijiya-review-router.js` 文件路径触发 3 层机制
+
+**Oracle 审核历程**: 4 次 Oracle 审核(1 次发现 P0 全部降级 + 1 次发现文档基于错误假设 + 1 次确认 R1-R4 修复 + 1 次 Oracle B5-2 事实错误核查);最终验证 validate-skills.sh 42/42 OK + check-marketplace.sh 42 skills in sync
+
+**总改动**: 35 文件 + 5 commits(`chore(audit-core)` / `chore(skill-metadata)` / `docs(repo)` / `feat(dispatch)` / `docs(changelog)`)
 
 ### v0.6.0 — 11-skill roadmap + marketplace 6-group refactor (2026-07-24)
 
