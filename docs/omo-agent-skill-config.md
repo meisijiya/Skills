@@ -1,129 +1,232 @@
-# omo Per-Agent Skill List Configuration
+# omo Skill 配置参考
 
-## Overview
+> **本文档的姊妹文档**：[`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) — **Sisyphus dispatcher skill**（运行时读）。本文档是**用户配置参考**（手工应用 `omo.jsonc`）。
+>
+> **TL;DR**：omo 没有 `agents.<name>.skills` 字段。Skill 管理 = 3 个机制：(1) `<available_skills>` 全可见（OpenCode 原生），(2) `task(load_skills=[...])` 由 Sisyphus 在 dispatch 时显式加载（**核心决策点**），(3) per-edit reminder plugin（review-router，已实现 8 个 reminder）。
 
-[meisijiya-skills] installs **36 SKILL.md** files(9 `core/` + 27 `extra/` = `9 security` + `2 cicd` + `4 observability` + `4 meta` + `8 domain`,见 `.claude-plugin/marketplace.json`)。默认 omo 会把所有已装 skill 加载到**每个** agent 的上下文中。这会让只需要的 agent(例如 `explore` 不需要 `spec-driven-development`)的 context 膨胀。
+---
 
-本指南为每个 omo agent 推荐应装载的 skill 子集,供希望按 agent 收敛 context 的用户参考。
+## 一、omo Skill 加载的 3 个机制
 
-> **约束**:我们**不会**替你修改 `oh-my-openagent.json`。请手工应用。本文档是**增强/指南**,不是路由变更。
+omo 通过 **3 层机制** 加载 skill，**没有 per-agent skill 白名单配置字段**。
 
-## Why per-agent skill lists?
+### L1：`<available_skills>` 自动可见
 
-- **Smaller context per agent** — agents only see relevant skills
-- **Faster responses** — less context to process
-- **Less noise** — fewer "which skill applies?" decisions
-- **Clearer intent** — agent's role + skill set align
+OpenCode 扫描 `~/.agents/skills/` 路径下的所有 SKILL.md，把它们的 `name` + `description` 注入每个 agent 的 `<available_skills>` system prompt 列表。
 
-Sisyphus (main orchestrator) gets **all 36** (it routes everything). All other agents get a subset.
+**所有 agent 默认能看到所有 skill description**。这意味着 agent 会**知道**每个 skill 的存在，但**不一定会主动 invoke**（description 触发是弱信号，特别是窄触发 skill）。
 
-## Recommended per-agent config
+### L2：`task(load_skills=[...])` 由 Sisyphus 显式加载（核心）
 
-| omo Agent | Recommended skills | Why |
-|---|---|---|
-| **sisyphus** | (all 36) | Main orchestrator — full visibility needed |
-| **hephaestus** | brainstorming, spec-driven-development, incremental-implementation, test-driven-development, debugging-and-error-recovery, source-driven-development, diagnosing-bugs, **security-devsecops**, **supply-chain-risk-auditor**, **closed-loop-delivery** | Deep autonomous executor — full discipline stack + supply-chain/deployment + runtime-closure |
-| **prometheus** | brainstorming, spec-driven-development, **contract-strengthening** (optional) | Strategic planner — question-quality + spec discipline + Phase 1.25 contract review |
-| **atlas** | using-meisijiya-skills, incremental-implementation, **slice-review**, **verify-chain** | Todo orchestrator — meta + slice guidance + per-slice review + parallel Verifier via `general` agent |
-| **oracle** | source-driven-development, debugging-and-error-recovery, diagnosing-bugs, api-and-interface-design, **security-incident-response**, **security-threat-model**, **gha-security-review**, **contract-strengthening** | Read-only consultant — verification + interface design + post-incident + threat modeling + GHA audit + Phase 1.25 contract review |
-| **librarian** | source-driven-development | Docs/OSS search — needs verification |
-| **explore** | (none) | Codebase grep — already fast, no skill needed |
-| **multimodal-looker** | (none) | Vision — no meisijiya-skill wrapper needed |
-| **metis** | spec-driven-development, **contract-strengthening** | Gap analyzer — spec context + open-world / non-exhaustive contract review |
-| **momus** | (none) | Plan reviewer — direct-use agent |
-| **sisyphus-junior** | incremental-implementation, test-driven-development, **test-guard**, **improve-codebase-architecture** | Focused executor — slice + TDD + test-quality audit + single-task architecture review |
-| **build** | verification-before-completion, **ai-code-blindspots**, **stack-security-coder** | Default build agent — must-invoke verification layer; layer-coding + AI-blindspots picked up via review-router plugin (no manual config needed) |
+Sisyphus 在 dispatch sub-agent 时，可以指定要加载哪些 skill：
 
-## Configuration example
+```typescript
+task(
+  category: "visual-engineering",
+  load_skills: ["meisijiya-frontend-taste"],  // ← 关键
+  prompt: "..."
+)
+```
 
-Add to `~/.config/opencode/oh-my-openagent.json` (user-level) or `.opencode/oh-my-openagent.json` (project-level override):
+**没有 `load_skills=[...]`，sub-agent 经常漏触发窄 skill**（如 `meisijiya-frontend-taste` 的 trigger 是 "agent writes marketing-grade UI code"，容易被忽略）。
 
-```json
+**SOT（single source of truth）**：[`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) 的 **Category × Skill Matrix** + **Common Dispatch Patterns** 段。这是 Sisyphus 应该读的协议。
+
+### L3：per-edit reminder plugin
+
+`~/.config/opencode/plugins/meisijiya-review-router.js` 在 Write/Edit/apply_patch 后追加 reminder，引导 invoke：
+
+| File path pattern | Reminder skill |
+|---|---|
+| `*.ts` / `*.js` / `*.py` / `*.go` / `*.rs` (AI-generated code) | `ai-code-blindspots` |
+| 任何文件 | `security-and-hardening` |
+| `.github/workflows/*.yml` | `gha-security-review` |
+| `*test*.ts` / `*.test.js` 等 | `test-guard` |
+| `.tsx` / `.jsx` / `.vue` / `.svelte` | `meisijiya-frontend-taste` + `stack-security-coder` |
+| `.tsx` / `.jsx` / `.vue` / `.svelte` / `.css` / `.scss` / `.less` | `meisijiya-redesign-ui` |
+| `.swift` / `.dart` | `stack-security-coder` |
+| Write/Edit tool calls | `verification-before-completion` |
+
+这是**文件路径触发的硬规则**，**不是 skill 配置**。
+
+---
+
+## 二、omo 的实际 schema（没有 per-agent skill 字段）
+
+来源：[omo `docs/reference/configuration.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/configuration.md) + [`docs/reference/omo-json.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/omo-json.md)
+
+### `agents.<name>` 支持的字段
+
+```jsonc
 {
   "agents": {
-    "sisyphus": {
-      "model": "anthropic/claude-opus-4-7",
-      "skills": ["*"]
-    },
-    "hephaestus": {
-      "model": "openai/gpt-5.5",
-      "variant": "xhigh",
-      "skills": [
-        "spec-driven-development",
-        "incremental-implementation",
-        "test-driven-development",
-        "debugging-and-error-recovery",
-        "source-driven-development"
-      ]
-    },
-    "prometheus": {
-      "model": "kimi-for-coding/k2p5",
-      "skills": ["brainstorming", "spec-driven-development"]
-    },
-    "atlas": {
-      "model": "google/gemini-3-flash",
-      "skills": ["using-meisijiya-skills", "incremental-implementation"]
-    },
-    "oracle": {
-      "model": "openai/gpt-5.5",
-      "variant": "high",
-      "skills": [
-        "source-driven-development",
-        "debugging-and-error-recovery",
-        "api-and-interface-design"
-      ]
-    },
-    "librarian": {
-      "model": "google/gemini-3-flash",
-      "skills": ["source-driven-development"]
-    },
-    "explore": {
-      "model": "github-copilot/grok-code-fast-1",
-      "skills": []
-    },
-    "multimodal-looker": {
-      "model": "google/gemini-3-flash",
-      "skills": []
-    },
-    "metis": {
-      "skills": ["spec-driven-development"]
-    },
-    "momus": {
-      "skills": []
-    },
-    "sisyphus-junior": {
-      "skills": ["incremental-implementation", "test-driven-development"]
+    "<name>": {
+      "model": "anthropic/claude-opus-5",       // ← 实际能配的
+      "fallback_models": [...],                  // ← 实际能配的
+      "prompt": "..." | "file://...",
+      "prompt_append": "...",
+      "tools": { "edit": "allow" | "deny" },
+      "temperature": 0.1,
+      "disable": true,
+      "permission": { "edit": "ask" | "allow" | "deny", "bash": "..." }
     }
   }
 }
 ```
 
-> **Field-name note**: Verify the exact field name for per-agent skill lists against your version of omo. Recent versions use `skills: [...]` (list) or `skills: ["*"]` (all). Older versions may use different syntax. Check [omo docs](https://github.com/code-yeongyu/oh-my-openagent) for current schema.
+**没有 `skills` 字段**。`variant` / `reasoningEffort` / `fallback_models` 等老 key 已被迁移到 `reasoning` + `models`。
 
-## How to apply
+### `categories.<name>` 支持的字段
 
-1. Open `~/.config/opencode/oh-my-openagent.json` (or your project-level override).
-2. For each agent listed above, add the `skills` array under its config.
-3. For Sisyphus, use `["*"]` to get all.
-4. Restart omo for changes to take effect.
+```jsonc
+{
+  "categories": {
+    "visual-engineering": {
+      "model": "anthropic/claude-opus-5",
+      "fallback_models": [...],
+      "prompt_append": "...",
+      "tools": { "bash": false },
+      "disable": false,
+      "warn_unavailable": false
+    }
+  }
+}
+```
+
+**没有 `skill` 字段**。
+
+### `skills.<name>` 全局 per-skill 配置
+
+```jsonc
+{
+  "skills": {
+    "sources": [{ "path": "~/.agents/skills", "recursive": true }],
+    "enable": ["my-skill"],
+    "disable": ["other-skill"],
+    "my-skill": {
+      "description": "...",
+      "allowed-tools": ["read", "bash"],
+      "model": "custom/model",
+      "agent": "custom-agent",
+      "subtask": true
+    }
+  }
+}
+```
+
+这是**唯一 per-skill 配置入口**。但它是**全局**的，不是 per-agent。
+
+---
+
+## 三、6 个新 skill 的全局配置示例（v0.8.0+）
+
+基于 [`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) 的 Category × Skill Matrix，6 个新 skill 的推荐配置：
+
+```jsonc
+{
+  "skills": {
+    "meisijiya-frontend-taste": {
+      "allowed-tools": ["read"],
+      "model": "anthropic/claude-opus-5"
+    },
+    "meisijiya-minimalist-ui": {
+      "allowed-tools": ["read"],
+      "model": "anthropic/claude-opus-5"
+    },
+    "meisijiya-redesign-ui": {
+      "allowed-tools": ["read"],
+      "model": "anthropic/claude-opus-5"
+    },
+    "prototype": {
+      "allowed-tools": ["read", "edit", "bash", "glob", "grep"],
+      "model": "openai/gpt-5.6-luna"
+    },
+    "wayfinder": {
+      "allowed-tools": ["read", "edit", "bash", "glob", "grep"]
+    },
+    "research": {
+      "allowed-tools": ["read", "edit", "bash", "glob", "grep"],
+      "model": "kimi-for-coding/kimi-k3"
+    }
+  }
+}
+```
+
+**为什么 `allowed-tools` 是关键？**
+
+| Skill | `allowed-tools` | 含义 |
+|---|---|---|
+| 3 个 frontend triad | `["read"]` | 这些 skill 是 reference-only（约束规则集），不应有 Edit/Write 权限；UI 输出由 frontend agent 自己负责 |
+| `prototype` / `wayfinder` / `research` | `["read", "edit", "bash", "glob", "grep"]` | 这些 skill 需要写文件（prototype 变体、wayfinder plan、research report）|
+
+---
+
+## 四、Sisyphus Dispatch Patterns（完整决策树）
+
+完整版见 [`using-meisijiya-skills` § Common Dispatch Patterns](../../skills/core/using-meisijiya-skills/SKILL.md)。这里给 6 个新 skill 的精简版：
+
+| 任务 | `task(category=..., load_skills=[...])` |
+|---|---|
+| 写 React/Vue UI | `task(category="visual-engineering", load_skills=["meisijiya-frontend-taste"])` |
+| Linear/Notion 风格 UI | `task(category="visual-engineering", load_skills=["meisijiya-frontend-taste", "meisijiya-minimalist-ui"])` |
+| 改造现存 UI | `task(category="visual-engineering", load_skills=["meisijiya-redesign-ui"])` |
+| Spec 阶段视觉决策 | `task(category="unspecified-low", load_skills=["prototype"])` |
+| 多 session 规划 | `task(load_skills=["wayfinder"])` |
+| Plan 阶段权威研究 | `task(load_skills=["research"])` |
+
+---
+
+## 五、常见误解澄清
+
+### ❌ "我可以在 `omo.jsonc` 给特定 agent 限定 skill 列表"
+
+**不能**。omo schema 没有 `agents.<name>.skills` 字段。任何 agent 默认能看到所有 skill description。
+
+如果你想"屏蔽"某个 skill，只能用全局 `skills.disable: ["my-skill"]`——这是**全局**禁用，不是 per-agent。
+
+### ❌ "我可以指定 `sisyphus` 用 `["*"]` 兜底"
+
+**没意义**。`<available_skills>` 已经默认全部可见。`["*"]` 在 schema 中也不存在。
+
+### ❌ "文件路径触发的 review-router 是 skill 配置"
+
+**不是**。review-router plugin 是 `~/.config/opencode/plugins/` 下的 `.js` 文件，由 OpenCode plugin hook 触发。它与 `omo.jsonc` 的 skill 配置是**正交**的两层。
+
+### ❌ "我应该把 meisijiya-frontend-taste 给 build agent 加 allowed-tools"
+
+**build agent 默认就能 invoke meisijiya-frontend-taste**（通过 `<available_skills>` + review-router 触发）。allowed-tools 控制的是 skill 加载时的工具权限（"这个 skill 能用什么工具"），不是"哪些 agent 能用它"。
+
+---
+
+## 六、Apply 此配置
+
+```bash
+# 用户级
+~/.omo/omo.jsonc
+
+# 项目级
+<project>/.omo/omo.jsonc
+```
+
+修改后**重启 OpenCode** 才能生效（omo 启动时一次性读取配置）。
+
+> **Field-name note**：早期版本用 `oh-my-openagent.json[c]` / `oh-my-opencode.json[c]`，已迁移到统一 `omo.jsonc`。详细迁移说明见 [omo migration docs](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/configuration.md#migration)。
+
+---
+
+## 七、相关文档
+
+- [`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) — **SOT**：dispatch 协议 + Category × Skill Matrix + Common Patterns
+- [omo `docs/reference/configuration.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/configuration.md) — 完整 schema
+- [omo `docs/reference/omo-json.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/omo-json.md) — 字段定义
+- [omo `docs/reference/orchestration.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/guide/orchestration.md) — task(category=, load_skills=) 协议
 
 ## Verification
 
 After applying:
-
-1. Restart omo session.
-2. Run `use skill tool to list skills` (or equivalent) inside Sisyphus's context — should see all 36.
-3. Dispatch a task to `hephaestus` and list its skills — should see only the ~10 recommended (including 11-skill-series additions).
-4. Spot-check 2-3 other agents.
-
-## Caveat: skill discoverability
-
-If a non-Sisyphus agent needs a skill not in its list, omo should still let it load the skill on demand (or fall back to Sisyphus for routing). Per-agent lists are an **optimization**, not a hard restriction.
-
-If you want strict enforcement, use omo's hook system (`tool.before.*` matching on skill load) to block unauthorized skill loading.
-
-## Don't confuse with omo built-ins
-
-These meisijiya-skills are **additive** to omo's built-in skills (git-master, frontend-ui-ux, playwright, review-work, remove-ai-slops, init-deep, team-mode, ast-grep, etc.). Per-agent config above is for **our** skills only — don't remove omo built-ins.
-
-If you want to control omo built-in skills per agent, that's omo's territory (see omo docs for `omo.builtin_skills` or similar config).
+1. Restart OpenCode session.
+2. Run `using-meisijiya-skills` — should see the new "Sisyphus Dispatch Protocol" + "Category × Skill Matrix" + "Common Dispatch Patterns" sections.
+3. Dispatch a sub-agent task with `load_skills=["meisijiya-frontend-taste"]` — sub-agent's instructions should explicitly include meisijiya-frontend-taste's SKILL.md body.
+4. Edit a `.tsx` file — review-router should fire `meisijiya-frontend-taste` reminder (per-edit reminder, not skill config).
+</content>
+</invoke>

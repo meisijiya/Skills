@@ -36,6 +36,119 @@ Meta dispatcher. Hard-injected every session by the OpenCode plugin (`~/.config/
 4. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
 5. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For model selection by task type, read [`references/model-selection.md`](references/model-selection.md).
 6. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
+7. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol below** — always specify `load_skills=[...]` to anchor the sub-agent's discipline.
+
+## Sisyphus Dispatch Protocol
+
+When delegating to sub-agents, ALWAYS specify both the routing axis (`category` OR `subagent_type`) AND `load_skills=[...]`. The sub-agent will see the skill in `<available_skills>`, but explicit loading forces it to read SKILL.md body and follow the discipline — without it, sub-agents often miss narrow-trigger skills.
+
+### Pattern 1 — `category`-based dispatch (most common)
+
+```typescript
+task(
+  category: "<category>",
+  load_skills: ["<skill-name>", ...],
+  prompt: "..."
+)
+```
+
+### Pattern 2 — `subagent_type` dispatch (specialist agents)
+
+```typescript
+task(
+  subagent_type: "<oracle|librarian|explore>",
+  load_skills: ["<skill-name>", ...],
+  prompt: "..."
+)
+```
+
+### Why `load_skills` matters
+
+Without it, the sub-agent may:
+- Skip reading SKILL.md body (only sees the description in `<available_skills>`)
+- Drift toward generic output (no discipline anchor)
+- Miss narrow-trigger skills entirely (e.g., `meisijiya-frontend-taste` triggers only on UI code, easy to miss)
+
+With it, the sub-agent's instructions explicitly include the skill body, and routing is unambiguous.
+
+## Category × Skill Matrix
+
+Use this matrix to choose `load_skills=[...]` based on the task's category. (Categories from omo orchestration schema.)
+
+| Category | Default Model | When to use | Recommended `load_skills` |
+|---|---|---|---|
+| `visual-engineering` | `claude-opus-5` | UI/UX code (React/Vue/Svelte/Tailwind) | `["meisijiya-frontend-taste"]` for greenfield, or `["meisijiya-frontend-taste", "meisijiya-minimalist-ui"]` for Linear/Notion aesthetic, or `["meisijiya-redesign-ui"]` for existing UI audit-fix |
+| `ultrabrain` | `gpt-5.6-sol` | Hard logic, architecture, complex debugging | `["api-and-interface-design"]` / `["security-threat-model"]` / `["performance-optimization"]` (pick 1) |
+| `deep` | `gpt-5.6-sol` | Autonomous deep implementation | `["incremental-implementation"]` or `["incremental-implementation", "test-driven-development"]` |
+| `quick` | `kimi-for-coding-highspeed` | Trivial single-file changes (typo / rename) | `[]` (don't load skills — overhead > benefit) |
+| `unspecified-low` | `gpt-5.6-luna` | General standard work | `[]` (default is fine); add `["prototype"]` only if task has `[PROTO-RESOLVE]` markers |
+| `unspecified-high` | `kimi-k3` | Complex general work | `["debugging-and-error-recovery"]` for bug hunts, `["writing-skills"]` for skill creation |
+| `writing` | `kimi-k3` | Documentation, prose, articles | `["verify-chain"]` if fact-checking claims |
+| `artistry` | `claude-fable-5` | Creative / unconventional approaches | (rarely needed) |
+
+### Specialist agents (`subagent_type`)
+
+| subagent_type | Purpose | Recommended `load_skills` |
+|---|---|---|
+| `oracle` | Read-only consultation (architecture / debug / threat-model) | `["api-and-interface-design"]` / `["security-threat-model"]` / `["debugging-and-error-recovery"]` / `["diagnosing-bugs"]` (pick 1 matching the question) |
+| `librarian` | Doc / OSS search | `["source-driven-development"]` (always — it enforces API verification) |
+| `explore` | Codebase grep | `[]` (already fast, skill overhead wasted) |
+
+## Common Dispatch Patterns
+
+### Marketing frontend / UI code
+
+```typescript
+task(
+  category: "visual-engineering",
+  load_skills: ["meisijiya-frontend-taste"],
+  prompt: "Build the landing page for [brief]"
+)
+```
+
+### Linear/Notion aesthetic
+
+```typescript
+task(
+  category: "visual-engineering",
+  load_skills: ["meisijiya-frontend-taste", "meisijiya-minimalist-ui"],
+  prompt: "Build a Linear-style settings page for [brief]"
+)
+```
+
+### Existing UI audit-then-fix
+
+```typescript
+task(
+  category: "visual-engineering",
+  load_skills: ["meisijiya-redesign-ui"],
+  prompt: "Audit and fix the React checkout UI in [path]"
+)
+```
+
+### Spec-level visual decision (Phase 1.2)
+
+```typescript
+task(
+  category: "unspecified-low",
+  load_skills: ["prototype"],
+  prompt: "Generate 3 layout variants for [PROTO-RESOLVE: button placement]"
+)
+```
+
+### Multi-session scope (wayfinder)
+
+```typescript
+// wayfinder triggers automatically via description; explicit load only for spec-level clarity
+task(load_skills: ["wayfinder"], prompt: "Plan a 3-day refactor across [modules]")
+```
+
+### Plan-phase high-trust research
+
+```typescript
+// research triggers automatically via description; explicit load only for spec-level clarity
+task(load_skills: ["research"], prompt: "Investigate the OpenCode skill loading mechanism")
+```
 
 ## Common Rationalizations
 
@@ -45,6 +158,8 @@ Meta dispatcher. Hard-injected every session by the OpenCode plugin (`~/.config/
 | "This doesn't need a formal skill" / "I remember this skill" / "The skill is overkill" | If a Skill exists, use it. Skills evolve — read current version. Simple things become complex. |
 | "I'll just do this one thing first" / "This feels productive" | Check BEFORE doing anything. Undisciplined action wastes time. |
 | "1% chance applies, must load" | Only invoke when description matches; "not sure" still requires checking the catalog, but not loading every adjacent Skill. |
+| "The sub-agent will figure it out from `<available_skills>`" | It won't. Description triggers are too weak for narrow skills. Explicit `load_skills=[...]` is the contract. |
+| "I'll just dispatch without `load_skills`, simpler" | Sub-agent drifts toward generic output without the discipline anchor. Your dispatch is wasted. |
 
 ## Red Flags
 
@@ -52,6 +167,9 @@ Meta dispatcher. Hard-injected every session by the OpenCode plugin (`~/.config/
 - Reading skill SKILL.md files when the description alone would suffice (wastes tokens — read on demand after description match).
 - Treating the Priority table as authoritative (it's a hint accelerator; the `description` field wins).
 - Skipping the announce step — without "Using [skill] to [purpose]" the user can't see the routing.
+- **Dispatching without `load_skills=[...]`** — sub-agent may miss the skill's discipline or skip its constraints.
+- **Overloading `load_skills` (>3 skills per dispatch)** — context bloat kills quality; load only what's strictly needed.
+- **Loading conflicting skills** — `meisijiya-frontend-taste` + `meisijiya-minimalist-ui` together is intentional pairing (minimalist-ui narrows frontend-taste); `meisijiya-frontend-taste` + `meisijiya-redesign-ui` is NOT (frontend-taste = greenfield; redesign-ui = existing UI audit-fix).
 
 ## Plugin layer (where this bootstrap comes from)
 
@@ -70,3 +188,4 @@ Before responding, confirm:
 - [ ] You have either invoked a matching skill OR explicitly stated no skill matches
 - [ ] You announced "Using [skill] to [purpose]" when invoking
 - [ ] The invoked skill's `allowed-tools` covers the tools you need (otherwise escalate)
+- [ ] For sub-agent dispatches: `load_skills=[...]` is specified (consult Category × Skill Matrix)
