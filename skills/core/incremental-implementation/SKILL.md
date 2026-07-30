@@ -15,8 +15,8 @@ Slice 的大小不是越小越好 —— 太碎浪费 commit overhead,太大失�
 > - **Slice 元数据**:`title` / `goal` / `scope` / `acceptance` / `blockedBy` / `parallel` / `HITL|AFK` / `owner` / `verify` / `status` / `superseded_by` —— 让 OMO `atlas` / `team_task` 能读出真正可以并行的 frontier
 > - **审慎 commit**:**任何 commit 都需项目 git 策略授权**;默认不强制每个 slice 自动 commit,只保留"为可回滚而 commit"的语义
 > - **后置闭环**:Phase 3 全部完成后,**桥接 OMO 内置 `review-work`**——以全新上下文 5 个并行子代理审 diff 与 spec 对齐;不重复造新审查 skill。slice 全部 ship 后,运行时证据(24h+ 健康 + 用户可达)由 [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) 单独负责 —— 本 skill 停在 PR 闭环,不在运行时闭环
-> - **中途变更路由**:见 § 9(五档分类 + 状态机 + amend 协议)
-> - **回滚审计**:见 § 10(`[rollback]` 日志模板 + 6 态状态机扩展)
+> - **中途变更路由**:见 [`references/mid-build-changes.md`](references/mid-build-changes.md)(五档分类 + 状态机 + amend 协议)
+> - **回滚审计**:见 [`references/rollback-protocol.md`](references/rollback-protocol.md)(`[rollback]` 日志模板 + 6 态状态机扩展)
 ## When to Use
 
 **Use when:**
@@ -147,111 +147,17 @@ ticket 集合是 DAG:`blockedBy` 是有向边,跨 ticket 的环 = 错。**execut
 如果 slice 之间接口不匹配(consumes 期望的方法名 vs produces 导出的方法名不一致),executor 跑挂。**MUST** 在 § 5 实施前用 `~/.agents/skills/slice-review/scripts/review-package.sh --check-interfaces` 验证一致性。
 #### 3.6 Bite-sized steps: TDD 5 步 + exact code
 
-**每个 slice 必须用 TDD 5 步分解**(每步 2-5 分钟):
-```markdown
-**Steps:**
-
-- [ ] **Step 1: Write the failing test**
-```typescript
-// tests/users/getUserById.test.ts
-import { getUserById } from '@/users/service';
-import { setupTestDB, teardownTestDB } from '../helpers/db';
-
-describe('getUserById', () => {
-  beforeEach(setupTestDB);
-  afterEach(teardownTestDB);
-
-  test('returns user when id exists', async () => {
-    const created = await createUser({ email: 'a@b.co' });
-    const found = await getUserById(created.id);
-    expect(found?.email).toBe('a@b.co');
-  });
-
-  test('returns null when id does not exist', async () => {
-    const found = await getUserById('nonexistent');
-    expect(found).toBeNull();
-  });
-});
-```
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `pnpm test tests/users/getUserById.test.ts`
-Expected: FAIL with "Cannot find module '@/users/service' or its corresponding type declarations." (or "getUserById is not a function")
-
-- [ ] **Step 3: Write minimal implementation**
-```typescript
-// src/users/service.ts
-export async function getUserById(id: string): Promise<User | null> {
-  const row = await db.users.findUnique({ where: { id } });
-  return row ? toUser(row) : null;
-}
-```
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pnpm test tests/users/getUserById.test.ts`
-Expected: PASS — 2/2 tests
-
-- [ ] **Step 5: Commit**
-```bash
-git add tests/users/getUserById.test.ts src/users/service.ts
-git commit -m "feat(users): add getUserById"
-```
-```
-**强约束**(从 Superpowers No Placeholders 直接吸收):
-
-- ❌ 禁止 "TBD" / "TODO" / "implement later" / "fill in details"
-- ❌ 禁止 "Add appropriate error handling" / "add validation" / "handle edge cases"
-- ❌ 禁止 "Similar to Task N" — 必须重复代码,executor 可能乱序读
-- ❌ 禁止 "Write tests for the above" without actual test code
-- ❌ 禁止 描述 "做什么" 而不展示 "怎么做" — 代码块必填
-- ❌ 禁止 引用未定义的类型/函数/方法
-- ✅ exact paths 必填 (`tests/exact/path/test.ts`)
-- ✅ complete code in every step — 即使代码已在 Step 1 写过,Step 3 仍需重新展示
-- ✅ exact commands with expected output(每个 command 必带 Expected: PASS/FAIL 行)
+每个 slice 必须用 TDD 5 步分解(每步 2-5 分钟):write failing test → run to verify fail → write minimal impl → run to verify pass → commit。**完整模板 + TypeScript 示例 + 6 项强约束**(禁 "TBD" / 禁 "Similar to Task N" / 必填 exact paths + complete code + Expected: PASS/FAIL) 见 [`references/bite-sized-steps.md`](references/bite-sized-steps.md)。
 
 **WHY**:executor 在 fresh context,看不到 plan 全貌,无法"参考前面步骤",只能照猫画虎。每步必须独立可执行。
 #### 3.7 Executor status contract(4 态)
 
-executor 跑完 slice **必须**返回 4 态之一,不是 free text:
+executor 跑完 slice **必须**返回 4 态之一(`DONE` / `DONE_WITH_CONCERNS` / `NEEDS_CONTEXT` / `BLOCKED`),不是 free text。详细 4 态含义表 + Controller action + 实现约束(< 200 字符总结 + report 文件) 见 [`references/executor-status-contract.md`](references/executor-status-contract.md)。
 
-| Status | Meaning | Controller action |
-|---|---|---|
-| `DONE` | slice 完成 + 全部测试通过 + commit 落地 | 派 review-slice / 进入下一个 slice |
-| `DONE_WITH_CONCERNS` | 完成 + 测试通过,但发现潜在的边缘 case / 设计疑问 | Controller 读 concerns → 决定补 spec / 跳到下个 slice |
-| `NEEDS_CONTEXT` | executor 需要超出 brief 的信息(consumes 不够 / produce 缺上下文) | Controller 补 brief → 重派 executor |
-| `BLOCKED` | executor 撞到 blocker(dependency 错 / 设计错 / 任务过大) | Controller 评估:补 ctx / 升模型 / 拆任务 / 回到 brainstorming |
+**WHY**:允许 free text 时 executor 会写"looks good"等 self-assessment → controller 盲信 → phantom completion。4 态契约 + 强制 report + reviewer 独立 re-run 是反 phantom completion 的核心机制。
+#### 3.8 OMO task metadata 结构化字段
 
-**实现**:executor 在 dispatch prompt 里**只能**返回 4 态 + 1 行总结(< 200 字符)。详细 RED/GREEN evidence、commit、concerns 写到 report 文件(`~/.agents/skills/incremental-implementation/scripts/task-brief.sh` 生成 brief,executor 写 report)。
-
-**WHY**(来自 Superpowers 实验):允许 free text status 时,executor 会写"looks good" / "should pass" 等 self-assessment,controller 盲信导致 phantom completion(实测案例:verifier 报告 "tests pass" 但代码是 stub,只有独立 run test 才能抓到)。4 态契约 + 强制 report 文件 + mandatory re-run by reviewer 是反 phantom completion 的核心机制。
-#### 3.8 OMO task metadata 结构化字段(我们的实现)
-
-OMO `task_create` 工具已经支持 `metadata: record<string, unknown>` 字段。我们**用 metadata 传结构化 brief** 而不是塞 free text description:
-```typescript
-task_create({
-  subject: "slice-2b-read-user-v2: Read user list v2",
-  metadata: {
-    globalConstraints: [/* 引用 Phase 1 Global Constraints 段 */],
-    interfaces: {
-      consumes: [
-        { symbol: "createUser", file: "src/users/service.ts:42" },
-        { symbol: "User", file: "src/users/types.ts:5-12" }
-      ],
-      produces: [
-        { symbol: "getUserById", file: "src/users/service.ts", signature: "(id: string) => Promise<User | null>" }
-      ]
-    },
-    biteSizedSteps: [
-      { step: 1, action: "Write failing test", files: ["tests/users/getUserById.test.ts"], code: "...", verify: "pnpm test tests/users/getUserById.test.ts", expected: "FAIL: Cannot find module" },
-      { step: 2, action: "Run test to verify fails", command: "pnpm test tests/users/getUserById.test.ts", expected: "FAIL with 'getUserById is not a function'" },
-      // ...
-    ],
-    noPlaceholders: true,  // 写入即 commit 此契约
-    statusContract: "DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED"
-  }
-})
-```
-**为什么不写 `description` 字段**:OMO 的 task description 是 free text,executor 看到的是 description 而不是 metadata。**metadata 是结构化的、可被脚本读取的**。我们的 `~/.agents/skills/incremental-implementation/scripts/task-brief.sh` 直接从 metadata 提取 brief 文件,executor 拿到的 brief 包含完整 step-by-step 代码。
+OMO `task_create` 的 `metadata: record<string, unknown>` 字段传结构化 brief(consumes / produces / biteSizedSteps / statusContract),不是塞 free text description。完整字段 schema + TypeScript 示例 见 [`references/task-metadata.md`](references/task-metadata.md)。`scripts/task-brief.sh` 直接从 metadata 提取 brief 文件给 executor。
 ### 4. Isolate each slice
 
 For slices > 50 lines, use a feature branch or git worktree:
@@ -302,136 +208,24 @@ Before merging slices, mentally rehearse: "If slice 3 breaks production, can I r
 ### 9. Mid-build requirement changes
 
 需求进入实施阶段后用户说"改成 X" / "其实应该是 Y" / "再加一条 Z"。**禁止假装没听见,继续按 Spec 写** —— 这等于把 Spec 与代码漂移、attest 失真、后续 review-work 必红的循环里。
-#### 9.1 Classify the change (5 个类型 → 5 个路由)
 
-| 改动类型 | 例 | 路由 | 副作用 |
-|---|---|---|---|
-| **Cosmetic** | "字段叫 `name` 改成 `fullName`" / "措辞 / 边界值调整" | 只改 Phase 1 文字;不 amend Spec、不动 slice | 无 |
-| **Implementation detail (HOW)** | 换库 / 换算法 / 调实现顺序 | 不动 Spec;改既有 slice 的 `verify` 命令或加新 slice | slice 表更新;**不改** `blockedBy` 拓扑 |
-| **Data-shape / API contract (WHAT)** | 加字段 / 改 schema / 改 endpoint 签名 | **重入 Phase 1 Spec**;amend + 重新跑 Momus 拿 `[OKAY]`;旧 slice 标 `superseded` 由新 slice 替换 | 旧 slice 走 `git revert`(项目 git policy 下)+ 标 `status=superseded` 并填 `superseded_by`;新 slice 入 frontier |
-| **Feature re-scope (WHY)** | 用户说"其实我们要做的不是 X,是 Y" | **重入 Phase 0 Brainstorming**;只保留 Phase 0 Design 的设计骨架;再走 § Phase 1 Spec 重写 | 大部分已有 slice 走 `status=superseded` 或 `deprecated`;新设计产出新 Phase 1 Spec |
-| **Pure addition (orthogonal)** | "再加一个 Y,不影响已存在的 X" | append 到 Phase 1 Spec(amend + Momus);**仅在 frontier 末尾追加新 slice**,旧 slice 不动 | frontier 增长;不改既有 `blockedBy` 拓扑 |
-#### 9.2 Process for any requirement change
+完整 5 档分类 + 状态机 + amend 协议见 [`references/mid-build-changes.md`](references/mid-build-changes.md):
 
-1. **Detect**:用户或 review-work 🔴 报告"需求 / 验收标准变了"。
-2. **Classify**:用 § 9.1 的 5 档表对位(只取一行,不许混)。
-3. **Halt in-flight slice**:`in_progress` 的 slice 若被 impacted,先停下,不要再 commit,记录当前进度 `.omo/notepads/<plan-name>/issues.md` 加 `[halt] <slice-id> reason:<一句话>`。
-4. **Route to the right phase**:
-   - Cosmetic / HOW → 不出 Phase 3,仅修改既有 row 或 append row
-   - **Data-shape / Pure addition →** invoke [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) Step 5.5 Amend + re-attest
-   - **WHY changed →** invoke [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) Phase 0 重新对齐,完成后再走 Phase 1 amend
-5. **Deprecate or supersede impacted slices**:用 § 9.3 的状态机更新 `status` + `superseded_by`;OMO `atlas` 自动把它们从 frontier 排除。
-6. **Log amendment**:`.omo/notepads/<plan-name>/decisions.md` append 一段(用 `Edit`,不要 `Write` —— `notepad-write-guard` hook 强制 append-only):
-   ```
-   [amend] <type> at <ts> by <actor> reason:<一句话>
-        sections:   <Phase-1.Section-list, e.g. Acceptance / Test Strategy>
-        momus-verdict: <OKAY | REJECT — issues>
-        affected:   <slice-id-1, slice-id-2...>
-        action:     <deprecate / supersede / append / modify>
-        spec:       .omo/plans/<slug>.md#Phase-1.Section
-   ```
-   这是事后 audit"为什么 X 被作废"的唯一线索。`sections` + `momus-verdict` 是必备字段:前者定位改动位置,后者证明 amend 经过了 Momus 评审(防止"amend 后忘了评审")。
-7. **Resume**:**只在 Momus 通过新 plan + 新 slice 表上**继续 frontier work。任何 `in_progress` 的旧 slice 必须 halt 并 supersede,绝不允许续写半成品。
-#### 9.3 Slice status machine(含 halted 路径)
-```
-pending  ──► in_progress ──► complete
-                │                  │
-                │ halted           ├──► deprecated  (需求改但旧实现保留;git 不删)
-                ▼                  │
-            [halt]+superseded      └──► superseded  (需求改,新 slice 接替;必填 superseded_by)
-               (halt 中途
-                amendment 是合法
-                路径,见 § 9.2 step 3 + 5)
-```
-**写代码纪律**:
-
-- 禁止 `deprecated` ↔ `superseded` 的来回切换 — deprecated 是"被废弃保留",superseded 是"被替换",方向感不一样。
-- 禁止无 `superseded_by` 的 `superseded` slice。
-- 旧 slice 即使 `deprecated`,其 `verify` 命令仍应在 CI 通过 = "没坏但不再演化"。如果 verify 失败,先解 verify 再标 deprecated。
-- `in_progress` slice 在 § 9.2 step 3 halt 后,只能:
-  - 进 `superseded`(若新 slice 接替) — **必须**用 § 9.2 step 3 + step 5 的 [halt]+[amend] 协议,不能直接跳。
-  - 退回 `pending`(若变更撤回) — 但这等于放弃已做的工作,通常由 OMO `git stash` 配合。
-  - 不要从 `in_progress` 直接进 `complete`(已 halt 的不算完成)。
-- 任何 status 变更必须 append 到 `.omo/notepads/<plan-name>/` 的 `[amend]` 段。
+- **9.1** 5 类变更(Cosmetic / HOW / WHAT / WHY / Pure addition)的路由规则
+- **9.2** 标准处理流程(Detect → Classify → Halt → Route → Deprecate → Log → Resume)
+- **9.3** Slice 状态机扩展(含 halted 路径 + `[amend]` 日志模板)
 ### 10. Rollback protocol
 
 Slice 上线后被判定需要回收时(数据丢失 / 安全洞 / correctness regression / 用户主动撤回 / fix-the-fix 反效果),按本协议收尾。
 
+完整协议见 [`references/rollback-protocol.md`](references/rollback-protocol.md):
+
+- **10.1** 触发条件(5 种)
+- **10.2** 7 步协议(HALT → 恢复方式 → 状态更新 → Log → Postmortem → Spec 修复 → 验证)
+- **10.3** 状态机扩展(`rolled_back` 6 态)
+- **10.4** `[rollback]` 日志模板 + 10.5 Rationalizations + 10.6 Red Flags
+
 **注意**:rollback 是 § 9 amend 的姐妹协议 —— § 9 处理"需求变了,spec 与 slice 还没坏";本协议处理"已落地的 slice 必须撤回"。两者状态机独立,但共用 `.omo/notepads/<plan-name>/` 日志约定。
-#### 10.1 触发条件
-
-满足下列任一即触发本协议:
-
-1. OMO `review-work` Stage 2 报 **critical severity** `🔴`(数据丢失 / 安全 / 修复引入新 bug)
-2. 用户主动说"回滚那一段"
-3. [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) Step 4 fix 引入新 regression(reproduce 命令倒过来了)
-4. § 9 amend 反向:某个 spec amendment 决定撤回上线分支
-5. Pre-merge 检查发现主线 cherry-pick 错位(合并前最后一道关)
-#### 10.2 协议(必须按顺序)
-
-1. **HALT frontier** — 任何并行 slice 立即停下:`.omo/notepads/<plan-name>/decisions.md` append `[halt] <slice-id> reason:<一句话>`。正在 `in_progress` 的 slice 必须 halt 后才走后续步骤(进 `rolled_back`,不要直接 `complete`)。
-2. **选择恢复方式**:
-   - `git revert <sha>`(已 commit 但未 publish)
-   - `git reset --hard <safe-sha>`(永远仅在 main 之外用)
-   - `cherry-pick --abort` 或 `rebase --abort`
-   - 删除 worktree 整目录(`git worktree remove`)
-3. **更新 slice 状态**:见 § 10.3 状态机新增 6 态 `rolled_back`,必填 `rolled_back_at` / `rolled_back_reason`。
-4. **Log `[rollback]`**(必写,模板见 § 10.4,append 到 `.omo/notepads/<plan-name>/decisions.md`)。这是事后 audit "为什么 X 段被回收" 的唯一线索。
-5. **(critical severity 必做)** Postmortem — 在 `[rollback]` 行后 append 一句"如何防再次发生"(action item:新增防漏测试 / 新 checklist / 新 spec 段落)。
-6. **修 Spec(若根因是 spec 错)**:走 [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) Step 5.5 amend,re-attest 后再继续。任何"只回退代码不修 Spec"的捷径见 § 10.6 Red Flags。
-7. **验证回滚真完成**:`[rollback]` 行写齐 7 个字段 / `verify` 命令重跑且退出 0 / 受影响的 sibling slice `verify` 仍过。
-#### 10.3 slice 状态机扩展
-```
-pending  ──► in_progress ──► complete
-                │   │              │
-                │   │ halted       ├──► deprecated   (留旧不演化)
-                │   ▼              │
-                │  [halt]          └──► superseded   (被新 slice 接替)
-                │   │
-                │   └────► rolled_back (post-complete rollback;git history preserved)
-                │              ↑
-                │              outcome of incidents;详细见 § 10
-                ▼
-              (rollback 流程见 § 10)
-```
-**写代码纪律**(rollback 专属):
-
-- 禁止无 `[rollback]` 日志就改 git 历史(`git reset` / `git rebase --interactive`)。
-- 禁止 `rolled_back` slice 不填 `rolled_back_at` / `rolled_back_reason`。
-- 禁止"只回退代码不回退 spec 假设" —— 若根因是 spec 错,amend 必走。
-- `rolled_back` slice 不允许再回 `complete`(除非 amend 一遍后整个 acceptance 重做)。
-- 多个 slice 同时被影响的"事件级 rollback":`[rollback]` 里 `affected:` 字段列多个,`postmortem` 写在最后一条。
-#### 10.4 `[rollback]` 日志模板
-```
-[rollback] <slice-id | commit-sha> at <ts> by <actor>
-     trigger:    <review-work-crit | user-request | fix-the-fix | spec-retro | pre-merge-cherry-pick>
-     severity:   <critical | major | minor>
-     recovered:  <git-revert <sha> | git-reset <sha> | rebase-abort | worktree-remove | cherry-pick-abort>
-     reason:     <一句话 5-whys 第一层>
-     affected:   <slice-id-1, slice-id-2...>
-     action:     <fix-tests | amend-spec | new-blocking-slice | none-yet>
-[postmortem] <一句话如何防再次发生>  ← critical severity 必写
-[test-gap]    <新测试名 / 新 checklist / 新 spec 段落>  ← optional
-```
-#### 10.5 Common Rationalizations
-
-| Excuse | Reality |
-|---|---|
-| "已经 git revert 了,日志可以省" | revert 只是个动作,不是 audit 入口。下次人看到 git log 时,**[rollback]** 是唯一的"为什么这段代码不再有效"说明。无日志 = 历史虚无。 |
-| "只是个小 bug,不用 critical 严重度" | 严重度由后果定,不由大小定。"小 bug"如果导致 P95 latency 翻倍 → **major**;导致数据丢失 → **critical**。不分严重度 → § 10.2 step 5 的 postmortem 被跳过,下次同样坑。 |
-| "[rollback] 之后再补日志吧,先恢复代码" | 事故发生时补日志最容易遗漏(上下文已切换)。本协议要求 revert 与 log 同步:revert 完立刻写 `.omo/notepads/<plan-name>/`。 |
-| "spec 不需要 amend,只是某个 edge case" | 如果触发是 spec 没覆盖到该 edge case,这就是"spec 错",amend 必走。否则下次同一个 edge case 又会出现。 |
-| "rolled_back 跟 complete 差不多" | **错**:`rolled_back` 的 slice **不算** shipping 成功的能力,3 个月后看 planner 的人若把它当 `complete` 引用,会引入回归。状态机分清这两态是为了 audit,不是冗余。 |
-#### 10.6 Red Flags
-
-- `git reset --hard` 在 main 分支上
-- `git push --force` 到 main/release
-- 在没有 `[rollback]` log 的情况下改了 git history
-- "git pull 失败了,直接 reset 到 origin" — 跳过 audit
-- `rolled_back` slice 没填 `rolled_back_at` / `rolled_back_reason`
-- rollback 后没跑 sibling slice `verify`(确认没有牵连破坏)
-- critical rollback 没写 postmortem
-- rollback 但没 amend spec(若 spec 是根因之一)
 ## Common Rationalizations
 
 | Excuse | Reality |
