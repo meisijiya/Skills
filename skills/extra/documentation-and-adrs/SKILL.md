@@ -1,6 +1,6 @@
 ---
 name: documentation-and-adrs
-description: "Records significant architectural decisions as ADRs (Markdown files in `docs/adr/`). Strictly limited to architecture-level decisions (data model, API contracts, dependency upgrades, deprecations). Daily project docs, READMEs, and inline comments belong in the project's own AGENTS.md or progress notes — not as ADRs."
+description: "Use when recording a significant architectural decision (data model / API contract / dependency upgrade / deprecation / 选型变更) that is irreversible + cross-time + cross-team. Records it as an ADR in `docs/adr/<NNNN>-<slug>.md` using a Nygard-adapted template. Strictly NOT for daily project docs, READMEs, single-file changes, or commit-message-length notes — those belong in the project's own AGENTS.md, README, or `.omo/notepads/<plan>/decisions.md`."
 allowed-tools: "Read Write Edit Bash Glob Grep"
 ---
 

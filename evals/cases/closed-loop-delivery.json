@@ -29,6 +29,11 @@
       "input": "Within 5 min of deploy, audit the canary and CDN",
       "expected_no_skill": true,
       "reason": "Deploy-time audit (<5 min) → matches NOT for 'within-deploy-time evidence' → pre-ship-gate routes here"
+    },
+    {
+      "input": "My local dev server crashed during a feature branch — restart it",
+      "expected_no_skill": true,
+      "reason": "Local-only dev workflow, no production rollout → matches NOT for 'local-only development without production evidence needs' → debugging-and-error-recovery routes here"
     }
   ],
   "behavioral_evals": [

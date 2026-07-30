@@ -29,6 +29,11 @@
       "input": "Just deployed, want to confirm it's not silently failing",
       "expected_no_skill": true,
       "reason": "Pre-deploy catching of silent failures → matches NOT for 'pre-deploy catching' → pre-ship-gate routes here"
+    },
+    {
+      "input": "CI is red on my feature branch but I haven't deployed anything yet",
+      "expected_no_skill": true,
+      "reason": "Pre-deploy CI failure, no production incident → matches NOT for 'pre-deploy test failures / CI red on unmerged branch' → debugging-and-error-recovery routes here"
     }
   ],
   "behavioral_evals": [

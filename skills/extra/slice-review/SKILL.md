@@ -6,6 +6,8 @@ allowed-tools: "Read Bash Grep"
 
 # slice-review
 
+## Overview
+
 Per-slice lightweight review. One reviewer (`task(subagent_type="oracle")` or
 `task(category="unspecified-high")`) returns TWO ordered verdicts on a
 single slice's diff:
@@ -201,6 +203,16 @@ With per-slice review:
 
 Per-slice review adds ~30s per slice × N slices = cheap insurance against
 hours of cascading rewrites.
+
+## Common Rationalizations
+
+| Excuse | Reality |
+|---|---|
+| "Skip per-slice review to save time" | Reviewer adds ~30s × N slices — cheap insurance vs hours of cascading rewrites at whole-branch review |
+| "The executor said it looks good" | Reviewer's whole point is independent verification; by the time review-work catches it, 5 slices have built on the mistake |
+| "Pre-rate findings so the reviewer doesn't get too aggressive" | Reviewer has full judgment authority; pre-rating is the orchestrator's rationalization, not the reviewer's bias |
+| "Re-dispatch this slice — I'm pretty sure I already did it" | Ledger + `git log` are authoritative after compaction; trust them over recollection |
+| "Run the tests again in the review prompt to be safe" | Read the GREEN evidence in the executor's report file instead; re-running wastes reviewer context |
 
 ## Red Flags
 

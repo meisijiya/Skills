@@ -34,6 +34,11 @@
       "input": "Production p99 regressed to 1s — find the bottleneck.",
       "expected_no_skill": true,
       "reason": "Performance regression → matches NOT for 'production-bug root-cause hunt' → debugging-and-error-recovery or performance-optimization routes here"
+    },
+    {
+      "input": "Add tests to bring coverage from 60% to 90%",
+      "expected_no_skill": true,
+      "reason": "Coverage-driven test expansion without quality lens → matches NOT for 'coverage-metric-driven test writing' → test-driven-development routes here"
     }
   ],
   "behavioral_evals": [

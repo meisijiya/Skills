@@ -45,6 +45,7 @@ Recommended checks (WARN on miss):
   - Has '## Overview' section
   - Has '## When to Use' section
   - Has '## Process' section
+  - 'name' matches strict kebab-case regex (no '--', no leading/trailing '-')
 EOF
 }
 
@@ -104,6 +105,11 @@ for skill_md in "${skill_files[@]}"; do
     fails+=("name '$name' does not match directory '$skill_name'")
   fi
 
+  # 5b. Strict kebab-case regex check
+  if [[ -n "$name" && ! "$name" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+    warns+=("name '$name' should match ^[a-z0-9]+(-[a-z0-9]+)*\$ (no '--' / no leading or trailing '-')")
+  fi
+
   # 6. Validate description
   if [[ -z "$desc" ]]; then
     fails+=("frontmatter missing 'description'")
@@ -120,6 +126,21 @@ for skill_md in "${skill_files[@]}"; do
   fi
   if ! grep -qiE '^##[[:space:]]+(Process|Core Process|Workflow|How It Works|Steps)' "$skill_md"; then
     warns+=("missing recommended Process section (## Process / ## Core Process / ## Workflow / ## How It Works)")
+  fi
+
+  # 8. allowed-tools consistency: body must not reference tools not declared
+  body_after_fm=$(awk 'BEGIN{out=0} /^---$/{n++; if(n==2) out=1; next} out' "$skill_md")
+  if [[ -n "$fm" && -n "$body_after_fm" ]]; then
+    declared_tools=$(echo "$fm" | grep '^allowed-tools:' | head -1 | sed 's/^allowed-tools:[[:space:]]*"//;s/"[[:space:]]*$//' | tr ' ' '\n' | sort -u)
+    for tool in Read Write Edit Bash Glob Grep WebFetch WebSearch; do
+      echo "$body_after_fm" | grep -qE "\b$tool\b" || continue
+      echo "$declared_tools" | grep -qxF "$tool" && continue
+      echo "$body_after_fm" | grep -qiE "(No|not|cannot|should not|禁用|不要|不需要|only[[:space:]]+Read|not[[:space:]]+use|without).{0,30}\b$tool\b" && continue
+      if [[ "$tool" == "Write" ]] && echo "$body_after_fm" | grep -qiE "\b(writes?|writing|written)\b"; then continue; fi
+      if [[ "$tool" == "Edit" ]] && echo "$body_after_fm" | grep -qiE "\b(edits?|editing|edited)\b"; then continue; fi
+      warns+=("body references '$tool' but frontmatter allowed-tools does not declare it")
+      break
+    done
   fi
 
   # Report

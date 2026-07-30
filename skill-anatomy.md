@@ -16,13 +16,18 @@ allowed-tools: "Read Edit Bash Glob Grep"
 ### `description` 规则
 
 - **第三人称**:"Guides agents through X" / "做 X。Use when Y。"
-- **包含触发条件**:"Use when Y"
-- **禁止包含流程摘要**——否则 agent 会按摘要跳过读全文
+- **必须以 "Use when ..." 开头** — 优先描述**触发条件**,而非 skill 的工作流摘要(Superpowers 实证测试:描述含流程摘要会导致 agent 跳过读全文,直接按 description 执行)
+- **触发句式**:`Use when [具体触发条件/症状/上下文]`(可接同义表达 `Use before/after/during/in/for`、`Apply when`、`Load when`、`Triggers:`)
+- **可含 what 摘要,但只放在触发句之后** — 现有 skill 的 "what + Use when" 双段式格式可接受;新 skill 推荐"Use when ..." 开头(分阶段迁移,不强制重写)
 - **必须能让 agent 判断"现在该不该加载这个 skill"**
+- **≤ 1024 字符**(硬上限),推荐 ≤ 500 字符(更易在 group picker 中完整展示)
+- **不要写流程步骤**("1. xxx 2. xxx");流程属于 SKILL.md body,不属于 description
 
 ### `name` 规则
 
 - kebab-case(小写 + 连字符)
+- **必须满足正则 `^[a-z0-9]+(-[a-z0-9]+)*$`** — 禁止连续 `--`、首尾连字符、保留字(`anthropic-` / `claude-`)
+- **推荐 gerund 形式**(Anthropic best-practices):`-ing` 结尾(`brainstorming` / `debugging` / `testing`) — 不强制,但与 Anthropic 标准对齐
 - 必须跟 SKILL.md 所在的目录名一致
 
 ## 6 个标准段(推荐结构)
@@ -129,9 +134,16 @@ allowed-tools: "Read Edit Bash Glob Grep"
       ]
     },
     {
-      "name": "meisijiya-domain",        // 选装集(domain group · 7 个)
+      "name": "meisijiya-domain",        // 选装集(domain group · 11 个)
       "skills": [
         "./skills/extra/<domain-skill-name>",
+        ...
+      ]
+    },
+    {
+      "name": "meisijiya-frontend",      // 选装集(frontend group · 3 个)
+      "skills": [
+        "./skills/extra/<frontend-skill-name>",
         ...
       ]
     }
@@ -144,7 +156,7 @@ allowed-tools: "Read Edit Bash Glob Grep"
 - `name` 是 picker 里显示的 group header(`npx skills add` 按 group 展示,可选整组团或单 skill)
 - 每个路径必须以 `./` 起头
 - 路径指向 skill 目录(包含 SKILL.md 的目录),**不是 SKILL.md 文件本身**
-- 必装集(9 个)放 `meisijiya-core`(单 entry 保留必装视觉信号);选装集按 6 个 group(`security` / `cicd` / `observability` / `meta` / `domain` / `frontend`)分开放,共 29 个,7 个 entry
+- 必装集(9 个)放 `meisijiya-core`(单 entry 保留必装视觉信号);选装集按 6 个 group(`security` / `cicd` / `observability` / `meta` / `domain` / `frontend`)分开放,共 33 个,7 个 entry
 - 同一 skill 不能出现在多个 plugin 里(否则 pluginName 二义性)
 - 新增 group(罕见):在 `marketplace.json` 加新 plugin entry、`scripts/inject-agents-md.sh:47` 的 `GROUP_SUFFIXES` 数组加对应后缀、`AGENTS.md` Section A 加 `**<group> (N):**` 块(N 自动从 manifest 派生)
 - `core/` 保持单 entry 而**不**按学科拆,因为"必装"是定位信号(group 拆了反而稀释);如需拆 core,先确认会导致 picker UX 变化
@@ -210,3 +222,16 @@ npx skills remove <name> -g -a opencode
 - `npx skills add` CLI 用 `pluginName` 字段做 group header(`pluginName = name`)
 - 单个 `name` 只能给所有列出的 skill 同一个 group → 必须用 `marketplace.json` 多 plugin entry 才有多个 group
 - CLI 不按目录名分组(`.core/` vs `.extra/` 仅是组织约定,不影响显示)
+
+## 安全(Safety)
+
+**只从可信源安装 skill**。本仓库的 skill 经 omo 生态审计,符合 OpenCode + OMO 插件适配;第三方 skill 可能包含未审计的指令或脚本,在加载前必须人工 review:
+
+- **仓库视角**:本 fork 继承自 [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) + [obra/superpowers](https://github.com/obra/superpowers) + 社区贡献;每个 SKILL.md 的 `omo Integration` 段明示其调用的 OMO 资源(`task()` / `oracle` / `librarian` 等)。装到 `.agents/skills/` 后,skill 在 OpenCode 加载时会进入 `<available_skills>`,模型可能根据 description 自动 invoke。
+- **用户视角**:通过 `npx skills add meisijiya/Skills` 装本仓库的 skill 是受信任路径;通过 `npx skills add <unknown-source>/<repo>` 装第三方 skill 前,先 review `SKILL.md` 的 description 是否合理、`Process` 段是否会触发不可逆动作(`git push --force` / `rm -rf` / 网络请求外部 URL 等)。
+- **审计线索**:每个 skill 的 `verification-before-completion` 段是反向测试 — 如果 skill 让你跳过 verification,这就是一个 red flag。
+- **威胁模型**:恶意 skill 可能让 model 执行 description 之外的工具调用(如 `Bash` 跑外部脚本、`WebFetch` 抓取钓鱼 URL);`allowed-tools` 字段是显式声明的工具白名单,frontmatter 缺 `allowed-tools` 时 model 默认有全部工具权限。
+
+**对齐**:Anthropic / OpenCode / Superpowers 三方权威都强调 "install only from trusted sources";本段是该共识在 meisijiya-skills 的本地化表达。
+
+**仅 OpenCode + OMO 插件适配**:本仓库的 skill **仅**针对 OpenCode + oh-my-openagent (omo) 生态设计,引用 `~/.config/opencode/plugins/`、`~/.agents/skills/`、OMO 内置 MCPs (`context7` / `grep_app` / `websearch` / `lsp`)、内置 agents (`sisyphus` / `prometheus` / `atlas` / `oracle` / `librarian`)、内置 skills (`git-master` / `review-work` / `visual-qa` / `remove-ai-slops` / `init-deep` / `frontend` / `playwright`)、内置 modes (`hyperplan` / `security-research` / `ultrawork`)。其他 harness (Claude Code / Codex / Cursor / 等) 的扩展字段(`when_to_use` / `disable-model-invocation` / `user-invocable` / `context: fork` / hooks) **不在本仓库支持范围内**,刻意不引入以避免 YAGNI 兼容成本。

@@ -29,6 +29,11 @@
       "input": "Threat-model a new payment processing integration before we start coding",
       "expected_no_skill": true,
       "reason": "Pre-design adversarial modeling → matches NOT for 'adversarial boundary modeling' → security-threat-model routes here"
+    },
+    {
+      "input": "Audit my Kubernetes manifests for securityContext / runAsNonRoot / readOnlyFilesystem",
+      "expected_no_skill": true,
+      "reason": "Infrastructure-as-code / k8s manifests, not source code → matches NOT for 'IaC / deployment manifests layer' → security-devsecops routes here"
     }
   ],
   "behavioral_evals": [
