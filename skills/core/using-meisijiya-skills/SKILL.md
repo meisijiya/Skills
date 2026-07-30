@@ -14,152 +14,59 @@ If a Skill's description matches what you are about to do, you MUST invoke it be
 This is not optional. Skills encode team-validated discipline; bypassing them because "this is simple" is exactly when they matter.
 </EXTREMELY-IMPORTANT>
 
-## The Rule
+## Overview
 
-**Invoke relevant skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If no Skill matches, say so explicitly and proceed.
+Meta dispatcher. Hard-injected every session by the OpenCode plugin (`~/.config/opencode/plugins/meisijiya-skills.js`) so the model actively invokes skills instead of letting them sit in `<available_skills>`. Coordinates with omo Sisyphus + IntentGate; this skill does NOT do work — it routes.
 
-**Before entering plan mode:** if you haven't already brainstormed, invoke [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) first.
+## When to Use
 
-Then announce **"Using [skill] to [purpose]"** and follow it exactly. If the Skill has a checklist, create a todo per item.
+**Use when:**
+- Starting any session in a project where meisijiya-skills are installed (you're in one right now)
+- About to take any action on the user's behalf — every turn, before responding
 
-## Skill Catalog Source
+**NOT for:**
+- Sub-agents (you were dispatched to execute a specific task; ignore this skill — the controller should not have forwarded it)
+- Executors — receive domain-specific skills in the dispatch prompt, NOT this dispatcher
 
-This file is a routing policy, not a catalog. Consult `<available_skills>` (injected by the harness) before routing — the Priority table below is a hint accelerator, and extras are part of the same system, loaded on demand.
+## Process
 
-## Skill Priority (soft hints — not rules)
+1. Consult `<available_skills>` (injected by the harness) for the current session's skill roster + each skill's `description`.
+2. Match the incoming request against each skill's `description` field. The `description` is the source of truth for routing.
+3. For cross-skill trigger hints (one row per common request pattern), read [`references/priority-table.md`](references/priority-table.md).
+4. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
+5. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For model selection by task type, read [`references/model-selection.md`](references/model-selection.md).
+6. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
 
-> **AI decides via description match.** Each skill's `description` field is the source of truth for whether to invoke it. This table is a **hint accelerator** for common request patterns — read it as "consider this skill first," not as "must invoke this skill." When multiple skills could apply, **process skills come first** (they're the discipline layer; the rest are tools).
->
-> **Under omo**, Sisyphus's Intent Gate already classifies intent (research / implementation / investigation / fix / evaluation) before any skill routing happens. The table below covers the `implementation` branch where skill routing still matters; other branches are handled by omo's built-in dispatch (librarian / explore / oracle for `research`; debugging-and-error-recovery for `fix`).
-
-| Trigger (user request pattern) | Consider first | Possible next |
-|---|---|---|
-| `ulw` / `ultrawork` / "just build it" / "do it" | (no skill — Sisyphus ultrawork mode handles) | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) only if mid-flight scope emerges |
-| "Let's build X" / "implement Y" / new feature (scope known) | [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) only if Sisyphus detects hidden ambiguity |
-| "I want to do X but I'm not sure how" / "design X" / "what's the right way" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) → [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) |
-| "Fix this bug" / "X is broken" / "X is wrong" | [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) | If the cause is non-obvious after 1-2 hypotheses, switch to [`diagnosing-bugs`](~/.agents/skills/diagnosing-bugs/SKILL.md) (symptom-driven observation loop); final fix then returns to [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
-| "Review this slice" / "diff against brief" / per-slice review before next slice | If installed, [`slice-review`](~/.agents/skills/slice-review/SKILL.md) (extra/) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) |
-| "About to claim done" / "ready to commit/PR" | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | (invoke OMO `review-work` per Stage 2) |
-| "Modify GHA workflow" / "audit .github/workflows" / "review a PR with CI changes" / "design CI step order" | If installed, [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) (extra/) | [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) if the workflow change touches supply chain (action swap, pinned SHA, secret pass-through) |
-| "About to design / refactor / integrate X" with a trust-boundary crossing (new feature, third-party, multi-tenant, auth refactor) | If installed, [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) once the design lands |
-| "About to roll out a release" / "canary stuck at 0%" / "deploy exit 0 but suspect silent failure" | If installed, [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) (extra/) | [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) only if the failure already reached users |
-| "About to refactor X" / "author of sensitive code is leaving" / "what's our sensitive-code bus factor?" / "compliance audit asking who owns this" | If installed, [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) for the per-line audit after the refactor lands |
-| "Need perf gate before merging" / "is X endpoint fast enough at 1k RPS" / "find the breaking-point load" | If installed, [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) (extra/) | [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) once the gate fires or for post-hoc regression investigation |
-| "Production alert fired" / "need the in-flight runbook" / "writing postmortem for last week's SEV1" / "design runbook template for service X" | If installed, [`production-incident-playbook`](~/.agents/skills/production-incident-playbook/SKILL.md) (extra/) | [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) only if the incident is security-class (breach / leaked creds / CVE); for hard-bug investigation within an incident, [`diagnosing-bugs`](~/.agents/skills/diagnosing-bugs/SKILL.md) |
-| "About to declare this done" / "diff is large, must be done" / "bug ticket came back despite green CI" | If installed, [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) (extra/) | [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) for the deploy-side evidence + [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) for the runtime metric data |
-| "Adding a new dep" / "lockfile quarterly review" / "this dep's maintainer signal degraded" | If installed, [`supply-chain-risk-auditor`](~/.agents/skills/supply-chain-risk-auditor/SKILL.md) (extra/) | [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) for CVE scan at install time |
-| "AI wrote our React/Express/Mobile code" / "XSS-prone frontend code" / "SSRF-prone backend URL handling" / "WebView hard to reason about" | If installed, [`stack-security-coder`](~/.agents/skills/stack-security-coder/SKILL.md) (extra/) | [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) for the cross-cutting audit + [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) for AI-coded diff blindspots |
-| "Tests are 100% green but prod bug slipped" / "audit AI-generated tests" / "set up per-PR test-quality gate" | If installed, [`test-guard`](~/.agents/skills/test-guard/SKILL.md) (extra/) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) for the methodology |
-| AI just generated/edited code, in `verification-before-completion` stage | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) | [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) (extra/) |
-| "Write code that touches K+/v X / unfamiliar API" | [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) | [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) |
-| "Write a skill" / "edit a skill" / "extract this workflow" | [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) | (test-first, red-green-refactor) |
-| Codebase health scan / on-boarding unfamiliar codebase / weekly architecture review | [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) | (proposal-only output; defer to `incremental-implementation` for action) |
-| Post-attested-Spec work with observed open-world contract/state/timing/concurrency/boundary/dependency/reversibility/verification-blind-spot signals | If installed, [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) | Missing optional extra never blocks the core flow; continue with the attested Spec, TDD, and completion gate |
-| `@teacher` / "教我" / "teaching-style HTML" / "我想学会 X 的思维方式" (reverse distillation from a public skill / teacher source) | If installed, [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) (extra/) | Emits pedagogy data contract → OMO `frontend`; build-gate HTML page mode §5 reminder for overlay |
-| Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
-| "Build a landing / portfolio / marketing page" / "frontend agent is about to write UI code" / "ship a SaaS hero that doesn't look AI-default" / "redesign our existing site to premium quality" | If installed, [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) (extra/) — anti-slop rules + three dials + non-default hard rules | [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) for the project-specific spec contract (loads first; frontend-taste is the second contract layer on top). If the brief names a specific aesthetic (Linear / Notion / editorial / premium-utilitarian), stack [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md) as the active direction. If upgrading existing UI rather than greenfield, load [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) first. |
-| Use when a Phase 1.2 spec contains `[PROTO-RESOLVE]` markers or has a visual-fidelity gap | If installed, [`prototype`](~/.agents/skills/prototype/SKILL.md) (extra/) — generate throwaway UI variants | Return to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) §3.5; `NEEDS_CONTEXT` on <2 valid variants; `[proto:bypass] reason` required |
-| Use when scope exceeds a single brainstorming session | If installed, [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) (extra/) — DAG ticket graph for multi-session exploration | Close → Phase 0 of `.omo/plans/<slug>.md`, consumed by [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) |
-| Use when a planning/design decision requires authoritative information from official docs / RFCs / source-repo / spec | If installed, [`research`](~/.agents/skills/research/SKILL.md) (extra/) — plan-required, 4-type citation whitelist, Stack Overflow REFUSED | Uses the OMO `librarian` under the hood (async or sync); findings feed the plan decision |
-
-**Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
-
-## Red Flags — STOP, you're rationalizing
+## Common Rationalizations
 
 | Thought | Reality |
 |---|---|
-| "This is just a simple question" | Questions are tasks. Check for Skills. |
-| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "I can check git/files quickly" | Files lack conversation context. Check for Skills. |
-| "This doesn't need a formal skill" | If a Skill exists, use it. |
-| "I remember this skill" | Skills evolve. Read current version. |
-| "This doesn't count as a task" | Action = task. Check for Skills. |
-| "The skill is overkill" | Simple things become complex. Use it. |
-| "The diff/LOC is small, so contract strengthening cannot apply" | Size is not a risk signal; route on the observed contract properties above. |
-| "I'll just do this one thing first" | Check BEFORE doing anything. |
-| "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
-| "1% chance applies, must load" (removed) | Only invoke when description matches; "not sure" still requires checking the catalog first, but not loading every adjacent Skill. |
+| "This is just a simple question" / "Let me explore first" / "I can check files quickly" | Questions are tasks. Skills tell you HOW to explore. Files lack conversation context. |
+| "This doesn't need a formal skill" / "I remember this skill" / "The skill is overkill" | If a Skill exists, use it. Skills evolve — read current version. Simple things become complex. |
+| "I'll just do this one thing first" / "This feels productive" | Check BEFORE doing anything. Undisciplined action wastes time. |
+| "1% chance applies, must load" | Only invoke when description matches; "not sure" still requires checking the catalog, but not loading every adjacent Skill. |
+
+## Red Flags
+
+- Invoking `using-meisijiya-skills` from a sub-agent (means the controller forgot to filter — see `<SUBAGENT-STOP>`).
+- Reading skill SKILL.md files when the description alone would suffice (wastes tokens — read on demand after description match).
+- Treating the Priority table as authoritative (it's a hint accelerator; the `description` field wins).
+- Skipping the announce step — without "Using [skill] to [purpose]" the user can't see the routing.
 
 ## Plugin layer (where this bootstrap comes from)
 
-If you see `<EXTREMELY-IMPORTANT>` markup prepended to the first user message of this session, that comes from a hard-layer OpenCode plugin (not from a soft SKILL.md reference). Specifically:
+- `~/.config/opencode/plugins/meisijiya-skills.js` reads this `SKILL.md` on session start, strips frontmatter, wraps in `<EXTREMELY-IMPORTANT>`, and `unshift`s into `firstUser.parts` once per session (idempotent against compaction re-fires).
+- `~/.config/opencode/plugins/meisijiya-review-router.js` injects per-Edit reminders for `ai-code-blindspots` + `security-and-hardening` + `verification-before-completion` after `write` / `edit` / `apply_patch` (deduped per turn).
 
-- `~/.config/opencode/plugins/meisijiya-skills.js` reads `~/.agents/skills/using-meisijiya-skills/SKILL.md` on session start, strips frontmatter, wraps in `<EXTREMELY-IMPORTANT>` tags, and `unshift`s into `firstUser.parts` once per session (idempotent against compaction re-fires).
-- `~/.config/opencode/plugins/meisijiya-review-router.js` injects per-Edit reminders for `ai-code-blindspots` + `security-and-hardening` + `verification-before-completion` after `write` / `edit` / `apply_patch` tool calls (deduped per turn).
+**Editing rules** — Changes to `SKILL.md` do **not** auto-reload; OpenCode plugins load once at process start. Restart OpenCode after editing. If `<EXTREMELY-IMPORTANT>` is missing, the bootstrap plugin is not installed — fix the install before assuming this skill is active.
 
-**Editing rules**:
-
-- Changes to `SKILL.md` here **do not auto-reload** — OpenCode plugins are loaded once at process start. Restart OpenCode after editing SKILL.md or any of the plugin files.
-- If `<EXTREMELY-IMPORTANT>` is missing, the bootstrap plugin is not installed (or skill is missing from `~/.agents/skills/`). Fix the install before assuming this skill is active.
-- If you're a sub-agent, see `<SUBAGENT-STOP>` at the top — the controller should not have forwarded this skill to you.
-
-## Process chains (not just a flat routing table)
-
-The Priority table above is *cross-cutting routing*, but most real work follows a multi-skill **chain**. Common chains (in order — don't skip stages):
-
-```
-design:           brainstorming → wayfinder → spec-driven-development (wayfinder is the alternative Phase 0 for multi-session scope)
-spec phase 1.2:   spec-driven-development §3.5 → /prototype (NEEDS_CONTEXT if <2 valid) → decisions.md [proto]
-implementation:   brainstorming? → incremental-implementation → test-driven-development → verification-before-completion
-ui front-end:     designer-handoff (project-specific spec) → meisijiya-frontend-taste (anti-slop rules) → [meisijiya-minimalist-ui if aesthetic named] → incremental-implementation → meisijiya-redesign-ui (if existing UI) → verification-before-completion + visual-qa
-slice loop:       incremental-implementation (dispatch) → slice-review (per-slice) → slice-progress.sh mark-complete → whole-branch review-work
-fix:              debugging-and-error-recovery (5-step protocol) → diagnosing-bugs (symptom-driven observation loop when cause is non-obvious) → test-driven-development (red-green for the guard test) → verification-before-completion
-maintenance:      verification-before-completion → ai-code-blindspots → security-and-hardening → review-work
-ci/cd security:   gha-security-review (workflow audit) → verification-before-completion (PR gate)
-threat → hard:    security-threat-model (design) → security-and-hardening (impl) → pre-ship-gate (deploy)
-ship:             gha-security-review (CI) → pre-ship-gate (deploy evidence) → observability-and-instrumentation (post)
-perf gate:        k6-load-testing (synthetic-load PASS/FAIL) → performance-optimization (post-fire diagnosis)
-governance:       security-ownership-map (people↔file topology) before major refactor + post-incident
-closed loop:      verification-before-completion → pre-ship-gate (deploy evidence) → closed-loop-delivery (24h+ runtime + reachability)
-dep safety:       supply-chain-risk-auditor (trustworthyness) → security-devsecops (CVE scan at install)
-test quality:     test-driven-development → test-guard (post-hoc audit so tests actually test something)
-teaching artifact: brainstorming? → teacher-skill (pedagogy data contract) → OMO `frontend` (single-file responsive HTML)
-```
-
-The Priority table tells you which skill handles a single trigger. The chains tell you which skill comes *next*. Both matter.
-
-## omo Integration
-
-OMO dispatcher owns routing; use the `ulw-plan` skill (triggered by `plan this` / `ulw-plan` / `just make it good` / `/plan` keyword), OMO task tools (`task_create` / `task_update` for task DAG at `$OPENCODE_CONFIG_DIR/tasks/<list-id>/T-{uuid}.json`), Boulder (`.omo/boulder.json` schema v2 with multi-work / session_ids / worktree_path), notepads (`.omo/notepads/<plan>/{learnings,decisions,issues,problems}.md` — **append-only** via `notepad-write-guard` hook), `compaction-context-injector` hook (8-section context prompt for state survival across compaction), and `review-work` (5 parallel lanes) for execution and verification.
-
-## Controller vs Executor Identity Contract
-
-When dispatching work via `task(subagent_type="...", ...)`, the **controller** (Sisyphus / Atlas / Sisyphus-Junior) and the **executor** (sisyphus-junior / hephaestus / general agent) have strictly different roles:
-
-| Concern | Controller (session owner) | Executor (dispatched sub-agent) |
-|---|---|---|
-| Plan / spec / brief | Reads full plan, holds cross-task context | Reads only `brief` file (via `task-brief.sh`) — sees NOTHING else |
-| Cross-slice state | Maintains Boulder + notepad | Reads notepad append-only, never edits |
-| Review gates | Schedules `slice-review` (per slice) + `review-work` (whole-branch) | Receives review verdicts; re-dispatches fixers if BLOCKED |
-| Decision authority | Owns design / scope / architectural calls | 4-status return only (DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED) — never invents scope |
-| Context pollution | Stays in session, accumulates | Fresh per dispatch (the whole point of subagent isolation) |
-
-**Why this matters**: this skill is bound by `<SUBAGENT-STOP>` — when
-invoked as a sub-agent, ignore it. The controller is the only entity
-that should ever invoke the meta dispatcher. Executors receive
-domain-specific skills (e.g. `incremental-implementation`, `slice-review`)
-in their dispatch prompt, NOT `using-meisijiya-skills`.
-
-## Model Selection by Task Type (when dispatching sub-agents)
-
-OpenCode does not support per-call dynamic `model` fields
-([issue #1776](https://github.com/code-yeongyu/oh-my-openagent/issues/1776)
-is still open). Instead, OMO routes through **agent / category
-selection** — each agent has a fixed model chain, so picking the agent
-indirectly picks the model.
-
-| Task type | Recommended agent / category | Rationale |
-|---|---|---|
-| Mechanical implementation (1-2 files, complete spec in brief) | `sisyphus-junior` (sonnet-4-6) — or category `quick` (gpt-5.4-mini) | Transcription + testing; cheap model suffices |
-| Integration / coordination (multi-file, dependency awareness) | `sisyphus-junior` (sonnet-4-6) | Mid-tier; can't be cheap because cross-file judgment needed |
-| Architectural / design decisions | `oracle` (gpt-5.6-sol xhigh) — read-only consultant | High judgment; cheapest models recommend DRY as YAGNI per Superpowers cost experiments |
-| Final whole-branch review | OMO built-in `review-work` (5 parallel lanes) | Multi-lane = broader coverage than any single reviewer |
-
-**Cheapest ≠ always-better**: Superpowers' cost experiments showed cheap
-reviewers approve DRY violations as YAGNI and pass tests with no
-assertions. Mid-tier is the floor for reviewers; cheap only works for
-implementers with **complete code in brief** (i.e. transcription, not
-judgment).
 ## User Instructions
 
-User instructions (AGENTS.md, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
+User instructions (AGENTS.md, direct requests) take precedence over skills, which override default behavior. Only skip skill workflows when your human partner has explicitly told you to.
+
+## Verification
+
+Before responding, confirm:
+- [ ] You have either invoked a matching skill OR explicitly stated no skill matches
+- [ ] You announced "Using [skill] to [purpose]" when invoking
+- [ ] The invoked skill's `allowed-tools` covers the tools you need (otherwise escalate)
