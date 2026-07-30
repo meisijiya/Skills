@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Investigates questions against high-trust primary sources (official docs, RFCs, source-repo code, project ADRs/spec) and writes cited Markdown findings to `.omo/research/<plan>/<topic>.md`. Use when a planning or design decision requires authoritative information that should outlive the current session as a citable record and the question cannot be answered from local codebase or context alone. Requires plan context: refuses plan-less invocations. Delegates retrieval to the librarian agent; this skill owns the output contract, citation discipline (4-type whitelist), async dispatch, and the decisions.md audit entry. NOT for casual knowledge questions (use agent default tools), non-authoritative sources such as Stack Overflow or blogs (link in See Also, never cite as [ref]), or plan-less invocations (refuse with the literal 'Plan context required. Open a plan first with /brainstorming or /ulw-plan.')."
+description: "Investigates planning/design questions against high-trust primary sources (official docs, RFCs, source-repo, project ADRs); writes cited Markdown findings to `.omo/research/<plan>/<topic>.md`. Use when a decision requires authoritative information as a citable record. Requires plan context — refuses plan-less. NOT for casual questions or Stack Overflow / blogs."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

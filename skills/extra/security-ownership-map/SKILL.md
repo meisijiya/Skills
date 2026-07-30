@@ -1,6 +1,6 @@
 ---
 name: security-ownership-map
-description: "Builds a people↔file security-ownership topology from git history to surface orphan sensitive code, hidden owners, and bus-factor hotspots. Default queries: orphan sensitive files (no recent contributor), hidden owners (single-author modules nobody else has touched), bus-factor hotspots (files with only N contributors where N=1), maintainer concentration (top-K authors by sensitive LOC). Output is a single `<repo>-ownership-map.md` per session plus optional CSV/JSON artifacts for further analysis. Use before any refactor that risks orphaning sensitive code, after a security incident to map the blast-radius-of-departure, when hiring and need to identify coverage gaps, or when designing a rotation / on-call scheme that requires understanding who actually knows what."
+description: "People↔file security-ownership topology from git history — surfaces orphan sensitive code, hidden owners, bus-factor hotspots, maintainer concentration. Output: `<repo>-ownership-map.md` per session + optional CSV/JSON. Use before refactors risking orphan sensitive code, after incidents to map blast-radius-of-departure, when hiring for coverage gaps, or designing rotation/on-call."
 allowed-tools: "Read Bash Glob Grep"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: k6-load-testing
-description: "Performance acceptance gate before any production rollout. Designs and runs k6 load tests (smoke / load / stress / spike / soak) for HTTP, gRPC, and WebSocket services; captures latency-percentile + error-budget thresholds; produces PASS/FAIL evidence with concrete regression diagnosis. Use before merging a perf-sensitive change, when establishing a release baseline, when adding a new endpoint and you need to prove it holds under advertised load, when capacity-planning a deploy, or when an existing endpoint's latency-percentile regressed and you need to find the breaking point. Distinct from performance-optimization (post-hoc bottleneck hunting): this skill gates a deploy on concrete load-test evidence."
+description: "Pre-deploy performance gate. Designs and runs k6 load tests (smoke / load / stress / spike / soak) for HTTP, gRPC, WebSocket; captures latency-percentile + error-budget thresholds; produces PASS/FAIL evidence with regression diagnosis. Use before merging perf-sensitive changes, establishing release baselines, adding endpoints needing load proof, or diagnosing regressed latency-percentiles. Complements performance-optimization (post-hoc)."
 allowed-tools: "Read Bash Glob WebFetch"
 ---
 

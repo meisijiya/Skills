@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: "Periodic codebase architecture health check that surfaces shallow modules, coupling hotspots, and concept-sprawl using Ousterhout's deep/shallow scoring (interface area / impl-to-interface ratio / caller cost / test ease), then proposes deepening candidates without forcing edits. Use when on-boarding an unfamiliar codebase, doing a weekly or post-surge review, or when agents seem to produce worse output than the codebase warrants. NOT for single-file refactors (use remove-ai-slops or incremental-implementation), known bugs (use debugging-and-error-recovery), new feature design (use brainstorming + spec-driven-development), performance optimization (use performance-optimization), or security review (use security-and-hardening + security-devsecops). Load by user signal OR weekly-cadence prompt — does not gate any other skill; runs as a sidecar scan. (token cost: medium-to-high — codebase scan via librarian agent or manual grep)"
+description: "Codebase architecture health check via Ousterhout deep/shallow scoring — surfaces shallow modules, coupling hotspots, concept-sprawl; proposes deepening without forcing edits. Use for unfamiliar codebase on-boarding, weekly / post-surge review, or when agent output degrades vs the codebase. NOT for single-file refactors, bugs, new features, perf, or security. Proposal-only."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: stack-security-coder
-description: "Layered security-coding guardrails for the three surfaces where AI-generated code most often drifts from secure defaults: frontend (XSS / unsafe-DOM / CSP gaps / cross-origin), backend (parameterized queries / authz checks / rate-limit / safe redirects / SSRF), mobile (WebView hardening / certificate pinning / secure storage / biometric handling). Each layer is a checklist of checkpoints with file:line evidence. Use when writing or reviewing code in any of these three layers (especially AI-generated code that hasn't been hardened against the OWASP-class defaults for the layer), or when a per-line audit reveals gaps specific to a layer. Distinct from security-and-hardening (cross-cutting trust-boundary audit): this skill is per-stack — it knows the stack-specific landmines and enumerates them concretely."
+description: "Per-stack security-coding checkpoints for the three layers where AI-generated code drifts most — frontend (XSS / CSP / cross-origin), backend (parameterized queries / authz / SSRF), mobile (WebView / cert pinning / biometric). Use when writing or reviewing code in these layers or when a per-line audit reveals stack-specific gaps. Complements security-and-hardening (cross-cutting trust boundaries)."
 allowed-tools: "Read Bash Glob Grep"
 ---
 

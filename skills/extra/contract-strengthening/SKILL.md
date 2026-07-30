@@ -1,6 +1,6 @@
 ---
 name: contract-strengthening
-description: "Use when the user-visible change touches contracts, shared state, timing, concurrency, or untrusted boundaries — even when the implementation feels small. Trigger conditions are open-world, non-exhaustive properties (contract completeness, state/timing/concurrency, boundary/dependency, blast-radius/reversibility, verification-blind-spot); absence from the list never proves ordinary L1 suitability, and newly discovered signals belong in scope. Use also when a global installation is being considered, when a verification backend has no project-local alternative, or when prior authorization is being cited for a new tool, version, or effect. Complements security-ownership-map (people↔file governance / bus-factor questions) and security-threat-model (adversarial-boundary questions) — different axes on the same sensitive-change surface. NOT for ordinary L1 work already covered by TDD + verification-before-completion, pre-Spec design exploration (use brainstorming), or one-line style changes."
+description: "Reviews changes touching contracts / shared state / timing / concurrency / untrusted boundaries for open-world risks (contract completeness, state/timing/concurrency, boundary/dependency, blast-radius/reversibility, verification-blind-spot). Use after Spec attestation when these signals appear. NOT for L1 work (TDD covers), pre-Spec design, or style changes. Complements security-threat-model."
 allowed-tools: "Read Write Edit Bash Glob Grep"
 ---
 

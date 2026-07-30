@@ -1,6 +1,6 @@
 ---
 name: supply-chain-risk-auditor
-description: "Audits the trustworthyness of dependencies — not the CVE database but the project's maintenance posture. Evaluates single-maintainer risk, abandoned-repo risk, low-popularity risk, maintainer-identity hygiene, and social-engineering resistance. Use when adding a dependency with a non-trivial maintenance footprint, when a dependency's maintenance signal has degraded (release cadence slipped, contributors dwindled, ownership changed), during dependency policy review, or before committing to a lockfile across releases. Distinct from security-devsecops: devsecops scans for known CVEs at install time; this skill audits the supply side that CVE scanning cannot reach."
+description: "Audits dependency trustworthyness — maintainer posture, not CVE database. Evaluates single-maintainer risk, abandoned-repo risk, low-popularity risk, maintainer-identity hygiene, social-engineering resistance. Use when adding a dep with non-trivial maintenance footprint, when maintenance signal has degraded, during dep policy review, or before lockfile commits. Complements security-devsecops (which scans CVEs at install time)."
 allowed-tools: "Read Bash Glob WebFetch Grep"
 ---
 

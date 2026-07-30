@@ -1,6 +1,6 @@
 ---
 name: meisijiya-redesign-ui
-description: "Audit-then-fix workflow for existing web/mobile UI in any framework (React/Vue/Svelte/Tailwind/vanilla). Scans the codebase, runs a layered design audit (typography / color / layout / interactivity / content / components / icons / code / a11y / strategic omissions), fixes the highest-leverage items in priority order without breaking functionality or migrating frameworks. Use when the user wants to upgrade an existing UI to premium quality — fix the AI tells, fix the cheap-default components, fix the loadable but unfinished states. NOT for greenfield designs (use meisijiya-frontend-taste instead), dashboards / data tables (api-and-interface-design), or pure bug fixes."
+description: "Audit-then-fix workflow for existing web/mobile UI in any framework. Layered audit (typography / color / layout / interactivity / content / components / icons / code / a11y / strategic omissions); fixes highest-leverage items in priority order without breaking functionality or migrating frameworks. Use to upgrade existing UI to premium quality. NOT for greenfield designs (meisijiya-frontend-taste), dashboards / data tables, or bug fixes."
 ---
 
 # meisijiya-redesign-ui

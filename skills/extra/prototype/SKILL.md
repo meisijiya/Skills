@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: "Prototype / visual-decision skill for spec authoring. Use when the spec contains [PROTO-RESOLVE: <question>] markers and the user needs to pick between layout / density / motion alternatives for visual fidelity, or during Phase 1.2 of spec-driven-development when text-only specs cannot answer layout or interaction questions. Generates 3 default throwaway UI variants (max 5, MIN 2 valid else NEEDS_CONTEXT) to resolve spec authoring questions, captures choice in decisions.md, never ships to production. NOT for implementing production UI, deploying artifacts, or shipping design tokens (use designer-handoff + meisijiya-frontend-taste for that)."
+description: "Throwaway UI variants to resolve `[PROTO-RESOLVE]` markers in Phase 1.2 specs when text-only specs cannot answer layout / density / motion questions. Generates 3 default variants (max 5, MIN 2 else NEEDS_CONTEXT); captures choice in decisions.md, never ships. NOT for production UI, deployment, or design tokens."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 
