@@ -19,6 +19,116 @@ All notable changes to meisijiya-skills.
 
 **No tag bump**(doc-only + 新外部依赖)。已装副本 `~/.agents/skills/designer-handoff/SKILL.md` 与 source 偏离,通过下次 `npx skills add meisijiya/Skills --skill designer-handoff` 自动同步。Hallmark 不计入仓库 `9 + 29` SKILL.md 总数,上游独立维护,本仓库只是消费方。
 
+## Unreleased — skill audit & dispatch protocol (R1-R4)
+
+**Trigger**：对 42 个 SKILL.md 做了完整审计,对照 Tier-1 权威规范(Anthropic / agentskills.io / Claude Code / OpenCode / Vercel Labs / Superpowers × 2)+ 我方规范(`skill-anatomy.md` + `writing-skills` + `skill-design-principles.md`)。Oracle 4 次审核,本文档记录所有修复。
+
+### Round 1 — 核心合规修复（9 项）
+
+#### Fixed — description 触发条件(我方规范要求 "Use when...")
+- `skills/extra/documentation-and-adrs/SKILL.md`: description 加 "Use when recording a significant architectural decision..." 句式,符合 skill-anatomy.md 触发条件规则
+
+#### Fixed — 6 段结构缺漏
+- `skills/extra/slice-review/SKILL.md`: 加 `## Overview` header(复用首段 prose)+ 新写 `## Common Rationalizations` 5 行表(Skip per-slice review / Trust executor / Pre-rate findings / Re-dispatch confusion / Re-run tests)
+
+#### Fixed — 我方文档一致性
+- `skill-anatomy.md`: 统一 description 规则为"推荐 'Use when...' 开头,可含 what 但不强制"(解决 §A 内部矛盾);加 name 正则 `^[a-z0-9]+(-[a-z0-9]+)*$`(禁 `--` 连续、首尾连字符)+ gerund `-ing` 命名推荐
+- `skill-anatomy.md` 新增 `## 安全(Safety)` 段:明确 (a) **只从可信源安装 skill**,(b) **本仓库仅 OpenCode + OMO 插件适配**,(c) Claude Code / Codex / Cursor 扩展字段(`when_to_use` / `disable-model-invocation` / `user-invocable` / `context: fork` / hooks) **不在支持范围**(刻意不引入,避免 YAGNI 兼容成本)
+
+#### Fixed — 空目录卫生
+- 删除 `skills/extra/git-worktree-isolation/`(空目录,untracked,git status/log 全空)
+
+#### Fixed — eval case 完整性
+- 4 个 eval case 各 +1 negative_trigger:`closed-loop-delivery`(local dev server) / `production-incident-playbook`(CI 红未部署) / `stack-security-coder`(k8s manifests) / `test-guard`(覆盖率提升)— 全部从 2 个 negative 升到 3 个
+
+#### Added — validate-skills.sh
+- 加 §8 allowed-tools 一致性 WARN checker(body 引用 frontmatter 未声明的 Unix tool 时提醒);name 正则 WARN checker(`^[a-z0-9]+(-[a-z0-9]+)*$`,防未来错名)— 2 个新 check 都为 WARN 级(Oracle 建议:先观察 3 月,零假阳性后再升 FAIL)
+
+### Round 2 — 清理 + 数字漂移修复(21 项)
+
+#### Fixed — teacher-skill frontmatter 清理
+- `skills/extra/teacher-skill/SKILL.md`: 移除 `argument-hint` / `user-invocable: true` / `triggers: []` / `version: 0.2.0`(均为 Claude Code / Codex 扩展字段,与本仓库"仅 OpenCode + OMO"约束冲突)
+- `skills/extra/README.md:24`: 删"不计入 26 的统计"过时注释 → 改为"已合入 meisijiya-domain group(11 个中之一)"
+- `skills/extra/README.md:71`: 删 `[Local]` 前缀(teacher-skill 已在 marketplace.json)
+
+#### Fixed — skill-anatomy.md 数字漂移
+- line 137: `meisijiya-domain (domain group · 7 个)` → **11 个**
+- line 144-150: JSON example 补 `meisijiya-frontend` group entry(3 个 skill)
+- line 159: `共 29 个,7 个 entry` → **33 个,7 个 entry**
+
+#### Fixed — frontend triad allowed-tools 缺失
+- `skills/extra/meisijiya-frontend-taste/SKILL.md`: 加 `allowed-tools: "Read"`
+- `skills/extra/meisijiya-minimalist-ui/SKILL.md`: 加 `allowed-tools: "Read"`
+- `skills/extra/meisijiya-redesign-ui/SKILL.md`: 加 `allowed-tools: "Read"`
+
+#### Added — 13 个 ≥250 行 skill 加 version 字段
+- `incremental-implementation` / `spec-driven-development` / `ai-code-blindspots` / `meisijiya-frontend-taste` / `meisijiya-minimalist-ui` / `meisijiya-redesign-ui` / `production-incident-playbook` / `research` / `security-devsecops` / `security-incident-response` / `security-ownership-map` / `stack-security-coder` / `test-guard` 全部加 `version: 0.1.0`(Anthropic best-practices 推荐字段;本仓库之前 0/13 缺失)
+
+### Round 3 — 文档同步 + §8 收敛(3 项)
+
+#### Fixed — README.md 残留过时注释
+- `README.md:162/165`: 删 "不计入 26 的统计"过时注释 + 改"10 个" → "10 个,teacher-skill 因 `allowed-tools: Read` only 刻意未在 mv 中列出"
+
+#### Fixed — docs/omo-agent-skill-config.md 数字更新
+- 全文 4 处数字 36→42(line 5/18/24/115),含 group 拆解 `9 core + 33 extra = 9 security + 2 cicd + 4 observability + 4 meta + 11 domain + 3 frontend`
+
+#### Fixed — §8 WARN 收敛(50% false positive → 0%)
+- `scripts/validate-skills.sh` 加负面词表:`No/not/cannot/should not/禁用/不要/不需要/only Read` 后跟工具名时跳过;动词变形排除(`writes/writing/written` / `edits/editing/edited`)。效果:21 WARN → 0 WARN
+
+### Round 4 — Dispatch 协议 + omo 文档重写(2 项)
+
+#### Refactored — using-meisijiya-skills 加 4 个新段
+- `skills/core/using-meisijiya-skills/SKILL.md`: 加 **Sisyphus Dispatch Protocol**(task(category=, load_skills=) + task(subagent_type=, load_skills=) 2 个模式)/ **Category × Skill Matrix**(8 omo category × 推荐 load_skills 决策表 + 3 个 specialist agent 表)/ **Common Dispatch Patterns**(6 个新 skill 的具体 dispatch 模板)/ **Red Flags + Rationalizations** 增强(dispatch 无 load_skills / overload / 冲突 skill 配对)
+- 文件行数: 72 → **190**
+
+#### Refactored — docs/omo-agent-skill-config.md 整段重写
+- 基于 omo 真实 schema 解释 3 层加载机制(`<available_skills>` 自动可见 + `task(load_skills=)` 显式加载 + review-router plugin 文件路径触发)
+- 删错误 JSON 例子(`agents.<name>.skills: [...]` 在 schema 中**不存在**);澄清 5 类误解;加 6 个新 skill 全局配置示例(`allowed-tools` 是关键:3 个 frontend triad = `["read"]`,prototype/wayfinder/research = `["read","edit","bash","glob","grep"]`)
+- 文件行数: 129 → **231**
+- 文档定位: 用户配置参考(手工 `omo.jsonc`);`using-meisijiya-skills` 是 dispatcher SOT(运行时读)。两者为**姊妹文档**
+
+### Oracle 审核历程
+
+- **Oracle 第 1 次**: P0 降级(P0 栏清零)+ 提供 7 项建议 + 6 项漏掉的审计点(N-1~N-6)
+- **Oracle 第 2 次**: Round 2 评分 4.2/5.0;发现 `docs/omo-agent-skill-config.md` 整体过时 + 根 README 残留过时注释(均已修)
+- **Oracle 第 3 次**: Round 4 评分待评估(用户未要求重新审计)
+
+### 修复统计
+
+```
+总修改文件: 35 个
+- SKILL.md frontmatter/段补全: 4 个
+- 脚本改进 (validate-skills.sh): 1 个 (新加 §8 + name 正则 + 负面词表)
+- 文档重写 (skill-anatomy.md, omo-agent-skill-config.md, README.md): 3 个
+- 文档补漏 (skills/extra/README.md): 1 个
+- skills/extra/*.json (eval case): 4 个
+- 13 个 ≥250 行 skill 加 version: 13 个
+- 其他 (delete + add): 9 个 (frontend triad allowed-tools + 删空目录)
+```
+
+### 验证
+
+```
+validate-skills.sh:        42/42 OK, 0 FAIL, 0 WARN
+check-marketplace.sh:      OK 42 skills in sync
+三方一致性 (marketplace=filesystem=evals): 42=42=42 ✓
+42 skill 的 omo Integration 段: 41/42 覆盖 (using-meisijiya-skills 自己是 dispatcher, 不需要)
+```
+
+### Oracle 错误核查
+
+- Oracle Q7-B5-2 断言"teacher-skill 缺少 eval case"是错的(实际 `evals/cases/teacher-skill.json` 已存在且完整 3+3+3)。R2-1 简化为只清理 frontmatter + 修数字漂移(不重写 eval case)。已在 Oracle 报告 4.2/5.0 后 verify。
+- Oracle 建议的 "6 个新 skill 的 per-agent 分配" — **schema 不支持 per-agent skill list**, 收敛方案改用 Sisyphus dispatcher + `task(load_skills=)` 协议(详见 Round 4)。
+
+### 后续 backlog
+
+- ⏸ **eval case CI blocker**: 3 个月观察期满后再评估
+- ⏸ **§8 WARN → FAIL 升级**: 3 个月零 false positive 后评估
+- ⏸ **period 审计脚本**: 每月自动跑 validate-skills + check-marketplace + 数字漂移扫描
+- ⏸ **dispatch 实际效果测试**: 需要真实 OpenCode session 验证 `load_skills=[...]` 真的能让 sub-agent 读到 SKILL.md body
+
+**No tag bump**(全为合规修复 + 文档同步,无新功能)。
+
 ## v0.8.0 — meisijiya-frontend triad (Leonxlnx/taste-skill absorption) (2026-07-25)
 
 **Major change**: 吸收 [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT, Leon Linnx / Leonxlnx) 3 个核心子 skill,新开 `meisijiya-frontend` plugin group,补强 LLM 前端写作中 3 个具体缺口(避免同质化 / 避免 AI 味过重 / 增强审美)。
