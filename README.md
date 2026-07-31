@@ -306,6 +306,8 @@ rm -rf ~/.opencode/skills/ui-ux-pro-max/
 
 **4 verbs**:`(default)` build new UI / `hallmark audit <target>` / `hallmark redesign <target>` / `hallmark study <url|screenshot>`(抽 design DNA 到 portable `design.md`,拒绝像素克隆)。
 
+> ⚠️ **本仓库 `npx skills add meisijiya/Skills` 不会装 hallmark** — hallmark 不在 `.claude-plugin/marketplace.json` 7 个 plugin 块里,跑 `npx skills add` 选 7 group 都装不上;必须按下方 bash 块手动从上游 `nutlope/hallmark` 拉,且不进入项目 lockfile(全局 user-level,跨机器需各自执行)。
+
 ```bash
 # 装(vercel-labs/skills CLI 全局模式,落到 ~/.agents/skills/,与本仓库 meisijiya 系同路径)
 npx skills add -g -y nutlope/hallmark
@@ -358,6 +360,26 @@ MIT
 **Oracle 审核历程**: 4 次 Oracle 审核(1 次发现 P0 全部降级 + 1 次发现文档基于错误假设 + 1 次确认 R1-R4 修复 + 1 次 Oracle B5-2 事实错误核查);最终验证 validate-skills.sh 42/42 OK + check-marketplace.sh 42 skills in sync
 
 **总改动**: 35 文件 + 5 commits(`chore(audit-core)` / `chore(skill-metadata)` / `docs(repo)` / `feat(dispatch)` / `docs(changelog)`)
+
+### Unreleased — agent-driven loop capability (loop-omo-handoff, 2026-07-31)
+
+- **`loop-me` 加 `runner: agent` + 5 spec runtime fields**: `runner` (`human` 默认 / `agent` 显式声明)、`max_rounds` (默认 100)、`consecutive_failures_max` (默认 5,独立安全阀)、`failure_policy` (`stop` / `continue` / `pause_ask`,默认 `pause_ask` 替换 `escalate`)、`completion_signal` (external-verifiable + cool-down 2 连续通过);Checkpoint 双语义 (Human-mode 签收 / Agent-mode exit condition);§ Red Flags 加 6 条 HITL rules + 4 行 adversarial prompt coverage
+- **`closed-loop-delivery` Gate 4 in-loop variant**: 新增 per-round 监控变体(anomaly → log + brief + loop continues;hard failure → halt per `failure_policy: pause_ask`);明确"distinct from the post-deploy Gate 4 above" 与 "Do NOT conflate the two" 边界;原 post-deploy Gate 4 段(line 94-108)逐字保留
+- **`verification-before-completion` loop-done ≠ task-done 边界**: 显式区分 loop 完成(state-machine event)与 task 完成(outcome claim,需 Gate 4-5 + 二段验证)
+- **Dispatcher 路由**: `using-meisijiya-skills/references/priority-table.md` line 43 加 "Agent-driven loop (monitoring / CI-CD / audit)" row → `loop-me` → `/goal` → `verification-before-completion`
+- **3 eval cases 扩展**: `loop-me.json` +1/+2/+3(HITL rule #2/#3/#4 behavioral); `using-meisijiya-skills.json` +1 positive; `closed-loop-delivery.json` +1/+1(Gate 4 in-loop variant 正/负)
+
+**HITL L1 严格**: 用户必须显式 `/goal <workflow>` 才能启动 loop;agent 永不代发;spec 描述 how,invocation 是 when — 两件事不可混淆。Adversarial prompt 4 类全部封堵(隐式调用 / 社交压力 / 自陈述 completion_signal / 轮询伪装 Trigger)
+
+**关键架构变化**: 完全 declarative handoff to OMO(0 新 SKILL.md / 0 新插件 / 0 marketplace 变更 / 0 新状态机 — ADR-0001 合规)。OMO `/goal` 提供 persistence + iteration cap + audit substrate;agent 在对话中执行每轮(re-read spec → execute → evaluate `completion_signal` → continue/break per `failure_policy`)
+
+**软层上限**: doc-level 强措辞 + 4-row adversarial coverage + 6 红标条目 + 3 eval behavioral scenarios,~80-90% per project docs。**Full L1 enforcement 需要 OMO runtime `requireUserInvocation: true`**(Phase 1 ask #7 已 defer)
+
+**OMO review-work 5-lane 全 PASS**: Goal+Constraint Oracle / QA Execution / Code Quality Oracle / Security Oracle / Context Mining,所有 lane HIGH confidence(除 Security LOW severity 仍 PASS);total ~10m 11s parallel;**0 BLOCKING issues**
+
+**总改动**: 7 文件 + 135/-1(4 SKILL.md + 1 reference + 3 eval JSON,无 frontmatter / marketplace / plugin 变化)
+
+**待解析(本次 deferred)**: `skills/extra/loop-me/SKILL.md ## Related Skills` 末行仍标 `verification-before-completion` 为 "不相关",与新 `## omo Integration` 引用轻微矛盾;plan 严格 preservation 规则要求保留 Related Skills 原文;resolution 推到后续独立 slice
 
 ### v0.6.0 — 11-skill roadmap + marketplace 6-group refactor (2026-07-24)
 

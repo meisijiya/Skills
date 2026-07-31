@@ -2,6 +2,42 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — agent-driven loop capability (loop-omo-handoff, 2026-07-31)
+
+4 个 SKILL.md 加 3 个 eval case 扩展 `loop-me` 已有的 recurring workflow spec 设计,新增 agent-driven loop 声明式移交到 OMO `/goal` + HITL L1 strict。**用户必须显式 `/goal <workflow>` 才能启动 loop;agent 永不代发**。doc-only 改动,零新 SKILL.md / 零新插件 / 零 marketplace 变更 — 完全符合 ADR-0001。
+
+### Added — loop-me 5 spec runtime fields + HITL 6 rules + adversarial prompt coverage
+
+- `skills/extra/loop-me/SKILL.md` § Process § 4 Vocabulary 表 Checkpoint 行替换为 dual semantics(Human-mode 签收 / Agent-mode exit condition);§ Process § 6 加 "Spec runtime fields (only when `runner: agent`)" 子节,5 个字段都有 default + 验证规则:`runner`(`human` 默认 / `agent` 显式声明;`agent` 不替代 user invocation), `max_rounds`(默认 100,硬上限), `consecutive_failures_max`(默认 5,独立安全阀,防 `max_rounds: ∞` + `failure_policy: continue` 静默死循环), `failure_policy`(`stop` / `continue` / `pause_ask`,默认 `pause_ask` 替换早期 `escalate` 概念), `completion_signal`(external-verifiable,not agent self-statement;cool-down 2 连续通过才 fire loop-done);§ Red Flags 加 6 条 HITL rules + 4 行 adversarial prompt coverage table + 6 项附加条目;`## omo Integration` 加 "Loop-done ≠ task-done" 引用 `verification-before-completion`
+- `skills/extra/closed-loop-delivery/SKILL.md` § 2 Per-gate evidence 加 "Gate 4 in-loop variant" 子节(per-round 触发,not `24h+` post-deploy;anomaly → log + brief + loop continues;hard failure → halt per `failure_policy: pause_ask`;healthy → continue);明确"distinct from the post-deploy Gate 4 above" 与 "Do NOT conflate the two" 边界声明;新增 `observability-and-instrumentation` 引用为 Source data layer;post-deploy Gate 4(原 line 94-108)逐字保留
+- `skills/core/verification-before-completion/SKILL.md` `## omo Integration` 加 "Boundary clarification: loop-done vs task-done" 子节(verbatim 自 plan Phase 0 § Boundary clarification):3 个 blockquote 段落 — Loop-done = state-machine event / Task-done = outcome claim(需 Gate 4-5 + 二段验证)/ Loop-done 必要但不充分 for task-done
+- `skills/core/using-meisijiya-skills/references/priority-table.md` line 43 新增 intent routing row — "Agent-driven loop (monitoring / CI-CD / audit) / run this loop spec / start goal" → `loop-me` (extra/) → OMO `/goal <spec-path>`(HITL L1:user 显式 invoke)→ `verification-before-completion` for loop-done ≠ task-done boundary audit
+
+### Added — 3 eval cases 覆盖 HITL bypass scenarios
+
+- `evals/cases/loop-me.json`: +1 positive trigger (`runner: agent` + 外部 `completion_signal: deploy-error-rate < 0.1%`); +2 negative triggers (missing `completion_signal`; `completion_signal: 'I confirm done'` 自陈述被 HARD Red Flag); +3 behavioral scenarios(HITL rule #2 隐式调用审批 / rule #3 轮询式 Step 伪装 Trigger / rule #4 用户施压 "I trust you" → verbatim 拒绝模板)
+- `evals/cases/using-meisijiya-skills.json`: +1 positive trigger (agent-driven monitoring loop 路由到 loop-me + /goal chain)
+- `evals/cases/closed-loop-delivery.json`: +1 positive trigger (Gate 4 in-loop variant invoked from monitoring loop); +1 negative trigger (post-deploy Gate 4 misused in loop context — flagged as mis-routing)
+
+### Verified — OMO review-work 5-lane PASSED
+
+- Goal+Constraint Oracle (HIGH) / QA Execution unspecified-high (HIGH) / Code Quality Oracle (HIGH) / Security Oracle (LOW severity) / Context Mining unspecified-high (HIGH);total ~10m 11s parallel;**0 BLOCKING issues**
+- `validate-skills.sh` 42/42 OK; `check-marketplace.sh` 42 skills in sync; PWF-era audit 0 hits in modified files;`description` ≤ 1024 chars(5 SKILL.md + 3 eval JSON)
+- Trigger counts met: loop-me 4/5/5; using-meisijiya-skills 5; closed-loop-delivery 4/4
+
+### Architecture & Constraints
+
+- **Pure declarative handoff to OMO**(ADR-0001 合规):0 new SKILL.md / 0 new plugins / 0 marketplace entries / 0 new state machinery。OMO `/goal` 提供 persistence + iteration cap + audit substrate;agent 在对话中执行每轮(re-read spec → execute → evaluate `completion_signal` → continue/break per `failure_policy`)
+- **HITL L1 soft-layer ceiling**:doc-level 强措辞("never", "must not", "halt", "HARD Red Flag")+ 4-row adversarial prompt coverage + 6 红标条目 + 3 eval behavioral scenarios;软层 ~80-90% per project docs。**Full L1 enforcement 需要 OMO runtime `requireUserInvocation: true`**(Phase 1 ask #7,deferred to OMO upstream)
+- **Spec 与 invocation 严格分离**:`runner: agent` 描述 loop 运行方式(how),不替代 user invocation(when)。Agent 在 4 类 adversarial prompt 模板下保证拒绝模板"To start this loop, run /goal <spec-path>"
+- **Phase 2 Research skipped**:OMO `/goal` API(`default_max_iterations` / cool-down / resume interception)已在 Phase 0 § Context 验证;Phase 1 asks Q7 (hard-layer HITL)/ Q8 (round↔`/goal` iteration mapping)/ Q9 (resume interception hook)推到 OMO 上游,不阻塞本计划
+- **Default round-to-iteration mapping**:1 spec round = 1 `/goal` iteration(可经未来 `goal_iterations_per_round: N` 扩展)
+
+### Known deferred follow-up (not blocking)
+
+- `skills/extra/loop-me/SKILL.md ## Related Skills` 末行仍标 `verification-before-completion` 为 "不相关",与新 `## omo Integration` 引用轻微矛盾。Plan 严格 preservation 规则要求保留 Related Skills 原文;resolution 推到后续独立 slice(`slice-5-reconcile-related-skills`)。不影响本计划合并
+- review-work MINOR:Adversarial prompt table 未覆盖 HITL rule #1/#2/#6(已部分被 eval behavioral scenarios 覆盖);Gate 4 in-loop "Boundary at a glance" 2-row 表与 § Behavior 3 sub-bullets 可能有结构重复;`completion_signal` 红标可强化"不能依赖 agent 自身可写资源"边界。三项均为 documentation polish,非 blocker
+
 ## Unreleased — ui-ux-pro-max path corrected (d752b37) + hallmark adopted
 
 ### Fixed
