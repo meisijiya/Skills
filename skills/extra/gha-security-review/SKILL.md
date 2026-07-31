@@ -149,6 +149,18 @@ A `run:` block that puts `${{ secrets.X }}` into an env var, then references tha
 
 **Mitigation**: include `github.run_id` + `github.run_attempt` in every artifact name; use `outputs.<job-id>.artifact` style download references where supported. Never download an artifact in a job that uploaded it from a fork-PR context.
 
+#### 3.7b Cache poisoning via `actions/cache`
+
+Same family as artifact poisoning, different vector: `actions/cache@v4` allows workflow runs to **share cache entries by key** across runs and branches. A lower-privilege workflow (e.g. a `pull_request` from a fork) can write to a cache key that a higher-privilege workflow (e.g. `push` to main) later reads. The push job's `npm install` or `cargo build` may consume a poisoned cache before the dependency manager detects the substitution.
+
+**Exploit scenario template**: "PR #100's lint job caches `node_modules` under `Linux-node-${{ hashFiles('package-lock.json') }}`. PR #101 ships a malicious `package-lock.json` whose hash collides with a future legitimate `package-lock.json`. The next `push` to main reads the poisoned cache before `npm ci` even runs the package-lock integrity check."
+
+**Mitigation**:
+- Scope cache keys with `github.run_id` + `github.run_attempt` (defeats same-workflow cross-run collision)
+- Use `${{ runner.os }}-${{ github.job }}-${{ hashFiles(...) }}` to scope by job not by workflow
+- For build caches that genuinely need to span runs (e.g. long `cargo` builds), require the `pull_request` job to NOT share the cache key prefix with `push` jobs — use different `key:` prefixes per trigger
+- Audit: `grep -rE 'actions/cache(@v4)?$' .github/workflows/ -A 5` and inspect each `key:` for cross-trigger uniqueness
+
 ### 4. Output format
 
 For each finding, emit:

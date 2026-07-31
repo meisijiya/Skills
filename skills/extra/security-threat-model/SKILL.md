@@ -31,6 +31,7 @@ Threat model output is a single Markdown file per session — `<repo>-threat-mod
 - Refactoring authn / authz / session / secret-handling code (even if "small")
 - Expanding blast radius — multi-tenant, broader scope, increased trust assignment, breaking out of a sandbox
 - After a security review (pen-test, internal audit, security-and-hardening finding that a control was inadequate) to model the *system*, not just the finding
+- **After a `security-incident-response` postmortem identifies a boundary gap** — re-model the affected boundary so the next code change applies the lessons (closes the incident→design feedback loop)
 - Before any commitment of significant engineering effort on a path that crosses trust — much cheaper to correct the model than the code
 
 **NOT for:** (scenario description — let description match decide)

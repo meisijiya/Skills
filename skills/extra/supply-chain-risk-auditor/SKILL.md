@@ -10,7 +10,7 @@ allowed-tools: "Read Bash Glob WebFetch Grep"
 
 `security-devsecops` Step 1 (`npm audit`) catches **known CVEs** in your dependencies. It does not catch **whether the dependency itself is trustworthy**: a clean dependency that's maintained by one person who hasn't logged in for 8 months is a higher risk than a noisy dependency with a healthy maintainer pool. CVE scanners run on the package metadata; supply-chain risk audits the supply side — who maintains it, how, and whether continuing to depend on it is reasonable.
 
-This skill evaluates the **trustworthyness** of dependencies against 5 axes:
+This skill evaluates the **trustworthyness** of dependencies against 5 standard axes + 1 temporal-pattern axis (Axis 5.6, the long-game social-engineering signal):
 
 1. **Single-maintainer risk**: is the package a bus-factor-1 project? (See also [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) — same methodology, applied to your dependencies.)
 2. **Abandoned-repo risk**: last commit, last release, stale issue backlog, unmerged PRs.
@@ -114,6 +114,19 @@ Read the package's repo for the following signals:
 
 Risk: no SECURITY.md = MEDIUM (acceptable for low-criticality deps, increasing risk for critical); maintainer anonymity + bus-factor-1 + no disclosure history = HIGH (consider replacing).
 
+#### Axis 5.6 — Sustained-privilege-escalation temporal pattern (XZ Utils / Jia Tan)
+
+A signal the other 5 axes don't cover: a contributor who **monotonically increases commit share over 12+ months** while all other contributors leave or reduce activity. This is the pattern from the XZ Utils backdoor (Jia Tan, 2024): long-game social engineering where the attacker contributes small patches for years, gains trust, becomes co-maintainer, then injects a backdoor.
+
+Signals to flag (any combination is suspicious):
+- New contributor first commit in dep history was 6-18 months ago (NOT a recent newcomer, but NOT a long-time maintainer either)
+- Their commit share has grown from < 5% to > 50% in the last 12 months
+- The dep's other contributors have reduced activity in the same window (consolidation)
+- The dep has no `requires_two_factor` at the org level, OR signed commits stopped appearing in the same window (suggesting key rotation / loss of identity discipline)
+- No SECURITY.md, no co-maintainer accountability trail
+
+Risk: even if all other axes are GREEN, this pattern is **CRITICAL** for security-critical deps (auth / crypto / network / parser). For lower-criticality deps, flag as HIGH with explicit recommendation to investigate the contributor's commit history for the same pattern in OTHER deps they touch (one maintainer with sustained escalation across multiple deps is a coordinated campaign).
+
 ### 3. Aggregate to a risk score
 
 Per dep:
@@ -150,7 +163,7 @@ For depth=0 (direct deps), the threshold is sharper:
 > Scanned: <N dependencies> (depth 0: <M>, depth 1: <K>, depth 2+: ...>)
 
 ## Direct dependencies (depth 0)
-| Dep | Version | Used in | Axis 1-2-3-4-5 | Score | Band | Action |
+| Dep | Version | Used in | Axis 1-2-3-4-5-5.6 | Score | Band | Action |
 |---|---|---|---|---|---|---|
 | foo-auth | 1.2.3 | auth/login, auth/session | 2-2-1-3-2 | 0.50 | REVIEW | rotate signature |
 | bar-crypto | 0.9.1 | secrets/kms | 4-3-2-3-3 | 0.86 | REJECT | replace with bar-crypto-fork |

@@ -86,6 +86,22 @@ Use this matrix to choose `load_skills=[...]` based on the task's category. (Cat
 | `writing` | `kimi-k3` | Documentation, prose, articles | `["verify-chain"]` if fact-checking claims |
 | `artistry` | `claude-fable-5` | Creative / unconventional approaches | (rarely needed) |
 
+### Security 5-lane review fan-out (validated 2026-07-31)
+
+When Sisyphus / orchestrator dispatches the OMO `review-work` 5-lane scheme (or a custom 5-lane security audit), the `load_skills` for each lane has been validated against the 9 meisijiya security skills:
+
+| Lane (OMO 5-lane name) | `subagent_type` / `category` | Validated `load_skills` | Trigger condition |
+|---|---|---|---|
+| Security Oracle | `subagent_type="oracle"` | `["security-threat-model", "security-and-hardening", "security-incident-response", "ai-code-blindspots"]` | Trust-boundary-crossing code; multi-tenant / auth / secrets change; pre-merge of security-critical diff |
+| Code Quality Oracle | `subagent_type="oracle"` | `["ai-code-blindspots", "stack-security-coder", "security-and-hardening"]` | AI-generated or AI-touched diff; frontend/backend/mobile layer change; `meisijiya-review-router` matchPath on `.tsx`/`.vue`/`.svelte`/`.swift`/`.dart` |
+| QA Execution | `category="unspecified-high"` | `["gha-security-review", "security-devsecops", "security-threat-model"]` | `.github/workflows/*` change; Dockerfile / terraform / k8s manifest change; lockfile / dependency-tree change; pre-deploy gate |
+| Context Mining | `category="unspecified-high"` | `["security-ownership-map", "supply-chain-risk-auditor", "ai-code-blindspots"]` | New dependency added; lockfile quarterly review; bus-factor / sensitive-code ownership question; post-incident ownership re-mapping |
+| Slice Review (per-slice) | `subagent_type="oracle"` | `["verification-before-completion", "security-and-hardening", "ai-code-blindspots"]` (security variant — see `slice-review` skill § 2a) | Per-slice dispatch via `slice-review` skill; default `load_skills=[]` only for non-trust-boundary slices |
+
+Each `load_skills` set was validated by 5 parallel sub-agents in a 2026-07-31 review pass; the load_skills combinations cover all 5 lifecycle phases (design → code → pre-merge → pre-deploy → prod) and provide reviewer discipline anchoring (per the Sisyphus Dispatch Protocol below).
+
+**Pairing rule**: `meisijiya-frontend-taste` + `meisijiya-minimalist-ui` is intentional; `meisijiya-frontend-taste` + `meisijiya-redesign-ui` is NOT (one is greenfield, the other audit-fix). For security: `security-and-hardening` + `ai-code-blindspots` is the canonical "AI wrote this code" pair. `gha-security-review` + `security-devsecops` is the canonical "CI/CD touched" pair (gha = file-level, devsecops = pipeline-level).
+
 ### Specialist agents (`subagent_type`)
 
 | subagent_type | Purpose | Recommended `load_skills` |

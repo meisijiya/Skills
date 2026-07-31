@@ -143,6 +143,8 @@ Before merging any change that touches a trust boundary:
 - [ ] Auth check present on every protected route
 - [ ] Logs don't contain secrets
 - [ ] Error responses don't leak stack traces / internal paths
+- [ ] **Threat-model mitigations checked**: if `<repo>-threat-model.md` exists, each mitigation in §5 verified present in code with `file:line` anchor (closes the design→code loop)
+- [ ] **Post-incident decisions reviewed**: `.omo/notepads/<plan>/decisions.md` scanned for new patterns since last review; if `security-incident-response` postmortem action items appear, verify they landed (closes the incident→code loop)
 - [ ] For production-critical code, OMO `security-research` audit (Step 6.5) completed
 - [ ] Dependency / IaC / container / deployment pipeline checks: see dedicated skill (out of scope here)
 

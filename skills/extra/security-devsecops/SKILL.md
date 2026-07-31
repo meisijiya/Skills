@@ -48,10 +48,11 @@ version: 0.1.0
 
 ## Process
 
-### 1. Dependency scanning
+### 1. Dependency scanning — 3-layer defense
 
-每次添加 / 升级依赖都跑：
+每次添加 / 升级依赖都跑 3 层检查（参考 Korder 3 层防御 + AI 安全悖论视频）：
 
+**L1 — Static / free / auto (CVE database)**
 ```bash
 npm audit            # Node
 pip-audit            # Python
@@ -69,6 +70,22 @@ mcp__grep_app__searchGitHub <CVE-id> <library>
 mcp__grep_app__searchGitHub "CVE-2024-XXXX" "package.json"
 ```
 
+**L2 — Semantic / AI-assisted (call pattern + usage analysis)**
+当 dep 是 security-critical path（auth / crypto / secrets / network / input parsing）时，单纯 L1 不够（CVE 数据库有 zero-day 滞后）。加：
+```bash
+# CodeQL / Semgrep supply-chain rules — 查 vulnerable call patterns 而非 CVE
+codeql database analyze --semgrep-supply-chain
+semgrep --config p/owasp-top-ten --config p/security-audit
+```
+
+**L3 — Cross-file taint tracking (deep, sensitive paths only)**
+当 L1 + L2 都通过但 dep 仍在敏感路径（auth, crypto, input parsing）时，跑 cross-file taint 跟踪看 vulnerable function 是否被实际调用：
+- 工具：[`codegraph` MCP](../../.opencode/config) 的 `codegraph_explore` 查调用链
+- 或 OMO `security-research` mode 跑 3 hunters + 2 PoC engineers 验证 actual reachability
+- 输出：`<repo>-taint-report.md` 标哪些 dep 的 vulnerable function 被实际调用 + reachability graph
+
+L3 不是每次都跑——只在 L1/L2 通过但 dep 是 security-critical 时触发。成本高于 L1，但 catch zero-day 误用场景。
+
 ### 2. SBOM + supply chain
 
 **SBOM** (Software Bill of Materials) = 你的软件包含什么、来自哪里。
@@ -84,6 +101,12 @@ cdxgen                   # CycloneDX 格式 SBOM
 - 装包前在 npm / PyPI 官方站确认名字拼写
 - 用 `--ignore-scripts` (`npm install --ignore-scripts`) 阻止 postinstall 跑任意代码
 - 锁文件用 `npm ci` 而不是 `npm install` 进 CI（防止 lockfile 漂移）
+
+**Dependency confusion 防御**（typosquatting 的对偶风险）：
+- 私有 npm scope 必须显式绑定到 private registry：`npm config set @mycompany:registry https://npm.mycompany.com`
+- 内部包名加 `@mycompany/` prefix；CI 检查 `package.json` 的所有 `@mycompany/*` 都在 private registry 解析
+- 用 `npm audit signatures` + Sigstore provenance 验证内部包确实从内部 registry 出
+- 攻击场景：攻击者在公共 npm 注册 `@mycompany/internal-lib` 同名包；内部 build 误解析到公共包
 
 **Verify 来源**：内部 npm registry / private PyPI / JFrog Artifactory 配置 trusted registry，避免误装外部恶意包。
 
@@ -114,9 +137,13 @@ cdxgen                   # CycloneDX 格式 SBOM
 CI/CD 是攻击者最喜欢的横向移动入口。**Pipeline 必须**：
 
 - [ ] **Secret scanning** 每次 commit：gitleaks / trufflehog / GitHub secret scanning
-- [ ] **Branch protection** main 分支不允许 force-push
-- [ ] **PR review required** 不是 admin 也要 ≥1 approve
-- [ ] **OIDC token** 代替 long-lived secret（GitHub Actions → AWS / GCP 用 OIDC）
+- [ ] **Branch protection** main 分支不允许 force-push；admin override 关闭；GitHub App push 受限
+- [ ] **PR review required** 不是 admin 也要 ≥1 approve；CODEOWNERS 覆盖所有安全敏感路径
+- [ ] **OIDC token** 代替 long-lived secret（GitHub Actions → AWS / GCP 用 OIDC）+ **OIDC claims audit**：
+  - `sub` claim 必须约束到 `repo:<owner>/<repo>:ref:refs/heads/<branch>`（防止 token 跨 repo / 跨 branch replay）
+  - `aud` claim 验证（必须匹配目标云 provider audience）
+  - Token TTL ≤ 1 小时；不要缓存 token
+  - `permissions:` per-job 显式列 IAM scope，不要 wildcard
 - [ ] **Deployment key 权限最小化**：deploy key 只能写特定 service，不能改 IAM / billing
 - [ ] **环境隔离**：dev / staging / prod 三套独立 secrets / IAM role
 

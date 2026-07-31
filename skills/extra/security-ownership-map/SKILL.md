@@ -250,6 +250,7 @@ The ownership map is going wrong if:
 - §5 Methodology is missing — second reviewer can't reproduce
 - §6 CSV/JSON missing `sensitive_yes` column — downstream can't filter without it
 - Recommendations are vague ("improve documentation") not specific ("assign alice + bob as co-owners of src/crypto/; pair on first change")
+- **Repo is AI-heavy (`Co-authored-by: Claude/Cursor` > 50% of recent commits) and Query C/D outputs are treated as truth** — in AI-era codebases, "Alice owns src/crypto/" via 100 AI-authored commits does NOT mean Alice has any actual knowledge of that file. Bus-factor-1 may mask a deeper problem: nobody human understands the code. Cross-reference the ownership map with human-review log or pair-programming rotation before acting on Query C/D. Query A (orphan by recency) and Query B (single-author concentration) remain valid; their *meaning* shifts from "one human" to "one human + their AI" which is arguably riskier.
 
 ## Verification
 

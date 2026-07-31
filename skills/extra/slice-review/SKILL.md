@@ -62,14 +62,36 @@ unspecified-high) — NOT in the orchestrator's session, to avoid
 inheritance of rationalization.
 
 ```
+// Default variant — non-security-sensitive slices
 task(
   subagent_type="oracle",
   run_in_background=false,
   load_skills=[],
   description="Per-slice review for <task-id>",
+  ...
+)
+
+// Security-sensitive variant — slices touching trust boundaries
+// (auth, user input, data storage, file upload, external API, PII,
+// credentials, secrets, crypto). Add `ai-code-blindspots` if AI-touched.
+task(
+  subagent_type="oracle",
+  run_in_background=false,
+  load_skills=["security-and-hardening", "ai-code-blindspots"],
+  description="Per-slice security review for <task-id>",
   prompt="""
 <role>You are a slice-reviewer returning TWO ordered verdicts on a single
-slice's diff. Read these files once, then return your verdict.</role>
+slice's diff. Read these files once, then return your verdict.
+
+SECURITY-SENSITIVE SLICE: this slice touches a trust boundary. Before
+writing your verdict, apply the `security-and-hardening` Process (§1-7):
+typed validation at boundaries, no string-concat into SQL/HTML/shell,
+secrets from env not hardcoded, per-request auth on protected routes,
+OWASP Top 10 minimum bar. Flag any missed check as Critical.
+If the slice was AI-generated, also apply the `ai-code-blindspots`
+7-class checklist (null/array boundary, error visibility, env compat,
+deprecated API, hardcoded config, invisible failures, hallucinated API).
+</role>
 
 <brief_file>${BRIEF}</brief_file>
 <review_package_file>${PKG}</review_package_file>
@@ -80,7 +102,8 @@ slice's diff. Read these files once, then return your verdict.</role>
 <inputs_summary>
 The executor was dispatched to implement the slice described in the
 brief above. Their commits are in the review package. Your job is
-to verify the diff satisfies the brief and identify code quality issues.
+to verify the diff satisfies the brief, identify code quality issues,
+and audit trust-boundary security.
 DO NOT inherit the orchestrator's session context — you are a fresh
 reviewer.
 </inputs_summary>
@@ -106,7 +129,10 @@ runtime behavior, unchanged-code references).
 
 Categorize findings:
 - **Strengths** (1-3 bullets, optional)
-- **Critical** (must-fix, blocks merge): correctness bug, security hole, data loss, broken acceptance
+- **Critical** (must-fix, blocks merge): correctness bug, security hole
+  (trust-boundary: missing input validation / parameterized query /
+  per-request auth / secret exposure / error leakage), data loss,
+  broken acceptance
 - **Important** (should-fix before merge): significant smell, pattern violation, type weakness
 - **Minor** (nice-to-have): naming, doc, refactor opportunity
 
@@ -170,7 +196,7 @@ Important findings, do not loop indefinitely:
 - If it is "the implementation needs a different approach," dispatch
   the fix with the architectural hint.
 
-## OMO Integration
+## omo Integration
 
 | Layer | Mechanism |
 |---|---|

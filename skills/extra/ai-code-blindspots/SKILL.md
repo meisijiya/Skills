@@ -9,7 +9,7 @@ version: 0.1.0
 
 ## Overview
 
-Catches the **omissions** AI is most likely to leave out when writing code — the things that compile, look correct in a quick read, and silently break at runtime or in production. Complements OMO's built-in [`remove-ai-slops`](https://github.com/code-yeongyu/oh-my-openagent) skill, which hunts **bloat / over-engineering / dead flexibility** (code that *should not exist*); this skill hunts **missing checks** (code that *should exist but doesn't*).
+Catches the **omissions** and **fabrications** AI is most likely to leave out / invent when writing code — the things that compile, look correct in a quick read, and silently break at runtime or in production. Complements OMO's built-in [`remove-ai-slops`](https://github.com/code-yeongyu/oh-my-openagent) skill, which hunts **bloat / over-engineering / dead flexibility** (code that *should not exist*); this skill hunts **missing checks** and **fabricated references** (code that *should exist but doesn't*, OR *references things that don't exist*).
 
 | Skill | Hunts | Example finding |
 |---|---|---|
@@ -18,7 +18,7 @@ Catches the **omissions** AI is most likely to leave out when writing code — t
 
 The two skills do not overlap; running both back-to-back is the intended workflow. Each finds bugs the other structurally cannot.
 
-**Output:** `ai-blindspots-report.md` in the caller workspace root, listing every finding with file:line + a one-line fix. Findings cite the checklist class (1-7 below) so the reader can audit coverage.
+**Output:** `ai-blindspots-report.md` in the caller workspace root, listing every finding with file:line + a one-line fix. Findings cite the checklist class (1-8 below) so the reader can audit coverage.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ The two skills do not overlap; running both back-to-back is the intended workflo
 - Reviewing a PR / diff where the commit history suggests AI assistance (`Co-authored-by: Cursor` / `Generated with Claude` / similar).
 
 **NOT for:**
-- Manual review of purely hand-written code (no AI involvement). The 7-class checklist is tuned for AI failure modes; human-written code has different omissions.
+- Manual review of purely hand-written code (no AI involvement). The 8-class checklist is tuned for AI failure modes; human-written code has different omissions.
 - Pure style / formatting / text-only changes (no executable logic touched).
 - Code that has **already** been fully scanned by `remove-ai-slops` *and* the agent has re-verified boundary/error/deprecated items. Running both skills fully is fine — running this skill a second time after a clean pass is not.
 - Bug *debugging* of an existing failure. Use [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) for that; this skill is **preventive review**, not incident response.
@@ -38,7 +38,7 @@ The two skills do not overlap; running both back-to-back is the intended workflo
 
 ## Process
 
-The skill runs in 5 steps. Steps 2 and 3 are the **two-layer scan** (LLM semantic + grep static); both must run. Step 4 is the report.
+The skill runs in 5 steps. Steps 2 and 3 are the **two-layer scan** (LLM semantic + grep static); both must run. Step 4 is the report. The 8-class checklist below covers 7 omission patterns (Classes 1-7) + 1 fabrication pattern (Class 8).
 
 ### 1. Determine scope
 
@@ -51,11 +51,11 @@ If all three fail, write `"scope: undetermined — no git diff, no caller list, 
 
 ### 2. Sub-agent scan (LLM semantic layer)
 
-Dispatch a sub-agent (under omo: `task(category="deep", load_skills=["ai-code-blindspots"])`) over the scoped files with the 7-class checklist below. The sub-agent reads each file in full and flags suspicious patterns that grep cannot see (intent, missing-not-wrong, control flow across functions).
+Dispatch a sub-agent (under omo: `task(category="deep", load_skills=["ai-code-blindspots"])`) over the scoped files with the 8-class checklist below. The sub-agent reads each file in full and flags suspicious patterns that grep cannot see (intent, missing-not-wrong, control flow across functions).
 
 For each class, the sub-agent must report:
 - file:line
-- which AI omission pattern it matches
+- which AI omission or fabrication pattern it matches
 - a one-line concrete fix (not "consider checking" — show the guard)
 
 ### 3. Grep fallback (static layer)
@@ -69,7 +69,7 @@ Run each pattern with `grep -rnE '<pattern>' <scope>` and filter out:
 
 For each grep hit, write a finding with the same file:line + fix format.
 
-### 4. The 7-class checklist
+### 4. The 8-class checklist
 
 This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover all 7.
 
@@ -179,6 +179,29 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 - `Promise\.all\(` — flag when not paired with `.allSettled` consideration; LLM scan evaluates intent.
 - `(\.catch\(\s*\(\s*\)\s*=>\s*\{\s*\}\s*\))` — empty arrow catch.
 
+#### Class 8 — Hallucinated API / package / config (AI-era)
+
+**What AI invents (not omits):** Classes 1-7 hunt missing checks. Class 8 hunts **fabricated** ones — calls to methods, packages, config keys, or env vars that don't exist in the actually-installed version. The other 7 classes structurally cannot catch these (the code looks "complete" — it just calls a thing that doesn't exist).
+
+**LLM scan guidance (sample 3-5):**
+- `fs.writeFile(path, data, callback)` called as `fs.writeFile(path, data)` (wrong arity) or `fs.writeFileSync(path, data, 'utf8')` (deprecated signature)
+- `import { thing } from '@imaginary/package'` — package not in lockfile
+- `next.config.js` with `experimental: { nonExistentOption: true }` — config key the framework doesn't read
+- `process.env.OPENAI_KEY` when the real env var is `OPENAI_API_KEY` (silently `undefined` at runtime)
+- Cross-framework contamination: `v-model` in React JSX, `*ngIf` in Vue, `class:` in React
+- SDK method name mistakes: `s3.getObject(...)` on a client that only has `getObjectCommand(...)` (AWS SDK v3 sub-method pattern)
+- `npm install @types/node-fetch` when the right package is `@types/node` + built-in fetch
+- React 19 patterns in a React 18 codebase (`use()` hook, `useFormStatus` in client component)
+
+**Grep fallback patterns:**
+- `import\s+\{[^}]*\}\s+from\s+['"][^./].*['"]` — external package import; LLM scan verifies against `package.json` / `package-lock.json` / equivalent
+- `\.env\.\w+` and `process\.env\.\w+` — env var access; LLM scan verifies the var is set in `.env.example` or production env
+- `(class:|v-model|\*ngIf)` outside their native framework (Vue/Angular) — cross-framework contamination
+
+**Bypass / ground truth:** TypeScript compiler / `tsc --noEmit` catches some of this at compile time. The real ground truth is `npm ls` / `pip show` / framework config schema. This class catches what slips past the compiler (plain JS, runtime-typed configs, fabricated env vars).
+
+**Why a separate class:** "AI omits guards" (Classes 1-7) and "AI invents things" (Class 8) are different failure modes with different fixes. Omit = add the guard. Invent = remove the fabricated call, fix the env var name, downgrade the framework version. The skill description says "blindspots AI commonly omits"; Class 8 expands the scope to inventions because the same review pass catches both, and the AI-era 45% OWASP Top 10 rate includes both.
+
 ### 5. Write report
 
 Output path: caller workspace root, file name `ai-blindspots-report.md`.
@@ -219,7 +242,7 @@ If the report cannot be written to disk (permissions / full disk), print the sam
 
 | Excuse | Reality |
 |---|---|
-| "AI code looked clean in my read; no need to scan" | AI omissions are invisible to quick reads — that's the failure mode. `git diff` + the 7-class checklist catches what eyes miss. |
+| "AI code looked clean in my read; no need to scan" | AI omissions are invisible to quick reads — that's the failure mode. `git diff` + the 8-class checklist catches what eyes miss. |
 | "Sub-agent scan is too expensive; grep alone is fine" | Grep catches mechanical patterns; LLM catches intent (e.g. "this `await` is in a fire-and-forget"). Run both. |
 | "The diff is tiny (5 lines), skip the skill" | 5-line diffs often have null guards / catch blocks omitted. Skill runs in seconds for small diffs. |
 | "Already ran `remove-ai-slops`; double-scanning is wasteful" | `remove-ai-slops` hunts *bloat* (over-engineering). This skill hunts *omissions* (under-engineering). They cover different halves of the AI failure surface. |
@@ -245,7 +268,7 @@ If the report cannot be written to disk (permissions / full disk), print the sam
 
 - [ ] Scope determined from one of: `git diff`, caller-passed list, recent `Write`/`Edit` tool calls (or report marks `undetermined`).
 - [ ] Sub-agent scan dispatched and completed (or grep-only fallback with explicit note).
-- [ ] All 7 checklist classes covered (LLM + grep combined); Class 4 may be `unverified` if no browserslist.
+- [ ] All 8 checklist classes covered (LLM + grep combined); Class 4 may be `unverified` if no browserslist.
 - [ ] Each finding has `file:line` + one-line concrete fix (not "consider").
 - [ ] `ai-blindspots-report.md` written to caller workspace root, OR printed to stdout if write failed.
 - [ ] `bash scripts/validate-skills.sh` reports OK for `skills/extra/ai-code-blindspots/SKILL.md`.
@@ -262,8 +285,8 @@ echo "description length: ${#DESCRIPTION}"  # ≤ 1024
 # File size budget
 wc -l skills/extra/ai-code-blindspots/SKILL.md  # ≤ 500
 
-# 7-class coverage in Process
-for pat in 'Null / undefined' 'Array boundaries' 'Error visibility' 'Environment compat' 'Deprecated API' 'Hardcoded configuration' 'Invisible failures'; do
+# 8-class coverage in Process
+for pat in 'Null / undefined' 'Array boundaries' 'Error visibility' 'Environment compat' 'Deprecated API' 'Hardcoded configuration' 'Invisible failures' 'Hallucinated API'; do
   grep -q "$pat" skills/extra/ai-code-blindspots/SKILL.md && echo "✓ $pat" || echo "✗ MISSING: $pat"
 done
 

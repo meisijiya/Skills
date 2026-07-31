@@ -171,6 +171,7 @@ version: 0.1.0
 - [ ] 加监控 / alert
 - [ ] 加测试
 - [ ] 改流程
+- [ ] **Re-run `security-threat-model` on the affected boundary** — if the postmortem 5-whys surfaced a missing trust boundary, missing control, or a new attacker profile, re-model and re-issue the mitigations table (closes the incident→design feedback loop)
 
 ## Lessons
 - <一句话核心学习>

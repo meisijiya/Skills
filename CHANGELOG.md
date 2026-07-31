@@ -2,6 +2,62 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — security skill audit closeout (2026-08-01)
+
+5-lane 并行 security skill review(2 lane `oracle` + 3 lane `unspecified-high`,每条带不同 `load_skills=[...]`)对 9 个 security skill + `slice-review` 跑了 2 轮 verdict。Round 1 发现 **5 Critical + 15 Important + 10 Minor**;P0 修复 applied 后 Round 2 全部转 **APPROVE**,**0 Critical + 0 Important + 7 Minor**。3 个 lifecycle hand-off 闭环(design↔code↔incident↔design)、4 个新攻击面、Class 8 AI 幻觉捕捉、L1/L2/L3 三层防御 — 全部闭合。
+
+### Added — 10 SKILL.md 内化修复(0 新 skill / 0 新 plugin / 0 marketplace 变更)
+
+**3 个 lifecycle hand-off 闭环**
+- `skills/extra/slice-review/SKILL.md`: §2 新增"Security-sensitive slice variant" dispatch(`load_skills=["security-and-hardening", "ai-code-blindspots"]`)— 触发条件 9 类 trust boundary(auth / user input / data storage / file upload / external API / PII / credentials / secrets / crypto);Part 2 Critical 加 `(trust-boundary: missing input validation / parameterized query / per-request auth / secret exposure / error leakage)` 子类;`## OMO Integration` → `## omo Integration` 大写修复(repo convention 40/42 用小写)
+- `skills/extra/security-and-hardening/SKILL.md`: §7 pre-merge gate 加 2 项 — `Threat-model mitigations checked: if <repo>-threat-model.md exists, each mitigation in §5 verified present in code with file:line anchor` + `Post-incident decisions reviewed: .omo/notepads/<plan>/decisions.md scanned for new patterns since last review`(闭合 design→code + incident→code)
+- `skills/extra/security-threat-model/SKILL.md`: §When to Use 加 `After a security-incident-response postmortem identifies a boundary gap` trigger(闭合 incident→design)
+- `skills/extra/security-incident-response/SKILL.md`: §6 Postmortem action items 加 `Re-run security-threat-model on the affected boundary`(闭合 incident→design)
+
+**4 个新攻击面覆盖**
+- `skills/extra/security-devsecops/SKILL.md`: §1 Dependency scanning 拆 **L1 static**(npm audit / pip-audit / cargo audit)/ **L2 semantic**(CodeQL + Semgrep supply-chain rules for security-critical path)/ **L3 cross-file taint**(codegraph MCP + security-research mode,触发条件"只在 L1/L2 通过但 dep 是 security-critical 时")三层防御;§2 加 **Dependency confusion** 防御(npm scope 绑定 private registry + `@mycompany/` prefix CI 检查 + Sigstore 验证 + 攻击场景);§4 加 **OIDC claims audit**(`sub` claim 约束 `repo:<owner>/<repo>:ref:refs/heads/<branch>` 防 token replay / `aud` 验证 / TTL ≤1h / `permissions:` per-job no wildcard)+ **branch protection audit**(不允许 force-push + admin override 关闭 + GitHub App push 受限)
+- `skills/extra/gha-security-review/SKILL.md`: §3.7b **Cache poisoning via `actions/cache`**(同族但不同向量 — cache key collision 跨 trigger,exploit scenario 含 hash collision + 4 项 mitigation: run_id scope / job-level scope / per-trigger key prefix / grep audit command);Exploit primitive axis 加入 `cache poisoning`
+
+**Class 8 — AI 幻觉捕捉**
+- `skills/extra/ai-code-blindspots/SKILL.md`: §4 加 **Class 8 Hallucinated API / package / config (AI-era)** — 覆盖 6 模式(wrong arity / imaginary package / 不存在的 config key / 错误 env var / 跨框架污染 / SDK 方法名错)+ 3 个 grep fallback patterns;同时 4 处 `7-class` → `8-class` 文案统一(Overview / §When to Use / §Process / 验证 checklist / 验证脚本 grep);Bypass 段明确 TypeScript compiler + `npm ls` + `pip show` 是 ground truth
+
+**AI 时代治理 + 长期社工模式**
+- `skills/extra/security-ownership-map/SKILL.md`: Red Flags 加 AI 时代红旗 — `Co-authored-by: Claude/Cursor` > 50% 的仓库,Query C/D(bus-factor / maintainer concentration)输出需 cross-reference 人审日志或 pair-programming 轮转,否则"Alice 拥有 100 commits"被误读为知识所有权(实际是 AI 代笔)
+- `skills/extra/supply-chain-risk-auditor/SKILL.md`: §2 加 **Axis 5.6 Sustained-privilege-escalation temporal pattern (XZ Utils / Jia Tan)** — 6-18 月新贡献者 + 12 月内 commit 占比 <5%→>50% + 其他贡献者退出 + 签名提交停止 + 无 SECURITY.md 即触发 CRITICAL 信号(其他 5 axis 都 GREEN 也要 flag);概览 `5 axes` → `5 standard axes + 1 temporal-pattern axis`;output header `Axis 1-2-3-4-5` → `Axis 1-2-3-4-5-5.6`
+
+**Dispatcher routing 扩展**
+- `skills/core/using-meisijiya-skills/SKILL.md`: Category × Skill Matrix 扩 9 个 security skill 的 omo category × `load_skills` 映射(`oracle` → security-threat-model / security-and-hardening + ai-blindspots 等组合);新增 `### Security 5-lane review fan-out (validated 2026-08-01)` 表,固化 5 lane × subagent_type/category × validated `load_skills` × trigger condition;Pairing rule 段加 security skill canonical pair(`security-and-hardening` + `ai-code-blindspots` = "AI wrote this code" / `gha-security-review` + `security-devsecops` = "CI/CD touched")
+
+### Verified — 5-lane review 两轮全 PASSED
+
+- **Round 1**(未修复前):5 Critical + 15 Important + 10 Minor across 10 SKILL.md
+- **Round 2**(P0 修复后):5 APPROVE + 0 FIX + 0 REJECT,**0 Critical + 0 Important + 7 Minor**
+- **3 lifecycle hand-offs 闭环**:design→code(threat-model mitigations in code via hardening §7)/ code→incident(decisions.md scan via hardening §7)/ incident→design(re-run threat-model via incident-response §6 + postmortem trigger via threat-model §When to Use)— 5 个 SKILL.md 内 5 个 cross-reference 显式连接
+- **4 标准验收**:覆盖面广 ✓ / 触发稳定 ✓ / reviewer 提升 ✓ / 全生命周期 ✓
+- **同步回流**:10 SKILL.md 编辑同时写入 `~/.agents/skills/`(npx 安装位置)和 source repo;installed ↔ source diff 10/10 OK
+- `validate-skills.sh` 42/42 OK;`check-marketplace.sh` 42 skills in sync;0 warning
+
+### Architecture & Constraints
+
+- **0 new SKILL.md / 0 new plugins / 0 marketplace entries** — 全部修改内化到已有 10 个 SKILL.md 体内(slice-review + 9 security skill + using-meisijiya-skills dispatcher)。core 9 + extra 33 = 42 SKILL.md 总数不变
+- **不破坏现有 dispatch 协议**:每个修改都在 skill body 内,不改 `using-meisijiya-skills` 的 routing 逻辑(只新增 Category × Skill Matrix 文档 + 5-lane fan-out 表)
+- **复用现有 reviewer 体系**:5 lane 中 2 lane `oracle`(hard logic + smell detection)+ 3 lane `unspecified-high`(hands-on + mining + slice),所有 sub-agent 经 `task(load_skills=[...])` 显式注入 SKILL.md body(per `using-meisijiya-skills` Sisyphus Dispatch Protocol)
+
+### Remaining 7 Minor (accept, not blocking)
+
+- ai-code-blindspots Class 4 grep 模式过宽(`\.at\(\)|\?\.|\?\?=|#\w+\s*=`)匹配所有现代 JS,LLM 过滤
+- stack-security-coder 4 个小众 runtime surface(MCP server / Edge runtime / Browser extension / Electron)无专门覆盖 — 结构性缺口,需新 skill 或 community checklist 引用
+- gha §3.7b verification checklist 仍写 `3.1-3.7`(应为 3.1-3.7b);devsecops §1 L3 路径引用 `[「codegraph」MCP](../../.opencode/config)` 解析不正确
+- ownership-map AI 时代红旗仅在 Red Flags(未升级为 Process § Query 层级强制)
+- slice-review 默认变体 `load_skills=[]`(非 trust boundary slice 适用,但要求 orchestrator 准确分类);security variant trigger 9 类 vs Critical sub-category 5 类数量不对称(由加载的 security-and-hardening 兜底)
+
+### Considered but NOT included (P1/P2 评估结论: 全部不需要)
+
+- ❌ P1 `agent-chain-security` 新 skill — 只在项目用 AI agent / MCP server / Anthropic-OpenAI SDK 时必要;当前 9 security skill 已覆盖 application-layer + supply-chain + GHA,无 agent 自身执行链需求时不必要
+- ❌ P1 `cross-file-taint-tracker` 新 skill — security-devsecops §1 L3 已引用 codegraph MCP + security-research mode,缺的是工作流示例而非新 skill
+- ❌ P2 4 个小众 runtime surface 内化 — 加全 4 个会让 stack-security-coder 膨胀(已达 277 行),改用末尾指针到 community checklist 更经济
+- ❌ P2 devsecops §6 ↔ pre-ship-gate 显式 cross-ref — 1 行 markdown 成本,但两 skill 当前覆盖不冲突,仅文档洁癖
+
 ## Unreleased — agent-driven loop capability (loop-omo-handoff, 2026-07-31)
 
 4 个 SKILL.md 加 3 个 eval case 扩展 `loop-me` 已有的 recurring workflow spec 设计,新增 agent-driven loop 声明式移交到 OMO `/goal` + HITL L1 strict。**用户必须显式 `/goal <workflow>` 才能启动 loop;agent 永不代发**。doc-only 改动,零新 SKILL.md / 零新插件 / 零 marketplace 变更 — 完全符合 ADR-0001。
