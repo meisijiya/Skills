@@ -183,3 +183,11 @@ Before any completion claim, confirm:
 Require fresh command evidence, then use `review-work` and its 5 parallel lanes (goal / constraint / code quality / security / context mining) before claiming completion; store concise evidence in `.omo/notepads/<plan-name>/` (`issues.md` for failures, `decisions.md` for triage outcomes) and append per-event records to `.omo/start-work/ledger.jsonl`.
 
 **State-survival mechanism (`compaction-context-injector` hook)**: when OMO triggers a context compaction (`experimental.session.compacting` event), this hook captures the session's agent/model/tools checkpoint, injects an 8-section `COMPACTION_CONTEXT_PROMPT` into the surviving context (User Requests / Final Goal / Work Completed / Remaining Tasks / Active Working Context / Explicit Constraints / Agent Verification State / Delegated Agent Sessions), and restores on `session.compacted` — tail monitor threshold 5 consecutive no-text events + 60s cooldown prevents recovery loops. **Implication for verification**: if you are mid-stage-2 (5 parallel review-work lanes pending) when compaction fires, the prompt explicitly tells the resuming agent **"RESUME, DON'T RESTART"** — use `background_output(task_id="bg_...")` for in-flight lanes, do not re-launch fresh reviewers with stale context.
+
+### Boundary clarification: loop-done vs task-done
+
+> **Loop-done** = mechanical iteration finished. OMO `/goal` marked complete, all rounds ran, `completion_signal` evaluated positive per validation rules. This is a state-machine event — the loop machine stopped.
+>
+> **Task-done** = the intended behavior change is verified in production. Closed-loop-delivery Gate 4-5 evidence collected, separate `verification-before-completion` Stage 1 + Stage 2 audit passed. This is an outcome claim — the work produced the intended result.
+>
+> **Loop-done is a necessary but insufficient condition for task-done.** Claiming "task done" after loop-done without separate task-done evidence violates the verification-before-completion Iron Law (Stage 2 fresh-context audit required). The agent must explicitly distinguish: "loop completed" ≠ "task done".

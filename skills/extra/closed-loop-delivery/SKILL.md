@@ -106,6 +106,29 @@ Output: pass/fail for each metric with the comparison numbers.
 
 If any metric fails: investigate root cause via `observability-and-instrumentation` + `performance-optimization`. **Don't claim done**; defer claim until metric is back in baseline or root cause is identified as unrelated.
 
+#### Gate 4 in-loop variant (for `runner: agent` monitoring loops, distinct from the post-deploy Gate 4 above)
+
+The post-deploy Gate 4 above covers `24h+` post-release evidence for a normal feature release. A different invocation path, a [`loop-me`](~/.agents/skills/loop-me/SKILL.md) workflow spec declaring `runner: agent` AND the loop is a monitoring loop, calls Gate 4 **per-round**, not `24h+` after a release. This section documents the in-loop semantics. **It does NOT replace the post-deploy Gate 4 above**; both exist.
+
+**Trigger**: each completed round of the `runner: agent` monitoring loop, Gate 4 in-loop variant fires once.
+
+**Behavior** (distinct from post-deploy Gate 4):
+
+- **Metric anomaly** (e.g., error rate spike, latency threshold breach): log the anomaly into `round_summary`, brief the user (concise: anomaly type + magnitude + timestamp), the loop **continues** (monitoring loops expect noisy signals; do NOT halt). The user may abort via `pause_ask` manually if the anomaly is real.
+- **Hard failure** (service unreachable, deploy job failed): halt the loop per the spec's `failure_policy` (default `pause_ask`); the user resumes or aborts.
+- **Healthy**: append `round_summary: healthy` to the round log; loop continues to the next round.
+
+**Source data**: prefer [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) for SLI/SLO setup, query templates, and dashboard wiring. It provides the data-source layer (logs / metrics / traces / dashboards) that this Gate 4 variant reads. Install it before invoking Gate 4 in-loop.
+
+**Evidence artifact**: per-round anomaly/failure log entry + brief-user message (concise text; NOT a dashboard snapshot).
+
+**Boundary at a glance**:
+
+- **In-loop variant** (this section) — per-round, inside a `runner: agent` monitoring loop. Tolerates noisy signals; loop continues.
+- **Post-deploy Gate 4** (above) — `24h+` after a release; strict baseline comparison (±20% error rate, ±10% p95); may halt a done-claim if breached.
+
+Do NOT conflate the two. If a slice ships a `runner: agent` monitoring loop, this in-loop variant applies; if a slice ships a normal feature release, the post-deploy Gate 4 above applies.
+
 #### Gate 5 — Reachable by users (NEW gate)
 
 Distinguish "the deploy succeeded" from "the users are seeing the change":

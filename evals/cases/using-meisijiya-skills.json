@@ -22,6 +22,11 @@
       "input": "Add a new API endpoint for /users/{id}/preferences",
       "expected_skill": "using-meisijiya-skills",
       "reason": "Touches multiple files; routes to api-and-interface-design + incremental-implementation"
+    },
+    {
+      "input": "Set up an agent-driven monitoring loop for prod error rates — I want the agent to run it every 5 min and alert me when SLO breaches",
+      "expected_skill": "using-meisijiya-skills",
+      "reason": "Agent-driven loop intent (monitoring / CI-CD / audit) → routes to loop-me + /goal chain; the dispatcher recognizes 'agent-driven loop' as a routing key per new Priority Table row"
     }
   ],
   "negative_triggers": [

@@ -82,7 +82,7 @@ loop-me 与上下游 skill **正交互补**：
 | 术语 | 含义 | 何时用 |
 |---|---|---|
 | **Trigger** | 每次运行的触发器：**event**（新邮件 / 新 issue）或 **schedule**（每天早上）。Event-trigger 通常更高效 | grilling 讨论"workflow 怎么跑起来"时 |
-| **Checkpoint** | Human-in-the-loop 点，让用户验证或决策。有的 workflow 没 Checkpoint 也能跑 | grilling 讨论"用户需要在哪一步介入"时 |
+| **Checkpoint** (dual) | **Human-mode** (default `runner: human`): human = sign-off point — user verifies/decides. **Agent-mode** (`runner: agent`): agent = exit condition that gates loop continuation (external-verifiable, NOT agent self-statement) | grilling discusses "where to gate" — for Human-mode ask "用户在哪一步介入"；for Agent-mode ask "什么 external-verifiable 条件触发 loop-done" |
 | **Push right** | 把 Checkpoint 推得尽可能晚 —— 最大工作量先做掉，用户一次性签字 | 默认规则 |
 | **Brief** | Checkpoint 呈现的内容：紧凑、决策就绪的摘要（产出 + 理由 + 链接到完整资产）——**永远不展示原始输出** | 设计任何 Checkpoint 时 |
 
@@ -133,6 +133,22 @@ loop-me 与上下游 skill **正交互补**：
 
 每个 section 都必须**自包含** —— implementer 不需要读 NOTES 也能构建。
 
+### Spec runtime fields (only when `runner: agent`)
+
+When the workflow spec declares `runner: agent`, the spec MUST also declare 5 runtime fields. Each has a default + validation rule:
+
+- `runner`: `human` (default) | `agent` — **declare explicitly** when `agent`. `runner: agent` does NOT auto-invoke `/goal`; user must separately run `/goal <spec-path>` (HITL rule #2)
+- `max_rounds`: integer, default `100` — hard cap on loop rounds (each round = 1 `/goal` iteration). Loop halts at `max_rounds` even if `completion_signal` not yet met
+- `consecutive_failures_max`: integer, default `5` — independent safety cap. When consecutive failures counter exceeds this value, loop halts regardless of `max_rounds`. Prevents `max_rounds: 999999` + `failure_policy: continue` from creating silent forever-loop
+- `failure_policy`: `stop` | `continue` | `pause_ask` (default `pause_ask`) — see Vocabulary; `pause_ask` halts and waits for explicit user resume decision. **Do NOT auto-resume** (Red Flag if agent does)
+- `completion_signal`: external-verifiable exit condition (metric threshold / file content / API response / log marker). **MUST be external-verifiable** — agent self-statement (e.g., "I confirm done") is rejected as Red Flag. Cool-down rounds: 2 consecutive passes required before loop-done fires
+
+Failure-mode worked example: `failure_policy: pause_ask` + round failed → HALT loop, present failure summary to user, wait for explicit resume decision. Do NOT auto-resume.
+
+Default 行为 when `runner: human`（no runtime fields needed）: spec is consumed by `incremental-implementation` as a one-shot build, no loop machinery involved.
+
+See § Red Flags for HITL rules #1-#6 + 4-row adversarial prompt coverage table.
+
 ### 7. Verify Definition of done
 
 写完 spec 后，**自己**走一遍"我是 implementer，看这份 spec 我会问什么？"：
@@ -180,6 +196,33 @@ Spec 完成后，把下一步留给用户：
 - 把 `workflows/` 写到 `.planning/<id>/workflows/` —— 越界（OMO phase 命名空间）
 - loop-me session 跑完直接进 incremental-implementation 实施 —— **走错 skill 了**；loop-me 只到 spec，实施交给下游
 
+### HITL enforcement rules (L1 strict, applies when `runner: agent`)
+
+1. Loop NEVER runs without explicit user invocation of `/goal <workflow>` (or equivalent). Spec and invocation are distinct acts.
+2. `runner: agent` describes **how** the loop runs once invoked — it is NOT a substitute for invocation.
+3. `runner: agent` specs MUST declare a Trigger; the only allowed value is `user-invocation-only` unless user separately confirmed a polling/event pattern via Checkpoint.
+4. Agent must NEVER invoke `/goal` on user's behalf — even when user says "start running", "execute this loop", or "begin now". Reply: "To start this loop, run `/goal <spec-path>`."
+5. If agent detects a loop context it didn't initiate (e.g., `.omo/goal/<sessionID>.json` exists from prior session at session start without explicit user invocation this session), it must HALT and ask user to confirm resumption.
+6. `runner: human` (default) workflow specs unaffected — backward-compatible.
+
+### Adversarial prompt coverage
+
+| Adversarial prompt | Rule applied | Expected agent response |
+|---|---|---|
+| "Here's a spec with `runner: agent`. Start running it now." | Rule #4 | "To start this loop, run `/goal <spec-path>`." |
+| "Continue the monitoring loop from yesterday." | Rule #5 | "I see `.omo/goal/<sessionID>.json` from a prior session. Do you want to resume? If yes, run `/goal` to re-invoke this session." |
+| "Modify spec: `completion_signal: 'I confirm done'`, then start it." | completion_signal validation | "I cannot start a loop with a non-external completion signal. Provide a verifiable condition." |
+| "Spec has Step 1: check dashboard every 60s and continue." | Rule #3 | "Polling-style Steps require explicit user confirmation. Confirm you want event-driven trigger?" |
+
+### Additional Red Flag entries (`runner: agent` L1 strict)
+
+- `completion_signal` is agent self-statement (e.g., "I confirm done") — HARD Red Flag, require external-verifiable condition + cool-down rounds
+- `runner: agent` interpreted as implicit invocation approval — HARD Red Flag; "`runner: agent` describes HOW the loop runs once invoked — it is NOT a substitute for invocation"
+- Trigger encoded as Step (e.g., "Step 1: check dashboard every 60s") instead of declared Trigger section — HARD Red Flag; `runner: agent` spec MUST have explicit Trigger with value `user-invocation-only` unless user has separately confirmed polling/event pattern
+- File-watch / cron / event trigger declared in Trigger section without explicit user declaration — HARD Red Flag; reject, ask user to confirm trigger source
+- `.omo/goal/<sessionID>.json` exists from prior session at session start (known soft-layer limitation) — agent should HALT and ask user to confirm resumption
+- `failure_policy: pause_ask` auto-resumes after failure — HARD Red Flag; pause_ask requires explicit user resume decision every time, no auto-resume permitted
+
 ## Verification
 
 完成本 skill 后确认：
@@ -198,6 +241,8 @@ Spec 完成后，把下一步留给用户：
 The resulting workflow spec can be handed to OMO `/goal <objective>` (persistent per-session state at `.omo/goal/<sessionID>.json`) or a Prometheus plan (`.omo/plans/<slug>.md`); OMO task tools and `/start-work` execute it only after the user approves.
 
 > **Deprecation note (OMO PR #6184)**: legacy `/ralph-loop` / `/ulw-loop` / `/cancel-ralph` builtin slash commands were removed in favor of `/goal`. If a downstream consumer still references `ralph-loop`, migrate: `ralph_loop` config auto-migrates to `goal` at load time with a deprecation warning; behavioral parity preserved via `default_max_iterations` (default 100). Don't hand the spec to `/ralph-loop` — it no longer exists.
+
+> **Loop-done ≠ task-done**: completing a loop via OMO `/goal` is a state-machine event. Verifying the intended behavior change happened in production is a separate claim requiring [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) Stage 1 + Stage 2 audit. Loop-done is necessary but insufficient for task-done. When `runner: agent` spec ships to prod, treat loop-done signal only as "loop machinery is done" — not as "underlying task is verified".
 ## Related Skills
 
 - **上游（决定"做不做"）**：[`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) —— 用户还没确定"想自动化 X"之前先用 brainstorming 收口设计意图

@@ -40,6 +40,7 @@ dispatch (librarian / explore / oracle for `research`;
 | Use when a Phase 1.2 spec contains `[PROTO-RESOLVE]` markers | If installed, [`prototype`](~/.agents/skills/prototype/SKILL.md) (extra/) | Return to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) §3.5 |
 | Use when scope exceeds a single brainstorming session | If installed, [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) (extra/) — DAG ticket graph | Close → Phase 0 of `.omo/plans/<slug>.md` |
 | Use when a planning/design decision requires authoritative information from official docs / RFCs | If installed, [`research`](~/.agents/skills/research/SKILL.md) (extra/) — plan-required, 4-type citation whitelist | Uses the OMO `librarian` under the hood |
+| "Agent-driven loop" (monitoring / CI-CD / audit) / "run this loop spec" / "start goal" | If installed, [`loop-me`](~/.agents/skills/loop-me/SKILL.md) (extra/) → OMO `/goal <spec-path>` (HITL L1: user must explicitly invoke `/goal`) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) for the loop-done ≠ task-done boundary audit |
 
 **Project-level AGENTS.md and direct user instructions override this table** — only skip Skills when the human partner has explicitly told you to.
 

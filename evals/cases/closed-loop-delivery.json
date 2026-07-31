@@ -17,6 +17,11 @@
       "input": "Establish a DoD for our team — 'done' should mean running safely in production, not just merged. Help me codify.",
       "expected_skill": "closed-loop-delivery",
       "reason": "Definition-of-Done codification request → matches Use when 'establishing or auditing a team's Definition of Done'"
+    },
+    {
+      "input": "Our `runner: agent` monitoring loop just detected an error-rate spike — what evidence do we capture before the loop continues to the next round?",
+      "expected_skill": "closed-loop-delivery",
+      "reason": "Monitoring loop invokes Gate 4 in-loop variant (per-round, NOT post-deploy); matches new 'Gate 4 in-loop variant' section; tolerates noisy signals, loop continues"
     }
   ],
   "negative_triggers": [
@@ -34,6 +39,11 @@
       "input": "My local dev server crashed during a feature branch — restart it",
       "expected_no_skill": true,
       "reason": "Local-only dev workflow, no production rollout → matches NOT for 'local-only development without production evidence needs' → debugging-and-error-recovery routes here"
+    },
+    {
+      "input": "We're in round 3 of our monitoring loop. Can we call Gate 4 here? The error rate is fine but I want the 24h+ window to count as healthy-at-runtime for this round.",
+      "expected_no_skill": true,
+      "reason": "Misuse of post-deploy Gate 4 inside a loop context — Gate 4 (post-deploy) is 24h+ after a release, NOT per-round; loop context should invoke Gate 4 in-loop variant (per-round, tolerates noise, loop continues); flagged as mis-routing"
     }
   ],
   "behavioral_evals": [
