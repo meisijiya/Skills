@@ -34,7 +34,7 @@ Meta dispatcher. Hard-injected every session by the OpenCode plugin (`~/.config/
 2. Match the incoming request against each skill's `description` field. The `description` is the source of truth for routing.
 3. For cross-skill trigger hints (one row per common request pattern), read [`references/priority-table.md`](references/priority-table.md).
 4. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
-5. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For model selection by task type, read [`references/model-selection.md`](references/model-selection.md).
+5. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For agent / category selection by task type, read [`references/model-selection.md`](references/model-selection.md).
 6. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
 7. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol below** — always specify `load_skills=[...]` to anchor the sub-agent's discipline.
 
@@ -73,18 +73,18 @@ With it, the sub-agent's instructions explicitly include the skill body, and rou
 
 ## Category × Skill Matrix
 
-Use this matrix to choose `load_skills=[...]` based on the task's category. (Categories from omo orchestration schema.)
+Use this matrix to choose `load_skills=[...]` based on the task's category. (Categories from omo orchestration schema.) The default model for each category is selected by OMO at runtime — do NOT hardcode a model name here; the matrix is about category → skill routing, not model selection.
 
-| Category | Default Model | When to use | Recommended `load_skills` |
-|---|---|---|---|
-| `visual-engineering` | `claude-opus-5` | UI/UX code (React/Vue/Svelte/Tailwind) | `["meisijiya-frontend-taste"]` for greenfield, or `["meisijiya-frontend-taste", "meisijiya-minimalist-ui"]` for Linear/Notion aesthetic, or `["meisijiya-redesign-ui"]` for existing UI audit-fix |
-| `ultrabrain` | `gpt-5.6-sol` | Hard logic, architecture, complex debugging | `["api-and-interface-design"]` / `["security-threat-model"]` / `["performance-optimization"]` (pick 1) |
-| `deep` | `gpt-5.6-sol` | Autonomous deep implementation | `["incremental-implementation"]` or `["incremental-implementation", "test-driven-development"]` |
-| `quick` | `kimi-for-coding-highspeed` | Trivial single-file changes (typo / rename) | `[]` (don't load skills — overhead > benefit) |
-| `unspecified-low` | `gpt-5.6-luna` | General standard work | `[]` (default is fine); add `["prototype"]` only if task has `[PROTO-RESOLVE]` markers |
-| `unspecified-high` | `kimi-k3` | Complex general work | `["debugging-and-error-recovery"]` for bug hunts, `["writing-skills"]` for skill creation |
-| `writing` | `kimi-k3` | Documentation, prose, articles | `["verify-chain"]` if fact-checking claims |
-| `artistry` | `claude-fable-5` | Creative / unconventional approaches | (rarely needed) |
+| Category | When to use | Recommended `load_skills` |
+|---|---|---|
+| `visual-engineering` | UI/UX code (React/Vue/Svelte/Tailwind) | `["meisijiya-frontend-taste"]` for greenfield, or `["meisijiya-frontend-taste", "meisijiya-minimalist-ui"]` for Linear/Notion aesthetic, or `["meisijiya-redesign-ui"]` for existing UI audit-fix |
+| `ultrabrain` | Hard logic, architecture, complex debugging | `["api-and-interface-design"]` / `["security-threat-model"]` / `["performance-optimization"]` (pick 1) |
+| `deep` | Autonomous deep implementation | `["incremental-implementation"]` or `["incremental-implementation", "test-driven-development"]` |
+| `quick` | Trivial single-file changes (typo / rename) | `[]` (don't load skills — overhead > benefit) |
+| `unspecified-low` | General standard work | `[]` (default is fine); add `["prototype"]` only if task has `[PROTO-RESOLVE]` markers |
+| `unspecified-high` | Complex general work | `["debugging-and-error-recovery"]` for bug hunts, `["writing-skills"]` for skill creation |
+| `writing` | Documentation, prose, articles | `["verify-chain"]` if fact-checking claims |
+| `artistry` | Creative / unconventional approaches | (rarely needed) |
 
 ### Security 5-lane review fan-out (validated 2026-07-31)
 

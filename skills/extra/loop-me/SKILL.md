@@ -2,6 +2,7 @@
 name: loop-me
 description: "Designs a recurring workflow spec via a stateful grilling session (one question at a time, each with a recommended answer) whose only output is the spec — not the implementation. Use when the user wants to specify a loop they keep doing manually so an implementer can build it without asking a single question. Hand off the finished spec to OMO /goal or incremental-implementation for execution."
 disable-model-invocation: true
+disable-model-invocation-justification: "stateful 交互式会话;避免与 brainstorming 自动描述匹配产生路由竞争"
 argument-hint: "A workflow to design, or nothing to go find one"
 allowed-tools: "Read Write Edit Bash Glob Grep"
 ---
@@ -250,4 +251,4 @@ The resulting workflow spec can be handed to OMO `/goal <objective>` (persistent
 - **下游（执行）**：OMO `/goal <objective>` —— 把 spec 链接塞进 goal 描述，让 agent 持续运行这个 workflow
 - **下游（构建）**：[`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) —— spec 当 Phase 1 PRD 输入，做 Tracer Bullet 切片
 - **Meta（提炼）**：[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) —— 当 spec 重复出现成模式时，把它提炼成 skill（meta-only）
-- **不相关**：[`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) —— 完成门禁，针对编程完成声明；loop-me 不需要它的二段验证
+- **下游（完成门禁）**：[`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) —— 当 `runner: agent` loop 跑完时,需要二段验证"loop-done ≠ task-done";详见 `## omo Integration` 段的 Boundary clarification

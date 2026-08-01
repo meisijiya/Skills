@@ -61,8 +61,8 @@ task(
 {
   "agents": {
     "<name>": {
-      "model": "anthropic/claude-opus-5",       // ← 实际能配的
-      "fallback_models": [...],                  // ← 实际能配的
+      "model": "<provider>/<model-name>",       // ← 实际能配的,具体 provider 由 OMO 运行时决定
+      "fallback_models": ["<provider>/<model-name>"],  // ← 实际能配的
       "prompt": "..." | "file://...",
       "prompt_append": "...",
       "tools": { "edit": "allow" | "deny" },
@@ -82,8 +82,8 @@ task(
 {
   "categories": {
     "visual-engineering": {
-      "model": "anthropic/claude-opus-5",
-      "fallback_models": [...],
+      "model": "<provider>/<model-name>",
+      "fallback_models": ["<provider>/<model-name>"],
       "prompt_append": "...",
       "tools": { "bash": false },
       "disable": false,
@@ -106,7 +106,7 @@ task(
     "my-skill": {
       "description": "...",
       "allowed-tools": ["read", "bash"],
-      "model": "custom/model",
+      "model": "<provider>/<model-name>",
       "agent": "custom-agent",
       "subtask": true
     }
@@ -127,26 +127,24 @@ task(
   "skills": {
     "meisijiya-frontend-taste": {
       "allowed-tools": ["read"],
-      "model": "anthropic/claude-opus-5"
+      "model": "<provider>/<model-name>"
     },
     "meisijiya-minimalist-ui": {
       "allowed-tools": ["read"],
-      "model": "anthropic/claude-opus-5"
+      "model": "<provider>/<model-name>"
     },
     "meisijiya-redesign-ui": {
       "allowed-tools": ["read"],
-      "model": "anthropic/claude-opus-5"
+      "model": "<provider>/<model-name>"
     },
     "prototype": {
-      "allowed-tools": ["read", "edit", "bash", "glob", "grep"],
-      "model": "openai/gpt-5.6-luna"
+      "allowed-tools": ["read", "edit", "bash", "glob", "grep"]
     },
     "wayfinder": {
       "allowed-tools": ["read", "edit", "bash", "glob", "grep"]
     },
     "research": {
-      "allowed-tools": ["read", "edit", "bash", "glob", "grep"],
-      "model": "kimi-for-coding/kimi-k3"
+      "allowed-tools": ["read", "edit", "bash", "glob", "grep"]
     }
   }
 }

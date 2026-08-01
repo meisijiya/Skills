@@ -67,6 +67,47 @@ if [[ ${#skill_files[@]} -eq 0 ]]; then
   exit 2
 fi
 
+# eval_check_eval <eval_json_path>: print OK|WAIVER|FAIL|<reason>
+# OK when positive_triggers≥3, negative_triggers≥3, behavioral_evals≥1.
+# WAIVER when any count below threshold but top-level `waiver` field has future `expires` date.
+# FAIL otherwise (also when waiver is missing fields, has invalid expires, or expired).
+eval_check_eval() {
+  python3 - "$1" <<'PYEOF'
+import json, sys, datetime
+path = sys.argv[1]
+try:
+    d = json.load(open(path))
+except Exception as e:
+    print(f"FAIL|invalid JSON: {e}")
+    sys.exit(0)
+pos = len(d.get("positive_triggers") or [])
+neg = len(d.get("negative_triggers") or [])
+beh = len(d.get("behavioral_evals") or [])
+waiver = d.get("waiver")
+if pos >= 3 and neg >= 3 and beh >= 1:
+    print(f"OK|pos={pos} neg={neg} beh={beh}")
+    sys.exit(0)
+if waiver:
+    reason = waiver.get("reason", "")
+    expires = waiver.get("expires", "")
+    if not reason or not expires:
+        print(f"FAIL|waiver present but missing 'reason' or 'expires' (pos={pos} neg={neg} beh={beh})")
+        sys.exit(0)
+    try:
+        exp_dt = datetime.date.fromisoformat(expires)
+    except Exception:
+        print(f"FAIL|waiver 'expires' not ISO date '{expires}' (pos={pos} neg={neg} beh={beh})")
+        sys.exit(0)
+    today = datetime.date.today()
+    if exp_dt < today:
+        print(f"FAIL|waiver EXPIRED on {expires} (today {today}) (pos={pos} neg={neg} beh={beh})")
+        sys.exit(0)
+    print(f"WAIVER|expires={expires} pos={pos} neg={neg} beh={beh}")
+    sys.exit(0)
+print(f"FAIL|pos={pos}(need≥3) neg={neg}(need≥3) beh={beh}(need≥1); no waiver or waiver expired")
+PYEOF
+}
+
 checked=0
 failed=0
 warned=0
@@ -141,6 +182,91 @@ for skill_md in "${skill_files[@]}"; do
       warns+=("body references '$tool' but frontmatter allowed-tools does not declare it")
       break
     done
+  fi
+
+  # 9. disable-model-invocation controlled-field policy (per skill-anatomy.md)
+  # Allowlist of skills allowed to use this controlled extension field.
+  # TODO: extract to a config file (e.g. scripts/allowlist/disable-model-invocation.txt) when more skills qualify.
+  dmi_allowlist="loop-me"
+  has_dmi=$(grep -E '^disable-model-invocation:[[:space:]]*true' <<<"$fm" || true)
+  if [[ -n "$has_dmi" ]]; then
+    if ! grep -qxF "$skill_name" <<<"$dmi_allowlist"; then
+      fails+=("disable-model-invocation: true on '$skill_name' but only allowlisted skills may use it (current allowlist: $dmi_allowlist). See skill-anatomy.md § Controlled extension fields.")
+    else
+      fm_line_index=$(awk -v p="$fm" 'BEGIN{ n=0 } { n++ } { if($0 == p || (length(p)>0 && index($0,p)==1)) print n; exit }' <<<"$fm" || true)
+      dmi_line=$(awk 'BEGIN{n=0} /^disable-model-invocation:[[:space:]]*true/{print NR; exit}' <<<"$fm")
+      if [[ -z "$dmi_line" ]]; then
+        fails+=("disable-model-invocation: true on '$skill_name' (allowlisted) but could not locate line index in frontmatter.")
+      else
+        next_line=$((dmi_line + 1))
+        next_field=$(awk -v n="$next_line" 'NR==n' <<<"$fm")
+        if ! [[ "$next_field" =~ ^disable-model-invocation-justification:[[:space:]]* ]]; then
+          fails+=("disable-model-invocation: true on '$skill_name' (allowlisted) but the line immediately below the flag is not 'disable-model-invocation-justification:'. See skill-anatomy.md § Controlled extension fields.")
+        fi
+      fi
+      eval_file="evals/cases/${skill_name}.json"
+      if [[ -f "$eval_file" ]]; then
+        beh_count=$(python3 -c "import json; d=json.load(open('$eval_file')); print(len(d.get('behavioral_evals',[])))" 2>/dev/null || echo "0")
+        if [[ "${beh_count:-0}" -lt 1 ]]; then
+          fails+=("disable-model-invocation: true on '$skill_name' (allowlisted) but eval case '$eval_file' has 0 behavioral_evals. Must have ≥1 demonstrating the user-trigger pattern.")
+        else
+          eval_check=$(python3 - "$eval_file" <<'PYEOF'
+import json, re, sys
+path = sys.argv[1]
+data = json.load(open(path))
+invocation_keywords = re.compile(r"user-triggered|user explicitly|manual invocation|disable-model-invocation|user-only|stateful|user must|user invokes|user-invocation|requireUserInvocation|user must explicitly|manually invoked", re.I)
+no_auto_keywords = re.compile(r"does not auto-invoke|does NOT invoke|agent will not auto-load|not auto-invoked|will not auto-load|must not auto-invoke|not auto[- ]load|never invoke|never auto-invoke|NEVER invoke", re.I)
+for entry in data.get("behavioral_evals", []):
+    if not isinstance(entry, dict):
+        continue
+    fields = []
+    for key in ("scenario", "expected_behavior", "scenario_text", "expected", "input", "output"):
+        if key in entry:
+            value = entry[key]
+            if isinstance(value, str):
+                fields.append(value)
+            elif isinstance(value, list):
+                fields.extend(item for item in value if isinstance(item, str))
+    if not fields:
+        for key, value in entry.items():
+            if isinstance(value, str):
+                fields.append(value)
+            elif isinstance(value, list):
+                fields.extend(item for item in value if isinstance(item, str))
+    text = "\n".join(fields)
+    if invocation_keywords.search(text) and no_auto_keywords.search(text):
+        print("MATCH")
+        sys.exit(0)
+print("MISS")
+PYEOF
+          )
+          if [[ "$eval_check" != "MATCH" ]]; then
+            fails+=("disable-model-invocation: true on '$skill_name' (allowlisted) but no behavioral_evals entry contains BOTH a user-invocation phrase (user-triggered / user explicitly / manual invocation / disable-model-invocation / user-only / stateful / user must / user invokes / user-invocation) AND a non-auto-invocation phrase (does not auto-invoke / agent will not auto-load / not auto-invoked / will not auto-load / must not auto-invoke / not auto-load).")
+          fi
+        fi
+      else
+        fails+=("disable-model-invocation: true on '$skill_name' (allowlisted) but eval case '$eval_file' not found.")
+      fi
+    fi
+  fi
+
+  # 10. eval case 3+3+1 structural check (per skill-anatomy.md § Marketplace / Add new skill step)
+  # Each evals/cases/<skill>.json MUST have ≥3 positive_triggers, ≥3 negative_triggers,
+  # ≥1 behavioral_evals scenario UNLESS it carries a top-level `waiver` with future
+  # `expires` date. Expired waivers also fail.
+  eval_file="evals/cases/${skill_name}.json"
+  if [[ -f "$eval_file" ]]; then
+    eval_check=$(eval_check_eval "$eval_file" 2>/dev/null || echo "FAIL|PYTHON_ERROR")
+    case "${eval_check%%|*}" in
+      OK) ;;
+      WAIVER) ;;
+      FAIL)
+        fails+=("eval case '$eval_file' structural check: ${eval_check#FAIL|}")
+        ;;
+      *)
+        fails+=("eval case '$eval_file' check error: ${eval_check#*|}")
+        ;;
+    esac
   fi
 
   # Report

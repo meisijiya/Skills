@@ -66,7 +66,7 @@ meisijiya-skills/
 │       ├── slice-review/
 │       ├── contract-strengthening/
 │       ├── test-guard/
-│       ├── build-gate-visual-review/        # domain group (10,teacher-skill 除外)
+│       ├── build-gate-visual-review/        # domain group (11,含 teacher-skill)
 │       ├── designer-handoff/
 │       ├── api-and-interface-design/
 │       ├── documentation-and-adrs/
@@ -159,7 +159,7 @@ git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-meta
 mv /tmp/meisijiya-meta/skills/extra/{writing-skills,contract-strengthening,slice-review,test-guard} .opencode/skills/
 rm -rf /tmp/meisijiya-meta
 
-# 装 meisijiya-domain(10 个,teacher-skill 已合入 marketplace,因 `allowed-tools: Read` only 刻意未在 mv 中列出;如需强制包含可加 ,teacher-skill)
+# 装 meisijiya-domain(11 个,teacher-skill 已合入 marketplace;因 `allowed-tools: Read` only 保持默认不装,若项目需要教学型 overlay 可显式追加 ,teacher-skill)
 mkdir -p .opencode/skills
 git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-domain
 mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me,prototype,wayfinder,research} .opencode/skills/

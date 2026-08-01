@@ -17,9 +17,15 @@
  *                (use for broad-purpose reminders that want to skip pure docs)
  *   - neither:   trigger on every Write/Edit/apply_patch
  *
- * apply_patch note: its args.filePath is not available; reminders with
- * matchPath cannot fire from apply_patch edits, since the path is hidden
- * inside the patch body. Use write/edit for security-critical CI files.
+ * apply_patch note: OpenCode stores the patch in args.patchText (not args.patch
+ * or args.diff). The patch is OpenAI-style: `*** Begin Patch ... *** End Patch`
+ * envelope containing one or more `*** Add File: PATH` / `*** Update File: PATH`
+ * (optionally followed by `*** Move to: NEWPATH`) / `*** Delete File: PATH`
+ * headers. We extract ALL affected paths (multi-file patches return multi-path
+ * array) and run normal matchPath/skipPath logic per-path. A reminder fires if
+ * ANY extracted path matches its matchPath. When extraction fails (rare; truly
+ * malformed patches), we fall back to firing ALL matchPath-bound reminders as
+ * a candidate batch with a `[review-router:patch-candidate]` marker.
  *
  * Per-edit token cost: ~21-23 tokens per reminder. Per-turn dedup via
  * state.reminded; per-result dedup via marker.
@@ -107,12 +113,52 @@ const installed = (name) => {
 
 const marker = (name) => `[review-router:${name}]`
 
-function shouldTriggerPath(reminder, filePath) {
-  // No filePath (e.g. apply_patch) — matchPath-only reminders cannot decide.
-  // Fire everything else (broad reminders fall back to default).
-  if (!filePath) return !reminder.matchPath
-  if (reminder.matchPath) return reminder.matchPath.test(filePath)
-  if (reminder.skipPath) return !reminder.skipPath.test(filePath)
+// Path extraction from apply_patch bodies. OpenCode's apply_patch tool uses an
+// OpenAI-style format with `*** Begin Patch / *** End Patch` envelope containing
+// one or more `*** Add File: PATH` / `*** Update File: PATH` (optionally
+// followed by `*** Move to: NEWPATH`) / `*** Delete File: PATH` headers. We
+// return ALL affected paths so multi-file patches trigger each path's reminders.
+//
+// Anchored to start-of-line with the `m` + `g` flag so the regex does NOT
+// false-positive on in-source `matchPath: /pattern/` regex declarations and
+// captures every occurrence (not just the first).
+const PATH_RE_OAI_FILE = /^\*\*\* (?:Add|Update|Delete) File: (.+)$/gm
+const PATH_RE_OAI_MOVE = /^\*\*\* Move to: (.+)$/gm
+// Git format: capture BOTH a/OLD and b/NEW so renames register both paths
+// (critical for gha-security-review on .github/workflows/ renames).
+const PATH_RE_DIFF_GIT = /^diff --git a\/(.+?) b\/(.+?)$/gm
+const PATH_RE_PLUS_PLUS = /^\+\+\+ b\/(.+?)(?:\t|$)/gm
+
+function extractPathsFromPatch(patchBody) {
+  if (typeof patchBody !== 'string' || patchBody.length === 0) return []
+  const seen = new Set()
+  const push = (p) => {
+    if (typeof p === 'string' && p.length > 0) seen.add(p.trim())
+  }
+  // 1. OpenAI-style (*** Add/Update/Delete File: PATH) — primary, multi-file
+  for (const m of patchBody.matchAll(PATH_RE_OAI_FILE)) push(m[1])
+  // 2. *** Move to: PATH — secondary (paired with Update File rename)
+  for (const m of patchBody.matchAll(PATH_RE_OAI_MOVE)) push(m[1])
+  if (seen.size > 0) return [...seen]
+  // 3. git format (diff --git a/OLD b/NEW) — fallback, multi-file, captures rename
+  for (const m of patchBody.matchAll(PATH_RE_DIFF_GIT)) {
+    push(m[1])
+    push(m[2])
+  }
+  if (seen.size > 0) return [...seen]
+  // 4. unified diff (+++ b/PATH) — last-resort, multi-file
+  for (const m of patchBody.matchAll(PATH_RE_PLUS_PLUS)) push(m[1])
+  return [...seen]
+}
+
+function shouldTriggerPathForAny(reminder, filePaths) {
+  if (!filePaths || filePaths.length === 0) return !reminder.matchPath
+  if (reminder.matchPath) {
+    return filePaths.some((fp) => reminder.matchPath.test(fp))
+  }
+  if (reminder.skipPath) {
+    return filePaths.some((fp) => !reminder.skipPath.test(fp))
+  }
   return true
 }
 
@@ -130,14 +176,40 @@ export const MeisijiyaReviewRouter = async ({ client, directory }) => {
       if (!TRIGGER_TOOLS.has(String(input.tool).toLowerCase())) return
       if (typeof output?.output !== 'string') return
 
-      const fp = String(input?.args?.filePath ?? input?.args?.filepath ?? '')
+      const toolName = String(input.tool).toLowerCase()
       const s = get(input.sessionID)
+
+      let fps = []
+      let patchCandidateMode = false
+
+      const directFp = String(input?.args?.filePath ?? input?.args?.filepath ?? '')
+      if (directFp) {
+        fps = [directFp]
+      } else if (toolName === 'apply_patch') {
+        // OpenCode's apply_patch stores the patch under args.patchText (NOT
+        // args.patch / args.diff / args.content / args.body — those are wrong).
+        const patchBody = String(input?.args?.patchText ?? '')
+        const recovered = extractPathsFromPatch(patchBody)
+        if (recovered.length > 0) {
+          fps = recovered
+        } else if (patchBody.length > 0) {
+          patchCandidateMode = true
+        }
+      }
 
       for (const reminder of REMINDERS) {
         const { name, text } = reminder
         if (!installed(name)) continue
         if (s.reminded.has(name)) continue
-        if (!shouldTriggerPath(reminder, fp)) continue
+        if (patchCandidateMode) {
+          if (!reminder.matchPath) continue
+          const m = `[review-router:patch-candidate] ${name}`
+          if (output.output.includes(m)) continue
+          output.output += `\n\n${m} (path unknown — apply_patch body could not be parsed; agent decides if this applies)`
+          s.reminded.add(name)
+          continue
+        }
+        if (!shouldTriggerPathForAny(reminder, fps)) continue
         const m = marker(name)
         if (output.output.includes(m)) continue
         output.output += `\n\n${m} ${text}`

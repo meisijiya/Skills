@@ -234,4 +234,30 @@ npx skills remove <name> -g -a opencode
 
 **对齐**:Anthropic / OpenCode / Superpowers 三方权威都强调 "install only from trusted sources";本段是该共识在 meisijiya-skills 的本地化表达。
 
-**仅 OpenCode + OMO 插件适配**:本仓库的 skill **仅**针对 OpenCode + oh-my-openagent (omo) 生态设计,引用 `~/.config/opencode/plugins/`、`~/.agents/skills/`、OMO 内置 MCPs (`context7` / `grep_app` / `websearch` / `lsp`)、内置 agents (`sisyphus` / `prometheus` / `atlas` / `oracle` / `librarian`)、内置 skills (`git-master` / `review-work` / `visual-qa` / `remove-ai-slops` / `init-deep` / `frontend` / `playwright`)、内置 modes (`hyperplan` / `security-research` / `ultrawork`)。其他 harness (Claude Code / Codex / Cursor / 等) 的扩展字段(`when_to_use` / `disable-model-invocation` / `user-invocable` / `context: fork` / hooks) **不在本仓库支持范围内**,刻意不引入以避免 YAGNI 兼容成本。
+**仅 OpenCode + OMO 插件适配**:本仓库的 skill **仅**针对 OpenCode + oh-my-openagent (omo) 生态设计,引用 `~/.config/opencode/plugins/`、`~/.agents/skills/`、OMO 内置 MCPs (`context7` / `grep_app` / `websearch` / `lsp`)、内置 agents (`sisyphus` / `prometheus` / `atlas` / `oracle` / `librarian`)、内置 skills (`git-master` / `review-work` / `visual-qa` / `remove-ai-slops` / `init-deep` / `frontend` / `playwright`)、内置 modes (`hyperplan` / `security-research` / `ultrawork`)。其他 harness (Claude Code / Codex / Cursor / 等) 的扩展字段(`when_to_use` / `user-invocable` / `context: fork` / hooks) **不在本仓库支持范围内**,刻意不引入以避免 YAGNI 兼容成本。
+
+### Controlled extension fields
+
+少数来自其他 harness 的字段虽然被刻意排除,但有 1 个例外因真实需要被列为**受控扩展字段**(controlled extension field)— 允许使用,但使用门槛被 validator 强制。
+
+| 字段 | 状态 | 原因 |
+|---|---|---|
+| `disable-model-invocation` | **CONTROLLED**(allowlist only) | 强制 agent 不自动 invoke,只能用户手动触发(stateful 交互会话场景)。其他 skill 不得使用 |
+| `when_to_use` / `user-invocable` / `context: fork` / hooks | 禁用(YAGNI) | 无本仓库真实需求 |
+
+#### `disable-model-invocation` 政策
+
+**Allowlist(2026-08-01)**:仅 `loop-me`(stateful `/grilling` 交互会话;避免与 `brainstorming` 自动 description 匹配产生路由竞争)。
+
+**Frontmatter pairing**:任何 skill 标 `disable-model-invocation: true` **必须**紧随其后(下一行)声明:
+
+```yaml
+disable-model-invocation: true
+disable-model-invocation-justification: "<one-sentence reason — why this skill needs user-only invocation>"
+```
+
+**Eval pairing**:该 skill 的 `evals/cases/<name>.json` **必须**有 ≥1 `behavioral_evals` 场景,显式说明用户触发模式(user-triggered / manual invocation / explicit user invocation / disable-model-invocation 关键字之一),并显式证明 agent **不会**自动 invoke 该 skill(例如:用户在没有显式 `/skill-name` 调用时,agent 不会加载该 skill)。
+
+**Validator 强制**:`scripts/validate-skills.sh` 加 §9 检查 — skill 在 allowlist 中但 frontmatter 缺 `disable-model-invocation-justification` 或 eval 缺 behavioral scenario,**FAIL**;skill 不在 allowlist 但 frontmatter 含 `disable-model-invocation: true`,**FAIL**。
+
+**加新 skill 到 allowlist 的流程**:(1) 提 PR 描述真实需求场景;(2) 在 frontmatter 加 justification;(3) eval 加 ≥1 behavioral scenario 证明 user-only invocation;(4) `skill-anatomy.md` allowlist 表格更新该 skill 名;(5) `scripts/validate-skills.sh` allowlist 同步更新;(6) `scripts/validate-skills.sh` 跑通。

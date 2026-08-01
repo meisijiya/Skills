@@ -2,6 +2,26 @@
 
 All notable changes to meisijiya-skills.
 
+### v0.9.0-post-release — OpenCode compat + model cleanup + verify-chain routing (2026-08-01)
+
+5 轮 audit(momus R1 + oracle R2/R3 + oracle R4 compat + oracle R5 model)对 v0.9.0 做收尾。0 BLOCKER / 0 HIGH;3 minor 全闭合。
+
+- **R4 — OpenCode apply_patch 兼容性 (MEDIUM)**: `.opencode/plugins/meisijiya-review-router.js` 修正 worker 上版的字段名误用(原 `args.patch` / `diff` / `content` / `body` 全错;OpenCode 实际是 `args.patchText`);加 OpenAI 风格 `*** Add/Update/Delete File:` 与 `*** Move to:` 多文件 path 提取(`Set` 去重);`shouldTriggerPath` → `shouldTriggerPathForAny`(任一 path 匹配即触发);Git rename `diff --git a/OLD b/NEW` 双向 path 提取(GHA workflow rename 不再漏 trigger);无 filePath + patchCandidateMode 降级为 `[review-router:patch-candidate]` marker
+- **R5 — model name cleanup (BLOCKER → fixed)**: 仓库内 9 处硬编码模型名全部清理 — `docs/omo-agent-skill-config.md` 4 个 JSONC 示例占位化为 `<provider>/<model-name>`;`skills/core/using-meisijiya-skills/references/model-selection.md` 整文件重写为 "Agent / Category Selection"(去掉 `sonnet-4-6` / `gpt-5.6-sol xhigh` / `gpt-5.4-mini`);`skills/extra/contract-strengthening/SKILL.md:120` 与 `skills/core/debugging-and-error-recovery/SKILL.md:166` body 替换为 `(read-only high-IQ consultant)` / `(focused executor)`;`skills/core/using-meisijiya-skills/SKILL.md:37` 交叉引用 "model selection" → "agent / category selection";`using-meisijiya-skills/SKILL.md` Category×Skill Matrix 删 "Default Model" 列
+- **R5 — verify-chain priority-table 路由 (MEDIUM → fixed)**: `references/priority-table.md` 加新行 `"Verify / fact-check an existing technical article"` / `"核查已完成技术文章的事实与引用"`,避免与 negative trigger "Help me write a K8s tutorial from scratch" 冲突;与 `writing` category dispatch + `load_skills=["verify-chain"]` 形成双路由
+
+**总改动**: 5 个文件(`docs/omo-agent-skill-config.md` / `references/model-selection.md` / `references/priority-table.md` / 2 个 SKILL.md body)
+
+### v0.9.0 — process-chains audit & 5-issue closeout (2026-08-01)
+
+- **Issue #1 — apply_patch path-aware reminders (HIGH)**: `.opencode/plugins/meisijiya-review-router.js` 加启发式 patch body 路径解析,`apply_patch` 不再绕过 GHA / test / frontend / security 专项 reminder;无法解析时降级为候选 batch marker
+- **Issue #2 — eval 3+3+1 硬限 + waiver (HIGH)**: `scripts/validate-skills.sh` 加 eval 结构校验(≥3 positive + ≥3 negative + ≥1 behavioral);`scripts/check-doc-drift.sh` 新建,自动比 marketplace ↔ README ↔ AGENTS 数字;当前 42 个 eval 全部合规,无 waiver 需求
+- **Issue #3 — `disable-model-invocation` 政策(从禁用 → 控制字段)(HIGH)**: `skill-anatomy.md` 改写为受控扩展字段政策;`loop-me` SKILL.md 加 `disable-model-invocation-justification` 字段;修 Related Skills 与 omo Integration 矛盾;validator 加 allowlist 检查
+- **Issue #4 — process chain 完整化 (MEDIUM)**: 加 standalone 声明段(11 个 standalone skill 解释);UI chain 补 `build-gate-visual-review?` 节点;新加 `incident` chain(production-incident-playbook OR security-incident-response)
+- **Issue #5 — 文档数字与 contradiction 清理 (MEDIUM)**: README 修 `domain group (10,...)` → `(11,含 teacher-skill)`;CHANGELOG 历史计数由 `check-doc-drift.sh` mask 保护不误报;`loop-me` Related Skills 矛盾已闭合
+
+**总改动**: 11 个文件(10 modified + 1 added) + 1 新脚本(`check-doc-drift.sh`) + 1 新 chain(`incident`) + 1 新 policy 段(skill-anatomy) + 1 新 frontmatter 字段(`disable-model-invocation-justification`) + 1 新 standalone 分类段(process-chains) + 1 个 CI step(wire check-doc-drift 到 `.github/workflows/validate-skills.yml`)
+
 ## Unreleased — security skill audit closeout (2026-08-01)
 
 5-lane 并行 security skill review(2 lane `oracle` + 3 lane `unspecified-high`,每条带不同 `load_skills=[...]`)对 9 个 security skill + `slice-review` 跑了 2 轮 verdict。Round 1 发现 **5 Critical + 15 Important + 10 Minor**;P0 修复 applied 后 Round 2 全部转 **APPROVE**,**0 Critical + 0 Important + 7 Minor**。3 个 lifecycle hand-off 闭环(design↔code↔incident↔design)、4 个新攻击面、Class 8 AI 幻觉捕捉、L1/L2/L3 三层防御 — 全部闭合。
@@ -110,6 +130,19 @@ All notable changes to meisijiya-skills.
 - `README.md` `## 前置依赖` 段新增 `### Hallmark` 子段,含 install / verify / uninstall + 安全审计 + 分工对照表
 
 **No tag bump**(doc-only + 新外部依赖)。已装副本 `~/.agents/skills/designer-handoff/SKILL.md` 与 source 偏离,通过下次 `npx skills add meisijiya/Skills --skill designer-handoff` 自动同步。Hallmark 不计入仓库 `9 + 29` SKILL.md 总数,上游独立维护,本仓库只是消费方。
+
+## Unreleased — process-chains audit & 2-reviewer convergence (R5, 2026-08-01)
+
+- **process-chains.md 重构** (Momus R5-1 + Oracle R5-2 合并):
+  - design chain: `brainstorming → wayfinder` 改显式分支 `brainstorming OR wayfinder`;`research?` 移到 spec-driven-development 之后(spec 实际是 research 的 plan 出口)
+  - implementation chain: 补回 `brainstorming?`,新增 `api-and-interface-design?` 节点
+  - maintenance chain: 新增 `improve-codebase-architecture?` (proposal-only 周期扫描);`documentation-and-adrs` 改为条件(`if irreversible decision`),不默认走
+  - ship chain: 末尾补 `verification-before-completion` 完成闸门(Oracle HIGH 修复);`observability-and-instrumentation` 后缀补 `(post telemetry)`
+- **`skills/extra/README.md` line 58 一致性修复**: 移除 `contract-strengthening` 错误的 `disable-model-invocation: true` 声明(SOT 为 SKILL.md frontmatter;全仓 grep 仅 `loop-me/SKILL.md:4` 实际使用该 flag)
+- **`priority-table.md` ADR 入口新增**: 新增 "About to record an irreversible architectural decision" trigger 行,把 chain 引用与 dispatcher 入口对齐
+- **2 轮 reviewer 对比**: momus 抓 plan 内部清晰度,oracle 抓 chain 网络一致性;HIGH 1 个(Oracle)+ MEDIUM 3 个(Oracle)+ BLOCKER 1 个(Momus)全部闭合
+
+**总改动**: 4 文件 + ~20 行
 
 ## Unreleased — skill audit & dispatch protocol (R1-R4)
 

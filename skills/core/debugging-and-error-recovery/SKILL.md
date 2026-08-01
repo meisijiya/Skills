@@ -163,7 +163,7 @@ Before declaring debug complete, confirm:
 
 ## omo Integration
 
-Use an OMO task (`task_create` / `task_update` for the bug as a task DAG entry) for reproduce/localize/reduce/fix/guard, hand complex localization to the `oracle` agent (read-only high-IQ, gpt-5.6-sol xhigh — escalate to it after 2+ failed fix attempts, not before), and record evidence in `.omo/notepads/<plan-name>/problems.md` (append-only via `notepad-write-guard` hook) before `review-work`.
+Use an OMO task (`task_create` / `task_update` for the bug as a task DAG entry) for reproduce/localize/reduce/fix/guard, hand complex localization to the `oracle` agent (read-only high-IQ consultant — escalate to it after 2+ failed fix attempts, not before), and record evidence in `.omo/notepads/<plan-name>/problems.md` (append-only via `notepad-write-guard` hook) before `review-work`.
 
 **State-survival across compaction**: debugging is the most likely workflow to hit `experimental.session.compacting` mid-investigation — long file reads + multiple reproduce attempts easily exceed 1M-token context windows. OMO's `compaction-context-injector` hook handles this in 3 stages:
 

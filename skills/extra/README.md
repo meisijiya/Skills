@@ -55,7 +55,7 @@
 |---|---|
 | [`writing-skills`](./writing-skills/) | meta: 创建 / 编辑 skill 用 TDD-for-docs 流程 |
 | [`slice-review`](./slice-review/) | per-slice 轻量审查(spec compliance + code quality,2 verdicts);与 OMO `review-work` 互补 |
-| [`contract-strengthening`](./contract-strengthening/) | Phase 1.25 open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);`disable-model-invocation: true` 仅用户触发 |
+| [`contract-strengthening`](./contract-strengthening/) | Phase 1.25 open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);可选装、可自动触发 |
 | [`test-guard`](./test-guard/) | 7-check AI 测试质量审计(skip / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness);与 `test-driven-development` 互补 |
 
 ### domain (11)

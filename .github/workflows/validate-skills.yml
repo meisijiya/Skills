@@ -52,6 +52,9 @@ jobs:
       - name: Verify marketplace.json in sync with filesystem
         run: bash scripts/check-marketplace.sh
 
+      - name: Verify marketplace.json ↔ docs in sync (no numeric drift)
+        run: bash scripts/check-doc-drift.sh
+
       - name: Verify .opencode/plugins/*.js parse cleanly (node --check)
         run: |
           set -e
