@@ -4,7 +4,7 @@ The Priority table ([`priority-table.md`](priority-table.md)) is *cross-cutting 
 
 ```
 design:           brainstorming OR wayfinder → research? → spec-driven-development → contract-strengthening?
-                  (brainstorming 和 wayfinder 是同一 Phase 0 slot 的替代分支;research 在 wayfinder 给出 plan stub 后跑;contract-strengthening 在 spec attestation 后、impl 前的 Phase 1.25)
+                  (brainstorming 和 wayfinder 是同一入口 slot 的替代分支;research 在 wayfinder 给出 plan stub 后跑;contract-strengthening 在 spec attestation 后、impl 前的契约审查 slot)
 
 spec phase 1.2:   spec-driven-development §3.5 → /prototype (NEEDS_CONTEXT if <2 valid) → decisions.md [proto]
 
@@ -39,7 +39,7 @@ governance:       security-ownership-map (people↔file topology) before major r
 incident:         production-incident-playbook OR security-incident-response → observability-and-instrumentation? (data) → verification-before-completion (postmortem sign-off)
                   (production-incident-playbook 适用于非安全事故 in-flight runbook + blameless postmortem;
                    security-incident-response 适用于安全事故 NIST CSF detect/triage/contain/eradicate/recover/postmortem;
-                   两者同一 Phase 0 slot 二选一 — 走错分支走错 skill)
+                   两者同一入口 slot 二选一 — 走错分支走错 skill)
 
 closed loop:      verification-before-completion → pre-ship-gate (deploy evidence) → closed-loop-delivery (24h+ runtime)
 

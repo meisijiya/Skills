@@ -2,6 +2,17 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — dispatcher: intent-verb table and prompt-only IntentGate relationship (2026-08-04)
+
+7-lane 终审(a-architecture / b-omo-compat / c-state / d-eval / e-migration / f-security / g-yagni)对 `using-meisijiya-skills` dispatcher 的 v2 草案给出 **6×APPROVE-WITH-CAVEATS + 1×REJECT-as-drafted → 6 项 cut 全部应用**。0 新 skill / 0 新 plugin / 0 新 frontmatter / 0 新机制。
+
+- **`skills/core/using-meisijiya-skills/SKILL.md`**: `## Overview` 之后插入 `## Relationship to OMO IntentGate (prompt-only)` 3 句 prose,verbatim 引用 `sisyphus/default.ts:200-213` 6-intent 词汇、`intent-diff.md` I3 partial 状态 + "No runtime semantic classifier was found in inspected sources" 短语、以及 `meisijiya-skills.js:113-132` 的 firstUser-anchored 注入 + marker guard idempotent 行为
+- **`skills/core/using-meisijiya-skills/references/priority-table.md`**: 修 line 8-13 5-label 缺 `open-ended` 词;在 `## Priority Table` 之前插入 `## Intent Verb → Skill` 6 行表,显式声明 OMO 6-intent 是 prompt-only,`(no skill)` 不覆盖 OMO,指向 v4.19.4 commit `b072d279110bdda2c6ac2525d0d24dc54d16148a`
+- **跨 7 lane P0 闭合**: 删除 3 个 cross-cutting 行(completion/release/incident 不在 OMO 6-intent 词汇);删除 `Next-step pointer` 列(避免行号漂移);`debugging-and-completion` typo 修正为 `debugging-and-error-recovery`
+- **8 条 rg 验证全过**:`Phase 0/3.5` 0 命中,`EXTREMELY_IMPORTANT` ≥ 6,`b072d279` ≥ 3,6 intent label 全部出现,validator 42/42 OK
+
+**总改动**: 3 文件(2 SKILL.md + 1 CHANGELOG.md)。后续 handoff: `/tmp/dispatcher-patch-v2-handoff.md`。
+
 ### v0.9.0-post-release — OpenCode compat + model cleanup + verify-chain routing (2026-08-01)
 
 5 轮 audit(momus R1 + oracle R2/R3 + oracle R4 compat + oracle R5 model)对 v0.9.0 做收尾。0 BLOCKER / 0 HIGH;3 minor 全闭合。

@@ -18,6 +18,14 @@ This is not optional. Skills encode team-validated discipline; bypassing them be
 
 Meta dispatcher. Hard-injected every session by the OpenCode plugin (`~/.config/opencode/plugins/meisijiya-skills.js`) so the model actively invokes skills instead of letting them sit in `<available_skills>`. Coordinates with omo Sisyphus + IntentGate; this skill does NOT do work — it routes.
 
+## Relationship to OMO IntentGate (prompt-only)
+
+- **OMO Intent Gate:** prompt text asks Sisyphus to self-report one of six labels and select an agent; no durable semantic intent record exists (`sisyphus/default.ts:200-213`; `intent-diff.md` I3, status `partial`; *"No runtime semantic classifier was found in inspected sources."*).
+- **meisijiya dispatcher:** after that selection, this `SKILL.md` and `priority-table.md` decide whether a meisijiya skill applies; `(no skill)` never overrides OMO.
+- **Bootstrap plugin:** `meisijiya-skills.js:113-132` injects this dispatcher into `firstUser.parts`; the `EXTREMELY_IMPORTANT` marker guard makes re-injection idempotent after compaction. It is a meisijiya-owned OpenCode plugin, not an OMO agent, hook, or classifier.
+
+These are existing prompt/injection layers, not a new lifecycle stage, phase, or intent-state object. Keyword-mode detection remains a separate mechanism.
+
 ## When to Use
 
 **Use when:**

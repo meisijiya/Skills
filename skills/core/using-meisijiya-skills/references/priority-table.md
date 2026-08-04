@@ -6,11 +6,33 @@ common trigger patterns. When multiple skills could apply, **process
 skills come first** (the discipline layer; the rest are tools).
 
 Under omo, Sisyphus's Intent Gate classifies intent (research /
-implementation / investigation / fix / evaluation) before any skill
-routing happens. This table covers the `implementation` branch where
+implementation / investigation / fix / evaluation / open-ended) before any
+skill routing happens. This table covers the `implementation` branch where
 skill routing still matters; other branches are handled by omo's built-in
 dispatch (librarian / explore / oracle for `research`;
-`debugging-and-error-recovery` for `fix`).
+`debugging-and-error-recovery` for `fix`). The OMO six-label vocabulary is
+prompt-only self-report, not durable intent state — see
+`sisyphus/default.ts:200-213` in OMO `v4.19.4` (commit
+`b072d279110bdda2c6ac2525d0d24dc54d16148a`) and the related
+`Intent Verb → Skill` summary below.
+
+## Intent Verb → Skill
+
+OMO's six semantic labels are prompt-only self-report, not durable intent
+state (`sisyphus/default.ts:200-213`; `intent-diff.md` I3, status `partial`;
+*"No runtime semantic classifier was found in inspected sources."*).
+The keyword-mode detector is separate. OMO selects the agent first;
+`(no skill)` never overrides it. Concrete triggers and next steps remain
+in the Priority table below.
+
+| OMO intent label | User signal | Default meisijiya skill |
+|---|---|---|
+| `research` | "explain" / "how does" / "what is" | (none — OMO handles) |
+| `investigation` | "look into" / "check" / "investigate" | (none — OMO handles) |
+| `implementation` | "implement" / "add" / "build" | (no intent-wide default — use the Priority table after OMO dispatch) |
+| `fix` | "broken" / "error" / "wrong" | `debugging-and-error-recovery` |
+| `evaluation` | "review" / "is this right?" | (none — OMO handles) |
+| `open-ended` | "refactor" / "improve" / "clean up" | (none — assess/clarify, then use the Priority table) |
 
 | Trigger (user request pattern) | Consider first | Possible next |
 |---|---|---|
@@ -39,7 +61,7 @@ dispatch (librarian / explore / oracle for `research`;
 | Underspecified request / "interview me" / "grill me" | [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) | (one question at a time, see Process § 2) |
 | "Build a landing / portfolio / marketing page" / "redesign our existing site to premium quality" | If installed, [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) (extra/) — anti-slop rules + three dials | [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) for the project-specific spec contract. If the brief names a specific aesthetic, stack [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md). If upgrading existing UI, load [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) first. |
 | Use when a Phase 1.2 spec contains `[PROTO-RESOLVE]` markers | If installed, [`prototype`](~/.agents/skills/prototype/SKILL.md) (extra/) | Return to [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) §3.5 |
-| Use when scope exceeds a single brainstorming session | If installed, [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) (extra/) — DAG ticket graph | Close → Phase 0 of `.omo/plans/<slug>.md` |
+| Use when scope exceeds a single brainstorming session | If installed, [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) (extra/) — DAG ticket graph | Close → plan-stub 段 of `.omo/plans/<slug>.md` |
 | Use when a planning/design decision requires authoritative information from official docs / RFCs | If installed, [`research`](~/.agents/skills/research/SKILL.md) (extra/) — plan-required, 4-type citation whitelist | Uses the OMO `librarian` under the hood |
 | "Agent-driven loop" (monitoring / CI-CD / audit) / "run this loop spec" / "start goal" | If installed, [`loop-me`](~/.agents/skills/loop-me/SKILL.md) (extra/) → OMO `/goal <spec-path>` (HITL L1: user must explicitly invoke `/goal`) | [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) for the loop-done ≠ task-done boundary audit |
 | "Verify / fact-check an existing technical article" / "核查已完成技术文章的事实与引用" | If installed, [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) (extra/) — 3-role article fact-check pipeline (Critic → Verifier × N → Repairer) | (dispatch to `writing` category subagent with `load_skills=["verify-chain"]` for the full pipeline) |
