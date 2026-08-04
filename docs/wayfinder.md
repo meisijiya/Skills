@@ -32,14 +32,14 @@ After close → `.omo/wayfinder-archive/<slug>/` (read-only history) + `.omo/pla
 
 ```bash
 # 1. Scaffold (idempotent, exits 0 on re-run; rejects slugs not matching ^[a-z0-9][a-z0-9-]{0,39}$)
-bash scripts/wayfinder-init.sh <slug>
+bash ../skills/extra/wayfinder/scripts/wayfinder-init.sh <slug>
 
 # 2. Write/edit tickets/ as you resolve each leaf
 #    Each ticket: frontmatter (id/type/status/ts_created/ts_resolved/blockedBy/title)
 #    + body (## Description / ## Resolution)
 
 # 3. Close (7-step protocol: validate types + DAG + status → generate plan → archive → log)
-bash scripts/wayfinder-close.sh <slug>
+bash ../skills/extra/wayfinder/scripts/wayfinder-close.sh <slug>
 ```
 
 The close script **exits non-zero** on: unresolved ticket, `blockedBy` cycle, unknown ticket type (anything outside `prototype` / `research` / `decision`), or missing scaffold. It is **idempotent on already-closed** (re-running exits 0 with "already closed").
@@ -81,12 +81,12 @@ This is the canonical "when was this closed" log. The `omo-state-index` plugin (
 
 ```bash
 # Lifecycle contract test (T1–T9: tree, schema, idempotent, types, cycle, unresolved, archive, plan, idempotent close)
-bash scripts/test-wayfinder-lifecycle.sh
+bash ../skills/extra/wayfinder/scripts/test-wayfinder-lifecycle.sh
 
 # Single-probe smoke
-bash scripts/wayfinder-init.sh 'Bad_Slug!'   # expect: exit 1, regex error
-bash scripts/wayfinder-init.sh qa-wayfinder   # expect: exit 0, scaffold created
-bash scripts/wayfinder-close.sh qa-wayfinder  # expect: exit 0 (or 1 if unresolved tickets)
+bash ../skills/extra/wayfinder/scripts/wayfinder-init.sh 'Bad_Slug!'   # expect: exit 1, regex error
+bash ../skills/extra/wayfinder/scripts/wayfinder-init.sh qa-wayfinder   # expect: exit 0, scaffold created
+bash ../skills/extra/wayfinder/scripts/wayfinder-close.sh qa-wayfinder  # expect: exit 0 (or 1 if unresolved tickets)
 ```
 
 ## Common mistakes
@@ -100,5 +100,5 @@ bash scripts/wayfinder-close.sh qa-wayfinder  # expect: exit 0 (or 1 if unresolv
 
 - [`skills/extra/wayfinder/SKILL.md`](../../skills/extra/wayfinder/SKILL.md) — full machine-readable spec (process, edge cases, omo integration).
 - [`evals/cases/wayfinder.json`](../../evals/cases/wayfinder.json) — trigger phrases and behavioral scenarios.
-- [`scripts/wayfinder-init.sh`](../../scripts/wayfinder-init.sh) / [`scripts/wayfinder-close.sh`](../../scripts/wayfinder-close.sh) / [`scripts/test-wayfinder-lifecycle.sh`](../../scripts/test-wayfinder-lifecycle.sh).
+- [`wayfinder-init.sh`](../../skills/extra/wayfinder/scripts/wayfinder-init.sh) / [`wayfinder-close.sh`](../../skills/extra/wayfinder/scripts/wayfinder-close.sh) / [`test-wayfinder-lifecycle.sh`](../../skills/extra/wayfinder/scripts/test-wayfinder-lifecycle.sh).
 - Phase 0.b of `.omo/plans/skills-extension-v1.md` for the design rationale.
