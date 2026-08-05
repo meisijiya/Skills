@@ -31,8 +31,8 @@ in the Priority table below.
 | `investigation` | "look into" / "check" / "investigate" | (none — OMO handles) |
 | `implementation` | "implement" / "add" / "build" | (no intent-wide default — use the Priority table after OMO dispatch) |
 | `fix` | "broken" / "error" / "wrong" | `debugging-and-error-recovery` |
-| `evaluation` | "review" / "is this right?" | (none — OMO handles) |
-| `open-ended` | "refactor" / "improve" / "clean up" | (none — assess/clarify, then use the Priority table) |
+| `evaluation` | "review" / "is this right?" | (OMO oracle default; defer to Priority table when trigger matches — `brainstorming` for "interview me", `verification-before-completion` for "claim done", `slice-review` for "diff vs brief", `improve-codebase-architecture` for codebase scan, `documentation-and-adrs` for irreversible decision) |
+| `open-ended` | "refactor" / "improve" / "clean up" | `brainstorming` (if scope ambiguous) → Priority table |
 
 | Trigger (user request pattern) | Consider first | Possible next |
 |---|---|---|

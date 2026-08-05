@@ -2,6 +2,16 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — priority-table: clarify evaluation / open-ended routing (2026-08-05)
+
+2 行文字修订,**0 机制变更 / 0 新 skill / 0 新 plugin / 0 marketplace 变更**。基于 [`docs/intent-verb-review.md`](docs/intent-verb-review.md) 的 per-label 诚实审视。
+
+- **`evaluation` 行**:从 `(none — OMO handles)` → `(OMO oracle default; defer to Priority table when trigger matches — ...)`。原表述隐藏了 4+ evaluation→具体 skill 的路由(详见 review §2.5)
+- **`open-ended` 行**:从 `(none — assess/clarify, then use the Priority table)` → `` `brainstorming` (if scope ambiguous) → Priority table ``。原表述隐式两步,`brainstorming` 应是 first-line 入口
+- **未改动**:`research` / `investigation` / `implementation` / `fix` 4 行 — 判定正确,无需调整
+
+**总改动**: 2 文件(1 reference + 1 CHANGELOG.md)。0 行为变更,纯文字精度提升。
+
 ## Unreleased — dispatcher: intent-verb table and prompt-only IntentGate relationship (2026-08-04)
 
 7-lane 终审(a-architecture / b-omo-compat / c-state / d-eval / e-migration / f-security / g-yagni)对 `using-meisijiya-skills` dispatcher 的 v2 草案给出 **6×APPROVE-WITH-CAVEATS + 1×REJECT-as-drafted → 6 项 cut 全部应用**。0 新 skill / 0 新 plugin / 0 新 frontmatter / 0 新机制。
