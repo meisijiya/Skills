@@ -8,10 +8,11 @@ meisijiya — minimal OpenCode plugin manager (lite)
 
 Usage:
   meisijiya plugin list      List installed plugins with status
-  meisijiya plugin verify    Run bun check on all installed plugins
+  meisijiya plugin verify    Run syntax check on all installed plugins
+                             (.ts via bun check, .js via node --check)
 
 Plugin directory: $PLUGINS_DIR (override via OPENCODE_PLUGINS_DIR).
-Requires bun: https://bun.sh
+Requires node (for .js) and bun (for .ts) in PATH.
 EOF
 }
 
@@ -33,18 +34,23 @@ cmd_list() {
 }
 
 cmd_verify() {
-  command -v bun >/dev/null 2>&1 || { echo "bun not in PATH; install: curl -fsSL https://bun.sh/install | bash" >&2; return 1; }
+  command -v node >/dev/null 2>&1 || { echo "node not in PATH; install Node 18+ first." >&2; return 1; }
+  command -v bun  >/dev/null 2>&1 || echo "  (bun not in PATH — skipping .ts syntax check)" >&2
   [[ -d "$PLUGINS_DIR" ]] || { echo "Not found: $PLUGINS_DIR" >&2; return 1; }
   local failed=0 total=0
-  for p in "$PLUGINS_DIR"/*.ts; do
+  # .ts → bun check (TypeScript-aware); .js → node --check (zero-dep, commonjs+esm-syntax tolerant)
+  for p in "$PLUGINS_DIR"/*.ts "$PLUGINS_DIR"/*.js; do
     [[ -e "$p" ]] || continue
     total=$((total + 1))
     local n=$(basename "$p")
     printf "  %s ... " "$n"
-    if err=$(bun check "$p" 2>&1); then
-      echo "OK"
+    if [[ "$p" == *.ts ]]; then
+      command -v bun >/dev/null 2>&1 || { echo "SKIP (no bun)"; continue; }
+      if err=$(bun check "$p" 2>&1); then echo "OK"
+      else echo "FAILED"; echo "$err" | tail -10; failed=$((failed + 1)); fi
     else
-      echo "FAILED"; echo "$err" | tail -10; failed=$((failed + 1))
+      if err=$(node --check "$p" 2>&1); then echo "OK"
+      else echo "FAILED"; echo "$err" | tail -10; failed=$((failed + 1)); fi
     fi
   done
   echo
