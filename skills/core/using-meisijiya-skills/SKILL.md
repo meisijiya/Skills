@@ -11,6 +11,8 @@ If you were dispatched as a subagent to execute a specific task, ignore this ski
 <EXTREMELY-IMPORTANT>
 If a Skill's description matches what you are about to do, you MUST invoke it before acting. If you are not sure whether a Skill applies, **stop and check the Skill catalog first**; do not default to skipping.
 
+**IMPORTANT**: When dispatching sub-agents via `task()`, ALWAYS pass the COMPLETE `load_skills` set from the Category × Skill Matrix main table — never `[]` for matrix-mapped categories. The dispatch-gate plugin will console.warn if you pass an incomplete list.
+
 This is not optional. Skills encode team-validated discipline; bypassing them because "this is simple" is exactly when they matter.
 </EXTREMELY-IMPORTANT>
 
@@ -45,11 +47,18 @@ These are existing prompt/injection layers, not a new lifecycle stage, phase, or
 5. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
 6. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For agent / category selection by task type, read [`references/model-selection.md`](references/model-selection.md).
 7. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
-8. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol below** — always specify `load_skills=[...]` to anchor the sub-agent's discipline.
+8. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol above** — always specify the COMPLETE `load_skills` set from the Category × Skill Matrix main table (Hard Rule). If the dispatch-gate plugin warns "matrix recommends X" while you have an existing list, evaluate whether X is missing and add it.
 
 ## Sisyphus Dispatch Protocol
 
 When delegating to sub-agents, ALWAYS specify both the routing axis (`category` OR `subagent_type`) AND `load_skills=[...]`. The sub-agent will see the skill in `<available_skills>`, but explicit loading forces it to read SKILL.md body and follow the discipline — without it, sub-agents often miss narrow-trigger skills.
+
+### Hard Rule (mandatory)
+
+Always pass the COMPLETE `load_skills` set from the Category × Skill Matrix main table below —
+never an empty or partial list for a matrix-mapped category. Exceptions: categories the matrix
+explicitly maps to `[]` (`quick`, `unspecified-low`, `artistry`). Never exceed 3 skills (Red Flags);
+when a scenario needs more, expand via Common Dispatch Scenarios, not the matrix cell.
 
 ### Pattern 1 — `category`-based dispatch (most common)
 
@@ -84,11 +93,13 @@ With it, the sub-agent's instructions explicitly include the skill body, and rou
 
 Use this matrix to choose `load_skills=[...]` based on the task's category. (Categories from omo orchestration schema.) The default model for each category is selected by OMO at runtime — do NOT hardcode a model name here; the matrix is about category → skill routing, not model selection.
 
+Legend: `Main` = base bundle · `+X` = additive modifier · `→X` = substitute (mutually exclusive with Main)
+
 | Category | When to use | Recommended `load_skills` |
 |---|---|---|
-| `visual-engineering` | UI/UX code (React/Vue/Svelte/Tailwind) | `["meisijiya-frontend-taste"]` for greenfield, or `["meisijiya-frontend-taste", "meisijiya-minimalist-ui"]` for Linear/Notion aesthetic, or `["meisijiya-redesign-ui"]` for existing UI audit-fix |
+| `visual-engineering` | UI/UX code (React/Vue/Svelte/Tailwind) | Main: `["meisijiya-frontend-taste"]`; +`"meisijiya-minimalist-ui"` (Linear/Notion/editorial brief); →`"meisijiya-redesign-ui"` (existing UI audit-fix, see Scenarios §3) |
 | `ultrabrain` | Hard logic, architecture, complex debugging | `["api-and-interface-design"]` / `["security-threat-model"]` / `["performance-optimization"]` (pick 1) |
-| `deep` | Autonomous deep implementation | `["incremental-implementation"]` or `["incremental-implementation", "test-driven-development"]` |
+| `deep` | Autonomous deep implementation | Main: `["incremental-implementation"]`; +`"test-driven-development"` (TDD-required) |
 | `quick` | Trivial single-file changes (typo / rename) | `[]` (don't load skills — overhead > benefit) |
 | `unspecified-low` | General standard work | `[]` (default is fine); add `["prototype"]` only if task has `[PROTO-RESOLVE]` markers |
 | `unspecified-high` | Complex general work | `["debugging-and-error-recovery"]` for bug hunts, `["writing-skills"]` for skill creation |
@@ -107,7 +118,7 @@ When Sisyphus / orchestrator dispatches the OMO `review-work` 5-lane scheme (or 
 | Context Mining | `category="unspecified-high"` | `["security-ownership-map", "supply-chain-risk-auditor", "ai-code-blindspots"]` | New dependency added; lockfile quarterly review; bus-factor / sensitive-code ownership question; post-incident ownership re-mapping |
 | Slice Review (per-slice) | `subagent_type="oracle"` | `["verification-before-completion", "security-and-hardening", "ai-code-blindspots"]` (security variant — see `slice-review` skill § 2a) | Per-slice dispatch via `slice-review` skill; default `load_skills=[]` only for non-trust-boundary slices |
 
-Each `load_skills` set was validated by 5 parallel sub-agents in a 2026-07-31 review pass; the load_skills combinations cover all 5 lifecycle phases (design → code → pre-merge → pre-deploy → prod) and provide reviewer discipline anchoring (per the Sisyphus Dispatch Protocol below).
+Each `load_skills` set was validated by 5 parallel sub-agents in a 2026-07-31 review pass; the load_skills combinations cover all 5 lifecycle phases (design → code → pre-merge → pre-deploy → prod) and provide reviewer discipline anchoring (per the Sisyphus Dispatch Protocol above).
 
 **Pairing rule**: `meisijiya-frontend-taste` + `meisijiya-minimalist-ui` is intentional; `meisijiya-frontend-taste` + `meisijiya-redesign-ui` is NOT (one is greenfield, the other audit-fix). For security: `security-and-hardening` + `ai-code-blindspots` is the canonical "AI wrote this code" pair. `gha-security-review` + `security-devsecops` is the canonical "CI/CD touched" pair (gha = file-level, devsecops = pipeline-level).
 
@@ -119,9 +130,13 @@ Each `load_skills` set was validated by 5 parallel sub-agents in a 2026-07-31 re
 | `librarian` | Doc / OSS search | `["source-driven-development"]` (always — it enforces API verification) |
 | `explore` | Codebase grep | `[]` (already fast, skill overhead wasted) |
 
-## Common Dispatch Patterns
+## Common Dispatch Scenarios
+
+(formerly Common Dispatch Patterns — kept for grep-compatibility during migration)
 
 ### Marketing frontend / UI code
+
+→ see matrix row: `visual-engineering`
 
 ```typescript
 task(
@@ -133,6 +148,8 @@ task(
 
 ### Linear/Notion aesthetic
 
+→ see matrix row: `visual-engineering` (+modifier)
+
 ```typescript
 task(
   category: "visual-engineering",
@@ -142,6 +159,8 @@ task(
 ```
 
 ### Existing UI audit-then-fix
+
+→ see matrix row: `visual-engineering` (→modifier; mutually exclusive with Main)
 
 ```typescript
 task(
@@ -153,6 +172,8 @@ task(
 
 ### Spec-level visual decision (Phase 1.2)
 
+→ see matrix row: `unspecified-low` (PROTO-RESOLVE marker)
+
 ```typescript
 task(
   category: "unspecified-low",
@@ -163,12 +184,16 @@ task(
 
 ### Multi-session scope (wayfinder)
 
+→ see Specialist agents table (`subagent_type="general"`)
+
 ```typescript
 // wayfinder triggers automatically via description; explicit load only for spec-level clarity
 task(load_skills: ["wayfinder"], prompt: "Plan a 3-day refactor across [modules]")
 ```
 
 ### Plan-phase high-trust research
+
+→ see Specialist agents table (`subagent_type="general"`)
 
 ```typescript
 // research triggers automatically via description; explicit load only for spec-level clarity
@@ -197,6 +222,8 @@ task(load_skills: ["research"], prompt: "Investigate the OpenCode skill loading 
 - **Loading conflicting skills** — `meisijiya-frontend-taste` + `meisijiya-minimalist-ui` together is intentional pairing (minimalist-ui narrows frontend-taste); `meisijiya-frontend-taste` + `meisijiya-redesign-ui` is NOT (frontend-taste = greenfield; redesign-ui = existing UI audit-fix).
 
 ## Plugin layer (where this bootstrap comes from)
+
+This SKILL.md is injected into firstUser.parts each session — see `meisijiya-skills.js:113-132` (Editing rules below).
 
 - `~/.config/opencode/plugins/meisijiya-skills.js` reads this `SKILL.md` on session start, strips frontmatter, wraps in `<EXTREMELY-IMPORTANT>`, and `unshift`s into `firstUser.parts` once per session (idempotent against compaction re-fires).
 - `~/.config/opencode/plugins/meisijiya-review-router.js` injects per-Edit reminders for `ai-code-blindspots` + `security-and-hardening` + `verification-before-completion` after `write` / `edit` / `apply_patch` (deduped per turn).
