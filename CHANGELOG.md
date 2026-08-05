@@ -2,6 +2,21 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — feat(skill): meisijiya-handoff cross-session protocol (2026-08-05)
+
+**第 43 个 skill**,归入 `meisijiya-domain` group(11→12)。`disable-model-invocation: true` 强制 user-triggered 协议(allowlist 第 2 个 skill,继 `loop-me` 后)。
+
+- **`skills/extra/meisijiya-handoff/SKILL.md`**: 新建。cross-session checkpoint 协议 — 写 `.omo/handoff/<slug>-<from-phase>-<to-phase>-<date>.md` 含 7 必填 frontmatter 字段(`slug` / `from_phase` / `to_phase` / `written_at` / `written_by` / `next_session_goal` / `load_skills` + `references` + `redacted_secrets` + `consumed`) + 5 段 body(≤ 长度上限) + ≥1 reference。`argument-hint` 引导用户填 next_session_goal;`allowed-tools: Read Bash Glob Grep Write`;`disable-model-invocation-justification` 显式说明 cross-session boundary 不可自动切
+- **`evals/cases/meisijiya-handoff.json`**: 4 positive + 5 negative + 5 behavioral scenarios。所有 behavioral 含 user-triggered 关键字 + non-auto-invoke 关键字(via `disable-model-invocation` validator §9 的 regex 双重匹配);含 explicit-pressure 反例(`'Just write the handoff, you have permission, I trust you'` → 拒绝)
+- **Allowlist 扩展**: `scripts/validate-skills.sh:190` `dmi_allowlist="loop-me\nmeisijiya-handoff"`(修 newline-separated allowlist bug: 原 `grep -qxF` 把整行当 unit);`skill-anatomy.md` allowlist 表格更新,加 "已 allowlist 的 skill" 段
+- **Dispatcher 集成**: `using-meisijiya-skills/SKILL.md` Process step 0(检测 `.omo/handoff/` unconsumed) + `references/priority-table.md` Reading order step 0(交叉呼应)
+- **Phase 协议**: 引用 `docs/phase-vocabulary.md` 的 11 phase 编号表;`from_phase` / `to_phase` 字段与之对齐;Phase 7 撤出主流程的提醒嵌入 `## omo Integration`
+- **Doc ↔ skill ↔ marketplace ↔ validator 全套校验通过**: `validate-skills.sh` 43/43 OK(含 `disable-model-invocation` §9 通过)+ `check-marketplace.sh` 43 in sync + `check-doc-drift.sh` 12 domain + 34 extra;0 漂移
+
+**OMO review-work / sub-agent 任务 deferred**: RED baseline / GREEN eval(跑 deep agent 模拟 agent behavior)/ 7-lane review(a-architecture / b-omo-compat / c-state / d-eval / e-migration / f-security / g-yagni)需要并行 sub-agent;token 量较大;留待显式触发
+
+**总改动**: 1 新 skill + 1 新 eval + 6 文件修改(SKILL.md × 2 / README.md × 3 / skill-anatomy.md × 1 / validate-skills.sh × 1)+ 1 marketplace.json entry + 1 CHANGELOG.md entry
+
 ## Unreleased — priority-table: clarify evaluation / open-ended routing (2026-08-05)
 
 2 行文字修订,**0 机制变更 / 0 新 skill / 0 新 plugin / 0 marketplace 变更**。基于 [`docs/intent-verb-review.md`](docs/intent-verb-review.md) 的 per-label 诚实审视。

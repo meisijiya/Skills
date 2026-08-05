@@ -38,6 +38,7 @@ These are existing prompt/injection layers, not a new lifecycle stage, phase, or
 
 ## Process
 
+0. **Check `.omo/handoff/` for unconsumed documents** (cross-session resumption). If any `.md` file has `consumed: false` in frontmatter, inject a `<RESUME FROM PHASE <to_phase>>` block to firstUser.parts and auto-append the doc's `load_skills` to sub-agent dispatch per Sisyphus Dispatch Protocol. Wait for user to type `consumed` (mark `consumed: true`) or `consume --reject <reason>` (skip) before proceeding. See [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md) for the cross-session protocol.
 1. Consult `<available_skills>` (injected by the harness) for the current session's skill roster + each skill's `description`.
 2. Match the incoming request against each skill's `description` field. The `description` is the source of truth for routing.
 3. For cross-skill trigger hints (one row per common request pattern), read [`references/priority-table.md`](references/priority-table.md).

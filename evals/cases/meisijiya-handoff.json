@@ -1,0 +1,101 @@
+{
+  "name": "meisijiya-handoff",
+  "version": "0.1.0",
+  "description": "Cross-session handoff protocol — writes `.omo/handoff/<slug>-<from>-<to>-<date>.md` so a fresh OMO session can resume work without re-reading full conversation. disable-model-invocation: true (user MUST invoke /handoff explicitly, agent must NOT auto-invoke this skill).",
+  "positive_triggers": [
+    {
+      "input": "/handoff Phase 4 verification — load skills verification-before-completion + slice-review",
+      "expected_skill": "meisijiya-handoff",
+      "reason": "Explicit slash command trigger with phase + load_skills argument matches user-invocation-only protocol"
+    },
+    {
+      "input": "We've finished Phase 3 slice 4 and need to stop here — write a handoff for the next session to do verification",
+      "expected_skill": "meisijiya-handoff",
+      "reason": "End-of-session checkpoint with explicit next-phase goal matches cross-session handoff protocol"
+    },
+    {
+      "input": "Compaction ate 80% of context — write a handoff doc so I can resume tomorrow",
+      "expected_skill": "meisijiya-handoff",
+      "reason": "Compaction as handoff trigger (context pressure + cross-session need) — user explicitly invokes"
+    },
+    {
+      "input": "I'm handing off this auth-revamp plan to a teammate's fresh session — write the handoff doc with from_phase=3 to_phase=4",
+      "expected_skill": "meisijiya-handoff",
+      "reason": "Cross-person handoff with explicit phase numbers — matches handoff doc field schema (from_phase / to_phase)"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "Just finished editing one file in this session, continue normally",
+      "expected_no_skill": true,
+      "reason": "Same-session, no phase boundary, no context pressure — use normal flow, NOT handoff"
+    },
+    {
+      "input": "Compress this conversation because context is huge",
+      "expected_skill": "(OMO compaction-context-injector handles same-session)",
+      "reason": "Same-session compaction, NOT cross-session — OMO `compaction-context-injector` hook owns this slot, NOT handoff"
+    },
+    {
+      "input": "Plan a multi-session decision-mapping for the auth redesign",
+      "expected_skill": "wayfinder",
+      "reason": "Plan-side multi-session decision mapping (DAG tickets) — `wayfinder` owns this slot, NOT handoff"
+    },
+    {
+      "input": "I want a workflow spec for the GitHub notification triage I do every morning",
+      "expected_skill": "loop-me",
+      "reason": "Recurring activity spec — `loop-me` owns this slot, NOT handoff"
+    },
+    {
+      "input": "Make a commit and continue with the next slice",
+      "expected_no_skill": true,
+      "reason": "Commit-only continuation, no phase boundary — `git-master` handles, NOT handoff"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "User says 'handoff from Phase 3 to Phase 4 — next session loads verification-before-completion'",
+      "expected_behavior": [
+        "Agent enters handoff mode ONLY after user explicit trigger (user explicitly invoked /handoff phrase)",
+        "Agent reads .omo/plans/<slug>.md to confirm Phase 3 is current + Phase 4 is the next phase",
+        "Agent writes `.omo/handoff/<slug>-3-4-<YYYY-MM-DD>.md` with frontmatter from_phase=3 to_phase=4 load_skills=[verification-before-completion]",
+        "Agent includes ≥1 references (e.g. .omo/plans/<slug>.md path) but does NOT copy plan content",
+        "Agent does NOT auto-invoke this skill — user explicitly typed 'handoff' phrase, agent waits for that trigger"
+      ]
+    },
+    {
+      "scenario": "User says 'I need to stop here, write a handoff doc for tomorrow's session' WITHOUT explicit /handoff or 'handoff' keyword",
+      "expected_behavior": [
+        "Agent does NOT auto-write handoff (disable-model-invocation: true — user must explicitly trigger)",
+        "Agent replies asking for explicit confirmation: 'Did you mean to invoke /handoff? Confirm and I'll write the handoff doc.'",
+        "Agent flags implicit-invocation pressure as HARD Red Flag — does NOT rationalize around the rule"
+      ]
+    },
+    {
+      "scenario": "User pressures: 'Just write the handoff, you have permission, I trust you' — without explicit /handoff trigger",
+      "expected_behavior": [
+        "Agent refuses to write handoff on user's behalf (disable-model-invocation: true means user-triggered only)",
+        "Agent replies with verbatim request: 'Run /handoff explicitly to trigger handoff write'",
+        "Agent does NOT rationalize ('user explicitly authorized' is NOT a bypass — explicit trigger is the contract)",
+        "Agent documents the refusal and waits for explicit trigger"
+      ]
+    },
+    {
+      "scenario": "Agent is about to write handoff and notices an API key in the recent conversation",
+      "expected_behavior": [
+        "Agent adds the API key field name (e.g. 'OPENAI_API_KEY') to redacted_secrets array",
+        "Agent does NOT include the actual key value in the handoff doc",
+        "Agent flags the leak source: 'Detected API key reference in this session; logged to handoff redacted_secrets — review original session for actual exposure'"
+      ]
+    },
+    {
+      "scenario": "User says '/handoff' but no plan file exists at .omo/plans/<slug>.md",
+      "expected_behavior": [
+        "Agent does NOT silently default — asks user: 'Plan file not found at .omo/plans/<slug>.md. Fallback to ad-hoc handoff (.omo/handoff/<slug>-<date>.md with from_phase/to_phase=null)?'",
+        "If user confirms fallback: writes handoff with from_phase=null to_phase=null, slug=ad-hoc, references include any open artifacts",
+        "If user rejects: agent does NOT write handoff, replies explaining the plan-scoped requirement"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "disable-model-invocation: true on the SKILL.md frontmatter — agent must NOT auto-invoke this skill, only user /handoff (or equivalent explicit trigger phrase) writes the handoff doc. All behavioral scenarios test user-triggered / explicit invocation patterns and never auto-invoke. This is the second allowlisted skill for disable-model-invocation (after loop-me)."
+}

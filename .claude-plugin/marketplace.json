@@ -66,7 +66,8 @@
         "./skills/extra/teacher-skill",
         "./skills/extra/prototype",
         "./skills/extra/wayfinder",
-        "./skills/extra/research"
+        "./skills/extra/research",
+        "./skills/extra/meisijiya-handoff"
       ]
     },
     {

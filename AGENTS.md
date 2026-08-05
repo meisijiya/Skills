@@ -67,7 +67,7 @@ Each entry: skill name → install path → 1-line summary. Full `description` l
 - [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality)
 - [`test-guard`](~/.agents/skills/test-guard/SKILL.md) — 7-check AI-test quality audit (over-mocking / tautology / flakiness)
 
-**domain (11):**
+**domain (12):**
 - [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO frontend
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — designer → eng UI/UX spec handoff (via ui-ux-pro-max)
 - [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) — contract-first REST / GraphQL / RPC design

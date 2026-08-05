@@ -70,6 +70,7 @@ in the Priority table below.
 
 ## Reading order
 
+0. **Check `.omo/handoff/` for unconsumed documents** (cross-session resumption). If `consumed: false` exists, this takes precedence over trigger matching — user expects RESUME FROM PHASE, not fresh routing. See [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md).
 1. Check the trigger column against the current request.
 2. If the "Consider first" cell is empty, this is omo's territory (no skill needed).
 3. If you have an "If installed" cell, the skill is in `extra/` — only loaded if the user opted in via `npx skills add`.

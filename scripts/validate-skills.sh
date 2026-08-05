@@ -187,7 +187,8 @@ for skill_md in "${skill_files[@]}"; do
   # 9. disable-model-invocation controlled-field policy (per skill-anatomy.md)
   # Allowlist of skills allowed to use this controlled extension field.
   # TODO: extract to a config file (e.g. scripts/allowlist/disable-model-invocation.txt) when more skills qualify.
-  dmi_allowlist="loop-me"
+  dmi_allowlist="loop-me
+meisijiya-handoff"
   has_dmi=$(grep -E '^disable-model-invocation:[[:space:]]*true' <<<"$fm" || true)
   if [[ -n "$has_dmi" ]]; then
     if ! grep -qxF "$skill_name" <<<"$dmi_allowlist"; then

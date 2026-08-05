@@ -1,4 +1,4 @@
-# Extra Skills(选装集 · 33 个)
+# Extra Skills(选装集 · 34 个)
 
 按项目需求挑。**不必全装**。每个 skill 独立,装了就启用,不装就不影响其他。
 
@@ -19,9 +19,9 @@
 | 创建/编辑 skill | `meta` 中加 `writing-skills` |
 | AI 刚生成/修改了代码,要审查盲区 | `security` 中加 `ai-code-blindspots` |
 
-## 33 个 skill 一览(按 group)
+## 34 个 skill 一览(按 group)
 
-**注意**：`teacher-skill` 已合入 `meisijiya-domain` group(11 个中之一);`allowed-tools: Read` only(无 Bash / Python / 网络访问);通常通过 `build-gate-visual-review` 的 §5 teaching deck reminder 间接触发,极少直接 invoke。
+**注意**：`teacher-skill` 已合入 `meisijiya-domain` group(12 个中之一);`allowed-tools: Read` only(无 Bash / Python / 网络访问);通常通过 `build-gate-visual-review` 的 §5 teaching deck reminder 间接触发,极少直接 invoke。
 
 ### security (9)
 | Skill | 一句话 |
@@ -58,7 +58,7 @@
 | [`contract-strengthening`](./contract-strengthening/) | Phase 1.25 open-world / non-exhaustive 风险分类(contract / state / timing / concurrency / boundary / dependency / reversibility / verification-blind-spot);可选装、可自动触发 |
 | [`test-guard`](./test-guard/) | 7-check AI 测试质量审计(skip / over-mocking / tautology / boundary / fake-deps / lazy-assert / flakiness);与 `test-driven-development` 互补 |
 
-### domain (11)
+### domain (12)
 | Skill | 一句话 |
 |---|---|
 | [`build-gate-visual-review`](./build-gate-visual-review/) | 意图门控的实现前对齐:普通设计对齐只输出 Markdown / 文本;明确要求响应式 HTML 页面时通过 OMO 内置 `frontend` 渲染;教学型内容叠加 [`teacher-skill`](./teacher-skill/) pedagogy overlay |
@@ -72,6 +72,7 @@
 | [`prototype`](./prototype/) | 视觉 / 交互决策 skill(spec 编写阶段用);生成可丢弃的 UI 变体(MIN 2,max 5)解析 `[PROTO-RESOLVE]` markers;决策落到 `decisions.md`,**绝不**上线 |
 | [`wayfinder`](./wayfinder/) | 多 session 规划(scope 超过单次 brainstorming);打开 `.omo/wayfinder/<slug>/`,跨 session 推进;关闭时生成 `.omo/plans/<slug>.md` Phase 0 |
 | [`research`](./research/) | 对规划 / 设计问题做权威来源调查;写入 `.omo/research/<plan>/<topic>.md` 带引用;要求 plan context,无 plan 直接拒绝 |
+| [`meisijiya-handoff`](./meisijiya-handoff/) | cross-session checkpoint 协议(`disable-model-invocation: true` 仅 `/handoff` 触发);写 `.omo/handoff/<slug>-<from>-<to>-<date>.md` 含 from_phase/to_phase/load_skills/references/redacted_secrets;新 session 的 dispatcher 检测未消费 handoff 自动注入 load_skills |
 
 ## 依赖关系(顺序装才有效)
 
