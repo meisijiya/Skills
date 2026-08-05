@@ -128,7 +128,7 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 |---|---|
 | "新 session 不需要 load_skills,会自己发现 skill" | dispatcher 不读 handoff doc 就不会 inject `load_skills`;新 session 从 0 路由等于从 0 试错 |
 | "写到 /tmp/ 就行,git 不污染" | handoff 是 plan-scoped artifact,跨 session 必须在仓库内(`.omo/handoff/`);写到 /tmp 等同丢 |
-| "让我把整个 plan 复制进 handoff" | handoff doc 严禁 duplicate artifacts(§1);只能 reference;复制会让 doc 体积超 LLM context budget |
+| "让我把整个 plan 复制进 handoff" | handoff doc 严禁 duplicate artifacts(§3);只能 reference;复制会让 doc 体积超 LLM context budget |
 | "secret 在本 session 提过,handoff 也带上原值" | 违反 `Sensitive-Information-Handling`;必须 redacted_secrets 字段名 + 不带值 |
 | "我没显式 `/handoff`,用户说 'resume tomorrow' 我就写了" | 违反 `disable-model-invocation`;必须等用户显式触发词(`/handoff` / "handoff 一下" / "写个 handoff doc") |
 | "from_phase 和 to_phase 我不知道" | 读 `.omo/plans/<slug>.md` Phase 段;无 → null + plan-scoped fallback |
@@ -150,7 +150,7 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 - [ ] `from_phase` / `to_phase` 与 `.omo/plans/<slug>.md` 的实际进度对齐
 - [ ] `load_skills` 数组与 Priority table 中下一 phase 的推荐 skill 一致
 - [ ] 文件未进 `/tmp/`、未含明文 secret、未复制 plan 全文
-- [ ] User 已收到 6 步末尾的 3 行告知
+- [ ] User 已收到 7 步末尾的 3 行告知
 
 ## omo Integration
 

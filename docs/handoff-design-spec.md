@@ -194,7 +194,7 @@ Type `consumed` to acknowledge and proceed, or `consume --reject <reason>` to sk
 ### 5.3 与现有 dispatcher 的兼容
 
 - 不改 `using-meisijiya-skills/SKILL.md` 的 6-intent 表(已有 label 不需要新增)
-- 不改 priority-table.md(只在 reading order 第 0 步加 `Check .omo/handoff/ for unconsumed documents`)
+- 不改 priority-table.md(只在 reading order 第 1 步加 `Check .omo/handoff/ for unconsumed documents`)
 - 不改 process-chains.md(本 skill 是 cross-cutting / context-dependent,与 `loop-me` / `writing-skills` / `source-driven-development` 同 slot)
 
 ---
@@ -313,8 +313,8 @@ per `writing-skills/SKILL.md`,必须先有 failing baseline test 才写 skill。
 3. [ ] 写 `skills/extra/meisijiya-handoff/evals/cases/meisijiya-handoff.json`(3+3+1)— 跟 §7 一致
 4. [ ] 改 `.claude-plugin/marketplace.json`(`meisijiya-domain` group +1)
 5. [ ] 改 `skills/extra/README.md`(计数 11→12)+ `AGENTS.md`(同)+ `README.md`(同)
-6. [ ] 改 `skills/core/using-meisijiya-skills/references/priority-table.md` reading order 第 0 步
-7. [ ] 改 `skills/core/using-meisijiya-skills/SKILL.md` Process step 0(检测 handoff)
+6. [x] 改 `skills/core/using-meisijiya-skills/references/priority-table.md` reading order 第 1 步
+7. [x] 改 `skills/core/using-meisijiya-skills/SKILL.md` Process step 1(检测 handoff)
 8. [ ] 改 `.opencode/plugins/meisijiya-skills.js` firstUser.parts 注入逻辑(可选,看 RED 是否暴露必要)
 9. [ ] 跑 `validate-skills.sh` + `check-marketplace.sh` + `check-doc-drift.sh`(REFACTOR)— 三项全 PASS
 10. [ ] 跑 §7 eval case(GREEN)— agent **有** skill 后,行为与 §7.3 expected_behavior 完全一致
