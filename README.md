@@ -203,23 +203,24 @@ skill 安装用 `npx skills add`(已存在),**plugin 管理没有现成 CLI**,�
 # 列出已装 plugin(在 ~/.config/opencode/plugins/,匹配 *.ts 和 *.js)
 ./bin/meisijiya plugin list
 
-# 验证 .ts plugin(走 bun check;*.js 不在范围内)
+# 验证 plugin(.ts 走 bun check,.js 走 node --check;零额外依赖)
 ./bin/meisijiya plugin verify
 
 # 装到 PATH(任意一处)
 ln -s "$(pwd)/bin/meisijiya" ~/.local/bin/meisijiya
 ```
 
-**只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check`,没有 bun 会报错提示安装。**注意:**本 README 文档化的 3 个 hard-layer plugin(`meisijiya-skills.js` / `meisijiya-review-router.js` / `omo-state-index.js`)全部是 `.js`,**不被 `plugin verify` 覆盖**。`plugin list` 会列出 `~/.config/opencode/plugins/` 下所有 `*.js` + `*.ts`(当前默认应有 2 个 + 装了 `omo-state-index.js` 后变 3 个)。
+**只做 `plugin list` + `plugin verify`,不做 plugin add/remove/inject/status/update**(那些是 YAGNI,等真痛了再加)。`plugin verify` 走 `bun check` (.ts) + `node --check` (.js),两者缺一会报错提示安装。`plugin list` 会列出 `~/.config/opencode/plugins/` 下所有 `*.js` + `*.ts`(当前默认应有 4 个,见下)。**注意:**本 README 文档化的 4 个 hard-layer plugin 全部走 `plugin verify`(无类型门禁盲点)。
 
-### OpenCode Plugins(硬层 · 3 个)
+### OpenCode Plugins(硬层 · 4 个)
 
-本仓库有 **3 个 OpenCode plugin**(全部 hard-layer, 注入到 LLM 调用层,不是 soft 挂载的 SKILL.md)。三者机制互补、不冲突,可独立装:
+本仓库有 **4 个 OpenCode plugin**(全部 hard-layer, 注入到 LLM 调用层,不是 soft 挂载的 SKILL.md)。四者机制互补、不冲突,可独立装:
 
 | Plugin | 触发层 | 安装命令 |
 |---|---|---|
 | `meisijiya-skills.js` | 每 session 首条 user message(bootstrap 注入) | `cp .opencode/plugins/meisijiya-skills.js ~/.config/opencode/plugins/` |
 | `meisijiya-review-router.js` | Write/Edit/apply_patch(per-Edit reminder) | `cp .opencode/plugins/meisijiya-review-router.js ~/.config/opencode/plugins/` |
+| `meisijiya-dispatch-gate.js` | `task()` 工具调用前(`load_skills` 完整性兜底) | `cp .opencode/plugins/meisijiya-dispatch-gate.js ~/.config/opencode/plugins/` |
 | `omo-state-index.js` | 任意 `.omo/**` 写入(防抖 500ms 重建 `.omo/.index.json`)+ 每 session 首条 user message(3 行压缩态摘要) | `bash scripts/install.sh` |
 
 > `cp` 实复制路径(经验证可工作);`ln -sf` 软链路径行为未做独立验证,若需使用请自行核对 plugin loader 当前实现。
@@ -255,6 +256,25 @@ Write/Edit/apply_patch 工具调用完成后,在 tool result 末尾追加 remind
 - **per-turn dedup**:同 turn 多次 edit 只一次提醒(`Map<sessionID, Set>` + `chat.message` hook 重置 state)
 - **per-result marker check**:同一次 tool result 已有 marker 跳过
 - 单 reminder ~21-23 tokens,2 skill = ~50 tokens/turn max
+
+#### `meisijiya-dispatch-gate.js` — `load_skills` 完整性兜底
+
+兜底 Sisyphus 在 `task()` 派发时漏传/部分传 `load_skills=[...]` 的硬层 hard-layer fallback——和 SKILL.md §Hard Rule(soft 层 LLM 训练)形成双层保险。
+
+**机制:**
+
+- `tool.execute.before` hook — 拦截 `task()` 工具调用,检查 `args.load_skills`
+- 漏传(空 / undefined)+ matrix-mapped category → 按 Category × Skill Matrix 主表注入(visual-engineering / deep MVP)
+- 已传 list → **不动 args**(避免 LLM "我说 a 被塞 b" 困惑),仅 `console.warn` 显示 matrix 推荐
+- `installed()` 过滤(防止 matrix 推荐但未装的 skill 进入 → omo `resolveSkillContent` notFound 硬失败)
+- 永不 throw 出 hook(整体 try/catch)
+- mutate 字段(`args.load_skills = recommended`),不复 reassign 整对象(OpenCode SDK issue #25754)
+
+**SOT sync:** Plugin 头部注释声明 SOT → `~/.agents/skills/using-meisijiya-skills/SKILL.md` §Category × Skill Matrix;matrix 变更时同步更新 plugin `RECOMMENDED` 常量。
+
+**MVP 范围:** 仅 `visual-engineering` / `deep`;扩到其他 category 需 (a) matrix 同步 (b) RECOMMENDED 加行 (c) 单测加正例 (d) eval case 评估是否加 behavioral。
+
+详细行为表见 [`docs/omo-agent-skill-config.md`](./docs/omo-agent-skill-config.md) § L4 + spec [`docs/meisijiya-dispatch-gate-design-spec.md`](./docs/meisijiya-dispatch-gate-design-spec.md) § 4.3。
 
 ## 前置依赖
 

@@ -2,13 +2,13 @@
 
 > **本文档的姊妹文档**：[`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) — **Sisyphus dispatcher skill**（运行时读）。本文档是**用户配置参考**（手工应用 `omo.jsonc`）。
 >
-> **TL;DR**：omo 没有 `agents.<name>.skills` 字段。Skill 管理 = 3 个机制：(1) `<available_skills>` 全可见（OpenCode 原生），(2) `task(load_skills=[...])` 由 Sisyphus 在 dispatch 时显式加载（**核心决策点**），(3) per-edit reminder plugin（review-router，已实现 8 个 reminder）。
+> **TL;DR**：omo 没有 `agents.<name>.skills` 字段。Skill 管理 = **4 个机制**：(1) `<available_skills>` 全可见（OpenCode 原生），(2) `task(load_skills=[...])` 由 Sisyphus 在 dispatch 时显式加载（**核心决策点**），(3) per-edit reminder plugin（review-router，已实现 8 个 reminder），(4) `task()` dispatch-gate plugin（**hard 层**兜底 Sisyphus 漏传 `load_skills`；MVP 覆盖 `visual-engineering` + `deep`）。
 
 ---
 
-## 一、omo Skill 加载的 3 个机制
+## 一、omo Skill 加载的 4 个机制
 
-omo 通过 **3 层机制** 加载 skill，**没有 per-agent skill 白名单配置字段**。
+omo 通过 **4 层机制** 加载 skill，**没有 per-agent skill 白名单配置字段**。
 
 ### L1：`<available_skills>` 自动可见
 
@@ -30,7 +30,7 @@ task(
 
 **没有 `load_skills=[...]`，sub-agent 经常漏触发窄 skill**（如 `meisijiya-frontend-taste` 的 trigger 是 "agent writes marketing-grade UI code"，容易被忽略）。
 
-**SOT（single source of truth）**：[`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) 的 **Category × Skill Matrix** + **Common Dispatch Patterns** 段。这是 Sisyphus 应该读的协议。
+**SOT（single source of truth）**：[`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) 的 **Category × Skill Matrix** + **Common Dispatch Scenarios** 段。这是 Sisyphus 应该读的协议。
 
 ### L3：per-edit reminder plugin
 
@@ -48,6 +48,28 @@ task(
 | Write/Edit tool calls | `verification-before-completion` |
 
 这是**文件路径触发的硬规则**，**不是 skill 配置**。
+
+### L4：`task()` dispatch-gate plugin（load_skills 兜底，新加）
+
+L2 是 soft 层（Sisyphus 主动传 `load_skills`），但 LLM 调用率 ~80-90%（per `meisijiya-skills.js` acceptance test 段落）。
+
+`~/.config/opencode/plugins/meisijiya-dispatch-gate.js`（**hard 层**，可选安装）作为 L2 的兜底：
+
+| 情况 | plugin 动作 |
+|---|---|
+| `load_skills=[]` / undefined + matrix-mapped category（visual-engineering / deep MVP） | 注入 RECOMMENDED（按 `installed()` 过滤掉未装的 skill）|
+| `load_skills=[...]`（任意非空）| **不动 args** + `console.warn` 提示 matrix 推荐 |
+| category 不在 MVP | no-op |
+| tool != task | no-op |
+| 全局 | mutate 字段,**永不 throw**,**永不 reassign args** |
+
+安装（可选，独立 install）：
+
+```bash
+cp .opencode/plugins/meisijiya-dispatch-gate.js ~/.config/opencode/plugins/
+```
+
+**SOT sync**：plugin 头部注释声明 SOT → `~/.agents/skills/using-meisijiya-skills/SKILL.md` §Category × Skill Matrix；matrix 变更时同步更新 plugin `RECOMMENDED` 常量。MVP 仅 `visual-engineering` + `deep`，扩展其他 category 需 (a) matrix 同步 (b) RECOMMENDED 加行 (c) 单测加正例 (d) eval case 评估是否加 behavioral。
 
 ---
 
@@ -161,7 +183,7 @@ task(
 
 ## 四、Sisyphus Dispatch Patterns（完整决策树）
 
-完整版见 [`using-meisijiya-skills` § Common Dispatch Patterns](../../skills/core/using-meisijiya-skills/SKILL.md)。这里给 6 个新 skill 的精简版：
+完整版见 [`using-meisijiya-skills` § Common Dispatch Scenarios](../../skills/core/using-meisijiya-skills/SKILL.md)。这里给 6 个新 skill 的精简版：
 
 | 任务 | `task(category=..., load_skills=[...])` |
 |---|---|
@@ -214,7 +236,7 @@ task(
 
 ## 七、相关文档
 
-- [`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) — **SOT**：dispatch 协议 + Category × Skill Matrix + Common Patterns
+- [`using-meisijiya-skills`](../../skills/core/using-meisijiya-skills/SKILL.md) — **SOT**：dispatch 协议 + Category × Skill Matrix + Common Dispatch Scenarios
 - [omo `docs/reference/configuration.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/configuration.md) — 完整 schema
 - [omo `docs/reference/omo-json.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/reference/omo-json.md) — 字段定义
 - [omo `docs/reference/orchestration.md`](https://github.com/code-yeongyu/oh-my-openagent/blob/dev/docs/guide/orchestration.md) — task(category=, load_skills=) 协议
@@ -223,7 +245,7 @@ task(
 
 After applying:
 1. Restart OpenCode session.
-2. Run `using-meisijiya-skills` — should see the new "Sisyphus Dispatch Protocol" + "Category × Skill Matrix" + "Common Dispatch Patterns" sections.
+2. Run `using-meisijiya-skills` — should see the new "Sisyphus Dispatch Protocol" + "Category × Skill Matrix" + "Common Dispatch Scenarios" sections.
 3. Dispatch a sub-agent task with `load_skills=["meisijiya-frontend-taste"]` — sub-agent's instructions should explicitly include meisijiya-frontend-taste's SKILL.md body.
 4. Edit a `.tsx` file — review-router should fire `meisijiya-frontend-taste` reminder (per-edit reminder, not skill config).
 </content>
