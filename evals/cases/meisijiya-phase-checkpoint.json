@@ -6,12 +6,12 @@
     {
       "input": "Phase 3 的 slice 1-5 全部完成,acceptance criteria 都勾选了",
       "expected_skill": "meisijiya-phase-checkpoint",
-      "reason": "Phase 整体完成 → 触发 soft-prompt(三选一)"
+      "reason": "Phase 整体完成 → 触发 soft-prompt(三选一)。注意: '全部完成' 也是 completion claim,会触发 verification-before-completion;最终路由到 phase-checkpoint 是因 SKILL.md omo Integration 双 skill 仲裁(verification gate 优先,gate 通过后 phase-checkpoint emit 通知)"
     },
     {
       "input": "我刚把 Phase 4 verification 的 7 个 checkbox 都勾了,verification 看起来过了",
       "expected_skill": "meisijiya-phase-checkpoint",
-      "reason": "Phase 4 整体完成 → soft-prompt;user 选 /handoff 切 session 或选 继续 进 Phase 7"
+      "reason": "Phase 4 整体完成 → soft-prompt;user 选 /handoff 切 session 或选 继续 进 Phase 7。同上,verification-before-completion 也会 match,最终 phase-checkpoint(verify gate 后)是正确的 final routing"
     },
     {
       "input": "Phase 1 spec 已经 attestation 了(.omo/plans/<slug>.md Phase 1 段全 [x])",
