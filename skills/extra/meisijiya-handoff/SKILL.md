@@ -66,8 +66,8 @@ agent 必须读(不复制内容):
 
 扫描本 session 出现的所有 string,匹配 `Sensitive-Information-Handling` AGENTS.md rule 的 3 类:
 
-- API key:`sk-[a-zA-Z0-9]{16,}` / `[A-Za-z0-9]{32,}` 类
-- Token: Bearer token / GitHub PAT / OAI token
+- API key:`sk-ant-[a-zA-Z0-9-]{16,}` / `sk-proj-[a-zA-Z0-9-]{16,}` / `sk-[a-zA-Z0-9]{16,}` / `[A-Za-z0-9]{32,}` 类
+- Token: `Bearer xxx` / GitHub PAT(`ghp_*` / `gho_*` / `ghs_*`) / JWT(`eyJ[A-Za-z0-9_-]{10,}`) / OAI project key(`sk-proj-*`)
 - Password / PII
 
 任何命中 → 加入 `redacted_secrets` 数组(只列字段名,不列值)。
@@ -130,23 +130,31 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 | "写到 /tmp/ 就行,git 不污染" | handoff 是 plan-scoped artifact,跨 session 必须在仓库内(`.omo/handoff/`);写到 /tmp 等同丢 |
 | "让我把整个 plan 复制进 handoff" | handoff doc 严禁 duplicate artifacts(§3);只能 reference;复制会让 doc 体积超 LLM context budget |
 | "secret 在本 session 提过,handoff 也带上原值" | 违反 `Sensitive-Information-Handling`;必须 redacted_secrets 字段名 + 不带值 |
-| "我没显式 `/handoff`,用户说 'resume tomorrow' 我就写了" | 违反 `disable-model-invocation`;必须等用户显式触发词(`/handoff` / "handoff 一下" / "写个 handoff doc") |
-| "from_phase 和 to_phase 我不知道" | 读 `.omo/plans/<slug>.md` Phase 段;无 → null + plan-scoped fallback |
+| "我没显式 `/handoff`,用户说 'resume tomorrow' 我就写了" | 违反 `disable-model-invocation`;必须等用户显式触发词(`/handoff` / "handoff 一下" / "写个 handoff doc") — 任何祈使/请求式措辞("can you write something" / "write a summary" / "make a note so I can pick up tomorrow")都不构成显式触发 |
+| "用户授权了 / 你有 permission / I trust you,写吧" | 授权 ≠ 显式触发;`disable-model-invocation` 要求显式 `/handoff`(或触发词),"you have my permission" / "I trust you" 只表达同意,不构成协议调用(authority-pressure bypass,见 eval behavioral #3) |
+| "plan 文件不存在,写个 ad-hoc 摘要也能接" | handoff 是 plan-scoped 协议;无 plan 必须 ask user confirm fallback(§1);静默降级 = 新 session 无 phase 锚点,等于 0 evidence |
+| "references 不用填,plan 就在那" | `references` 是新 session 的 evidence 锚点,< 1 项 = 0 evidence(Red Flag);必须 ≥ 1(plan / ADR / commit / diff 路径) |
+| "我凭对话知道 phase,不用读 plan" | from_phase / to_phase **必须**从 `.omo/plans/<slug>.md` 读取核对,不读 plan 直接凭对话写 = Red Flag;agent 凭对话口述不验证 plan 实际进度是"错误自信"路径,比"承认不知"更危险 |
 
 ## Red Flags
 
 - handoff doc 含 plan / notepad 全文复制 — `wc -l handoff.md` < `wc -l plan.md` 的 50% 是必要条件
-- handoff doc 含明文 API key / token — `grep -E 'sk-[a-zA-Z0-9]{32,}\|[A-Za-z0-9]{32,}|Bearer ' .omo/handoff/*.md` 应 0 命中
+- handoff doc 含明文 API key / token — `grep -E 'sk-ant-[a-zA-Z0-9-]{16,}|sk-proj-[a-zA-Z0-9-]{16,}|sk-[a-zA-Z0-9]{32,}|[A-Za-z0-9]{32,}|ghp_[A-Za-z0-9]{36,}|gho_[A-Za-z0-9]{36,}|ghs_[A-Za-z0-9]{36,}|eyJ[A-Za-z0-9_-]{10,}|Bearer ' .omo/handoff/*.md` 应 0 命中
 - handoff doc 写到 OS temp dir(`/tmp/` / `~/.cache/`)— `find /tmp -name 'handoff*'` 应 0 命中
 - `load_skills` 字段为空数组 — 新 session 不知道 load 什么,等于用户必须手动补
 - `references` 字段少于 1 项 — 不算 valid handoff,等于 0 evidence
 - 同一 slug 24h 内有 2+ 个未消费 handoff doc — 上一 session 没 close 就写,流程混乱
+- `from_phase` / `to_phase` 非空但未与 `.omo/plans/<slug>.md` 当前进度对齐(凭对话口述、未读 plan 验证)— 字段非空但错误,比空更危险
+- `.omo/plans/<slug>.md` 不存在但已写 handoff 且 `from_phase` / `to_phase` 非空 — 走了静默降级,违反 plan-scoped 协议(必须 ask user fallback)
+- 用户用 "permission" / "trust" / "you're authorized" / "go ahead" 等施压措辞时直接写 doc,未要求显式 `/handoff` — authority bypass,直接违反 `disable-model-invocation`
 
 ## Verification
 
+- [ ] 用户显式触发了 `/handoff`(或 "handoff 一下" / "写个 handoff doc")才动手 — 祈使 / 授权 / "resume tomorrow" 等措辞不计数
+- [ ] `.omo/plans/<slug>.md` 缺失时已 ask user 并获 confirm 才 fallback(未 ask 即写 = 失败)
 - [ ] `.omo/handoff/<path>.md` 文件已写,frontmatter 7 个必填字段全填
 - [ ] body 5 段严格按顺序,每段长度 ≤ 上限
-- [ ] `references` 数组 ≥ 1 项,`redacted_secrets` 数组(可空)列了字段名不列值
+- [ ] `references` 数组 ≥ 1 项;`redacted_secrets` 数组必须列本 session 出现过的敏感字段名(若 session 出现过 key / token / PII 则**非空**;若确实无敏感值,可空)
 - [ ] `from_phase` / `to_phase` 与 `.omo/plans/<slug>.md` 的实际进度对齐
 - [ ] `load_skills` 数组与 Priority table 中下一 phase 的推荐 skill 一致
 - [ ] 文件未进 `/tmp/`、未含明文 secret、未复制 plan 全文

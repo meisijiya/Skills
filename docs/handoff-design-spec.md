@@ -188,7 +188,7 @@ Type `consumed` to acknowledge and proceed, or `consume --reject <reason>` to sk
 ### 5.2 消费确认
 
 - 用户回 `consumed` → dispatcher 把 `consumed: false` 改为 `consumed: true`,追加 `consumed_at` + `consumed_by` 字段,接着 normal flow
-- 用户回 `consume --reject <reason>` → 不改字段,加 `rejected_at` + `rejection_reason` 字段,接着 normal flow(用户决定从哪儿接)
+- 用户回 `consume --reject <reason>` → dispatcher 把 `consumed: false` 改为 `consumed: true`,追加 `rejected_at` + `rejection_reason` 字段,接着 normal flow(用户决定从哪儿接)。**关键**:`consumed: true` 保证 dispatcher 下次不再重新检测此 doc(rejected 也是完结状态,doc 留下 audit trail 不重新 RESUME)
 - 静默 → dispatcher 不消费,只在每个 turn 的 `<system-reminder>` 提示 `<RESUME>` block 待消费(防失忆)
 
 ### 5.3 与现有 dispatcher 的兼容
@@ -316,7 +316,7 @@ per `writing-skills/SKILL.md`,必须先有 failing baseline test 才写 skill。
 6. [x] 改 `skills/core/using-meisijiya-skills/references/priority-table.md` reading order 第 1 步
 7. [x] 改 `skills/core/using-meisijiya-skills/SKILL.md` Process step 1(检测 handoff)
 8. [ ] 改 `.opencode/plugins/meisijiya-skills.js` firstUser.parts 注入逻辑(可选,看 RED 是否暴露必要)
-9. [ ] 跑 `validate-skills.sh` + `check-marketplace.sh` + `check-doc-drift.sh`(REFACTOR)— 三项全 PASS
+9. [x] 跑 `validate-skills.sh` + `check-marketplace.sh` + `check-doc-drift.sh`(REFACTOR)— 三项全 PASS
 10. [ ] 跑 §7 eval case(GREEN)— agent **有** skill 后,行为与 §7.3 expected_behavior 完全一致
 11. [ ] 7-lane review(a-architecture / b-omo-compat / c-state / d-eval / e-migration / f-security / g-yagni)— 至少 5 lane APPROVE 才算 close
 
