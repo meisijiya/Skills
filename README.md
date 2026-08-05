@@ -368,6 +368,39 @@ MIT
 
 最近 tag: **v0.8.0** — meisijiya-frontend triad (Leonxlnx/taste-skill absorption)(详细见 [`CHANGELOG.md`](./CHANGELOG.md) 与 `git log`)
 
+### Unreleased — dispatch-gate ship (R5, 2026-08-05)
+
+- **双层保险架构**(软层训练 + 硬层兜底)落地,dispatcher SKILL.md 强化为协议级 SOT:
+  - **软层**:`skills/core/using-meisijiya-skills/SKILL.md` 加 `§Hard Rule (mandatory)` 至 `§Sisyphus Dispatch Protocol` 段首;`§Category × Skill Matrix` 主表重构(`Main` / `+modifier` / `→substitute` 三记号 legend),visual-engineering + deep 2 行升级到 Main+Modifier 形式;`§Process step 8` 改写引用 Hard Rule;`§Common Dispatch Patterns` → `§Common Dispatch Scenarios`(过渡标记 + 6 cross-refs);Plugin layer 段首补注入机制说明;EXTREMELY_IMPORTANT 块加 1 行 dispatch 提示(双拷贝同步 `~/.agents/skills/`)
+  - **硬层**:新增 `.opencode/plugins/meisijiya-dispatch-gate.js`(`tool.execute.before` hook,visual-engineering + deep MVP,`installed()` 过滤防 notFound,mutate 字段不 reassign,永不 throw,`console.warn` 注入/警告双模式)
+- **bin CLI 升级**:`bin/meisijiya plugin verify` 扩 `.js` 通道(`node --check` 零依赖);require node (for .js) + bun (for .ts)
+- **测试覆盖**:17 个 `node --test` 单测(`tests/plugins/meisijiya-dispatch-gate.test.js`)覆盖 4 类 + 引用恒等断言;`evals/cases/using-meisijiya-skills.json` +2 behavioral_evals(Hard Rule completeness + plugin regression)
+- **跨文件同步**:README 插件表 3→4 + 新增 #### meisijiya-dispatch-gate.js 子段;`docs/omo-agent-skill-config.md` TL;DR + 标题 3→4 机制 + 新增 ### L4 段,`Common Dispatch Patterns` 全改 `Common Dispatch Scenarios`
+- **设计 SOT 落库**:`docs/meisijiya-dispatch-gate-design-spec.md` 535 行 design spec(从 prior session handoff 转移,作为本 work 的 single source of truth)
+
+**未做项 + 待解决问题**(per prior handoff §Open issues + 本 session 新发现):
+
+- ⚠️ **E2E smoke 未做真实 OpenCode session 验证** — 17 单测覆盖 plugin hook 4 类行为,但 spec §6 要求 "真实 OpenCode session 跑 4 场景"。OpenCode 仅在 process start 扫描 plugins(`README.md` "Reload" 段),本 session 进程早于 commit `fc1ec66`,plugin hook 在本进程不触发。**next session 必做**:user 重启 OpenCode + 触发 `task(category='visual-engineering', load_skills=[])`,期望 console 输出 `[meisijiya-dispatch-gate] injected ["meisijiya-frontend-taste"]` + sub-agent 收到该 SKILL.md body
+- ❌ **SKILL.md 双拷贝同步机制缺失** — 仓库无 sync script;R5 commit 仍手工 cp + diff(YAGNI per prior handoff D6,但已是 4th 复审共识阻断点)
+- ❌ **MVP 扩张时机未定义** — `visual-engineering` + `deep` 仅覆盖 2/8 categories;何时扩到全表需 (a) matrix 同步 (b) RECOMMENDED 加行 (c) 单测加正例 (d) eval 评估。具体阈值未在本 spec 锁定
+- ❌ **`ultrabrain` / `unspecified-high` 行的消歧策略** — "pick 1 of 3 by prompt keyword" 在 hook 不可靠;保留 LLM-only(不进 plugin)或未来消歧
+- ⚠️ **Plugin 对 omo 内部派发的影响未实测** — gate 无 opt-out,omo 内部 `task()` 也会被注入;无明显问题但 E2E 应观察
+- ⚠️ **Step 8 "above" vs 实际地理关系** — `§Process step 8` 写 "follow the Sisyphus Dispatch Protocol above",但 Protocol 在 step 8 之后(L50+)。Per spec §3.5 严格 verbatim 应用,可能是 spec typo;若 user 发现请告知
+- ❌ **`bun 1.3.14` 移除 `bun check` 子命令** — pre-existing,`bin/meisijiya plugin verify` 跑 `rtk.ts` 失败("Script not found check")。非本 commit regressions,建议另开 issue
+- ❌ **`scripts/sync-plugins.sh` 永久 fix 未做** — 当前 `cp` 手工操作,root-owned 老 plugin mtime 不可刷(见 sync 输出 Permission denied)。建议:加 chown + sync 一步脚本
+
+**验证**(全部 PASS):
+- `bash scripts/validate-skills.sh` → 44/44 OK,0 fail,0 warning
+- `bash scripts/check-marketplace.sh` → OK 44 skills in sync
+- `bash scripts/check-doc-drift.sh` → OK doc-vs-marketplace in sync
+- `node --check .opencode/plugins/meisijiya-dispatch-gate.js` → OK
+- `node --test tests/plugins/meisijiya-dispatch-gate.test.js` → 17/17 pass
+- `./bin/meisijiya plugin verify` → 4 .js OK(rtk.ts pre-existing fail)
+
+**总改动**:5 commits(本 R5 + 前 4 原子 `042f871` / `fc1ec66` / `28f431d` / `dc052df`)+ 7 文件 + 411 inserts / 23 deletes + 1 spec doc 入库 + .gitignore +1 行
+
+**follow-up handoff**:`.omo/handoff/meisijiya-dispatch-gate-E2E-followup-2026-08-05.md`(下 session 接续)
+
 ### Unreleased — skill audit & dispatch protocol (R1-R4, 2026-07-30)
 
 - **R1 9 项合规修复**: description 触发条件(`documentation-and-adrs`) / 6 段结构(`slice-review` 加 Overview + Rationalizations) / 我方文档一致性(`skill-anatomy.md` 描述规则 + 安全段) / 删 untracked 空目录(`git-worktree-isolation`) / 4 个 eval case 各 +1 negative / `validate-skills.sh` 加 §8 allowed-tools 一致性 + name 正则(WARN 级)

@@ -41,3 +41,6 @@ venv/
 .omo/
 .omo-run-continuation/
 .ulw-research/
+
+# Local verification scratch (per-session artifacts from verify-chain or similar tools)
+.verification/
