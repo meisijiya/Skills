@@ -67,7 +67,7 @@ Each entry: skill name → install path → 1-line summary. Full `description` l
 - [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality)
 - [`test-guard`](~/.agents/skills/test-guard/SKILL.md) — 7-check AI-test quality audit (over-mocking / tautology / flakiness)
 
-**domain (12):**
+**domain (13):**
 - [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO frontend
 - [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — designer → eng UI/UX spec handoff (via ui-ux-pro-max)
 - [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) — contract-first REST / GraphQL / RPC design
@@ -79,6 +79,7 @@ Each entry: skill name → install path → 1-line summary. Full `description` l
 - [`prototype`](~/.agents/skills/prototype/SKILL.md) — throwaway UI variants to resolve `[PROTO-RESOLVE]` markers in Phase 1.2 specs
 - [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) — multi-session planning (scope > single brainstorming session)
 - [`research`](~/.agents/skills/research/SKILL.md) — investigates planning/design questions against high-trust primary sources (requires plan context)
+- [`meisijiya-phase-checkpoint`](~/.agents/skills/meisijiya-phase-checkpoint/SKILL.md) — agent-driven phase boundary notification; emits 三选一 soft-prompt on `.omo/plans/<slug>.md` phase completion (complements meisijiya-handoff; never writes handoff doc)
 
 **frontend (3):**
 - [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) — anti-slop frontend rules for landing / portfolio / marketing code

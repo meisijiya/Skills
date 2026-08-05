@@ -75,3 +75,4 @@ in the Priority table below.
 3. If the "Consider first" cell is empty, this is omo's territory (no skill needed).
 4. If you have an "If installed" cell, the skill is in `extra/` — only loaded if the user opted in via `npx skills add`.
 5. Read [`references/process-chains.md`](process-chains.md) when work spans multiple stages — the table tells you *which* skill handles a single trigger; chains tell you what comes *next*.
+6. (informational) `meisijiya-phase-checkpoint` 由 agent 在 phase 完成时主动调用(`disable-model-invocation: false`),emit 三选一 prompt 让 user 决定 /handoff / 继续 / 走 notepad;与 `meisijiya-handoff`(契约层,user-driven)互补不替代。

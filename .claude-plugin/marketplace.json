@@ -67,7 +67,8 @@
         "./skills/extra/prototype",
         "./skills/extra/wayfinder",
         "./skills/extra/research",
-        "./skills/extra/meisijiya-handoff"
+        "./skills/extra/meisijiya-handoff",
+        "./skills/extra/meisijiya-phase-checkpoint"
       ]
     },
     {

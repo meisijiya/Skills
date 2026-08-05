@@ -1,0 +1,98 @@
+{
+  "name": "meisijiya-phase-checkpoint",
+  "version": "0.1.0",
+  "description": "Agent-driven phase boundary notification — soft-prompt user with 'Phase N 完成,要 /handoff 吗?还是继续?' when .omo/plans/<slug>.md current phase acceptance criteria all checked. NOT for mid-phase work, NOT for writing handoff doc (that's meisijiya-handoff), NOT for forcing split.",
+  "positive_triggers": [
+    {
+      "input": "Phase 3 的 slice 1-5 全部完成,acceptance criteria 都勾选了",
+      "expected_skill": "meisijiya-phase-checkpoint",
+      "reason": "Phase 整体完成 → 触发 soft-prompt(三选一)"
+    },
+    {
+      "input": "我刚把 Phase 4 verification 的 7 个 checkbox 都勾了,verification 看起来过了",
+      "expected_skill": "meisijiya-phase-checkpoint",
+      "reason": "Phase 4 整体完成 → soft-prompt;user 选 /handoff 切 session 或选 继续 进 Phase 7"
+    },
+    {
+      "input": "Phase 1 spec 已经 attestation 了(.omo/plans/<slug>.md Phase 1 段全 [x])",
+      "expected_skill": "meisijiya-phase-checkpoint",
+      "reason": "Phase 1 完成 → soft-prompt,user 决定 /handoff 跨 session 推进 Phase 3 还是继续"
+    }
+  ],
+  "negative_triggers": [
+    {
+      "input": "我刚完成 Phase 3 slice 3,继续 slice 4",
+      "expected_no_skill": true,
+      "reason": "mid-phase(Phase 3 内 sub-task),phase 整体 acceptance criteria 未全勾,不打扰"
+    },
+    {
+      "input": "我想 /handoff 一下,从 Phase 3 到 Phase 4",
+      "expected_skill": "meisijiya-handoff",
+      "reason": "user 主动触发 handoff 写 doc → 走 handoff skill 而非 phase-checkpoint(handoff 是契约层,user-driven)"
+    },
+    {
+      "input": ".omo/plans/<slug>.md 不存在,我在做新项目",
+      "expected_no_skill": true,
+      "reason": "无 plan → 静默跳过(per Process §1);user 应走 brainstorming 先建 Phase 0 Design"
+    },
+    {
+      "input": "Phase 0 design brainstorm 一下 auth 重构的方案",
+      "expected_skill": "brainstorming",
+      "reason": "Phase 0 Design 阶段由 brainstorming HARD-GATE 管,不是 phase-completion 通知"
+    },
+    {
+      "input": "All Phase 0 design decisions approved and documented, time to move forward",
+      "expected_no_skill": true,
+      "reason": "Phase 0 是 approval-based phase(无 - [ ] 结构),NOT-for L34 + Process §3 L58 排除;phase-vocabulary.md §2 — Phase 0 是 brainstorming 自己的 gate,phase-checkpoint 不二次通知"
+    },
+    {
+      "input": "我刚改完 Phase 3 的第一个 slice 的代码",
+      "expected_no_skill": true,
+      "reason": "mid-iteration 工作,phase 整体 acceptance criteria 未勾,phase-checkpoint 不触发"
+    }
+  ],
+  "behavioral_evals": [
+    {
+      "scenario": "Agent 检测到 Phase 3 acceptance criteria 全勾选,emit 三选一 prompt",
+      "expected_behavior": [
+        "Agent reads .omo/plans/<slug>.md Phase 3 section,确认所有 - [x]",
+        "Agent optionally checks git log -n 5 for Phase 4 prep commits(soft signal,不是 hard gate)",
+        "Agent emits verbatim 三选一: /handoff / 继续 / 走 notepad",
+        "Agent does NOT write handoff doc, does NOT modify plan",
+        "Agent waits for user decision; does NOT proceed automatically"
+      ]
+    },
+    {
+      "scenario": "User 在 prompt 后选 2(继续),agent 进入 Phase 4 后又完成一些 sub-task",
+      "expected_behavior": [
+        "Agent does NOT re-prompt during Phase 4 work",
+        "Phase 4 整体 acceptance criteria 全勾后才再触发一次 prompt"
+      ]
+    },
+    {
+      "scenario": "User 同时表达 'Phase 3 完成了,帮我 handoff 一下' — 两 skill 同时 match",
+      "expected_behavior": [
+        "Agent recognises both phase-checkpoint (phase completion) and handoff (handoff request) triggers",
+        "Agent routes to handoff skill as primary(handoff 是 user-driven 契约层),not phase-checkpoint",
+        "Agent does NOT first run phase-checkpoint 判定 then handoff — directly handoff skill"
+      ]
+    },
+    {
+      "scenario": "phase 段无 - [ ] 结构(Phase 3 ticket DAG 形式)",
+      "expected_behavior": [
+        "Agent skips the phase automatically, does NOT prompt",
+        "Agent does NOT count ticket checkboxes as acceptance criteria"
+      ]
+    },
+    {
+      "scenario": "User 选 3(走 notepad)后,agent 应该 append-only 写 1 行到 decisions.md",
+      "expected_behavior": [
+        "Agent writes single line: '## Phase <N> → notepad @ <ISO-8601> ...'",
+        "Agent does NOT write learnings, issues, or progress details to notepad",
+        "Agent confirms continuation in same session"
+      ]
+    }
+  ],
+  "owner": "meisijiya",
+  "notes": "Agent-driven phase boundary notification. No disable-model-invocation (agent may invoke when phase completion detected). Complements meisijiya-handoff: this skill NOTIFIES, handoff skill WRITES (handoff skill keeps disable-model-invocation: true for user-triggered contract)."
+}
