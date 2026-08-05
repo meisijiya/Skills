@@ -2,6 +2,30 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — feat(skill): meisijiya-phase-checkpoint phase boundary notification (2026-08-05)
+
+**第 44 个 skill**,归入 `meisijiya-domain` group(12→13)。与 `meisijiya-handoff` 分层互补:**phase-checkpoint = 通知层**(agent-driven,`disable-model-invocation: false`);**handoff = 契约层**(user-driven,`disable-model-invocation: true`,allowlist 第 2 个)。phase-checkpoint 在 `.omo/plans/<slug>.md` phase 整体完成时主动 emit 三选一 soft-prompt(`/handoff` / `继续` / `走 notepad`),由 user 决策;**绝不替 user 写 handoff doc**(契约层专属)。`allowlist` 不扩 —— agent-driven skill 默认不进。
+
+- **`skills/extra/meisijiya-phase-checkpoint/SKILL.md`**: 新建,154 行,6 段(Overview / When to Use / Process 7 步 / Common Rationalizations 6 行 / Red Flags 11 行 / Verification 11 项)+ `## omo Integration` 5 段(Dispatcher 集成 / 双 skill 仲裁 with verification-before-completion / user 显式 `/handoff` 仲裁 / 与 handoff 互补契约 / Phase 词汇表引用 / Plugin 不需要改动)。`allowed-tools: Read Bash Glob Grep Write`(`Write` 用于选 3 时 append-only 1 段 notepad 记录;与 handoff 同款声明 — 因 §7 强制写文件,删 `Write` 会强制走 Bash `echo >>`,反而扩大 shell injection 面)
+- **`evals/cases/meisijiya-phase-checkpoint.json`**: 3 positive(Phase 3 / 4 / 1 完成)+ 6 negative(mid-slice / `/handoff` 走 handoff / 无 plan 静默跳过 / Phase 0 brainstorm 边界 / **Phase 0 完成 → 不归 phase-checkpoint**(G-1 修复后从 positive 移入 negative)/ mid-iteration)+ 5 behavioral scenarios(emit prompt / 选 2 后免二次 / 双 match 仲裁 / 无 `- [ ]` 结构跳过 / 选 3 写 notepad)
+- **`docs/phase-checkpoint-design-spec.md`**: 设计文档,348 行,14 段(Goals / Non-goals / frontmatter / Process / Rationalizations / Red Flags / Verification / eval 设计 / Dispatcher 集成 / 与 handoff 契约 / anti-pattern / 不做的事 / 实现 checklist / 一句话总结)
+- **Dispatcher 集成**: `using-meisijiya-skills/references/priority-table.md` Reading order 第 6 步(informational, **不进入 routing**)—— phase-checkpoint 是 agent 判定时机,不是 dispatcher 路由输入
+- **Phase 协议**: 引用 `docs/phase-vocabulary.md` 的 11 phase 编号;Process §3 主判定 + 软校验(git log -n 5)+ Phase 段无 `- [ ]` 结构跳过(覆盖 Phase 3 ticket DAG / Phase 0 / Phase 5);Phase 7 撤出主流程的提醒嵌入 `## omo Integration`
+- **RED → GREEN → 7-lane 闭环验证**: RED baseline 找到 3 gap(G1 dual-match 仲裁 / G2 续接确认 / G3 phase-scoped 计数)→ SKILL.md 修 → mini-GREEN 闭合 → full GREEN eval(HOLD 22/24,G-1 eval Phase 0 矛盾 + G-2 footer 缺失)→ 修 → re-run **PASS 24/24** → 7-lane review(a-architecture / b-omo-compat / c-state / d-eval / e-migration / f-security / g-yagni)并行 sub-agent → **7/7 APPROVE-WITH-CAVEATS**(c-state REJECT 的 2 BLOCKING 经设计审查 re-rated 为 design-by-design)。所有 evidence 在 `.omo/red-baselines/` / `.omo/green-evals/` / `.omo/reviews/`
+- **同 PR 修复(7-lane review findings)**: 
+  - `allowed-tools` 加 `Write`(3 lane 共识 shared MAJOR 闭合)
+  - "1 行 append-only" → "1 段 append-only"(A-3 一致性,template 是 4 行非 1 行)
+  - "§10 契约" 悬挂引用 → "见 omo Integration 段契约分层"(A-2)
+  - 3 stale counter drift: `skills/extra/README.md` 12→13、root `README.md` 34→35 + eval 42→44
+- **Follow-up commit (`4021fee`)**: doc drift 同步 — README install 命令 `meisijiya-domain` `mv` list 加 `meisijiya-handoff,meisijiya-phase-checkpoint`(顺手补 handoff pre-existing gap);AGENTS.md Section A domain bullets 加 `meisijiya-handoff`(对齐 (13) header)
+- **Doc ↔ skill ↔ marketplace ↔ validator 全套校验通过**: `validate-skills.sh` 44/44 OK(含 §8 allowed-tools 一致性 + §10 eval 3+3+1)+ `check-marketplace.sh` 44 in sync + `check-doc-drift.sh` 13 domain + 35 extra;0 漂移
+
+**已知 design-by-design trade-off**:c-state F1 持久化 prompt 状态(选 2 + 跨 compaction 场景下可能 re-prompt 同一边界,user 再选 2 兜底)。修复需写文件,违反 Non-goal "仅 emit prompt";若未来 UX 反馈成真,futrue iteration 可选给 option 2 加 1 行 notepad metadata 标记(仍不写 handoff 类文件)。
+
+**总改动**: 1 新 skill + 1 新 eval + 1 新 design-spec + 6 文件修改(SKILL.md × 1 + README.md × 3 + skill-anatomy.md × 1 + priority-table.md × 1 + AGENTS.md × 1)+ 1 marketplace.json entry + 1 CHANGELOG.md entry。follow-up commit 4021fee 2 文件(README install + AGENTS.md bullets)。
+
+## Unreleased — feat(skill): meisijiya-handoff cross-session protocol (2026-08-05)
+
 ## Unreleased — feat(skill): meisijiya-handoff cross-session protocol (2026-08-05)
 
 **第 43 个 skill**,归入 `meisijiya-domain` group(11→12)。`disable-model-invocation: true` 强制 user-triggered 协议(allowlist 第 2 个 skill,继 `loop-me` 后)。
