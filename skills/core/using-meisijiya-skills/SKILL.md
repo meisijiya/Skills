@@ -47,7 +47,7 @@ These are existing prompt/injection layers, not a new lifecycle stage, phase, or
 5. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
 6. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For agent / category selection by task type, read [`references/model-selection.md`](references/model-selection.md).
 7. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
-8. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol above** — always specify the COMPLETE `load_skills` set from the Category × Skill Matrix main table (Hard Rule). If the dispatch-gate plugin warns "matrix recommends X" while you have an existing list, evaluate whether X is missing and add it.
+8. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol below** — always specify the COMPLETE `load_skills` set from the Category × Skill Matrix main table (Hard Rule). If the dispatch-gate plugin warns "matrix recommends X" while you have an existing list, evaluate whether X is missing and add it.
 
 ## Sisyphus Dispatch Protocol
 
