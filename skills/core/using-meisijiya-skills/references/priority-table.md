@@ -70,8 +70,8 @@ in the Priority table below.
 
 ## Reading order
 
-0. **Check `.omo/handoff/` for unconsumed documents** (cross-session resumption). If `consumed: false` exists, this takes precedence over trigger matching — user expects RESUME FROM PHASE, not fresh routing. See [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md).
-1. Check the trigger column against the current request.
-2. If the "Consider first" cell is empty, this is omo's territory (no skill needed).
-3. If you have an "If installed" cell, the skill is in `extra/` — only loaded if the user opted in via `npx skills add`.
-4. Read [`references/process-chains.md`](process-chains.md) when work spans multiple stages — the table tells you *which* skill handles a single trigger; chains tell you what comes *next*.
+1. **Check `.omo/handoff/` for unconsumed documents** (cross-session resumption). If `consumed: false` exists, this takes precedence over trigger matching — user expects `RESUME FROM PHASE <to_phase>`, not fresh routing. See [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md).
+2. Check the trigger column against the current request.
+3. If the "Consider first" cell is empty, this is omo's territory (no skill needed).
+4. If you have an "If installed" cell, the skill is in `extra/` — only loaded if the user opted in via `npx skills add`.
+5. Read [`references/process-chains.md`](process-chains.md) when work spans multiple stages — the table tells you *which* skill handles a single trigger; chains tell you what comes *next*.

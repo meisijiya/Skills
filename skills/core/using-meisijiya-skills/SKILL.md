@@ -38,14 +38,14 @@ These are existing prompt/injection layers, not a new lifecycle stage, phase, or
 
 ## Process
 
-0. **Check `.omo/handoff/` for unconsumed documents** (cross-session resumption). If any `.md` file has `consumed: false` in frontmatter, inject a `<RESUME FROM PHASE <to_phase>>` block to firstUser.parts and auto-append the doc's `load_skills` to sub-agent dispatch per Sisyphus Dispatch Protocol. Wait for user to type `consumed` (mark `consumed: true`) or `consume --reject <reason>` (skip) before proceeding. See [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md) for the cross-session protocol.
-1. Consult `<available_skills>` (injected by the harness) for the current session's skill roster + each skill's `description`.
-2. Match the incoming request against each skill's `description` field. The `description` is the source of truth for routing.
-3. For cross-skill trigger hints (one row per common request pattern), read [`references/priority-table.md`](references/priority-table.md).
-4. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
-5. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For agent / category selection by task type, read [`references/model-selection.md`](references/model-selection.md).
-6. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
-7. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol below** — always specify `load_skills=[...]` to anchor the sub-agent's discipline.
+1. **Check `.omo/handoff/` for unconsumed documents** (cross-session resumption). If any `.md` file has `consumed: false` in frontmatter, this takes precedence over trigger matching — user expects `RESUME FROM PHASE <to_phase>`, not fresh routing. Inject a `<RESUME FROM PHASE <to_phase>>` block to firstUser.parts and auto-append the doc's `load_skills` to sub-agent dispatch per Sisyphus Dispatch Protocol. Wait for user to type `consumed` (mark `consumed: true`) or `consume --reject <reason>` (skip) before proceeding. See [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md) for the cross-session protocol.
+2. Consult `<available_skills>` (injected by the harness) for the current session's skill roster + each skill's `description`.
+3. Match the incoming request against each skill's `description` field. The `description` is the source of truth for routing.
+4. For cross-skill trigger hints (one row per common request pattern), read [`references/priority-table.md`](references/priority-table.md).
+5. For multi-stage work sequences (design → spec → impl → test → review; fix; ship; perf gate; etc.), read [`references/process-chains.md`](references/process-chains.md).
+6. For the sub-agent controller/executor split, read [`references/controller-executor.md`](references/controller-executor.md). For agent / category selection by task type, read [`references/model-selection.md`](references/model-selection.md).
+7. Announce **"Using [skill] to [purpose]"** when invoking, and follow the invoked skill's checklist exactly.
+8. **When delegating to sub-agents, follow the Sisyphus Dispatch Protocol below** — always specify `load_skills=[...]` to anchor the sub-agent's discipline.
 
 ## Sisyphus Dispatch Protocol
 

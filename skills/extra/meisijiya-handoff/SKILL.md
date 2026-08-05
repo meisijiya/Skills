@@ -35,23 +35,23 @@ disable-model-invocation-justification: "Cross-session checkpoint 协议:handoff
 
 ## Process
 
-### 0. 校验前置条件
+### 1. 校验前置条件
 
 ```bash
 # plan slug 必须存在
-test -f .omo/plans/<slug>.md || echo "WARN: plan missing — handoff is plan-scoped"
+test -f .omo/plans/<slug>.md || ask user to confirm fallback
 ```
 
-如果 plan 不存在:`ask user to confirm fallback to .omo/handoff/<slug>-<date>.md with from_phase/to_phase=null`;不静默降级。
+如果 plan 不存在:fallback 到 `.omo/handoff/<slug>-<date>.md` 且 `from_phase` / `to_phase` = null;**不静默降级**。
 
-### 1. 解析 argument-hint 为结构化字段
+### 2. 解析 argument-hint 为结构化字段
 
 `argument-hint` 字符串拆为:
 
 - `next_session_goal`:直接复制 argument-hint 全文
 - `from_phase` / `to_phase`:从 argument-hint 提取 phase 编号,无 → null(参考 [`phase-vocabulary`](../../../docs/phase-vocabulary.md))
 
-### 2. 提取本 session 关键 facts
+### 3. 提取本 session 关键 facts
 
 agent 必须读(不复制内容):
 
@@ -62,7 +62,7 @@ agent 必须读(不复制内容):
 
 **禁止**复制 plan 全文或 notepad 全文到 handoff doc。
 
-### 3. 检查 secret 泄漏
+### 4. 检查 secret 泄漏
 
 扫描本 session 出现的所有 string,匹配 `Sensitive-Information-Handling` AGENTS.md rule 的 3 类:
 
@@ -72,7 +72,7 @@ agent 必须读(不复制内容):
 
 任何命中 → 加入 `redacted_secrets` 数组(只列字段名,不列值)。
 
-### 4. 计算 handoff doc 文件路径
+### 5. 计算 handoff doc 文件路径
 
 ```
 .omo/handoff/<slug>-<from-phase>-<to-phase>-<YYYY-MM-DD>.md
@@ -82,7 +82,7 @@ agent 必须读(不复制内容):
 
 如果文件已存在 → 拒绝并 ask user 是否 overwrite(append-only with timestamp suffix 是默认)。
 
-### 5. 写 handoff doc
+### 6. 写 handoff doc
 
 frontmatter 必填字段(共 7 个):
 
@@ -112,7 +112,7 @@ body 5 段严格按顺序,每段末尾必须 "**References:**" 列引用:
 
 长度上限详见 [`handoff-design-spec` §4.4](../../../docs/handoff-design-spec.md);超出 → 强制截断 + `[truncated]` 标记。
 
-### 6. 告知 user
+### 7. 告知 user
 
 输出三行:
 
@@ -154,7 +154,7 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 
 ## omo Integration
 
-**Dispatcher 集成**:`skills/core/using-meisijiya-skills/SKILL.md` Process step 0(检测阶段)新增 "Check `.omo/handoff/` for unconsumed documents"。检测到 `consumed: false` 的 doc 时:
+**Dispatcher 集成**:`skills/core/using-meisijiya-skills/SKILL.md` Process step 1(检测阶段)新增 "Check `.omo/handoff/` for unconsumed documents"。检测到 `consumed: false` 的 doc 时:
 
 1. 注入 `<RESUME FROM PHASE <to_phase>>` block 到 firstUser.parts
 2. dispatcher 自动把 `load_skills` 注入 sub-agent dispatch(per Sisyphus Dispatch Protocol)
@@ -166,6 +166,6 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 
 **`disable-model-invocation: true` 政策**:与 `loop-me` 同源(2026-08-01 allowlist 加入)。agent 必须 NOT 自动 invoke 本 skill,只 user `/handoff` 或 explicit trigger。Validator §9 检查:frontmatter 必含 `disable-model-invocation-justification`(紧跟下一行);eval 必须有 ≥1 behavioral scenario 证明 user-only invocation pattern。
 
-**Phase 词汇表**:`from_phase` / `to_phase` 字段必须与 [`docs/phase-vocabulary.md`](../../../docs/phase-vocabulary.md) 一致;Phase 7 已撤出主流程,新 handoff 不应默认含 Phase 7 行。
+**Phase 词汇表**:`from_phase` / `to_phase` 字段必须与 [`docs/phase-vocabulary.md`](../../../docs/phase-vocabulary.md) 一致;Phase 7 撤出主流程的处理按 [`phase-vocabulary.md` §3.4](../../../docs/phase-vocabulary.md)(新 handoff 默认不含 Phase 7 行;若确需,显式说明并走撤销流程)。
 
 **Phase 1 ask #7 待 OMO 上游**:`requireUserInvocation: true` 在 OMO runtime 级别强制 `disable-model-invocation` 才能 100% 生效;当前 doc-level 措辞 ~80-90% per project docs(per 2026-07-31 security 5-lane 报告);full L1 enforcement 仍 deferred to OMO upstream。
