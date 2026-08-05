@@ -81,6 +81,22 @@
         "If installed, agent loads contract-strengthening through its canonical skill path before implementation slicing",
         "If the optional extra is missing, agent records that fact and continues the core Spec, TDD, and completion flow without blocking"
       ]
+    },
+    {
+      "scenario": "Sisyphus dispatches task(category='visual-engineering', load_skills=[]) for a greenfield landing page (Hard Rule completeness check)",
+      "expected_behavior": [
+        "Agent consults Category × Skill Matrix main table BEFORE dispatching (§Hard Rule, mandatory)",
+        "Agent passes COMPLETE load_skills, never [] for matrix-mapped categories: [\"meisijiya-frontend-taste\"]",
+        "Agent does NOT rely on dispatch-gate plugin to backfill — the gate is fallback only, primary discipline is the §Hard Rule"
+      ]
+    },
+    {
+      "scenario": "Sisyphus dispatches task(category='deep', load_skills=['test-driven-development']) to an executor (plugin regression check)",
+      "expected_behavior": [
+        "Agent passes the existing load_skills list through unchanged — plugin never modifies a non-empty list",
+        "Agent does not merge, dedupe, or reorder the list (respected as-is per §Reasoning: 'load_skills already set; matrix recommends ...')",
+        "If a console.warn 'matrix recommends X' appears, agent only updates its next dispatch if X was actually missing — does not retroactively mutate this one"
+      ]
     }
   ],
   "owner": "meisijiya",
