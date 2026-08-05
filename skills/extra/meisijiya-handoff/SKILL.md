@@ -42,7 +42,21 @@ disable-model-invocation-justification: "Cross-session checkpoint 协议:handoff
 test -f .omo/plans/<slug>.md || ask user to confirm fallback
 ```
 
-如果 plan 不存在:fallback 到 `.omo/handoff/<slug>-<date>.md` 且 `from_phase` / `to_phase` = null;**不静默降级**。
+如果 plan 不存在,**verbatim 问用户**:
+
+> Plan file not found at `.omo/plans/<slug>.md`. Fallback to ad-hoc handoff (`.omo/handoff/<slug>-<date>.md` with `from_phase`/`to_phase`=null)? Confirm to proceed, or reject to keep working without handoff.
+
+**用户拒绝时** verbatim 回复:
+
+> Plan 不存在 → 走 notepad 而非 handoff (per `When to Use` NOT-for);不写 handoff doc,继续 normal flow。
+
+**用户确认时** → fallback 到 `.omo/handoff/<slug>-<date>.md` 且 `from_phase` / `to_phase` = null;`slug` 改为 `"ad-hoc"`;`references` 含本 session 任意 open artifact 路径(notepad / commit / diff)以保留 evidence 锚点。**不静默降级**。
+
+**隐式触发判定**(若 user argument 未含 next-phase goal / 无 `/handoff` slash 命令):
+
+> 您的请求未含显式触发(无 `/handoff` slash 命令也无 phase goal)。Did you mean to invoke `/handoff`? Confirm and I'll write the handoff doc.
+
+停手等确认;不写。
 
 ### 2. 解析 argument-hint 为结构化字段
 
@@ -72,6 +86,10 @@ agent 必须读(不复制内容):
 
 任何命中 → 加入 `redacted_secrets` 数组(只列字段名,不列值)。
 
+**命中时 verbatim 告知 user**(必做,不允许静默 redact):
+
+> Detected API key reference in this session; logged to handoff `redacted_secrets` — review original session for actual exposure.
+
 ### 5. 计算 handoff doc 文件路径
 
 ```
@@ -88,9 +106,9 @@ frontmatter 必填字段(共 7 个):
 
 ```yaml
 ---
-slug: <plan-slug>
-from_phase: <phase 编号 or null>
-to_phase: <phase 编号 or null>
+slug: <plan-slug 或 "ad-hoc">  # 无 plan fallback 时用 "ad-hoc"
+from_phase: <phase 编号或 null>
+to_phase: <phase 编号或 null>
 written_at: <ISO-8601 timestamp>
 written_by: <agent identity>
 next_session_goal: <一句话,来自 argument-hint>
@@ -114,13 +132,19 @@ body 5 段严格按顺序,每段末尾必须 "**References:**" 列引用:
 
 ### 7. 告知 user
 
-输出三行:
+成功路径输出三行:
 
 ```
 Wrote: .omo/handoff/<path>.md
 New session can resume with: load_skills=[<skill-1>, <skill-2>, ...] from_phase=<from> to_phase=<to>
 To consume: open new session, type `consumed` (mark `consumed: true`) or `consume --reject <reason>` (skip)
 ```
+
+**拒绝路径**(authority-pressure / 无显式触发)verbatim 回复:
+
+> 拒绝代写 handoff。Run `/handoff` explicitly to trigger handoff write(`disable-model-invocation: true` 要求显式触发,授权/祈使措辞不构成协议调用)。
+
+**必须记录拒绝到 notepad**:`.omo/notepads/<slug>/problems.md` 追加 "## Handoff refusal @ <ISO-8601>: <verbatim user input> → agent refused due to authority-pressure / non-explicit-trigger"。给下一 session audit 留 trail。
 
 ## Common Rationalizations
 
@@ -130,7 +154,7 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 | "写到 /tmp/ 就行,git 不污染" | handoff 是 plan-scoped artifact,跨 session 必须在仓库内(`.omo/handoff/`);写到 /tmp 等同丢 |
 | "让我把整个 plan 复制进 handoff" | handoff doc 严禁 duplicate artifacts(§3);只能 reference;复制会让 doc 体积超 LLM context budget |
 | "secret 在本 session 提过,handoff 也带上原值" | 违反 `Sensitive-Information-Handling`;必须 redacted_secrets 字段名 + 不带值 |
-| "我没显式 `/handoff`,用户说 'resume tomorrow' 我就写了" | 违反 `disable-model-invocation`;必须等用户显式触发词(`/handoff` / "handoff 一下" / "写个 handoff doc") — 任何祈使/请求式措辞("can you write something" / "write a summary" / "make a note so I can pick up tomorrow")都不构成显式触发 |
+| "我没显式 `/handoff`,用户说 'resume tomorrow' 我就写了" | 违反 `disable-model-invocation`;**合法显式触发 = `/handoff` slash 命令 OR 含 next-phase goal / to_phase 边界的请求**(如 "write a handoff for the next session to do verification")。不带 phase goal 的祈使措辞("write a handoff doc" / "write a handoff for tomorrow")需先 ask user 确认(§1 verbatim 模板),**不视为显式触发**。 |
 | "用户授权了 / 你有 permission / I trust you,写吧" | 授权 ≠ 显式触发;`disable-model-invocation` 要求显式 `/handoff`(或触发词),"you have my permission" / "I trust you" 只表达同意,不构成协议调用(authority-pressure bypass,见 eval behavioral #3) |
 | "plan 文件不存在,写个 ad-hoc 摘要也能接" | handoff 是 plan-scoped 协议;无 plan 必须 ask user confirm fallback(§1);静默降级 = 新 session 无 phase 锚点,等于 0 evidence |
 | "references 不用填,plan 就在那" | `references` 是新 session 的 evidence 锚点,< 1 项 = 0 evidence(Red Flag);必须 ≥ 1(plan / ADR / commit / diff 路径) |
