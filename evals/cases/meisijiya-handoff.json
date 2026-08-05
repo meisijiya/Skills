@@ -16,7 +16,7 @@
     {
       "input": "Compaction ate 80% of context — write a handoff doc so I can resume tomorrow",
       "expected_skill": "meisijiya-handoff",
-      "reason": "Compaction as handoff trigger (context pressure + cross-session need) — user explicitly invokes"
+      "reason": "Compaction as handoff trigger (context pressure + cross-session need) — routes to confirmation flow: input lacks phase goal so SKILL.md §1 verbatim ask fires before write"
     },
     {
       "input": "I'm handing off this auth-revamp plan to a teammate's fresh session — write the handoff doc with from_phase=3 to_phase=4",

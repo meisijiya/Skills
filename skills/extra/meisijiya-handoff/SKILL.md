@@ -174,7 +174,7 @@ To consume: open new session, type `consumed` (mark `consumed: true`) or `consum
 
 ## Verification
 
-- [ ] 用户显式触发了 `/handoff`(或 "handoff 一下" / "写个 handoff doc")才动手 — 祈使 / 授权 / "resume tomorrow" 等措辞不计数
+- [ ] 用户显式触发了 `/handoff` slash 命令 OR 含 next-phase goal / to_phase 边界的请求(如 "write a handoff for the next session to do verification")才动手 — 祈使 / 授权 / "resume tomorrow" / 不带 phase goal 的 "write a handoff doc" 等措辞需先 ask confirm(见 §1 verbatim 模板),不计数为显式触发
 - [ ] `.omo/plans/<slug>.md` 缺失时已 ask user 并获 confirm 才 fallback(未 ask 即写 = 失败)
 - [ ] `.omo/handoff/<path>.md` 文件已写,frontmatter 7 个必填字段全填
 - [ ] body 5 段严格按顺序,每段长度 ≤ 上限
