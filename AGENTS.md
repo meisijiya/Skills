@@ -79,6 +79,7 @@ Each entry: skill name → install path → 1-line summary. Full `description` l
 - [`prototype`](~/.agents/skills/prototype/SKILL.md) — throwaway UI variants to resolve `[PROTO-RESOLVE]` markers in Phase 1.2 specs
 - [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) — multi-session planning (scope > single brainstorming session)
 - [`research`](~/.agents/skills/research/SKILL.md) — investigates planning/design questions against high-trust primary sources (requires plan context)
+- [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md) — cross-session checkpoint protocol (`disable-model-invocation: true`); writes `.omo/handoff/<slug>-<date>.md` for context hand-off
 - [`meisijiya-phase-checkpoint`](~/.agents/skills/meisijiya-phase-checkpoint/SKILL.md) — agent-driven phase boundary notification; emits 三选一 soft-prompt on `.omo/plans/<slug>.md` phase completion (complements meisijiya-handoff; never writes handoff doc)
 
 **frontend (3):**

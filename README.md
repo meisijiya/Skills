@@ -162,7 +162,7 @@ rm -rf /tmp/meisijiya-meta
 # 装 meisijiya-domain(13 个,teacher-skill 已合入 marketplace;因 `allowed-tools: Read` only 保持默认不装,若项目需要教学型 overlay 可显式追加 ,teacher-skill)
 mkdir -p .opencode/skills
 git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-domain
-mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me,prototype,wayfinder,research} .opencode/skills/
+mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me,prototype,wayfinder,research,meisijiya-handoff,meisijiya-phase-checkpoint} .opencode/skills/
 rm -rf /tmp/meisijiya-domain
 
 # 装 meisijiya-frontend(3 个,反 AI 味 + 美学方向)
