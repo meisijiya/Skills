@@ -133,6 +133,14 @@ for skill_md in "${skill_files[@]}"; do
   # 2. Extract frontmatter body (between first two ---)
   fm=$(awk 'BEGIN{n=0} /^---[[:space:]]*$/{n++; if(n==2){exit}; next} n==1{print}' "$skill_md")
 
+  # 2.5. YAML strict round-trip parse (PyYAML): regex-based field extraction below
+  # misses unescaped quotes / nested scalars / structural issues that downstream
+  # tooling (e.g. vercel-labs/skills CLI) silently skips — see meisijiya-handoff
+  # YAML double-quote-nesting precedent.
+  if ! python3 -c "import yaml,sys; yaml.safe_load(sys.stdin.read())" <<<"$fm" 2>/dev/null; then
+    fails+=("frontmatter failed YAML strict-parse via PyYAML (unescaped quotes / nested scalars / structural issue). Skills CLI and downstream YAML consumers will skip this skill — fix before merge.")
+  fi
+
   # 3. Parse name
   name=$(grep -E '^name:' <<<"$fm" | head -1 | sed 's/^name:[[:space:]]*//')
 
