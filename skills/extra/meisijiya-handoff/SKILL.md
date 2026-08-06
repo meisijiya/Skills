@@ -4,7 +4,7 @@ description: "Use when ending a session that the next session needs to resume �
 argument-hint: "下一个 session 要推进到的 phase / 目标 (e.g. 'Phase 3 切片 X → Phase 4 verification')"
 allowed-tools: "Read Bash Glob Grep Write"
 disable-model-invocation: true
-disable-model-invocation-justification: "Cross-session checkpoint 协议:handoff 是 user-driven checkpoint(用户显式决定"我要停了,新 session 接"),agent 不应自动写 handoff 切碎会话边界;与 `loop-me` 同 slot 的 user-only invocation 模式。"
+disable-model-invocation-justification: "Cross-session checkpoint 协议:handoff 是 user-driven checkpoint(用户显式决定「我要停了,新 session 接」),agent 不应自动写 handoff 切碎会话边界;与 `loop-me` 同 slot 的 user-only invocation 模式。"
 ---
 
 # meisijiya-handoff
