@@ -80,9 +80,8 @@ for src in "$SRC_DIR"/*.js; do
     continue
   fi
 
-  cp "$src" "$dst"
-  chmod 644 "$dst" 2>/dev/null || true
-
+  # chown before cp: root-owned dst would otherwise make cp fail under set -e
+  # before the sudo chown fallback (--force) could run. Preserve this order.
   current_owner="$(stat -c %U "$dst" 2>/dev/null || echo unknown)"
   if [[ "$current_owner" != "ubuntu" ]]; then
     if chown ubuntu:ubuntu "$dst" 2>/dev/null; then
@@ -94,6 +93,9 @@ for src in "$SRC_DIR"/*.js; do
       echo "  WARN: chown failed (current owner: $current_owner); rerun with --force" >&2
     fi
   fi
+
+  cp "$src" "$dst"
+  chmod 644 "$dst" 2>/dev/null || true
   synced=$((synced + 1))
 done
 
