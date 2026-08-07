@@ -20,6 +20,32 @@ This skill evaluates the **trustworthyness** of dependencies against 5 standard 
 
 Distinct from: [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) (CVE scan, SBOM, IaC, pre-deploy) and [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) (post-breach). This skill is **before** the dep enters your lockfile or **at policy-review time** to decide whether to keep it.
 
+## Path Convention (两轴原则)
+
+输入与输出都落在 `docs/supply-chain-risk/` 下,git tracked 项目级 audit log:
+
+- `docs/supply-chain-risk/<repo-hash>-<date>/dependency-risk-input.yaml` — §1 用户可手编辑的 target 配置输入(per-dep 或 lockfile-wide 都收容在此文件)
+- `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.md` — §4 主报告
+- `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.csv` — §5 机器可读(可选)
+- `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.json` — §5 机器可读(可选)
+
+**`<repo-hash>`**:报告生成时刻的 `git rev-parse --short=8 HEAD`(8 字符短 SHA;`<date>` = `YYYY-MM-DD`)。
+
+**Frontmatter 必填字段**:
+
+```yaml
+---
+generated_at: <ISO-8601 UTC>
+repo_hash: <8-char SHA>
+repo_name: <basename of CWD>
+scanned_deps: <N>(depth 0=<M>, depth 1=<K>, depth 2+=...)
+---
+```
+
+`scanned_deps` 字段保留扫描规模,便于长期对比。
+
+**碰撞语义**:`<repo-hash>-<date>` 同日同 SHA 重复触发的概率极低;若真撞了,后缀 `-HHMMSS` 区分。
+
 ## When to Use
 
 **Use when:**
@@ -50,7 +76,7 @@ Two scopes:
 For each dep, capture the metadata block:
 
 ```yaml
-# dependency-risk-input.yaml
+# docs/supply-chain-risk/<repo-hash>-<date>/dependency-risk-input.yaml
 target:
   ecosystem: npm | pip | crates | go-modules | maven | rubygems
   package: <name>
@@ -154,7 +180,7 @@ For depth=0 (direct deps), the threshold is sharper:
 - Any axis = CRITICAL: REJECT (especially for security-critical paths)
 - Otherwise escalate the band one level
 
-### 4. Output as `<repo>-supply-chain-risk.md`
+### 4. Output to `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.md`
 
 ```markdown
 # Supply-chain risk assessment — <repo>
@@ -185,7 +211,7 @@ For depth=0 (direct deps), the threshold is sharper:
 
 ### 5. Optional CSV / JSON artifacts
 
-Same as security-ownership-map: emit `<repo>-supply-chain-risk.csv` / `.json` for downstream tooling (Renovate config gating, policy enforcement).
+Same as security-ownership-map: emit `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.csv` / `.json` for downstream tooling (Renovate config gating, policy enforcement).
 
 ## omo Integration
 
@@ -230,7 +256,8 @@ Before claiming the risk assessment is done, produce evidence:
 - [ ] §1 Inventory complete; for lockfile-wide scan, transitive depth included with explicit policy
 - [ ] §2 Per-dep 5-axis scoring with concrete evidence (commit dates, star counts, 2FA flags, signed-tag presence)
 - [ ] §3 Aggregate risk score + band per dep + top-10 transitive aggregate
-- [ ] §4 Markdown output saved at `<repo>-supply-chain-risk.md`
+- [ ] §1 Inventory YAML exists at `docs/supply-chain-risk/<repo-hash>-<date>/dependency-risk-input.yaml`
+- [ ] §4 Markdown output saved at `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.md` with frontmatter (`generated_at` / `repo_hash` / `repo_name` / `scanned_deps`)
 - [ ] §4 Recommendations include specific REJECT / REVIEW / replace-with lists
 - [ ] §5 Methodology reproducible (commands in Methodology section)
 - [ ] Optional CSV / JSON artifacts emitted

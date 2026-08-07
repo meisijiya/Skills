@@ -1,7 +1,7 @@
 {
   "name": "security-ownership-map",
   "version": "0.1.0",
-  "description": "Builds a people↔file security-ownership topology from git history to surface orphan sensitive files (no recent contributor), hidden owners (single-author + no CODEOWNERS), bus-factor hotspots, and maintainer concentration. Output is `<repo>-ownership-map.md` plus optional CSV/JSON artifacts. Run before major refactors, after security incidents (to map blast-radius-of-departure), during hiring to identify coverage gaps, and quarterly for governance review. Distinct from per-line code review: this skill audits who-knows-what and who-leaves-is-a-risk, not what-is-wrong.",
+  "description": "Builds a people↔file security-ownership topology from git history to surface orphan sensitive files (no recent contributor), hidden owners (single-author + no CODEOWNERS), bus-factor hotspots, and maintainer concentration. Output is `docs/ownership-map/<repo-hash>-<date>/ownership-map.{yaml,md,csv,json}` (git-tracked project audit log with frontmatter) plus optional CSV/JSON artifacts. Run before major refactors, after security incidents (to map blast-radius-of-departure), during hiring to identify coverage gaps, and quarterly for governance review. Distinct from per-line code review: this skill audits who-knows-what and who-leaves-is-a-risk, not what-is-wrong.",
   "positive_triggers": [
     {
       "input": "Before we extract auth into a separate module, I want to know which sensitive files are bus-factor-1 right now so we don't orphan anything in the move.",
@@ -52,8 +52,8 @@
         "§3 Query B surfaces hidden owners — sensitive file with single-author + no CODEOWNERS coverage",
         "§3 Query C surfaces bus-factor-1 hotspots on sensitive paths only (not all files)",
         "§3 Query D surfaces maintainer concentration; if top-1 share > 40% or top-3 > 85%, flag concentration risk explicitly",
-        "§4 deeper queries offered as opt-in (not auto-run): cross-team coupling, tenure vs recency, off-hours velocity, sensitive-vs-public exposure gap",
-        "§5 output saved at <repo>-ownership-map.md with §1-§5 sections; Recommendations section has concrete actions (specific file + specific remediation), not 'improve documentation'",
+        "§5 output saved at `docs/ownership-map/<repo-hash>-<date>/ownership-map.md` with frontmatter (`generated_at` / `repo_hash` / `repo_name`) + §1-§5 sections; Recommendations section has concrete actions (specific file + specific remediation), not \"improve documentation\"",
+        "§6 CSV/JSON artifacts at `docs/ownership-map/<repo-hash>-<date>/ownership-map.{csv,json}` with `sensitive_yes` column for downstream filtering",
         "§6 CSV/JSON artifacts emitted with `sensitive_yes` column for downstream filtering",
         "Engineer now has a concrete list of which sensitive files they need to pair-program a current contributor onto before the auth extraction"
       ]

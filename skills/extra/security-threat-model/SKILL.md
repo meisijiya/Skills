@@ -1,6 +1,6 @@
 ---
 name: security-threat-model
-description: "Performs an AppSec-grade threat model before any non-trivial feature, integration, or design change. Identifies trust boundaries, attacker capability, abuse paths (STRIDE), and prioritized mitigations — all anchored to file:line in the actual codebase. Use when designing a new feature that crosses a trust boundary, integrating a third-party service, refactoring auth/secret handling, expanding blast radius (more tenants / more scope / more trust), or when security-and-hardening finds a control already inadequate. Output is a single `<repo>-threat-model.md` per session."
+description: "Performs an AppSec-grade threat model before any non-trivial feature, integration, or design change. Identifies trust boundaries, attacker capability, abuse paths (STRIDE), and prioritized mitigations — all anchored to file:line in the actual codebase. Use when designing a new feature that crosses a trust boundary, integrating a third-party service, refactoring auth/secret handling, expanding blast radius (more tenants / more scope / more trust), or when security-and-hardening finds a control already inadequate. Output: `docs/threat-model/<repo-hash>-<date>/threat-model.md` per session (git-tracked project audit log)."
 allowed-tools: "Read Grep Glob Bash WebFetch"
 ---
 
@@ -20,7 +20,29 @@ This is the threat-side counterpart to:
 | Post-deploy | `pre-ship-gate` | Is the deploy actually running safely? |
 | Post-incident | `security-incident-response` | Contain / recover / postmortem |
 
-Threat model output is a single Markdown file per session — `<repo>-threat-model.md` — with concrete file:line citations. **The model is only useful if the evidence can be checked in one read** — vague narratives get thrown away.
+Threat model output is a single Markdown file per session — saved at `docs/threat-model/<repo-hash>-<date>/threat-model.md` (git-tracked project audit log, see *Path Convention* below) — with concrete file:line citations. **The model is only useful if the evidence can be checked in one read** — vague narratives get thrown away.
+
+## Path Convention (两轴原则)
+
+输出落在 `docs/threat-model/` 下,git tracked 项目级 audit log:
+
+- `docs/threat-model/<repo-hash>-<date>/threat-model.md` — §6 主模型文件
+
+**`<repo-hash>`**:报告生成时刻的 `git rev-parse --short=8 HEAD`(8 字符短 SHA;`<date>` = `YYYY-MM-DD`)。
+
+**Frontmatter 必填字段**:
+
+```yaml
+---
+generated_at: <ISO-8601 UTC>
+repo_hash: <8-char SHA>
+repo_name: <basename of CWD>
+feature: <本次建模的功能名,来自 §1 Scope>
+---
+
+`threat-model.md` 必须带 frontmatter;`feature` 字段便于多 feature 同日生成时定位。
+
+**碰撞语义**:`<repo-hash>-<date>` 同日同 SHA 概率极低;若同日做两次(罕见),后缀加 `-HHMMSS` 区分。
 
 ## When to Use
 
@@ -147,9 +169,9 @@ After enumerating paths:
 3. **Validate assumptions with the user** — the model is a hypothesis; ask 2-3 questions to confirm attacker profile, deployment model (managed vs self-hosted), and threat priorities
 4. **Decide: model done; ship to implementation; or model needs more**
 
-### 6. Output: `<repo>-threat-model.md`
+### 6. Output to `docs/threat-model/<repo-hash>-<date>/threat-model.md`
 
-Write the model to `<repo>-threat-model.md` at workspace root. Structure:
+Write the model to `docs/threat-model/<repo-hash>-<date>/threat-model.md` per the *Path Convention* section. Structure:
 
 ```markdown
 # Threat model — <feature name>
@@ -241,7 +263,7 @@ Before claiming the threat model is done, produce evidence:
 - [ ] §5 mitigations table with owner column; gaps explicitly `no` or `partial`
 - [ ] §6 Open assumptions — at least 2-3 listed, validated with user
 - [ ] §7 Out-of-scope explicitly listed (one line each)
-- [ ] File saved at `<repo>-threat-model.md`
+- [ ] File saved at `docs/threat-model/<repo-hash>-<date>/threat-model.md` (with `generated_at` / `repo_hash` / `repo_name` / `feature` frontmatter)
 - [ ] If stage-2 review applies (production-critical), `review-work` has run
 
 **Acceptance criterion**: A second reviewer can read only the file and reach the same severity ranking, OR can pinpoint which §3 / §4 / §6 assumption they disagree with and why. The model is a contract; the team can call it on it later.

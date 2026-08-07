@@ -1,7 +1,7 @@
 {
   "name": "security-threat-model",
   "version": "0.1.0",
-  "description": "AppSec-grade threat model for design-stage and significant-architecture-change scenarios. Identifies trust boundaries, attacker profiles, and STRIDE attack paths; each finding cites file:line, attacker action, severity, and concrete mitigation. Output is a single `<repo>-threat-model.md` per session. Distinct from security-and-hardening (per-line code review): threat model decides *which controls are needed*, hardening checks *whether existing code follows them*. Run BEFORE non-trivial features or third-party integrations; re-run after significant authn/authz refactors or blast-radius expansion.",
+  "description": "AppSec-grade threat model for design-stage and significant-architecture-change scenarios. Identifies trust boundaries, attacker profiles, and STRIDE attack paths; each finding cites file:line, attacker action, severity, and concrete mitigation. Output is a single `docs/threat-model/<repo-hash>-<date>/threat-model.md` per session (git-tracked project audit log with frontmatter). Distinct from security-and-hardening (per-line code review): threat model decides *which controls are needed*, hardening checks *whether existing code follows them*. Run BEFORE non-trivial features or third-party integrations; re-run after significant authn/authz refactors or blast-radius expansion.",
   "positive_triggers": [
     {
       "input": "We're about to integrate Stripe for payments in our SaaS. Before we start coding, do a threat model of what could go wrong across this boundary.",
@@ -54,7 +54,7 @@
         "§5 mitigations table includes concrete controls (signed-URL TTL=5min, audit-log coverage on both success and failure, RBAC role name mapping, download rate-limit) with owner column",
         "§6 Open assumptions: at least 2-3 (e.g. 'admin role is double-mapped only from internal SSO'; 'S3 bucket does not allow list via IAM'; 'audit log is append-only'); user is asked to validate",
         "§7 Out of scope: explicit (e.g. 'GDPR right-to-erasure is handled by a separate flow'; 'encrypted-at-rest is covered by infrastructure layer')",
-        "File saved at <repo>-threat-model.md with §1-§8 structure"
+        "File saved at `docs/threat-model/<repo-hash>-<date>/threat-model.md` with §1-§8 structure + frontmatter (`generated_at` / `repo_hash` / `repo_name` / `feature`)"
       ]
     },
     {
@@ -71,5 +71,5 @@
     }
   ],
   "owner": "meisijiya",
-  "notes": "Source material adapted from openai's curated .curated/security-threat-model and the Antigravity threat-modeling-expert. Distinct from contract-strengthening: contract-strengthening looks at runtime contract/state/timing/boundary risks in a *contract* sense; this skill looks at *adversarial* risks across trust boundaries. The two skills are complementary — when both apply, run threat-model first to scope, then contract-strengthening to harden the chosen contract. The model file lives at <repo>-threat-model.md and should be committed alongside the implementation PR so the threat model has an audit trail."
+  "notes": "Source material adapted from openai's curated .curated/security-threat-model and the Antigravity threat-modeling-expert. Distinct from contract-strengthening: contract-strengthening looks at runtime contract/state/timing/boundary risks in a *contract* sense; this skill looks at *adversarial* risks across trust boundaries. The two skills are complementary — when both apply, run threat-model first to scope, then contract-strengthening to harden the chosen contract. The model file lives at `docs/threat-model/<repo-hash>-<date>/threat-model.md` and should be committed alongside the implementation PR so the threat model has an audit trail."
 }

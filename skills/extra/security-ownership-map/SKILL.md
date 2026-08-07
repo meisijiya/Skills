@@ -1,6 +1,6 @@
 ---
 name: security-ownership-map
-description: "People↔file security-ownership topology from git history — surfaces orphan sensitive code, hidden owners, bus-factor hotspots, maintainer concentration. Output: `<repo>-ownership-map.md` per session + optional CSV/JSON. Use before refactors risking orphan sensitive code, after incidents to map blast-radius-of-departure, when hiring for coverage gaps, or designing rotation/on-call."
+description: "People↔file security-ownership topology from git history — surfaces orphan sensitive code, hidden owners, bus-factor hotspots, maintainer concentration. Output: `docs/ownership-map/<repo-hash>-<date>/ownership-map.{yaml,md,csv,json}` per session (git-tracked project audit log). Use before refactors risking orphan sensitive code, after incidents to map blast-radius-of-departure, when hiring for coverage gaps, or designing rotation/on-call."
 allowed-tools: "Read Bash Glob Grep"
 ---
 version: 0.1.0
@@ -21,6 +21,31 @@ This skill turns git history into a people↔file topology and surfaces the secu
 This is **security governance** — not security code review. Pairs with [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) (the per-line code audit) and [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) (the supply-chain layer).
 
 Source material adapted from openai's `.curated/security-ownership-map`; the YAML/Neo4j/Gephi outputs were dropped in favor of CSV/JSON + a Markdown summary, which covers the same questions without the dependency.
+
+## Path Convention (两轴原则)
+
+输出全部落在 `docs/ownership-map/` 下,git tracked 项目级 audit log:
+
+- `docs/ownership-map/<repo-hash>-<date>/ownership-map.yaml` — §1 用户可手编辑的 sensitive_paths 输入配置
+- `docs/ownership-map/<repo-hash>-<date>/ownership-map.md` — §5 主报告
+- `docs/ownership-map/<repo-hash>-<date>/ownership-map.csv` — §6 机器可读
+- `docs/ownership-map/<repo-hash>-<date>/ownership-map.json` — §6 机器可读
+
+**`<repo-hash>`**:报告生成时刻的 `git rev-parse --short=8 HEAD`(8 字符短 SHA;`<date>` = `YYYY-MM-DD`)。
+
+**Frontmatter 必填字段**(`ownership-map.{md,csv,json}` 必须带;`ownership-map.yaml` 输入配置不加 frontmatter,因用户要手编辑):
+
+```yaml
+---
+generated_at: <ISO-8601 UTC>
+repo_hash: <8-char SHA>
+repo_name: <basename of CWD>
+---
+```
+
+`csv` 与 `json` 用同字段(`csv` 用 YAML frontmatter 在文件首行,然后才是 CSV header;若工具不允许,接受 `# generated_at: ...` 注释形式)。
+
+**碰撞语义**:`<repo-hash>-<date>` 同日同 SHA 重复触发的概率极低(git short SHA 同日不易冲突);若真撞了,3 选项:`覆盖` / `重命名为 <repo-hash>-<date>-HHMMSS/` / `跳过本次`。
 
 ## When to Use
 
@@ -60,7 +85,7 @@ Sensitive paths are where security bugs have outsized blast radius. Pick a heuri
 Define these as glob patterns at the top of the run (so the user can adjust before generation):
 
 ```yaml
-# <repo>-ownership-map.yaml
+# docs/ownership-map/<repo-hash>-<date>/ownership-map.yaml
 sensitive_paths:
   - "auth/**"
   - "**/crypto/**"
@@ -162,7 +187,7 @@ If top-1 > 40% OR top-3 > 85%, flag concentration risk.
 - **Off-hours velocity**: commits outside 9-17 by author — signal of bus-factor pressure.
 - **Sensitive-vs-public exposure gap**: sensitive files without test coverage from non-author contributors — no peer review evidence.
 
-### 5. Output as `<repo>-ownership-map.md`
+### 5. Output to `docs/ownership-map/<repo-hash>-<date>/ownership-map.md`
 
 ```markdown
 # Security ownership map — <repo>
@@ -201,7 +226,7 @@ If top-1 > 40% OR top-3 > 85%, flag concentration risk.
 
 ## Methodology
 - All numbers derived from `git log --follow` per file (commands in process §2)
-- Sensitive paths defined by `<repo>-ownership-map.yaml` (top of run); adjust per repo
+- Sensitive paths defined by `docs/ownership-map/<repo-hash>-<date>/ownership-map.yaml` (top of run); adjust per repo
 - Email canonicalization via `.mailmap` if present
 - Recency window: 12 months (configurable)
 ```
@@ -210,8 +235,8 @@ If top-1 > 40% OR top-3 > 85%, flag concentration risk.
 
 For machine-readable downstream analysis, also write:
 
-- `<repo>-ownership-map.csv` with one row per file: path, sensitive_yes, contributor_count, top_author, top_author_share, last_touched, days_since_touch, bus_factor, hidden_owner
-- `<repo>-ownership-map.json` with the same data nested: `{repo, sensitive_paths, files: [...], queries: {A, B, C, D}, recommendations: [...]}`
+- `docs/ownership-map/<repo-hash>-<date>/ownership-map.csv` with one row per file: path, sensitive_yes, contributor_count, top_author, top_author_share, last_touched, days_since_touch, bus_factor, hidden_owner
+- `docs/ownership-map/<repo-hash>-<date>/ownership-map.json` with the same data nested: `{repo, repo_hash, repo_name, generated_at, sensitive_paths, files: [...], queries: {A, B, C, D}, recommendations: [...]}`
 
 Do NOT include Neo4j / Gephi / Graphviz outputs unless explicitly requested — CSV/JSON is enough for downstream tooling.
 
@@ -256,16 +281,16 @@ The ownership map is going wrong if:
 
 Before claiming the ownership map is done, produce evidence:
 
-- [ ] §1 sensitive_paths YAML at top of run (or in `<repo>-ownership-map.yaml`); reviewed by user before generation
+- [ ] §1 sensitive_paths YAML at top of run (or in `docs/ownership-map/<repo-hash>-<date>/ownership-map.yaml`); reviewed by user before generation
 - [ ] §2 walked git log per file; excluded binary / generated / fixture files
 - [ ] §2 reconciled authors via `.mailmap` if present
 - [ ] §3 Query A: orphan sensitive files listed with `last_touched` + `days_since`
 - [ ] §3 Query B: hidden owners listed; cross-referenced against CODEOWNERS (or absence noted)
 - [ ] §3 Query C: bus-factor-1 hotspots listed (sensitive paths only)
 - [ ] §3 Query D: top-K maintainers share calculated; concentration risk flagged if thresholds breached
-- [ ] §5 Markdown output saved at `<repo>-ownership-map.md`
+- [ ] §5 Markdown output saved at `docs/ownership-map/<repo-hash>-<date>/ownership-map.md` with frontmatter (`generated_at` / `repo_hash` / `repo_name`)
 - [ ] §5 Recommendations are concrete actions (specific file + specific remediation)
 - [ ] §5 Methodology section: reproducible commands listed
-- [ ] §6 CSV/JSON artifacts with `sensitive_yes` column for downstream filtering
+- [ ] §6 CSV/JSON artifacts at `docs/ownership-map/<repo-hash>-<date>/ownership-map.{csv,json}` with `sensitive_yes` column for downstream filtering
 
 **Acceptance criterion**: A second reviewer can rerun the same commands (listed in Methodology), see the same numbers, and reach the same conclusion about which files are at risk and why.

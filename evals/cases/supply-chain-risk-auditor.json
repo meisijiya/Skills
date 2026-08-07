@@ -46,8 +46,9 @@
         "Each axis scoring cites the specific evidence (not just 'MEDIUM')",
         "Aggregate risk score + band per the formula (axis1*2 + axis2*1 + axis3*1 + axis4*2 + axis5*1) / 7",
         "For depth=0 + security_critical=yes, the band escalates one level (any axis = CRITICAL → REJECT)",
-        "Output saved at <repo>-supply-chain-risk.md with the dep's row visible at the top of direct deps + Recommendations: REJECT / REVIEW / accept",
-        "If risk band is REVIEW or REJECT, the recommendations section lists specific alternatives or fork candidates, not 'consider alternatives'"
+        "Output saved at `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.md` with frontmatter (`generated_at` / `repo_hash` / `repo_name` / `scanned_deps`) + the dep's row visible at the top of direct deps + Recommendations: REJECT / REVIEW / accept",
+        "If risk band is REVIEW or REJECT, the recommendations section lists specific alternatives or fork candidates, not 'consider alternatives'",
+        "§5 CSV/JSON artifacts at `docs/supply-chain-risk/<repo-hash>-<date>/supply-chain-risk.{csv,json}` include per-axis scores (axis1-axis2-axis3-axis4-axis5-axis5.6) for downstream tooling"
       ]
     },
     {
