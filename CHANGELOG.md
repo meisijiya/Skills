@@ -2,6 +2,36 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — chore(migration): docs/ vs .omo/ two-axis rebalancing (Steps 1-6) (2026-08-07)
+
+**6 commits · 41 files (32 M + 9 ?? new) · `SCHEMA_VERSION` 1.0.0 → 1.1.0.** 用户级 `docs/` 与运行时级 `.omo/` 二轴独立化;`skills/core/` vs `skills/extra/` 双目录正式落库。Pre-commit 6 Iron Law gate 全 PASS(`validate-skills.sh` 44/44 / `check-doc-drift.sh` OK / `check-marketplace.sh` OK / `test-text-contracts.sh` 8 PASS / `test-citation-discipline.sh` 7 PASS / `node --test scripts/test-omo-state-index.js` 1/1)。
+
+### Step 1 — verify-chain eval baseline (Commit 1)
+
+`chore(skill): Step 1 verify-chain eval baseline (Steps 1-6 migration part 1/6)`。`skills/extra/verify-chain/SKILL.md` 加 evaluate-against-online-sources capability,paired with `evals/cases/verify-chain.json`(3 positive + 3 negative + 1 behavioral)。Foundation for Step 2-4 eval-pattern siblings。
+
+### Step 2 — security triad evals (Commit 2)
+
+`feat(skills): Step 2 security triad evals — ownership-map + threat-model + supply-chain-risk-auditor (2/6)`。3 SKILL.md + 3 eval JSONs + 1 cross-ref (`security-and-hardening`) = 7 files。Positive/negative coverage for 3 trust-boundary skills;cross-ref links all 9 security skills。
+
+### Step 3 — research skill + citation discipline (Commit 3)
+
+`feat(skill): Step 3 research skill + citation discipline test (3/6)`。`skills/extra/research/SKILL.md` + `scripts/test-citation-discipline.sh`(7 PASS) + `evals/cases/research.json` + `docs/research.md` 跨链。Domain 6th entry with full citation-discipline gate enforcement.
+
+### Step 4 — domain group additions (Commit 4)
+
+`feat(skills): Step 4 domain group additions — architecture + incidents + designer-handoff (4/6)`。`improve-codebase-architecture` (Ousterhout deep/shallow audit, proposal-only) + `security-incident-response` (NIST CSF detect/triage/contain/eradicate/recover/postmortem) + `designer-handoff` (ui-ux-pro-max bridge). 7 files = 3 SKILL+eval pairs + 1 cross-cut glossary `docs/phase-vocabulary.md`。
+
+### Step 5 — omo-state-index v1.1.0 (Commit 5)
+
+`chore(plugin): Step 5 omo-state-index v1.1.0 — dual arrays + throwaway-worktree refs (5/6)`。`SCHEMA_VERSION 1.0.0 → 1.1.0` + dual `REQUIRED_ARRAYS`(8 arrays) + `throwaway-protos` detection。3 Lane binding fixes required for 1.1.0 verifiable:`scripts/test-omo-state-index-manual-qa.js` L31-34 + L135 (`REQUIRED_ARRAYS` = 8) + L123-127 (`1.1.0` assertion); `docs/supply-chain-risk/README.md` L7 filename binding fix. 11 files = 1 plugin + 3 tests + 1 core skill glob + 2 SKILL.md adjacencies + 2 paired evals + 1 governance doc。
+
+**⚠️ USER MUST RESTART OPENCODE** for plugin to take effect。旧 plugin 内存中保留 SCHEMA 1.0.0;新 bootstrap (`.mo`) 在 next process start 时注入 v1.1.0。OpenCode plugins 仅 process start 加载。
+
+### Step 6 — docs/ vs .omo/ two-axis rebalancing (Commit 6)
+
+`docs(migration): Step 6 docs/ vs .omo/ two-axis rebalancing + CHANGELOG entry (6/6)`。9 个新 `docs/<noun>/README.md`(verification / ownership-map / threat-model / supply-chain-risk / research / architecture-review / incidents / design-spec ── Step 4 review GAP fix) + `docs/migrations/2026-08-06-docs-omo-rebalancing.md` 用户迁移 runbook + `docs/prototype.md` 3 throwaway drift fix + 本 CHANGELOG 段.
+
 ## Unreleased — feat(skill): meisijiya-phase-checkpoint phase boundary notification (2026-08-05)
 
 **第 44 个 skill**,归入 `meisijiya-domain` group(12→13)。与 `meisijiya-handoff` 分层互补:**phase-checkpoint = 通知层**(agent-driven,`disable-model-invocation: false`);**handoff = 契约层**(user-driven,`disable-model-invocation: true`,allowlist 第 2 个)。phase-checkpoint 在 `.omo/plans/<slug>.md` phase 整体完成时主动 emit 三选一 soft-prompt(`/handoff` / `继续` / `走 notepad`),由 user 决策;**绝不替 user 写 handoff doc**(契约层专属)。`allowlist` 不扩 —— agent-driven skill 默认不进。

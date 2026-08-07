@@ -20,7 +20,7 @@ Phase 1.2 — Visual Gating
   │   (alt: need_context, bypassed)
   ├─ 3 default variants (max 5, MIN 2 valid)
   ├─ each variant differs on ≥ 1 axis: layout / density / motion
-  ├─ brownfield: ?variant=A|B|C|E + floating switcher (.omo/throwaway/<feature>/)
+  ├─ brownfield: ?variant=A|B|C|E + floating switcher (.omo/throwaway-worktree/<feature>/)
   ├─ greenfield: own static HTML generator (.omo/prototypes/<plan>/{variant-*,index}.html)
   ├─ marketing-grade: meisijiya-frontend-taste enforced
   │   data-heavy/dashboard/multi-step: [taste:exempt] annotation
@@ -54,7 +54,7 @@ Bypass **mandatory** record: `[proto:bypass]` in `decisions.md` + spec marker re
 ## Storage
 
 - Status: `.omo/prototypes/<plan>/status.json` (per-plan, state machine)
-- Variants: `.omo/prototypes/<plan>/{variant-A,B,C,index}.html` (greenfield) OR `.omo/throwaway/<feature>/` worktree (brownfield)
+- Variants: `.omo/prototypes/<plan>/{variant-A,B,C,index}.html` (greenfield) OR `.omo/throwaway-worktree/<feature>/` worktree (brownfield)
 - Decisions: `.omo/notepads/<plan>/decisions.md` (append-only)
 - Spec: original `[PROTO-RESOLVE]` marker replaced with chosen variant text
 
@@ -66,7 +66,7 @@ Bypass **mandatory** record: `[proto:bypass]` in `decisions.md` + spec marker re
 - `render:failed` variants stay visible; not silently deleted
 - Bypass requires `reason`; silent bypass = auto-trigger
 - Greenfield under `.omo/prototypes/`, never under `skills/` or other production paths
-- Brownfield under `.omo/throwaway/`, never under `skills/` or other production paths
+- Brownfield under `.omo/throwaway-worktree/`, never under `skills/` or other production paths
 
 ## Related skills
 
