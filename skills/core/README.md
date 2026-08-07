@@ -35,3 +35,20 @@ npx skills add https://github.com/meisijiya/Skills --from skills/core
 ```
 
 完整写作规范见 [`skill-anatomy.md`](../../skill-anatomy.md)。
+
+## L1 / L3 split convention
+
+`~/.config/opencode/AGENTS.md` (user-level) and project-level `AGENTS.md` follow
+a two-layer convention:
+
+| Layer | What it holds | When it's loaded |
+|---|---|---|
+| **L1 hard rules** | Behavioral disciplines (security, sensitivity, process) | Always (every session) |
+| **L3 environment context** | OS, locale, infra topology, port rules, mirror sources | On-demand via `meisijiya-env-context` skill |
+
+The 4 L3 blocks from a typical user-level AGENTS.md (Personal Rules,
+Architecture Principles, Port Exposure Rules, Domestic Mirror Sources) **belong
+in the `meisijiya-env-context` skill body**, not in AGENTS.md itself. AGENTS.md
+should only contain L1 hard rules.
+
+See `docs/agents-md-guide.md` §"L1 / L3 split" for the full convention.

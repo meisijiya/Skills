@@ -113,3 +113,24 @@ awk '/<!-- meisijiya-skills:start -->/{flag=1; next} /<!-- meisijiya-skills:end 
 - [`AGENTS.md`](../AGENTS.md) Section B — 仓库贡献者指南
 - [`AGENTS.md`](../AGENTS.md) Section C — 项目级 AGENTS.md 使用规范
 - [`skill-anatomy.md`](../skill-anatomy.md) — SKILL.md 写作规范(同源精神,scope 不同)
+
+## L1 / L3 split
+
+When writing AGENTS.md for a user-level or project-level context, follow the
+two-layer convention:
+
+- **L1 (hard rules)**: always-on behavioral disciplines (security, sensitivity,
+  process). Examples: handling of secrets, response language, decision-tree
+  discipline. Stays in AGENTS.md.
+- **L3 (environment context)**: user-specific or project-specific environment
+  facts (OS, locale, deployment topology, port rules, mirror sources). Belongs
+  in a dedicated skill body — for the user-level AGENTS.md use case, this is
+  `meisijiya-env-context`.
+
+Why split: L1 rules must be visible every turn (harness reads AGENTS.md
+once per session); L3 context is high-token but low-frequency. Keeping L3
+in a skill keeps AGENTS.md lean (~3K chars) and lets the model load L3 only
+when relevant (deploy / database / port / network keywords).
+
+**Migration path**: when trimming an existing AGENTS.md, move L3 blocks into
+the env-context skill body verbatim, then delete them from AGENTS.md.
