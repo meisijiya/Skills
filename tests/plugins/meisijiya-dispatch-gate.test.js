@@ -8,7 +8,9 @@
  *   1. Positive — empty load_skills + matrix-mapped category → inject recommendation
  *   2. Negative — non-empty load_skills → no mutation; console.warn fired with hint
  *   3. Defensive — output.args=null/undefined/non-object; tool != 'task' → no-throw, no-mutate
- *   4. Edge — category not in MVP matrix; no routing; recommended skill not installed → no-op
+ *   4. Edge — category mapped to [] (quick / unspecified-low / artistry / ultrabrain /
+ *      unspecified-high / writing, all non-injectable per matrix); no routing; recommended
+ *      skill not installed → no-op
  *
  * Plus 1 reference-identity assertion: `output.args` reference must not change across the
  * hook call (regresses against the OpenCode issue #25754 reassignment footgun).
@@ -60,11 +62,13 @@ test('resolveDispatchLoadSkills: returns installed recommendation for deep', (t)
 // 2. Pure resolver — edge cases
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('resolveDispatchLoadSkills: returns null for category not in MVP RECOMMENDED', () => {
+test('resolveDispatchLoadSkills: returns null for matrix rows mapped to [] (non-injectable)', () => {
   assert.strictEqual(resolveDispatchLoadSkills({ category: 'artistry' }), null);
   assert.strictEqual(resolveDispatchLoadSkills({ category: 'quick' }), null);
   assert.strictEqual(resolveDispatchLoadSkills({ category: 'unspecified-low' }), null);
   assert.strictEqual(resolveDispatchLoadSkills({ category: 'ultrabrain' }), null);
+  assert.strictEqual(resolveDispatchLoadSkills({ category: 'unspecified-high' }), null);
+  assert.strictEqual(resolveDispatchLoadSkills({ category: 'writing' }), null);
 });
 
 test('resolveDispatchLoadSkills: returns null when args is null/undefined', () => {
@@ -126,7 +130,7 @@ test('hook: non-empty load_skills → no mutation; console.warn called with hint
   assert.match(msg, /matrix recommends/);
 });
 
-test('hook: non-empty load_skills + category not in matrix → no warn, no mutation', async (t) => {
+test('hook: non-empty load_skills + category mapped to [] → no warn, no mutation', async (t) => {
   const warnSpy = t.mock.method(console, 'warn', () => {});
   const args = { category: 'artistry', load_skills: ['whatever'] };
   await invokeHook({ tool: 'task' }, { args });
@@ -167,14 +171,30 @@ test('hook: input missing → no throw, no warn', async (t) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. Edge: category not in MVP matrix → no-op (positive path)
+// 6. Edge: category mapped to [] (non-injectable per matrix) → no-op (positive path)
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('hook: category=artistry (not in MVP) + empty load_skills → no-op', async (t) => {
+test('hook: category=artistry (mapped to []) + empty load_skills → no-op', async (t) => {
   const warnSpy = t.mock.method(console, 'warn', () => {});
   const args = { category: 'artistry', load_skills: [] };
   await invokeHook({ tool: 'task' }, { args });
   assert.deepStrictEqual(args.load_skills, [], 'artistry must not trigger injection');
+  assert.strictEqual(warnSpy.mock.calls.length, 0);
+});
+
+test('hook: category=ultrabrain (pick-1, mapped to []) + empty load_skills → no-op', async (t) => {
+  const warnSpy = t.mock.method(console, 'warn', () => {});
+  const args = { category: 'ultrabrain', load_skills: [] };
+  await invokeHook({ tool: 'task' }, { args });
+  assert.deepStrictEqual(args.load_skills, [], 'ultrabrain must not trigger injection');
+  assert.strictEqual(warnSpy.mock.calls.length, 0);
+});
+
+test('hook: category=writing (conditional, mapped to []) + empty load_skills → no-op', async (t) => {
+  const warnSpy = t.mock.method(console, 'warn', () => {});
+  const args = { category: 'writing', load_skills: [] };
+  await invokeHook({ tool: 'task' }, { args });
+  assert.deepStrictEqual(args.load_skills, [], 'writing must not trigger injection');
   assert.strictEqual(warnSpy.mock.calls.length, 0);
 });
 

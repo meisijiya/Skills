@@ -1,5 +1,7 @@
 # Skill Priority Table
 
+> For Category × Skill Matrix + dispatch scenarios + 5-lane review, see [`category-matrix.md`](category-matrix.md).
+
 Cross-cutting routing hints — not rules. The `description` field of each
 skill is the source of truth; this table is an accelerator for the most
 common trigger patterns. When multiple skills could apply, **process

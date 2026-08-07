@@ -85,17 +85,25 @@
     {
       "scenario": "Sisyphus dispatches task(category='visual-engineering', load_skills=[]) for a greenfield landing page (Hard Rule completeness check)",
       "expected_behavior": [
-        "Agent consults Category × Skill Matrix main table BEFORE dispatching (§Hard Rule, mandatory)",
+        "Agent consults `references/category-matrix.md` §Sisyphus Dispatch Protocol (Category × Skill Matrix main table) BEFORE dispatching (§Hard Rule, mandatory)",
         "Agent passes COMPLETE load_skills, never [] for matrix-mapped categories: [\"meisijiya-frontend-taste\"]",
-        "Agent does NOT rely on dispatch-gate plugin to backfill — the gate is fallback only, primary discipline is the §Hard Rule"
+        "Agent does NOT rely on dispatch-gate plugin to backfill — the gate is fallback only, primary discipline is the §Hard Rule in references/category-matrix.md"
       ]
     },
     {
       "scenario": "Sisyphus dispatches task(category='deep', load_skills=['test-driven-development']) to an executor (plugin regression check)",
       "expected_behavior": [
         "Agent passes the existing load_skills list through unchanged — plugin never modifies a non-empty list",
-        "Agent does not merge, dedupe, or reorder the list (respected as-is per §Reasoning: 'load_skills already set; matrix recommends ...')",
+        "Agent does not merge, dedupe, or reorder the list (respected as-is per the load_skills-pass-through contract in references/category-matrix.md §Sisyphus Dispatch Protocol)",
         "If a console.warn 'matrix recommends X' appears, agent only updates its next dispatch if X was actually missing — does not retroactively mutate this one"
+      ]
+    },
+    {
+      "scenario": "When dispatcher is invoked, the model consults `references/category-matrix.md` and `references/dispatcher-rationalizations.md` before routing per Category × Skill Matrix.",
+      "expected_behavior": [
+        "Agent resolves routing decisions (load_skills per category, dispatch patterns, §Hard Rule) from `references/category-matrix.md` — not from memory of the pre-split SKILL.md body",
+        "Agent consults `references/dispatcher-rationalizations.md` when tempted to skip skill invocation — not the deprecated in-body §Common Rationalizations",
+        "Agent keeps SKILL.md lean: SKILL.md §Process cross-references the reference files instead of duplicating the matrix or rationalization tables inline"
       ]
     }
   ],
