@@ -2,6 +2,60 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — meisijiya-skills repo optimization (R1-R8 closed, 2026-08-08)
+
+**6 commits · 70 files (60 M + 10 new) · `validate-skills.sh` 45/45 OK · `check-marketplace.sh` 45 in sync · `check-doc-drift.sh` OK · `dispatch-gate.test.js` 17 → 19 pass.** Wave 1-3 + 5 atomic commits;每 commit 前 T4 验证全绿。`msg Feb M3` 答用户三问(Q1 description 精简+Q2 AGENTS.md 拆 L1/L3+Q3 提示词复用)。
+
+### Commits (5 atomic + 1 batch)
+
+1. `f3a9f65` — dispatcher split: body 242 → 70 + `references/category-matrix.md` (Sisyphus Dispatch Protocol + 8-row matrix + 5-lane + specialist agents + Common Dispatch Scenarios) + `references/dispatcher-rationalizations.md` + dispatch-gate RECOMMENDED 同步到 8-row 矩阵 (逐行一致) + tests 17 → 19 (新增 ultrabrain / writing 空 load_skills → no-op) + eval case 6 → 7 behavioral_evals (新增 split-refs consultation scenario)
+2. `2664ca7` — plugin `meisijiya-skills.js`: module-load 调 `client.skill.list({ query: { directory } })` 缓存 → 配置 hook 用 runtime 发现的 skill location + FS fallback 至 `~/.agents/skills/` (T0.1 结论:SDK hook input 不暴露 `availableSkills`,但 `client.skill.list` 是 OpenCode stable API)
+3. `91c6f3e` — `inject-agents-md.sh` 262 → 89 行 (Section A 由 plugin `<available_skills>` 提供;保留 `--remove` 作 legacy cleanup;默认 deprecation)
+4. `9da3cbb` — 新 skill `meisijiya-env-context` (改名避开 omo 内置 env-context 冲突;装 4 个 L3 block: Personal Rules / Architecture Principles / Port Exposure / Mirror Sources); eval 4/3/3/5; marketplace 45 sync
+5. `21231e5` — docs: L1/L3 split 约定 (skills/core/README.md + docs/agents-md-guide.md); repo AGENTS.md Section A 126 → 13 行 (catalog pointer); omo-agent-skill-config.md 6 处 matrix 引用迁移到 `references/category-matrix.md`
+6. `3566daf` — 44 SKILL.md description 精简到 ≤300 chars (总字符 19,966 → ~13,900, -30%); 9 verified eval case `positive_keywords` 同步以保 CI `validate-skills.yml:86` 门禁
+
+### Key decisions (Oracle + explore + planner 确认)
+
+- **D1**: plugin 不从 omo Sisyphus runtime 拉 `availableSkills` (无公开 API);改走 `client.skill.list()` + FS fallback (T0.1 验证)
+- **D2**: dispatcher body ≤150 行;matrix + scenarios + 5-lane + specialist 移到 `references/category-matrix.md`;rationalizations + red flags 移到 `references/dispatcher-rationalizations.md`
+- **D3**: 44 description 统一 ≤300 chars;dmi=true skill (loop-me / meisijiya-handoff) ≤120 chars;eval positive_keywords 同步
+- **D4**: 新 skill 命名 `meisijiya-env-context`(避开 omo 内置 env-context 时区/locale 冲突);装 4 个 L3 block
+- **D5**: inject-agents-md.sh 保留 `--remove` legacy cleanup(选 C);Section A 缩 pointer(避免文档漂移;catalog 改由 plugin runtime 提供)
+
+### Token 优化估算
+
+| 度量 | 优化前 | 优化后 | 节省 |
+|---|---|---|---|
+| EXTREMELY_IMPORTANT body 行数 | 242 | 70 | **-172 行** |
+| description 字符总长 | 19,966 | ~13,900 | **-30%** |
+| 用户级 AGENTS.md | 21K | ~3K (L1 硬规则 + env-context 指针) | **-85%** |
+| 每 session 常驻 token | ~60K | ~50K | **-10K** |
+
+### Risks closed (R1-R8)
+
+- R1 SDK API: `client.skill.list` 验证可行 ✓
+- R2 用户级 AGENTS.md: env-context skill 自动加载 + 用户手动移除 4 L3 block (文档化) ✓
+- R3 description 压缩: 保留 "what + Use when" 模板,lossless for routing ✓
+- R4 仓库 44 vs 48: 第三方 4 个 (aihot/hallmark/mmx-cli/check-understanding) 不动 ✓
+- R5 plugin 需重启 OpenCode: CHANGELOG 显式说明 ✓
+- R6 repo → home 同步: 每个 Wave 2.x 完成后 cp + diff 0 ✓
+- R7 bootstrap EXTREMELY_IMPORTANT wrapper 完整保留 (plugin T1.2 不动 wrapper) ✓
+- R8 eval 旧 Step 引用: T3.2 更新为 references/category-matrix.md 路径 ✓
+
+### 项目名兼容性
+
+✅ 完整兼容 skill 体系内核(分阶段调用 + using-skill 调度) + omo Sisyphus 基座(IntentGate + Category+Skill + handoff)。未引入新架构,未削弱基座提示词遵循度,未引入新依赖。`disp-gate` plugin 仍为 `task(load_skills=[])` 硬层 fallback。
+
+### 后续需手动操作
+
+- **重启 OpenCode** 使 plugin 改动生效 (T5.2 已 commit)
+- **用户级 `~/.config/opencode/AGENTS.md`**: 手动移除 4 个 L3 block (Personal Rules / Architecture Principles / Port Exposure Rules / Domestic Mirror Sources), 内容已迁移到 `meisijiya-env-context/SKILL.md`
+
+### Plan artifact
+
+方案文档:`/home/ubuntu/workSpace/Skills/.omo/plans/meisijiya-optimization-2026-08.md`
+
 ## Unreleased — chore(migration): docs/ vs .omo/ two-axis rebalancing (Steps 1-6) (2026-08-07)
 
 **6 commits · 41 files (32 M + 9 ?? new) · `SCHEMA_VERSION` 1.0.0 → 1.1.0.** 用户级 `docs/` 与运行时级 `.omo/` 二轴独立化;`skills/core/` vs `skills/extra/` 双目录正式落库。Pre-commit 6 Iron Law gate 全 PASS(`validate-skills.sh` 44/44 / `check-doc-drift.sh` OK / `check-marketplace.sh` OK / `test-text-contracts.sh` 8 PASS / `test-citation-discipline.sh` 7 PASS / `node --test scripts/test-omo-state-index.js` 1/1)。
