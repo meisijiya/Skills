@@ -47,7 +47,7 @@
     {
       "scenario": "Brownfield behavioral: existing route at .opencode/plugins/meisijiya-skills.js must accept ?variant=A|B|C|E and serve three prototype variants with a floating switcher; status.json transitions to awaiting_selection with at least 2 valid variants.",
       "expected_behavior": [
-        "Agent reads the existing route and writes throwaway scaffold under .omo/throwaway/<feature>/",
+        "Agent reads the existing route and writes throwaway scaffold under .omo/throwaway-worktree/<feature>/",
         "Agent generates 3 prototype variants differing on at least one axis (layout / density / motion)",
         "Agent creates floating bottom-bar switcher for live variant comparison",
         "Agent initializes .omo/prototypes/<plan>/status.json with state=awaiting_selection and variants[] array listing 3 entries with render:ok",

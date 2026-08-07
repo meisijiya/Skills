@@ -18,7 +18,7 @@ Catches the **omissions** and **fabrications** AI is most likely to leave out / 
 
 The two skills do not overlap; running both back-to-back is the intended workflow. Each finds bugs the other structurally cannot.
 
-**Output:** `ai-blindspots-report.md` in the caller workspace root, listing every finding with file:line + a one-line fix. Findings cite the checklist class (1-8 below) so the reader can audit coverage.
+**Output:** `.omo/blindspots-reports/<diff-hash>/ai-blindspots-report.md`(process-grade: ephemeral working artifact, not a git-tracked audit log; gitignored per diff — `<diff-hash>` defined in §5) — listing every finding with file:line + a one-line fix. Findings cite the checklist class (1-8 below) so the reader can audit coverage.
 
 ## When to Use
 
@@ -204,7 +204,7 @@ This is the canonical list. Both sub-agent (Step 2) and grep (Step 3) must cover
 
 ### 5. Write report
 
-Output path: caller workspace root, file name `ai-blindspots-report.md`.
+Output path: `.omo/blindspots-reports/<diff-hash>/ai-blindspots-report.md`. `<diff-hash>` is the **12-hex content hash of the diff being audited** (`` `git diff <base>..<head> | git hash-object --stdin | head -c 12` ``); for uncommitted working-tree changes, `<base>` defaults to HEAD. This uniquely identifies the diff and works for both committed and uncommitted audits — different diffs land in different directories, so reports don't overwrite each other (and the skill's "findings must not be lost" invariant holds). Falls back to ISO timestamp (`%Y%m%dT%H%M%SZ`) if git is unavailable.
 
 Report template:
 
@@ -270,7 +270,7 @@ If the report cannot be written to disk (permissions / full disk), print the sam
 - [ ] Sub-agent scan dispatched and completed (or grep-only fallback with explicit note).
 - [ ] All 8 checklist classes covered (LLM + grep combined); Class 4 may be `unverified` if no browserslist.
 - [ ] Each finding has `file:line` + one-line concrete fix (not "consider").
-- [ ] `ai-blindspots-report.md` written to caller workspace root, OR printed to stdout if write failed.
+- [ ] `.omo/blindspots-reports/<diff-hash>/ai-blindspots-report.md` written, OR printed to stdout if write failed.
 - [ ] `bash scripts/validate-skills.sh` reports OK for `skills/extra/ai-code-blindspots/SKILL.md`.
 - [ ] `bash scripts/check-marketplace.sh` reports OK (entry present in `.claude-plugin/marketplace.json`).
 - [ ] Description length ≤ 1024 chars; SKILL.md ≤ 500 lines.

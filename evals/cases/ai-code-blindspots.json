@@ -55,7 +55,7 @@
         "If ai-code-blindspots is not installed (extra/, opt-in), skip the load and proceed directly to verification-before-completion Gate Function — the dispatcher does not block on a missing optional skill",
         "If the changes are pure-docs / test-only / style-only (no executable logic touched), skip the load and proceed to Gate Function",
         "ai-code-blindspots enumerates the 7 categories and runs its two-layer scan (LLM sub-agent + grep fallback)",
-        "Agent writes ai-blindspots-report.md at workspace root with one section per applicable category, each finding showing file:line + concrete one-line fix",
+        "Agent writes .omo/blindspots-reports/<diff-hash>/ai-blindspots-report.md (process-grade: ephemeral working artifact, not git-tracked; gitignored per diff) with one section per applicable category, each finding showing file:line + concrete one-line fix",
         "Report marks any class with zero findings explicitly (proves coverage, not silent skip), and tags Class 4 environment-compat as 'unverified' if no browserslist config exists in the repo",
         "If sub-agent scan fails/times out, agent falls back to grep-only mode and surfaces 'subagent unavailable, grep-only' in report header — does not claim full coverage",
         "Agent returns control to verification-before-completion so blindspots findings combine with Stage-1 gates before the final completion claim"
@@ -66,7 +66,7 @@
       "expected_behavior": [
         "verification-before-completion loads as the always-on gate",
         "Process step checks Write/Edit tool-call ledger for this turn — finds none → does NOT load ai-code-blindspots (no code to scan)",
-        "Agent reports verification-before-completion result without ai-code-blindspots overhead; no ai-blindspots-report.md is written",
+        "Agent reports verification-before-completion result without ai-code-blindspots overhead; no .omo/blindspots-reports/<diff-hash>/ai-blindspots-report.md is written",
         "Token cost stays at zero — avoids the 'medium sub-agent scan' cost when there is nothing to scan"
       ]
     }

@@ -12,10 +12,11 @@ separate slices / TODOs in the same plan).
 ## Why
 
 `.omo/` accumulates state across plans: `plans/`, `notepads/`, `drafts/`,
-`wayfinder/`, `wayfinder-archive/`, `throwaway/`, `prototypes/`,
-`research/`, `incidents/`. Without a single discovery entry, every skill
-must re-scan the filesystem to know what's in flight — and stale state
-silently rots.
+`wayfinder/`, `wayfinder-archive/`, `throwaway-worktree/`, `throwaway-proto/`. Without a single
+discovery entry, every skill must re-scan the filesystem to know what's
+in flight — and stale state silently rots. (`research/` and `incidents/`
+moved to `docs/` per the docs/ vs `.omo/` two-axis rebalancing — git
+tracked project-level audit logs, not `.omo/` state.)
 
 A1 fixes that with **one** JSON file (`.omo/.index.json`) that mirrors
 the on-disk state of `.omo/**`. The file is maintained by a single
@@ -52,9 +53,9 @@ Mutates the in-memory config object in place, mirroring the pattern in
 ```js
 config.omoStateIndex = {
   debounceMs: 500,
-  schemaVersion: '1.0.0',
+  schemaVersion: '1.1.0',
   indexPath: '.omo/.index.json',
-  requiredArrays: [/* seven array names */],
+  requiredArrays: [/* eight array names */],
 };
 ```
 
@@ -83,8 +84,8 @@ reference, so reassigning `parts` is a silent no-op — see
 Example 3-line summary:
 
 ```markdown
-## OMO state (schema 1.0.0)
-- active_plans=3, open_wayfinders=1, throwaway_worktrees=0
+## OMO state (schema 1.1.0)
+- active_plans=3, open_wayfinders=1, throwaway_worktrees=0, throwaway_protos=0
 - drafts_to_resolve=2, stale_artifacts=0, closed_plans=0
 ```
 
@@ -112,21 +113,22 @@ Within the debounce window:
 The net effect: 100 events in a 400ms burst produce **one** rebuild,
 not 100.
 
-## Schema (1.0.0)
+## Schema (1.1.0)
 
 `.omo/.index.json` is a JSON object with the following required shape.
-All seven arrays must be present, even if empty. `ts_rebuilt` is the
+All eight arrays must be present, even if empty. `ts_rebuilt` is the
 ISO 8601 timestamp of the most recent rebuild.
 
 ```jsonc
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "ts_rebuilt": "2026-07-29T16:42:00.000Z",
   "active_plans":       [{ "slug": "skills-extension-v1", "path": ".omo/plans/skills-extension-v1.md" }],
   "closed_plans":       [],
   "open_wayfinders":    [{ "slug": "demo-map", "path": ".omo/wayfinder/demo-map/" }],
   "closed_wayfinders":  [],
   "throwaway_worktrees":[],
+  "throwaway_protos":   [],
   "drafts_to_resolve":  [{ "slug": "unfinished-spec", "path": ".omo/drafts/unfinished-spec.md" }],
   "stale_artifacts":    []
 }
@@ -140,9 +142,10 @@ ISO 8601 timestamp of the most recent rebuild.
 | `closed_plans` | `.omo/plans-archive/*.md` | No archive yet |
 | `open_wayfinders` | `.omo/wayfinder/*/` (each `slug` = directory name) | No open wayfinders |
 | `closed_wayfinders` | `.omo/wayfinder-archive/*/` | No archived wayfinders |
-| `throwaway_worktrees` | `.omo/throwaway/*/` | No throwaway worktrees |
+| `throwaway_worktrees` | `.omo/throwaway-worktree/*/` | No throwaway worktrees |
+| `throwaway_protos` | `.omo/throwaway-proto/*/` | No throwaway protos |
 | `drafts_to_resolve` | `.omo/drafts/*.md` | No drafts |
-| `stale_artifacts` | entries inside `throwaway/` that are **empty** or lack `.git` | Nothing stale |
+| `stale_artifacts` | entries inside `throwaway-worktree/` or `throwaway-proto/` that are **empty** or lack `.git` | Nothing stale |
 
 A2 (the next-slice existing-skill text patches) is responsible for
 marking plans as `closed` (via the `.omo/plans-archive/` directory) and
@@ -154,7 +157,7 @@ user with an explicit `y/n` confirmation before any deletion.
 ### 1. Corrupt `.index.json`
 
 **Symptom:** `.index.json` exists but isn't valid JSON, or is missing
-`schema_version`, or is missing one of the seven required arrays.
+`schema_version`, or is missing one of the eight required arrays.
 
 **Behavior:** `rebuildIndex()` flags `fromCorrupt: true` and overwrites
 the file with a fresh scan. The hook caller can log the corruption for
@@ -191,8 +194,8 @@ spurious intermediate writes.
 
 **Symptom:** user has no `.omo/` yet (greenfield repo).
 
-**Behavior:** `rebuildIndex` returns an empty index (all seven arrays
-empty, `schema_version: "1.0.0"`) and writes it. The first
+**Behavior:** `rebuildIndex` returns an empty index (all eight arrays
+empty, `schema_version: "1.1.0"`) and writes it. The first
 `scheduleRebuild` call creates `.omo/.index.json` from scratch.
 
 **Test coverage:** case (a) starts with an empty `.omo/` (the test
@@ -222,7 +225,7 @@ delay writes in repo B.
 `scripts/test-omo-state-index.js` is a pure-Node smoke test (no
 vitest, no new deps) covering the four required cases:
 
-- **(a)** absent index + first `.omo/**` write → schema 1.0.0 + 7 arrays
+- **(a)** absent index + first `.omo/**` write → schema 1.1.0 + 8 arrays
 - **(b)** corrupt index → rebuilt from filesystem
 - **(c)** self-write → no recursion
 - **(d)** two events within 500ms → exactly one rebuild

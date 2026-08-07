@@ -37,7 +37,7 @@ Slice 的大小不是越小越好 —— 太碎浪费 commit overhead,太大失�
 
 Before reading the executable frontier, run this non-destructive inventory:
 ```bash
-ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway,wayfinder,wayfinder-archive,research,architecture-review,incidents}/* 2>/dev/null
+ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway-worktree,throwaway-proto,wayfinder,wayfinder-archive}/* 2>/dev/null
 ```
 Cross-check every result against `.omo/.index.json` field `stale_artifacts`. Show the filesystem-only, index-only, and matched stale candidates before any action. Prompt exactly `Delete stale artifacts? y/n`; never auto-delete. `n`, empty input, a missing/corrupt index, or an interrupted prompt preserves every path; `y` only authorizes the explicitly listed paths for a separate, auditable cleanup action.
 ### 1. Decompose into slices

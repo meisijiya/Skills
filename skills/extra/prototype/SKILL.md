@@ -12,7 +12,7 @@ Resolves visual / interaction decisions in spec authoring by generating throwawa
 
 **Two rendering paths:**
 
-- **Brownfield** — same existing route serves `?variant=A|B|C|E`; floating bottom-bar switcher for live comparison. Throwaway code lives in `.omo/throwaway/<feature>/` worktree.
+- **Brownfield** — same existing route serves `?variant=A|B|C|E`; floating bottom-bar switcher for live comparison. Throwaway code lives in `.omo/throwaway-worktree/<feature>/` worktree.
 - **Greenfield** — own static HTML generator outputs `.omo/prototypes/<plan>/{variant-A,B,C,index}.html`; does **not** delegate to `build-gate-visual-review` (its `<script>` ban is incompatible with the floating switcher).
 
 > **职责边界**:`/prototype` is throwaway spec-authoring scaffolding. It does not produce production UI, does not deploy, and does not enforce `meisijiya-frontend-taste` in the same way `designer-handoff` does. The exemption template is `[taste:exempt]` (see §3.3). Selected variant feeds spec §3.5 via `[PROTO-RESOLVE]` marker replacement.
@@ -71,8 +71,8 @@ Render order is not prescriptive; pick the inter-axis divergence that maximizes 
 If the user has an existing route / component / page:
 
 - Same route accepts `?variant=A|B|C|E` query param.
-- Floating bottom-bar switcher (HTML+JS, single file, lives at `.omo/throwaway/<feature>/switcher.html`) shows all variants; clicking reloads the route with the new query param.
-- Implementation lives in `.omo/throwaway/<feature>/` worktree (per `incremental-implementation` A2 cleanup).
+- Floating bottom-bar switcher (HTML+JS, single file, lives at `.omo/throwaway-worktree/<feature>/switcher.html`) shows all variants; clicking reloads the route with the new query param.
+- Implementation lives in `.omo/throwaway-worktree/<feature>/` worktree (per `incremental-implementation` A2 cleanup).
 
 #### 3.2 Greenfield path
 
@@ -139,7 +139,7 @@ Bypass **mandatory** record: `[proto:bypass] ts=... feature=... reason=...` in `
 | "Render failed, just delete the variant" | The user must see the failure; mark it `render:failed` and keep it shown. |
 | "User said they like A, ship it" | Until the user clicks / types the selection and you write `[proto]`, status is `awaiting_selection` not `resolved`. |
 | "Spec amend retroactively replaces prototype" | Mark `[proto:superseded] ts=... prior=... by=[amend:...]` — the old choice stays in history, don't silently rewrite. |
-| "Greenfield is just like brownfield, same HTML" | Greenfield lives in `.omo/prototypes/<plan>/`, brownfield lives in `.omo/throwaway/<feature>/`. Different lifetimes, different cleanup paths. |
+| "Greenfield is just like brownfield, same HTML" | Greenfield lives in `.omo/prototypes/<plan>/`, brownfield lives in `.omo/throwaway-worktree/<feature>/`. Different lifetimes, different cleanup paths. |
 | "1 valid variant is enough, decision is clear" | No — MIN 2 valid variants else `NEEDS_CONTEXT`. A single render means the other two failed; user must know. |
 
 ## Red Flags
@@ -168,8 +168,8 @@ Before reporting selection / bypass / NEEDS_CONTEXT, confirm:
 - [ ] Spec `[PROTO-RESOLVE]` marker replaced with chosen variant text + rationale on `resolved`
 - [ ] Bypass (if used) recorded with `reason` field, marker replaced with `(bypassed <date>, reason: ...)`
 - [ ] No `status.json.state = resolved` without explicit user selection
-- [ ] Greenfield variants under `.omo/prototypes/<plan>/`; brownfield under `.omo/throwaway/<feature>/`; neither under `skills/` or other production paths
+- [ ] Greenfield variants under `.omo/prototypes/<plan>/`; brownfield under `.omo/throwaway-worktree/<feature>/`; neither under `skills/` or other production paths
 
 ## omo Integration
 
-Use the Prometheus plan at `.omo/plans/<slug>.md` Phase 1.2 for gating context; record decisions in `.omo/notepads/<plan>/decisions.md` (append-only via `notepad-write-guard` hook); variants land in `.omo/prototypes/<plan>/` (greenfield) or `.omo/throwaway/<feature>/` worktree (brownfield); intra-variant taste enforcement routes through `meisijiya-frontend-taste`; status gate prevents `spec_approved` while `[PROTO-RESOLVE]` markers remain; Phase 2 startup A2 sweep cleans brownfield worktrees.
+Use the Prometheus plan at `.omo/plans/<slug>.md` Phase 1.2 for gating context; record decisions in `.omo/notepads/<plan>/decisions.md` (append-only via `notepad-write-guard` hook); variants land in `.omo/prototypes/<plan>/` (greenfield) or `.omo/throwaway-worktree/<feature>/` worktree (brownfield); intra-variant taste enforcement routes through `meisijiya-frontend-taste`; status gate prevents `spec_approved` while `[PROTO-RESOLVE]` markers remain; Phase 2 startup A2 sweep cleans brownfield worktrees.

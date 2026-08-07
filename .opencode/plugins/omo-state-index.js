@@ -41,7 +41,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const SCHEMA_VERSION = '1.0.0';
+const SCHEMA_VERSION = '1.1.0';
 const OMO_DIR_NAME = '.omo';
 const INDEX_FILE_NAME = '.index.json';
 const DEBOUNCE_MS_DEFAULT = 500;
@@ -51,6 +51,7 @@ const REQUIRED_ARRAYS = Object.freeze([
   'open_wayfinders',
   'closed_wayfinders',
   'throwaway_worktrees',
+  'throwaway_protos',
   'drafts_to_resolve',
   'stale_artifacts',
 ]);
@@ -145,17 +146,26 @@ function rebuildIndex(omoDir) {
   const closedPlans = listMdFiles(omoDir, 'plans-archive');
   const openWayfinders = listDirs(omoDir, 'wayfinder');
   const closedWayfinders = listDirs(omoDir, 'wayfinder-archive');
-  const throwaway = listDirs(omoDir, 'throwaway');
+  const throwawayWorktrees = listDirs(omoDir, 'throwaway-worktree');
+  const throwawayProtos = listDirs(omoDir, 'throwaway-proto');
   const drafts = listMdFiles(omoDir, 'drafts');
 
   // Stale: throwaway entries that are empty or have no .git worktree marker.
   const stale = [];
-  for (const t of throwaway) {
-    const { empty, hasGit } = isEmptyOrMissingGit(omoDir, 'throwaway', t.slug);
+  for (const t of throwawayWorktrees) {
+    const { empty, hasGit } = isEmptyOrMissingGit(omoDir, 'throwaway-worktree', t.slug);
     if (empty) {
       stale.push({ kind: 'throwaway_worktree', slug: t.slug, reason: 'empty' });
     } else if (!hasGit) {
       stale.push({ kind: 'throwaway_worktree', slug: t.slug, reason: 'no .git' });
+    }
+  }
+  for (const t of throwawayProtos) {
+    const { empty, hasGit } = isEmptyOrMissingGit(omoDir, 'throwaway-proto', t.slug);
+    if (empty) {
+      stale.push({ kind: 'throwaway_proto', slug: t.slug, reason: 'empty' });
+    } else if (!hasGit) {
+      stale.push({ kind: 'throwaway_proto', slug: t.slug, reason: 'no .git' });
     }
   }
 
@@ -166,7 +176,8 @@ function rebuildIndex(omoDir) {
     closed_plans: closedPlans,
     open_wayfinders: openWayfinders,
     closed_wayfinders: closedWayfinders,
-    throwaway_worktrees: throwaway,
+    throwaway_worktrees: throwawayWorktrees,
+    throwaway_protos: throwawayProtos,
     drafts_to_resolve: drafts,
     stale_artifacts: stale,
   };
@@ -259,7 +270,7 @@ function summarizeIndex(omoDir) {
 
   return [
     `## OMO state (schema ${idx.schema_version || 'unknown'})`,
-    `- active_plans=${(idx.active_plans || []).length}, open_wayfinders=${(idx.open_wayfinders || []).length}, throwaway_worktrees=${(idx.throwaway_worktrees || []).length}`,
+    `- active_plans=${(idx.active_plans || []).length}, open_wayfinders=${(idx.open_wayfinders || []).length}, throwaway_worktrees=${(idx.throwaway_worktrees || []).length}, throwaway_protos=${(idx.throwaway_protos || []).length}`,
     `- drafts_to_resolve=${(idx.drafts_to_resolve || []).length}, stale_artifacts=${(idx.stale_artifacts || []).length}, closed_plans=${(idx.closed_plans || []).length}`,
   ];
 }

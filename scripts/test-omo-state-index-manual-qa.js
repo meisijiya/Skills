@@ -30,7 +30,7 @@ const plugin = require(PLUGIN_PATH);
 
 const REQUIRED_ARRAYS = [
   'active_plans', 'closed_plans', 'open_wayfinders', 'closed_wayfinders',
-  'throwaway_worktrees', 'drafts_to_resolve', 'stale_artifacts',
+  'throwaway_worktrees', 'throwaway_protos', 'drafts_to_resolve', 'stale_artifacts',
 ];
 
 const out = [];
@@ -120,11 +120,11 @@ async function main() {
 
     // Schema sanity
     const finalIdx = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
-    if (finalIdx.schema_version !== '1.0.0') {
-      log(`ASSERT FAIL: schema_version !== "1.0.0"`);
+    if (finalIdx.schema_version !== '1.1.0') {
+      log(`ASSERT FAIL: schema_version !== "1.1.0"`);
       ok = false;
     } else {
-      log(`ASSERT PASS: schema_version == "1.0.0"`);
+      log(`ASSERT PASS: schema_version == "1.1.0"`);
     }
     for (const k of REQUIRED_ARRAYS) {
       if (!Array.isArray(finalIdx[k])) {
@@ -132,7 +132,7 @@ async function main() {
         ok = false;
       }
     }
-    if (ok) log(`ASSERT PASS: all 7 required arrays present`);
+    if (ok) log(`ASSERT PASS: all 8 required arrays present`);
   } finally {
     // --- Cleanup ---
     try {

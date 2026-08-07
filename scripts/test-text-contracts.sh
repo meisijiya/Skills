@@ -17,7 +17,7 @@ check() {
 contracts() {
   check skills/core/brainstorming/SKILL.md '^[a-z0-9][a-z0-9-]{0,39}$' slug-regex
   check skills/core/brainstorming/SKILL.md 'REFUSE: slug must match ^[a-z0-9][a-z0-9-]{0,39}$; offer transliterate fallback.' slug-refusal
-  check skills/core/incremental-implementation/SKILL.md 'ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway,wayfinder,wayfinder-archive,research,architecture-review,incidents}/* 2>/dev/null' startup-sweep
+  check skills/core/incremental-implementation/SKILL.md 'ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway-worktree,throwaway-proto,wayfinder,wayfinder-archive}/* 2>/dev/null' startup-sweep
   check skills/core/incremental-implementation/SKILL.md 'Cross-check every result against `.omo/.index.json` field `stale_artifacts`.' sweep-index-crosscheck
   check skills/core/incremental-implementation/SKILL.md 'Prompt exactly `Delete stale artifacts? y/n`; never auto-delete.' sweep-confirmation
   check skills/core/debugging-and-error-recovery/SKILL.md '<!-- WARNING: notepad exceeded 500 lines at <iso8601> -->' notepad-banner
@@ -28,8 +28,8 @@ contracts() {
   check skills/core/spec-driven-development/SKILL.md '[cleanup] ts=<iso8601> source=.omo/drafts/<slug>.md destination=.omo/sdd/<slug>/drafts/<slug>.md action=moved' cleanup-row
   check skills/extra/build-gate-visual-review/SKILL.md "find .omo -type f \\( -name '*.html' -o -name '*.htm' \\) -mtime +30 -print" stale-html
   check skills/extra/build-gate-visual-review/SKILL.md 'Prompt exactly `Archive stale HTML? y/n`; never auto-delete.' stale-html-confirmation
-  check skills/extra/security-incident-response/SKILL.md '[incident:closed] ts=<iso8601> incident=<slug> closed=.omo/incidents/<slug>/closed.json' incident-row
-  check skills/extra/security-incident-response/SKILL.md "printf '%s\\n' '{\"status\":\"closed\",\"closed_at\":\"<iso8601>\"}' > .omo/incidents/<slug>/closed.json" incident-closed-json
+  check skills/extra/security-incident-response/SKILL.md '[incident:closed] ts=<iso8601> incident=<incident-id> closed=docs/incidents/<incident-id>/closed.json' incident-row
+  check skills/extra/security-incident-response/SKILL.md "printf '%s\\n' '{\"status\":\"closed\",\"closed_at\":\"<iso8601>\"}' > docs/incidents/<incident-id>/closed.json" incident-closed-json
   (( failures == 0 )) || return 1
 }
 
@@ -53,7 +53,7 @@ notepad_qa() {
 sweep_qa() {
   local root="${1:-}" answer
   [[ -d "$root" ]] || { printf 'ERROR: not a directory: %s\n' "$root" >&2; return 1; }
-  (cd "$root" && ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway,wayfinder,wayfinder-archive,research,architecture-review,incidents}/* 2>/dev/null || true)
+  (cd "$root" && ls -d .omo/{drafts,sdd,build-gate,prototypes,throwaway-worktree,throwaway-proto,wayfinder,wayfinder-archive}/* 2>/dev/null || true)
   printf 'Delete stale artifacts? y/n: '
   IFS= read -r answer || { printf 'ERROR: read failed (EOF?)\n' >&2; return 1; }
   printf 'selection=%s; no files deleted by test helper\n' "$answer"

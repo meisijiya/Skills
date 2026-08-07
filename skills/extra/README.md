@@ -66,12 +66,12 @@
 | [`api-and-interface-design`](./api-and-interface-design/) | contract-first API 设计(REST/GraphQL/RPC) |
 | [`documentation-and-adrs`](./documentation-and-adrs/) | 只记录重大架构决策(ADR,跨人 / 跨时 / 不可逆);日常文档走项目级 AGENTS.md / notepad |
 | [`improve-codebase-architecture`](./improve-codebase-architecture/) | codebase-wide 健康巡检(weekly / post-surge / on-boarding);Ousterhout deep/shallow 评分;**proposal-only** —— 改架构走 `incremental-implementation` |
-| [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic → Verifier × N → Repairer);输出 `.verification/article-verified.md` + `.verification/verification-report.md` |
+| [`verify-chain`](./verify-chain/) | 3 角色文章事实核查流水线(Critic → Verifier × N → Repairer);输出 `docs/verification/<article-slug>/article-verified.md` + `docs/verification/<article-slug>/verification-report.md`(git tracked 项目级 audit log) |
 | [`loop-me`](./loop-me/) | 把反复做的活动形式化成可执行 workflow spec(stateful grilling session;产物 `workflows/*.md` + `NOTES.md`,**不是实现**);`disable-model-invocation: true` 仅用户 `/loop-me` 触发 |
 | [`teacher-skill`](./teacher-skill/) | meisijiya-adapted 教学编排(6 阶段 SOP / 3 级诊断 / 4 类 quiz / 刻意练习 / 跨学科 / 反蒸馏);不自动加载,仅在 `build-gate-visual-review` HTML page 模式 + §5 reminder 中被提示;`allowed-tools: Read` only;安装在 `~/.agents/skills/teacher-skill/` |
 | [`prototype`](./prototype/) | 视觉 / 交互决策 skill(spec 编写阶段用);生成可丢弃的 UI 变体(MIN 2,max 5)解析 `[PROTO-RESOLVE]` markers;决策落到 `decisions.md`,**绝不**上线 |
 | [`wayfinder`](./wayfinder/) | 多 session 规划(scope 超过单次 brainstorming);打开 `.omo/wayfinder/<slug>/`,跨 session 推进;关闭时生成 `.omo/plans/<slug>.md` Phase 0 |
-| [`research`](./research/) | 对规划 / 设计问题做权威来源调查;写入 `.omo/research/<plan>/<topic>.md` 带引用;要求 plan context,无 plan 直接拒绝 |
+| [`research`](./research/) | 对规划 / 设计问题做权威来源调查;写入 `docs/research/<plan-slug>/<topic>.md` 带引用(项目级 audit log,git tracked);要求 plan context,无 plan 直接拒绝 |
 | [`meisijiya-handoff`](./meisijiya-handoff/) | cross-session checkpoint 协议(`disable-model-invocation: true` 仅 `/handoff` 触发);写 `.omo/handoff/<slug>-<from>-<to>-<date>.md` 含 from_phase/to_phase/load_skills/references/redacted_secrets;新 session 的 dispatcher 检测未消费 handoff 自动注入 load_skills |
 | [`meisijiya-phase-checkpoint`](./meisijiya-phase-checkpoint/) | agent-driven phase boundary 通知层(`disable-model-invocation: false`,model 可在 phase 完成时主动 invoke);emit 三选一 prompt(/handoff / 继续 / 走 notepad)不替 user 写 doc;与 handoff skill 互补不替代 |
 

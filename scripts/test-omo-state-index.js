@@ -5,7 +5,7 @@
  * Node smoke test (no vitest) for .opencode/plugins/omo-state-index.js.
  * Covers the four required cases:
  *   (a) absent index.json + first .omo/** write → index.json exists with
- *       schema_version "1.0.0" and the seven required arrays
+ *       schema_version "1.1.0" and the eight required arrays
  *   (b) corrupt index.json → rebuilt from filesystem
  *   (c) .omo/.index.json self-write → no recursion
  *   (d) two write events within 500ms → exactly one mtime update
@@ -51,6 +51,7 @@ const REQUIRED_ARRAYS = [
   'open_wayfinders',
   'closed_wayfinders',
   'throwaway_worktrees',
+  'throwaway_protos',
   'drafts_to_resolve',
   'stale_artifacts',
 ];
@@ -104,7 +105,7 @@ async function runCaseA() {
 
     if (!fs.existsSync(indexPath)) return;
     const idx = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
-    assert(idx.schema_version === '1.0.0', `case (a): schema_version === "1.0.0" (got ${idx.schema_version})`);
+    assert(idx.schema_version === '1.1.0', `case (a): schema_version === "1.1.0" (got ${idx.schema_version})`);
     for (const k of REQUIRED_ARRAYS) {
       assert(Array.isArray(idx[k]), `case (a): ${k} is an array`);
     }
@@ -131,7 +132,7 @@ async function runCaseB() {
     assert(result && result.fromCorrupt === true, 'case (b): rebuildIndex flagged fromCorrupt=true');
 
     const idx = JSON.parse(fs.readFileSync(path.join(omoDir, '.index.json'), 'utf8'));
-    assert(idx.schema_version === '1.0.0', 'case (b): rebuilt schema_version === "1.0.0"');
+    assert(idx.schema_version === '1.1.0', 'case (b): rebuilt schema_version === "1.1.0"');
     const ap = (idx.active_plans || []).map((e) => e.slug);
     assert(ap.includes('p1'), `case (b): active_plans includes "p1" after rebuild (got ${JSON.stringify(ap)})`);
   } finally {
