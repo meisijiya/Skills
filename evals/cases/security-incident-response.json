@@ -40,7 +40,7 @@
     {
       "scenario": "User reports 'A user emailed saying their account got compromised and they see orders they didn't place'",
       "expected_behavior": [
-        "Agent enters Detect phase: timestamps + freezes evidence + creates .planning/<id>/incident-<id>.md (separate from compromised system logs)",
+        "Agent enters Detect phase: timestamps + freezes evidence + creates docs/incidents/<incident-id>/incident.md (git tracked evidence record, separate from compromised system logs)",
         "Agent does NOT immediately reset the affected account (would destroy evidence / prevent further attacker observation)",
         "Agent enters Triage phase: classifies severity (Major if single-account, Critical if multi-account compromise suspected) + scope assessment (PII / payment data at risk?)",
         "Agent uses oracle agent for severity / scope / notification timing decisions",
@@ -48,7 +48,7 @@
         "Agent enters Eradicate phase: investigates root cause (credential leak? session hijack? CVE in auth flow?) + patches if root cause is code",
         "Agent invokes /security-research mode for post-incident PoC verification that root cause is fully patched",
         "Agent enters Recover phase: resets all related credentials (not just the affected user) + enhances monitoring + verifies service normal",
-        "Agent enters Postmortem phase: writes 5-whys + action items + lessons to .planning/<id>/incident-<id>-postmortem.md",
+        "Agent enters Postmortem phase: writes 5-whys + action items + lessons to docs/incidents/<incident-id>/postmortem.md",
         "Agent does NOT touch application code unrelated to the root cause (separate skill — incremental-implementation)"
       ]
     },

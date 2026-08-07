@@ -60,7 +60,7 @@ version: 0.1.0
 **第一次动作（无论触发源）**：
 1. **记录时间戳**：incident 起点 = 你知道的最早可疑时间（不是发现时间）
 2. **冻结证据**：不要立刻修改受影响系统，避免破坏法证（forensic）证据
-3. **拉一份独立笔记**：`.omo/incidents/<incident-id>/incident.md`（不写入受害系统的日志，因为日志可能已被攻陷；incident 笔记独立于 `.omo/notepads/<plan>/` 的 per-plan 命名空间，因为 incident 跨 plan）
+3. **拉一份独立笔记**：`docs/incidents/<incident-id>/incident.md`(git tracked 事件档案;不写入受害系统的日志，因为日志可能已被攻陷;incident 笔记独立于 `.omo/notepads/<plan>/` 的 per-plan 命名空间，因为 incident 跨 plan)
 
 **不要做**：
 - ❌ 不要先发公开声明（信息不完整会失真）
@@ -139,7 +139,7 @@ version: 0.1.0
 
 **blameless postmortem**：目的是学习，不是追责。
 
-**模板**（写入 `.omo/incidents/<incident-id>/postmortem.md`）：
+**模板**(写入 `docs/incidents/<incident-id>/postmortem.md`):
 
 ```markdown
 # Postmortem — <incident-id>
@@ -184,16 +184,16 @@ version: 0.1.0
 Only after Recover and Postmortem verification, close the incident with the real slug and UTC timestamp substituted:
 
 ```bash
-printf '%s\n' '{"status":"closed","closed_at":"<iso8601>"}' > .omo/incidents/<slug>/closed.json
+printf '%s\n' '{"status":"closed","closed_at":"<iso8601>"}' > docs/incidents/<incident-id>/closed.json
 ```
 
 Then append this row to `.omo/notepads/<plan>/decisions.md`:
 
 ```text
-[incident:closed] ts=<iso8601> incident=<slug> closed=.omo/incidents/<slug>/closed.json
+[incident:closed] ts=<iso8601> incident=<incident-id> closed=docs/incidents/<incident-id>/closed.json
 ```
 
-Writing `.omo/incidents/<slug>/closed.json` is the close signal consumed by the A1 state-index hook. Do not emit either record before all close checks pass, and do not delete the incident evidence directory.
+Writing `docs/incidents/<incident-id>/closed.json` marks the incident closed. Do not emit either record before all close checks pass, and do not delete the incident evidence directory.
 
 ## Common Rationalizations
 
@@ -224,7 +224,7 @@ Writing `.omo/incidents/<slug>/closed.json` is the close signal consumed by the 
 
 完成本 skill 后确认：
 
-- [ ] incident 笔记已写到 `.omo/incidents/<incident-id>/incident.md`（含 timeline + 证据保留段）
+- [ ] incident 笔记已写到 `docs/incidents/<incident-id>/incident.md`(含 timeline + 证据保留段)
 - [ ] 严重度 + 影响范围 已记录（Triage 段）
 - [ ] Contain 动作已完成 + 记录
 - [ ] Eradicate 验证：OMO `security-research` 跑 post-incident PoC，确认漏洞已彻底修补
@@ -232,8 +232,8 @@ Writing `.omo/incidents/<slug>/closed.json` is the close signal consumed by the 
 - [ ] 用户通知已按法律时限发送（critical / major 必须）
 - [ ] Postmortem 已写：5 whys + action items + lessons
 - [ ] Runbook 已更新（下次 incident 不再手忙脚乱）
-- [ ] `.omo/incidents/<slug>/closed.json` 已写入,且 `.omo/notepads/<plan>/decisions.md` 已追加 `[incident:closed]` row
-- [ ] A1 state-index hook 已看到 close signal;incident evidence directory 仍保留
+- [ ] `docs/incidents/<incident-id>/closed.json` 已写入,且 `.omo/notepads/<plan>/decisions.md` 已追加 `[incident:closed]` row
+- [ ] incident evidence directory 仍保留
 - [ ] 本 skill 未做任何**未授权的**代码改动（只做最小隔离 + 补丁）
 
 ## omo Integration
