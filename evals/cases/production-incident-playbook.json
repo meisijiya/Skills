@@ -1,6 +1,14 @@
 {
   "name": "production-incident-playbook",
   "version": "0.1.0",
+  "positive_keywords": [
+    "incident",
+    "runbook",
+    "mitigation",
+    "postmortem",
+    "triage",
+    "blameless"
+  ],
   "description": "End-to-end incident handling — runbook templates for in-flight mitigation (detect / triage / mitigate / resolve / communicate) + blameless postmortem templates for after-action review with 5-whys root-cause + structural action items. Use during active incidents or post-incident for the postmortem write-up. Distinct from security-incident-response (security-specific incidents) and pre-ship-gate (pre-deploy catching).",
   "positive_triggers": [
     {

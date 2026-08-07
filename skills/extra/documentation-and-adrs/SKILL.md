@@ -1,6 +1,6 @@
 ---
 name: documentation-and-adrs
-description: "Use when recording a significant architectural decision (data model / API contract / dependency upgrade / deprecation / 选型变更) that is irreversible + cross-time + cross-team. Records it as an ADR in `docs/adr/<NNNN>-<slug>.md` using a Nygard-adapted template. Strictly NOT for daily project docs, READMEs, single-file changes, or commit-message-length notes — those belong in the project's own AGENTS.md, README, or `.omo/notepads/<plan>/decisions.md`."
+description: "Records a significant architectural decision (data model / API contract / dependency upgrade / deprecation / 选型变更) as an ADR in `docs/adr/<NNNN>-<slug>.md`. Use when irreversible + cross-time + cross-team. NOT for daily docs or READMEs — those go in AGENTS.md."
 allowed-tools: "Read Write Edit Bash Glob Grep"
 ---
 

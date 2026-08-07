@@ -1,6 +1,6 @@
 ---
 name: wayfinder
-description: "Multi-session exploration and decision-mapping for projects whose scope exceeds a single brainstorming session. Opens a wayfinder map under `.omo/wayfinder/<slug>/` (map.json + tickets/ + sessions/), drives resolution across sessions, and on close generates Phase 0 of `.omo/plans/<slug>.md` then archives. Tickets form a blockedBy DAG with cycle detection. Use when scope clearly spans multiple sessions with tickets blocking each other. NOT for single-session scope (use brainstorming), hotfixes / one-file changes, known-shape work (spec-driven-development), or pure debugging."
+description: "Multi-session planning + decision mapping across multiple brainstorming sessions. Opens a wayfinder map (map.json + tickets/ + sessions/) under `.omo/wayfinder/<slug>/`; tickets form a blockedBy ticket DAG. On close writes Phase 0 of `.omo/plans/<slug>.md` and archives to wayfinder-archive."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

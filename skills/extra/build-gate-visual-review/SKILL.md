@@ -1,6 +1,6 @@
 ---
 name: build-gate-visual-review
-description: "Guides the pre-implementation design-alignment and HTML page workflow with explicit, intent-gated modes. Use when the user requests a Markdown or text design-alignment review, or a responsive HTML page (with optional teaching-style pedagogy overlay via teacher-skill) for project visualization / self-learning / course material. Do not invoke for ordinary UI work, build phase entry, project complexity, or OMO Phase 3.5 alone."
+description: "Pre-impl design-alignment or responsive HTML page workflow with intent-gated modes. Use when user requests Markdown/text design-alignment review, or a responsive HTML page (teacher-skill overlay) for learning / course material. NOT for ordinary UI, build entry, project complexity, or OMO 3.5 alone."
 allowed-tools: "Read Bash Glob Grep Write"
 ---
 

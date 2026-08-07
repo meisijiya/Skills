@@ -1,6 +1,6 @@
 ---
 name: writing-skills
-description: "Use when creating a new skill, editing an existing skill, or extracting a repeated/abstractable workflow into a reusable skill during project development. Treats skill authoring as TDD for process documentation - write failing baseline test, write minimal skill addressing observed failures, close loopholes. Also use when noticing a workflow pattern that should be captured before the team forgets it."
+description: "Use when creating a new skill, editing an existing skill, or extracting a repeated/abstractable workflow into a reusable skill. Treats skill authoring as TDD for process documentation — baseline test, minimal skill, close loopholes. NOT for project documentation (use documentation-and-adrs)."
 allowed-tools: "Read Bash Glob Grep Write"
 ---
 

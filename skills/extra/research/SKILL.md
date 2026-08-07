@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Investigates planning/design questions against high-trust primary sources (official docs, RFCs, source-repo, project ADRs / spec); writes cited Markdown findings to `docs/research/<plan-slug>/<topic>.md`. Use when a decision requires authoritative information as a citable record. Requires plan context — refuses plan-less with `Plan context required.` NOT for casual questions or Stack Overflow / blogs."
+description: "Investigates planning/design questions against high-trust primary sources (official docs, RFCs, source-repo, project ADRs / spec); writes cited Markdown to `docs/research/<plan-slug>/<topic>.md`. Requires plan context — refuses plan-less with `Plan context required.` NOT for casual questions."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 version: 0.1.0

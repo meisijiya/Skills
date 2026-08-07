@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "HARD-GATE pre-design exploration: do NOT write code, scaffold projects, or invoke implementation skills before presenting a design and getting user approval. Applies even to projects that feel 'simple'. Use when starting any non-trivial feature, component, or behavior change, or when the user proposes a plan whose intent is unclear. Under omo, this is the in-context counterpart to Prometheus Mode (Tab / @plan); prefer it when the user has not explicitly invoked Prometheus and you are inside a Sisyphus-driven session."
+description: "HARD-GATE pre-design exploration: do NOT write code or scaffold projects before presenting a design and getting user approval. Use when starting a non-trivial feature, behavior change, or when a proposed plan's intent is unclear. NOT for trivial fixes (use spec-driven-development)."
 allowed-tools: "Read Bash Glob Grep"
 ---
 

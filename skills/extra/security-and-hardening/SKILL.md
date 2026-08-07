@@ -1,6 +1,6 @@
 ---
 name: security-and-hardening
-description: "Hardens application-layer code against vulnerabilities at trust boundaries — input validation, authentication, data storage, external integrations. Use when writing or reviewing code that handles user input, credentials, PII, or third-party integrations. For dependency / supply chain / IaC / container / deployment pipeline security, invoke security-devsecops. For post-breach response, invoke security-incident-response. For per-stack AI-coded blindspots (frontend/backend/mobile), load stack-security-coder."
+description: "Hardens app-layer trust boundaries: input validation, auth, storage, integrations. Use when writing/reviewing code handling user input, credentials, PII, third-party integrations. NOT for deps/IaC/CI (security-devsecops), post-breach (security-incident-response), per-stack (stack-security-coder)."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 

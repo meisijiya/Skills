@@ -1,6 +1,6 @@
 ---
 name: contract-strengthening
-description: "Reviews changes touching contracts / shared state / timing / concurrency / untrusted boundaries for open-world risks (contract completeness, state/timing/concurrency, boundary/dependency, blast-radius/reversibility, verification-blind-spot). Use after Spec attestation when these signals appear. NOT for L1 work (TDD covers), pre-Spec design, or style changes. Complements security-threat-model."
+description: "Reviews contract / shared-state / timing / concurrency / boundary changes for open-world risks (completeness, blast-radius, verification blind-spot). Use after Spec attestation when these signals appear. NOT for L1 work (TDD covers) or pre-Spec design. Complements security-threat-model."
 allowed-tools: "Read Write Edit Bash Glob Grep"
 ---
 

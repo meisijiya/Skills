@@ -1,6 +1,6 @@
 ---
 name: loop-me
-description: "Designs a recurring workflow spec via a stateful grilling session (one question at a time, each with a recommended answer) whose only output is the spec — not the implementation. Use when the user wants to specify a loop they keep doing manually so an implementer can build it without asking a single question. Hand off the finished spec to OMO /goal or incremental-implementation for execution."
+description: "User-only: stateful grilling producing a workflow spec (one Q + recommended A at a time). Output is the spec only."
 disable-model-invocation: true
 disable-model-invocation-justification: "stateful 交互式会话;避免与 brainstorming 自动描述匹配产生路由竞争"
 argument-hint: "A workflow to design, or nothing to go find one"

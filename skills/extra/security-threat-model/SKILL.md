@@ -1,6 +1,6 @@
 ---
 name: security-threat-model
-description: "Performs an AppSec-grade threat model before any non-trivial feature, integration, or design change. Identifies trust boundaries, attacker capability, abuse paths (STRIDE), and prioritized mitigations — all anchored to file:line in the actual codebase. Use when designing a new feature that crosses a trust boundary, integrating a third-party service, refactoring auth/secret handling, expanding blast radius (more tenants / more scope / more trust), or when security-and-hardening finds a control already inadequate. Output: `docs/threat-model/<repo-hash>-<date>/threat-model.md` per session (git-tracked project audit log)."
+description: "Threat-model non-trivial features or design changes. Identifies trust boundaries, attacker capability, STRIDE paths, mitigations at file:line. Use when designing cross-boundary, integrating 3rd-party, refactoring auth/secrets, expanding blast radius. NOT for per-line review."
 allowed-tools: "Read Grep Glob Bash WebFetch"
 ---
 

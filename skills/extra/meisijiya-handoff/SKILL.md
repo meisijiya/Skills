@@ -1,6 +1,6 @@
 ---
 name: meisijiya-handoff
-description: "Use when ending a session that the next session needs to resume — writes `.omo/handoff/<slug>-<from>-<to>-<date>.md` with from_phase / to_phase / load_skills / references / redacted_secrets fields so a fresh OMO session picks up without re-reading the full conversation. NOT for same-session compaction (use OMO `compaction-context-injector`), NOT for plan-side multi-session decision mapping (use `wayfinder`), NOT for commit/PR-only continuation."
+description: "User-only: writes `.omo/handoff/<slug>.md` for cross-session resume (from_phase / to_phase / load_skills)."
 argument-hint: "下一个 session 要推进到的 phase / 目标 (e.g. 'Phase 3 切片 X → Phase 4 verification')"
 allowed-tools: "Read Bash Glob Grep Write"
 disable-model-invocation: true

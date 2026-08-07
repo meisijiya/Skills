@@ -1,6 +1,14 @@
 {
   "name": "observability-and-instrumentation",
   "version": "0.1.0",
+  "positive_keywords": [
+    "instrument",
+    "production",
+    "metrics",
+    "traces",
+    "telemetry",
+    "diagnose"
+  ],
   "description": "Instruments production systems with structured logs, RED metrics, tracing",
   "positive_triggers": [
     {

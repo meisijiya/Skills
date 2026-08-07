@@ -1,18 +1,6 @@
 ---
 name: teacher-skill
-description: >
-  Pedagogical data-contract emitter for learning docs and teaching decks.
-  Borrow 6 patterns from upstream teacher-skill (6-phase SOP, 3-level learner
-  diagnosis, deliberate practice loop, 4 quiz types, cross-disciplinary links,
-  reverse distillation) and emit them as renderer-neutral data for downstream
-  HTML renderers.
-  Load when the user has explicitly invoked @teacher or accepted the
-  build-gate-visual-review Teaching deck reminder, AND the target is a
-  multi-unit learning artifact (doc or deck). Do NOT auto-load; user must
-  call @teacher or have a build-gate teaching-deck prompt in context.
-  Do NOT use for simple explanations, generic code help, single-page
-  non-pedagogical content, or anything that does not produce a multi-unit
-  artifact.
+description: "Pedagogical data-contract emitter for learning docs / teaching decks — borrows 6 patterns from upstream teacher-skill (6-phase SOP, learner diagnosis, practice loop, 4 quiz types, cross-disciplinary links, reverse distillation); emits renderer-neutral data. Load only on @teacher or Teaching-deck."
 allowed-tools: "Read"
 ---
 

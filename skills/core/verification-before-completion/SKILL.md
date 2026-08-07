@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: "Use when about to claim work is complete, fixed, or passing, before committing, creating PRs, or telling the user 'done'. Requires running verification commands and confirming output before making any success claims. Applies to ANY communication suggesting completion or correctness."
+description: "Use when about to claim work is complete, fixed, or passing, before committing, creating PRs, or telling the user 'done'. Requires running verification commands and confirming output before any success claim."
 allowed-tools: "Read Bash Glob Grep"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: diagnosing-bugs
-description: "Symptom-driven diagnosis loop for hard bugs and perf regressions. Form ≥3 candidate hypotheses, predict distinguishing observation for each, eliminate one. Use when debugging-and-error-recovery's 5-step triage is in progress and cause is non-obvious; when obvious causes are exhausted; or when symptom doesn't match a known failure mode. Pairs with debugging-and-error-recovery (protocol vs discipline)."
+description: "Symptom-driven diagnosis loop for hard bugs and performance regressions. Use when 5-step triage stalls to diagnose the root cause. Form ≥3 hypotheses; each hypothesis predicts a distinguishing observation that eliminates one candidate."
 allowed-tools: "Read Bash Glob Grep"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: "Throwaway UI variants to resolve `[PROTO-RESOLVE]` markers in Phase 1.2 specs when text-only specs cannot answer layout / density / motion questions. Generates 3 default variants (max 5, MIN 2 else NEEDS_CONTEXT); captures choice in decisions.md, never ships. NOT for production UI, deployment, or design tokens."
+description: "Prototype / throwaway UI variants for spec authoring — resolves `[PROTO-RESOLVE]` markers in Phase 1.2 specs when text alone cannot answer layout / density / motion. Generates 3 default variants (max 5, MIN 2 else NEEDS_CONTEXT) for visual fidelity. NOT for production UI."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

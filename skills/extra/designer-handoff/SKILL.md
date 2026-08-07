@@ -1,6 +1,6 @@
 ---
 name: designer-handoff
-description: "Generates a UI/UX design spec via ui-ux-pro-max-skill and hands it off to the frontend agent (omo visual-engineering category + frontend-ui-ux built-in skill) as a strict input. Use when the project has UI and you want the frontend agent to follow design rules (color palettes, typography, anti-patterns) instead of guessing."
+description: "Generates a UI/UX design spec via ui-ux-pro-max and hands it to the frontend agent (omo visual-engineering + frontend-ui-ux) as strict input. Use when project has UI and you want the frontend agent to follow design rules (color, typography, anti-patterns) instead of guessing. NOT for greenfield UI."
 allowed-tools: "Read Bash Glob Grep Write WebFetch"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: production-incident-playbook
-description: "End-to-end incident handling — runbook templates for in-flight mitigation + blameless postmortem templates for after-action review. Use during an active production incident to follow the detect / triage / mitigate / resolve / communicate phases, or after an incident to write a postmortem that turns the outage into actionable follow-ups. Pairs with observability-and-instrumentation (the data sources — alerts, dashboards, traces) and security-incident-response (the security-specific variant). Read the runbook phases DURING the incident; write the postmortem within 5 business days after."
+description: "End-to-end incident handling — runbook templates for in-flight mitigation (detect / triage / mitigate / resolve / communicate) + blameless postmortem templates. Use during an active production incident or for the postmortem. NOT for observability design — use observability-and-instrumentation."
 allowed-tools: "Read Bash Glob WebFetch"
 ---
 version: 0.1.0

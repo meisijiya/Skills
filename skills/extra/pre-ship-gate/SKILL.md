@@ -1,6 +1,6 @@
 ---
 name: pre-ship-gate
-description: "Guards against 'deploy exit 0 ≠ actually running'. Read-only pre-deploy audit + post-deploy smoke verification for migrations, feature flags, CDN/cache invalidation, canary/progressive delivery, env vars, release pointer, and shadow traffic. Use before any production rollout, after a deploy returned exit 0 but you suspect silent failure, when a canary is stuck at 0%, or to confirm a release is live vs cached. Each finding ships with concrete evidence commands plus expected output."
+description: "Catches 'deploy exit 0 ≠ actually running' via read-only pre-deploy audit + post-deploy smoke verification. Use before any production rollout, after a deploy returned exit 0 but suspect silent failure, or when a canary is stuck at 0%. NOT for: in-flight incidents (use production-incident-playbook)."
 allowed-tools: "Read Bash WebFetch"
 ---
 

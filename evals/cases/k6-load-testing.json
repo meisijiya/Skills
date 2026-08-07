@@ -1,6 +1,15 @@
 {
   "name": "k6-load-testing",
   "version": "0.1.0",
+  "positive_keywords": [
+    "k6",
+    "load",
+    "smoke",
+    "stress",
+    "spike",
+    "threshold",
+    "gate"
+  ],
   "description": "Pre-deploy performance acceptance gate using k6 (smoke / load / stress / spike / soak categories) with explicit latency-percentile + error-budget thresholds. Output is a PASS/FAIL gate decision with concrete percentile numbers + threshold summary, attached as release artifact. Distinct from performance-optimization (post-hoc bottleneck hunting): this skill gates a deploy on synthetic-load evidence before the change hits real users. Adapt the runner to Locust / Gatling / Vegeta if k6 isn't available; the test categories + threshold methodology transfer unchanged.",
   "positive_triggers": [
     {

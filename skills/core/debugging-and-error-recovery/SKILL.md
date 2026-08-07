@@ -1,6 +1,6 @@
 ---
 name: debugging-and-error-recovery
-description: "Five-step triage — reproduce / localize / reduce / fix / guard. Under omo, escalate to oracle agent when stuck at Step 2 (Localize) and use lsp MCP for code intelligence. Use when tests fail, builds break, or behavior is unexpected. Anti-pattern: guessing root cause and shotgun-changing files."
+description: "Five-step triage — reproduce / localize / reduce / fix / guard. Use when tests fail, builds break, or behavior is unexpected. Anti-pattern: guessing root cause and shotgun-changing files."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

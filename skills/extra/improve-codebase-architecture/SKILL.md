@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: "Codebase architecture health check via Ousterhout deep/shallow scoring — surfaces shallow modules, coupling hotspots, concept-sprawl; proposes deepening without forcing edits. Use for unfamiliar codebase on-boarding, weekly / post-surge review, or when agent output degrades vs the codebase. NOT for single-file refactors, bugs, new features, perf, or security. Proposal-only."
+description: "Codebase architecture health check via Ousterhout deep/shallow scoring — surfaces shallow modules, coupling hotspots, concept-sprawl; proposes deepening. Use for unfamiliar on-boarding, weekly review, or degraded agent output. NOT for single-file refactors, bugs, features, perf, security."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 

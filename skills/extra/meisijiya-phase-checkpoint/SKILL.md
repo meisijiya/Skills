@@ -1,6 +1,6 @@
 ---
 name: meisijiya-phase-checkpoint
-description: "Use when the agent detects a phase boundary in `.omo/plans/<slug>.md` — soft-prompt user with 'Phase N 完成,要 /handoff 吗?还是继续?' notification. NOT for mid-phase work (mid-slice / mid-iteration), NOT for writing handoff doc (that's meisijiya-handoff), NOT for forcing user to split (this is notification, not auto-action)."
+description: "Use when the agent detects a phase boundary in `.omo/plans/<slug>.md` — soft-prompt user with 'Phase N 完成,要 /handoff 吗?还是继续?' notification. NOT for mid-phase work, writing handoff doc (that's meisijiya-handoff), or forcing user to split. Notification only, no auto-action."
 argument-hint: "<plan-slug> <completed-phase-number>(可选;agent 默认从 .omo/plans/<slug>.md 推断)"
 allowed-tools: "Read Bash Glob Grep Write"
 ---

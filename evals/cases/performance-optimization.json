@@ -1,6 +1,14 @@
 {
   "name": "performance-optimization",
   "version": "0.1.0",
+  "positive_keywords": [
+    "optimization",
+    "bottleneck",
+    "latency",
+    "p99",
+    "profiling",
+    "production"
+  ],
   "description": "Measure-first performance optimization with profiling workflows",
   "positive_triggers": [
     {

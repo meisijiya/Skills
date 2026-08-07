@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "verified": true,
   "positive_keywords": [
-    "global installation",
-    "verification backend",
-    "project-local",
-    "prior authorization",
-    "alternative",
+    "contract",
+    "shared-state",
+    "concurrency",
     "boundary",
     "open-world",
-    "non-exhaustive"
+    "blast-radius",
+    "verification blind-spot",
+    "Spec attestation"
   ],
   "description": "Optional extra skill that strengthens AI coding work via open-world, non-exhaustive risk classification (contract / state / timing / concurrency / boundary / reversibility / verification-blind-spot) between the attested Spec and downstream phases. Emits a contract-review artifact; NOT for ordinary L1 work already covered by TDD + verification-before-completion.",
   "positive_triggers": [

@@ -1,6 +1,6 @@
 ---
 name: security-ownership-map
-description: "People↔file security-ownership topology from git history — surfaces orphan sensitive code, hidden owners, bus-factor hotspots, maintainer concentration. Output: `docs/ownership-map/<repo-hash>-<date>/ownership-map.{yaml,md,csv,json}` per session (git-tracked project audit log). Use before refactors risking orphan sensitive code, after incidents to map blast-radius-of-departure, when hiring for coverage gaps, or designing rotation/on-call."
+description: "People↔file security-ownership from git history: orphan sensitive code, hidden owners, bus-factor hotspots, maintainer concentration. Use before risky refactors, after incidents, hiring for coverage gaps, or designing rotation/on-call. NOT for per-line code audit (security-and-hardening)."
 allowed-tools: "Read Bash Glob Grep"
 ---
 version: 0.1.0

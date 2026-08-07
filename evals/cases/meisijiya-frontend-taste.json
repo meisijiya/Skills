@@ -1,6 +1,7 @@
 {
   "name": "meisijiya-frontend-taste",
   "version": "0.1.0",
+  "positive_keywords": ["landing page", "portfolio", "anti-slop"],
   "description": "Anti-slop frontend rules for landing pages, portfolios, redesigns. Reads the brief, infers the design language, tunes three dials (variance/motion/density), enforces hard non-default rules on typography, color, layout, CTA, eyebrows, zigzag, motion, and image strategy to keep AI-generated UI from collapsing into AI-default templates.",
   "positive_triggers": [
     {

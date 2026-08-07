@@ -1,6 +1,7 @@
 {
   "name": "meisijiya-redesign-ui",
   "version": "0.1.0",
+  "positive_keywords": ["existing", "audit", "upgrade"],
   "description": "Audit-then-fix workflow for existing web/mobile UI in any framework. Scans the codebase, runs a layered design audit (typography / color / layout / interactivity / content / components / icons / code / a11y / strategic omissions), fixes the highest-leverage items in priority order without breaking functionality or migrating frameworks.",
   "positive_triggers": [
     {

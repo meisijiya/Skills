@@ -1,6 +1,6 @@
 ---
 name: verify-chain
-description: "Cross-checks a written technical article against authoritative web sources via a three-role pipeline (Critic extracts claims, parallel Verifier subagents fact-check each claim with independent context windows, Repairer rewrites errors). Use when a user finishes writing an IT article and asks to verify / fact-check it, mentions '/verify-chain' or '/verify' or '验证链', or asks 'is this article accurate' before publishing."
+description: "Fact-checks a written IT article against authoritative web sources via Critic→Verifier→Repairer pipeline (Verifier subagents run in parallel). Use when user finishes an IT article, mentions '/verify-chain' / '/verify' / '验证链', or asks 'is this article accurate' before publishing."
 allowed-tools: "Read Write Edit Bash Glob Grep WebFetch WebSearch"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: security-devsecops
-description: "Secures supply-chain + deployment pipeline. Use when adding/upgrading deps, rotating secrets, configuring CI/CD, writing IaC (Terraform / Kubernetes / Ansible / Docker), building container images, or preparing production deploys. Scans CVEs at install time; complements supply-chain-risk-auditor (maintainer signal)."
+description: "Secures supply-chain + deploy pipeline: deps, SBOM, secrets, CI/CD, IaC, container, pre-deploy gate. Use when adding/upgrading deps, rotating secrets, configuring CI/CD, writing IaC, preparing production deploys. NOT for GHA workflows (gha-security-review) or app-layer code (security-and-hardening)."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 version: 0.1.0

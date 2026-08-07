@@ -1,6 +1,6 @@
 ---
 name: closed-loop-delivery
-description: "Closes the implementation-to-runtime loop so a task is not 'done' on diff-size but on evidence running in production without silent failure. Use when an implementation feels finished and the natural next move is 'merge and call it done', when a deploy passed CI but post-incident evidence suggests users saw the bug, or when establishing / auditing a team's Definition of Done. Complements incremental-implementation (slice dispatch) and verification-before-completion (PR-level Iron Law) by extending evidence past deploy into runtime."
+description: "Extends 'done' past merge: evidence running in production without silent failure. Use when a change feels finished and impulse is 'merge and call it done', when users report bugs despite green CI, or when auditing a Definition of Done. NOT for: PR-level review (use verification-before-completion)."
 allowed-tools: "Read Bash Glob WebFetch"
 ---
 

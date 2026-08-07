@@ -1,6 +1,6 @@
 ---
 name: source-driven-development
-description: "Forces the agent to verify framework / library API behavior against official documentation before writing code. Under omo, uses context7 MCP (primary, replaces WebFetch) and grep_app MCP (real-world examples). Apply ONLY when API is unfamiliar, version-sensitive (major upgrade), or behavior is unexpectedly wrong. Don't trigger for stdlib or well-known APIs."
+description: "Forces the agent to verify framework/library API behavior against official documentation before writing code. Use when the API is unfamiliar, version-sensitive (major upgrade), or behavior is unexpectedly wrong. NOT for stdlib or well-known APIs."
 allowed-tools: "Read Edit Bash Glob Grep WebFetch"
 ---
 
