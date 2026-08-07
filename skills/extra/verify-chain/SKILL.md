@@ -129,11 +129,49 @@ Repairer 按修复策略表执行：
    - ❓ 无法确定：W
 2. **修复清单**：哪些问题已自动修复（含修复后位置）
 3. **待人工确认项**：❓ 无法确定的内容
-4. **输出文件**：
-   - `.verification/article-verified.md` —— 修复后文章
-   - `.verification/verification-report.md` —— 完整核查报告（含所有断言 + 核查结论 + 来源）
+4. **输出文件**（项目级 audit log,git tracked,在 `docs/verification/` 下）：
 
-`.verification/` 目录在用户项目根（CWD）下首次创建；若已存在同名目录，提示用户决定（覆盖 / 改名 / 合并）而非默默覆盖。
+   **`<article-slug>` 派生规则**:从用户传入的 article 文件路径取 basename,strip `.md`/`.markdown` 后缀,strip 路径前缀,转 kebab-case,匹配 `^[a-z0-9][a-z0-9-]{0,39}$`(与 brainstorming 的 plan-slug regex 对齐);不合规则退化为 `verify-YYYYMMDDTHHMMSSZ`(atomic timestamp,**无需计数**;同日多次 fallback 概率极低,真撞了让下面的碰撞 3 选项兜住)。例:`docs/articles/kubernetes-networking.md` → slug=`kubernetes-networking`;`./foo/Bar.md` → slug=`bar`。
+
+   - `docs/verification/<article-slug>/article-verified.md` —— 修复后文章
+   - `docs/verification/<article-slug>/verification-report.md` —— 完整核查报告（含所有断言 + 核查结论 + 来源）
+
+   两个文件**必须带 YAML frontmatter**(让 `grep -l` 能跨多篇文章定位单次核查结果):
+
+   **article-verified.md 的 frontmatter 模板**:
+
+   ```yaml
+   ---
+   article: <article-slug>
+   verified_at: <ISO-8601 UTC>
+   verdict: pass
+   ---
+   ```
+
+   `verdict` 取值:`pass`(全部 ✅)/ `warn`(含 ⚠️)/ `fail`(含 ❌)/ `uncertain`(含 ❓)。
+
+   **verification-report.md 的 frontmatter 模板**:
+
+   ```yaml
+   ---
+   article: <article-slug>
+   verified_at: <ISO-8601 UTC>
+   claims_total: 0
+   claims_pass: 0
+   claims_warn: 0
+   claims_fail: 0
+   claims_uncertain: 0
+   ---
+   ```
+
+   5 个 `claims_*` 字段必须填整数(0 表示无该类断言),`claims_total = claims_pass + claims_warn + claims_fail + claims_uncertain`。
+
+   **碰撞语义**:`docs/verification/<article-slug>/` 子目录**已存在** → 三选项让用户决策(非默默覆盖):
+   - **覆盖**:删除旧版本后再写本次(本次 `verified_at` 成为单一记录)
+   - **保留旧版 + 写新版本**:把旧目录改名为 `docs/verification/<article-slug>-<ISO日期前 8 位>/`,作为历史快照保留;本次目录用 `<article-slug>/`(此选项让本目录的 git diff 包含两次完整核查,审计 trail 更完整,**默认推荐**)
+   - **保留旧版跳过本次**:本次 verify-chain 退化为只读模式,不写任何文件(适合用户只想看核查结果但不要 patch)
+
+   `docs/verification/` 父目录在用户项目根（CWD）下首次创建；若已存在 `docs/verification/<article-slug>/` 子目录，按上述语义处理。
 
 ## Common Rationalizations
 
@@ -146,7 +184,7 @@ Repairer 按修复策略表执行：
 | "用户没指定模式，默认全自动就行" | 默认全自动 OK,但若用户明确说"先审再改"/"只查不改",严格按用户指示执行 |
 | "文章太短不用走完整流程" | 即使 5 段文章也有 5+ 个断言可提取;流水线是统一接口,不分长短 |
 | "可以省略修复步骤直接给报告" | 模式"只查不改"才省略;默认全自动必须包含修复 |
-| "输出到.verification/ 麻烦，直接放 CWD 根" | 用户指定输出到 `.verification/`;改路径需要用户授权 |
+| "输出到 docs/verification/ 麻烦，直接放 CWD 根" | 不再允许。`docs/verification/<article-slug>/` 是两轴原则下唯一合规的项目级 audit log 落点；除非用户主动用 `<article-slug>` 派生规则特例（比如 `.verification/` 单目录变 `docs/verification/<slug>/` 子目录），否则切到新路径是默认行为，不需用户授权 |
 
 ## Red Flags
 
@@ -156,7 +194,7 @@ Repairer 按修复策略表执行：
 - Verifier 引用 CSDN / 掘金 / 个人博客作为主要来源（违反来源优先级）
 - Repairer 输入含 ✅ 断言（硬约束违反）
 - Repairer 改写 ✅ 断言的措辞（最小改动原则违反）
-- 输出文件直接覆盖同名目录而不提示用户（可能丢失用户既有内容）
+- 输出文件直接覆盖 `docs/verification/<article-slug>/` 而不提示用户（git tracked 目录里被默默覆盖会留下可疑的丢失 commit,丢失用户既有审计历史）
 - 跳过 `WebSearch` / `WebFetch` 工具就用本 skill（等于让 Verifier 盲猜）
 
 ## Verification
@@ -169,8 +207,8 @@ Repairer 按修复策略表执行：
 - [ ] 综合结论分布合理：✅ / ⚠️ / ❌ / ❓ 四类都有合理占比（全部 ✅ 通常意味着核查太宽松）
 - [ ] Repairer 输入只含 ⚠️ / ❌ / ❓（无 ✅）
 - [ ] 修复后文章保持原作者语气（diff 检验：未修改段落应与原文完全一致）
-- [ ] `.verification/article-verified.md` 存在
-- [ ] `.verification/verification-report.md` 存在
+   - [ ] `docs/verification/<article-slug>/article-verified.md` 存在（含 `article` / `verified_at` / `verdict` frontmatter）
+   - [ ] `docs/verification/<article-slug>/verification-report.md` 存在（含 `article` / `verified_at` / `claims_total` / 5 个分布计数 frontmatter）
 - [ ] 若模式为"先审再改"或"只查不改"，Phase 3 / 4 已按模式跳过
 
 ## omo Integration

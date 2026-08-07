@@ -1,7 +1,7 @@
 {
   "name": "verify-chain",
   "version": "0.1.0",
-  "description": "3-role article fact-checking pipeline (Critic extracts claims, parallel Verifier subagents verify with web search, Repairer fixes errors). Writes .verification/article-verified.md + .verification/verification-report.md.",
+  "description": "3-role article fact-checking pipeline (Critic extracts claims, parallel Verifier subagents verify with web search, Repairer fixes errors). Writes docs/verification/<article-slug>/article-verified.md + docs/verification/<article-slug>/verification-report.md (git-tracked project audit log with per-claim frontmatter).",
   "positive_triggers": [
     {
       "input": "I just finished writing a K8s upgrade guide, please verify accuracy",
@@ -46,7 +46,9 @@
         "Each Verifier uses WebSearch + WebFetch to consult authoritative sources (official docs, GitHub source, MDN/ArchWiki/RFC), avoiding CSDN/juejin/personal blogs",
         "Verifier subagent output: ✅/⚠️/❌/❓ per claim + URL sources + fix suggestions",
         "Repairer (prompts/repairer.md) receives only ⚠️/❌/❓ results (NEVER ✅), applies minimal-change fixes per strategy table",
-        "Agent writes .verification/article-verified.md (fixed article) + .verification/verification-report.md (full audit)",
+        "Agent derives <article-slug> from input article filename (matches ^[a-z0-9][a-z0-9-]{0,39}$, falls back to verify-YYYYMMDDTHHMMSSZ when invalid — atomic timestamp, no counter state)",
+        "Agent writes docs/verification/<article-slug>/article-verified.md (fixed article) + docs/verification/<article-slug>/verification-report.md (full audit), both with YAML frontmatter (article, verified_at, verdict / claims_total + 4 distribution counts)",
+        "On directory collision (docs/verification/<article-slug>/ already exists), agent prompts user with 3 choices: overwrite / keep-old-and-write-new (rename old to <slug>-YYYYMMDD/) / keep-old-skip-this-run; no silent overwrite",
         "If user said '先审再改' or '只查不改', agent pauses/skips Repairer per mode"
       ]
     }
