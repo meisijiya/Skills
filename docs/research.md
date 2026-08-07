@@ -1,6 +1,6 @@
 # `/research` — high-trust-source research with cited Markdown output
 
-Cited research findings on planning / design questions, written to `.omo/research/<plan>/<topic>.md`. Thin contract layer over the OMO `librarian` agent — this skill enforces the source whitelist, citation format, plan-required gate, async dispatch, and the audit entry; librarian does the actual retrieval.
+Cited research findings on planning / design questions, written to `docs/research/<plan-slug>/<topic>.md` (git tracked, project-level audit log). Thin contract layer over the OMO `librarian` agent — this skill enforces the source whitelist, citation format, plan-required gate, async dispatch, and the audit entry; librarian does the actual retrieval.
 
 ## When to use
 
@@ -18,17 +18,15 @@ Cited research findings on planning / design questions, written to `.omo/researc
   ↓
 /research skill
   ├─ plan-required gate (refuse if no plan slug)
-  ├─ topic dedupe (.omo/research/<plan>/<topic>.md exists? → reuse, no re-dispatch)
+  ├─ topic dedupe (docs/research/<plan-slug>/<topic>.md exists? → reuse, no re-dispatch)
   ├─ mode: sync (short fact-check) | async (≥ 3 sub-questions, wayfinder dispatch)
   ├─ dispatch librarian (background: true|false) with whitelist + format contract
   ↓
 librarian output (4-type whitelist only, inline [`ref:<type>,<id>`](url))
   ↓
 /research closeout:
-  ├─ write .omo/research/<plan>/<topic>.md (frontmatter + 5 sections)
+  ├─ write docs/research/<plan-slug>/<topic>.md (frontmatter + 5 sections)
   ├─ append [research] ts=... topic=... findings=... mode=... to .omo/notepads/<plan>/decisions.md
-  ├─ hook auto-updates .omo/.index.json (research_in_flight removed / research_complete added)
-  ├─ >5KB → distill prompt to docs/research/<plan-slug>-<topic-slug>.md
   └─ return:
        sync  → "findings: <path> (N findings, M sources)"
        async → {"status": "running", "task_id": "..."}
@@ -47,19 +45,15 @@ Anything else (Stack Overflow, blogs, Medium, Reddit, AI-generated answers) goes
 
 ## Output file
 
-`.omo/research/<plan>/<topic>.md` — required YAML frontmatter (`topic, plan, ts, mode, status, sources_used`) + five body sections in order: `Question` / `Findings` / `Recommendation` / `See Also` / `Sources Cited`. Each `Findings` subsection carries at least one `[ref:*]` inline citation; `See Also` is plain links only.
+`docs/research/<plan-slug>/<topic>.md` — required YAML frontmatter (`topic, plan, ts, mode, status, sources_used`) + five body sections in order: `Question` / `Findings` / `Recommendation` / `See Also` / `Sources Cited`. Each `Findings` subsection carries at least one `[ref:*]` inline citation; `See Also` is plain links only.
 
 ## Audit entry
 
 ```
-[research] ts=<iso8601> topic=<slug> findings=.omo/research/<plan>/<topic>.md mode=sync|async
+[research] ts=<iso8601> topic=<slug> findings=docs/research/<plan-slug>/<topic>.md mode=sync|async
 ```
 
 Appended to `.omo/notepads/<plan>/decisions.md` (parallel to existing `[proto]` / `[amend]` / `[wayfinder]` formats). The `ts` is ISO 8601 in UTC; the path is repo-relative; the line is the only accepted shape (case-greped by the test suite).
-
-## Distill protocol (plan close)
-
-If the output file is > 5KB, surface a one-line prompt: `Research output > 5KB. Distill to docs/research/<slug>-<topic>.md? (y/n)`. The original is always preserved as the canonical archive; the distill is a condensed, citation-preserving copy. "No" is a valid user answer; missing prompt is a bug.
 
 ## Hard rules
 

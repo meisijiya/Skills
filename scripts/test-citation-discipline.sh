@@ -65,7 +65,7 @@ test_f() {
 test_g() {
   local plan="qa-research" topic="citation-discipline" ts="2026-07-29T10:30:00Z"
   local decisions="$TMP/$plan/decisions.md"; mkdir -p "$TMP/$plan"
-  printf '[research] ts=%s topic=%s findings=.omo/research/%s/%s.md mode=async\n' \
+  printf '[research] ts=%s topic=%s findings=docs/research/%s/%s.md mode=async\n' \
          "$ts" "$topic" "$plan" "$topic" >> "$decisions"
   local n; n=$(grep -cF "[research]" "$decisions" || true)
   if [[ "$n" == "1" ]]; then ok "(g) Idempotent (plan, topic)"

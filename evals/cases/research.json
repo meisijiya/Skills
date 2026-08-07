@@ -12,7 +12,7 @@
     "plan context",
     "Plan context required"
   ],
-  "description": "High-trust-source research with cited Markdown findings on planning / design questions, written to .omo/research/<plan>/<topic>.md. Thin contract layer over OMO librarian agent: this skill enforces a 4-type source whitelist (official docs, RFC, source-repo code, project ADRs / spec), inline citation format, plan-required invocation, async dispatch, and the decisions.md audit entry. Use when a planning decision needs an authoritative answer that should outlive the session as a citable record and candidate sources are official docs, RFCs, source-repo code, or project ADRs / spec. NOT for casual questions (use agent default tools), non-authoritative sources like Stack Overflow or blogs (link in See Also only — never cite as [ref]), or plan-less invocations (refuse: 'Plan context required.').",
+  "description": "High-trust-source research with cited Markdown findings on planning / design questions, written to docs/research/<plan-slug>/<topic>.md. Thin contract layer over OMO librarian agent: this skill enforces a 4-type source whitelist (official docs, RFC, source-repo code, project ADRs / spec), inline citation format, plan-required invocation, async dispatch, and the decisions.md audit entry. Use when a planning decision needs an authoritative answer that should outlive the session as a citable record and candidate sources are official docs, RFCs, source-repo code, or project ADRs / spec. NOT for casual questions (use agent default tools), non-authoritative sources like Stack Overflow or blogs (link in See Also only — never cite as [ref]), or plan-less invocations (refuse: 'Plan context required.').",
   "positive_triggers": [
     {
       "input": "I need to know what the latest Vue 3.5 RFC says about prop inheritance defaults — get an authoritative answer I can cite in the spec",
@@ -52,15 +52,14 @@
       "scenario": "User is mid-plan on `skills-extension-v1` and asks: 'Investigate the citation discipline for me so the spec can cite it later. Mode: async — I want to keep planning.'",
       "expected_behavior": [
         "Agent verifies plan slug is present (skills-extension-v1) — does NOT refuse",
-        "Agent verifies topic is new — does NOT find .omo/research/skills-extension-v1/citation-discipline.md, so dispatches fresh",
+        "Agent verifies topic is new — does NOT find docs/research/skills-extension-v1/citation-discipline.md, so dispatches fresh",
         "Agent picks mode=async per the user's explicit request and the heuristic (multi-source investigation)",
         "Agent dispatches librarian with the verbatim dispatch prompt template (whitelist + format + section contract + refusal rule)",
         "Agent returns IMMEDIATELY with the exact JSON shape {\"status\": \"running\", \"task_id\": \"<id>\"} — does NOT block on librarian",
-        "Background librarian writes .omo/research/skills-extension-v1/citation-discipline.md with required frontmatter (topic, plan, ts, mode: async, status: complete, sources_used) and the 5 body sections in order",
+        "Background librarian writes docs/research/skills-extension-v1/citation-discipline.md with required frontmatter (topic, plan, ts, mode: async, status: complete, sources_used) and the 5 body sections in order",
         "Background librarian uses ONLY the 4 whitelisted [ref:*] types — Stack Overflow / blog links go to See Also as plain markdown",
-        "Agent appends the audit entry `[research] ts=<iso8601> topic=citation-discipline findings=.omo/research/skills-extension-v1/citation-discipline.md mode=async` to .omo/notepads/skills-extension-v1/decisions.md",
-        "Hook updates .omo/.index.json field `research_complete` with the (plan, topic) tuple — idempotent re-invocation reuses the existing record and does not double-append decisions.md",
-        "Agent surfaces the >5KB distill prompt to the user IF the output exceeds 5KB; user response (y/n) is recorded; original file is preserved either way"
+        "Agent appends the audit entry `[research] ts=<iso8601> topic=citation-discipline findings=docs/research/skills-extension-v1/citation-discipline.md mode=async` to .omo/notepads/skills-extension-v1/decisions.md",
+        "Idempotent re-invocation reuses the existing output file and does not double-append decisions.md"
       ]
     },
     {
@@ -69,7 +68,7 @@
         "Agent refuses IMMEDIATELY with the verbatim literal: `Plan context required. Open a plan first with /brainstorming or /ulw-plan.`",
         "Agent does NOT propose /tmp or any other fallback path — there is no plan-scoped place to land the output",
         "Agent does NOT call librarian — refusal is upstream of dispatch",
-        "Agent does NOT create .omo/research/<any>/foo.md — the output file path requires a plan slug"
+        "Agent does NOT create docs/research/<any>/foo.md — the output file path requires a plan slug"
       ]
     }
   ],

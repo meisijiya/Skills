@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Investigates planning/design questions against high-trust primary sources (official docs, RFCs, source-repo, project ADRs); writes cited Markdown findings to `.omo/research/<plan>/<topic>.md`. Use when a decision requires authoritative information as a citable record. Requires plan context — refuses plan-less. NOT for casual questions or Stack Overflow / blogs."
+description: "Investigates planning/design questions against high-trust primary sources (official docs, RFCs, source-repo, project ADRs / spec); writes cited Markdown findings to `docs/research/<plan-slug>/<topic>.md`. Use when a decision requires authoritative information as a citable record. Requires plan context — refuses plan-less with `Plan context required.` NOT for casual questions or Stack Overflow / blogs."
 allowed-tools: "Read Edit Bash Glob Grep"
 ---
 version: 0.1.0
@@ -9,7 +9,7 @@ version: 0.1.0
 
 ## Overview
 
-High-trust-source research with cited Markdown output to `.omo/research/<plan>/<topic>.md`. The skill is a thin **contract layer** over the OMO `librarian` agent: librarian does the actual retrieval, `/research` enforces the 4-type source whitelist, the inline citation format, the plan-required invocation gate, async dispatch, the `.omo/notepads/<plan>/decisions.md` audit entry, and the >5KB distill prompt.
+High-trust-source research with cited Markdown output to `docs/research/<plan-slug>/<topic>.md`. The skill is a thin **contract layer** over the OMO `librarian` agent: librarian does the actual retrieval, `/research` enforces the 4-type source whitelist, the inline citation format, the plan-required invocation gate, async dispatch, and the `.omo/notepads/<plan>/decisions.md` audit entry.
 
 The whole point is to make a cited record that outlives the session: a future reader (human or agent) must be able to point at a finding and say "this came from `ref:rfc-9457`, here's the URL, here is the page that resolves it" — not "trust me, I checked Stack Overflow".
 
@@ -46,7 +46,7 @@ Before anything else, check for a plan slug:
 
   This is the verbatim refusal string the regression test (`scripts/test-citation-discipline.sh` case (c)) greps for. Do not paraphrase it. The skill is not the place to bootstrap a plan — that is [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) or [`ulw-plan`](~/.agents/skills/ulw-plan/SKILL.md).
 
-The slug feeds two downstream slots: the output file path (`.omo/research/<slug>/<topic>.md`) and the `decisions.md` audit entry (`.omo/notepads/<slug>/decisions.md`).
+The slug feeds two downstream slots: the output file path (`docs/research/<plan-slug>/<topic>.md`) and the `decisions.md` audit entry (`.omo/notepads/<slug>/decisions.md`).
 
 ### 2. Resolve the topic and dedupe
 
@@ -54,8 +54,7 @@ Topic is a kebab-case slug (≤ 60 chars, matches `^[a-z0-9][a-z0-9-]{0,59}$`). 
 
 Before opening anything, check for an existing record:
 
-- `.omo/research/<slug>/<topic>.md` already exists → report the existing path, do **not** re-run librarian, and append a `[research]` entry to `decisions.md` with `mode=sync` and the existing `findings=<path>`. This is the idempotency contract tested in case (g).
-- `.omo/.index.json` field `research_in_flight` contains `<slug>:<topic>` → report "already running" with the existing `task_id`; do not double-dispatch.
+- `docs/research/<plan-slug>/<topic>.md` already exists → report the existing path, do **not** re-run librarian, and append a `[research]` entry to `decisions.md` with `mode=sync` and the existing `findings=<path>`. This is the idempotency contract tested in case (g). If the file was last modified within the last 60 seconds, treat it as in-flight and warn the user before re-dispatching (rare duplicate-dispatch window).
 
 ### 3. Pick the mode
 
@@ -87,7 +86,7 @@ The full prompt template is below in § "Dispatch prompt template" so it is copy
 
 ### 5. Capture the output
 
-Write the librarian output verbatim to `.omo/research/<slug>/<topic>.md`. Required YAML frontmatter (single source of truth for hook indexing):
+Write the librarian output verbatim to `docs/research/<plan-slug>/<topic>.md`. Required YAML frontmatter:
 
 ```yaml
 ---
@@ -107,31 +106,21 @@ Required body sections, in order: `Question`, `Findings`, `Recommendation`, `See
 Append one line to `.omo/notepads/<slug>/decisions.md` (create the directory if absent). Use this exact shape — `scripts/test-citation-discipline.sh` case (g) greps for it:
 
 ```
-[research] ts=<iso8601> topic=<topic-slug> findings=.omo/research/<slug>/<topic>.md mode=sync|async
+[research] ts=<iso8601> topic=<topic-slug> findings=docs/research/<plan-slug>/<topic>.md mode=sync|async
 ```
 
 The `ts` must be ISO 8601 in UTC (`YYYY-MM-DDTHH:MM:SSZ`). The path must be repo-relative. No additional keys, no prose on the same line.
 
-### 7. Distill prompt (Phase 3 / plan-close hook)
+### 7. Return
 
-If the output file is **> 5 KB** (after writing), surface a one-line prompt to the user:
-
-```
-Research output > 5KB. Distill to docs/research/<slug>-<topic>.md? (y/n)
-```
-
-The original `.omo/research/<slug>/<topic>.md` is always preserved as the canonical archive; `docs/research/<slug>-<topic>.md` is a condensed, citation-preserving copy. The 5KB threshold is a soft signal, not a hard cutoff — if the user says "no", leave it.
-
-### 8. Return
-
-- **Sync mode:** return a one-line summary plus the absolute path. Format: `findings: .omo/research/<slug>/<topic>.md (N findings, M sources)`.
+- **Sync mode:** return a one-line summary plus the absolute path. Format: `findings: docs/research/<plan-slug>/<topic>.md (N findings, M sources)`.
 - **Async mode:** return immediately with the exact JSON shape the regression test asserts (case (f)):
 
   ```json
   {"status": "running", "task_id": "<id>"}
   ```
 
-  Caller polls via `/research status <task_id>` or by reading `.omo/.index.json` field `research_complete` after the background librarian lands the output. The async return **must not** block on librarian completion — it returns the moment the dispatch is acknowledged.
+  Caller polls via `/research status <task_id>` or by checking filesystem existence of the output file. The async return **must not** block on librarian completion — it returns the moment the dispatch is acknowledged.
 
 ## Source Whitelist (4 types — exact)
 
@@ -203,7 +192,7 @@ Citation format (inline markdown anchor):
   [`ref:<type>,<id>`](url)
   e.g. [`ref:rfc-9457`](https://datatracker.ietf.org/doc/html/rfc9457)
 
-Output contract (file .omo/research/<plan-slug>/<topic-slug>.md):
+Output contract (file docs/research/<plan-slug>/<topic-slug>.md):
   Required sections in order: Question / Findings / Recommendation / See Also / Sources Cited
   Each finding must carry at least one [ref:*] inline citation.
   See Also contains plain markdown links only — no [ref:*] tag.
@@ -222,7 +211,7 @@ Frontmatter (required):
 | Excuse | Reality |
 |---|---|
 | "Stack Overflow has the answer, just cite it" | Stack Overflow is non-authoritative. Link in `See Also`; do not wrap in `[ref:*]`. The test suite rejects this in case (a). |
-| "Plan-less research is fine, I'll just save to /tmp" | The whole skill is plan-scoped (output path, decisions.md entry, index.json hook). A plan-less invocation has no place to land. Refuse with the literal `Plan context required.` |
+| "Plan-less research is fine, I'll just save to /tmp" | The whole skill is plan-scoped (output path, decisions.md entry). A plan-less invocation has no place to land. Refuse with the literal `Plan context required.` |
 | "I'll just answer the user directly, no need to write a file" | Then `/research` was not the right skill. Either use the agent's default tools for casual questions, or pick a different skill. `/research` always writes a cited record. |
 | "I can see the answer in the local code, no need for librarian" | If the answer is already in the local code, no research is needed — just answer. `/research` is for questions that need external or higher-trust sources. |
 | "Async dispatch means I should wait until librarian finishes" | Async means **return immediately** with `{"status": "running", "task_id": "..."}`. The caller polls separately. Returning a synchronous result for an async dispatch is a contract violation tested in case (f). |
@@ -231,7 +220,7 @@ Frontmatter (required):
 | "See Also doesn't need to be exhaustive" | `See Also` is the safety valve for non-authoritative-but-relevant links. Skipping it is what makes an LLM silently "upgrade" a blog post to `[ref:official-docs]`. The section's existence is the discipline. |
 | "The user wants the answer now, skip the file write" | The user wanted `/research`, not "tell me the answer". The file is the deliverable. Sync mode still writes the file; only the caller's experience is "fast". |
 | "I'll let the librarian pick which source types to cite" | The whitelist is enforced by this skill, not by librarian. The dispatch prompt above tells librarian "only these four may appear as [ref:*]". If the librarian proposes a Stack Overflow citation, the caller rejects and asks for an authoritative alternative. |
-| "The 5KB distill prompt is annoying, just write the file and move on" | The prompt is the audit gate for "did this research grow too big to be useful in-place". Skipping it lets findings rot. A "no" from the user is fine; a missing prompt is a bug. |
+| "I'll write the file to `.omo/research/` first, then distill to `docs/research/`" | Single-path: the canonical output goes directly to `docs/research/<plan-slug>/<topic>.md` (git tracked). No two-stage write; the cited record IS the deliverable from the start. |
 
 ## Red Flags
 
@@ -242,7 +231,7 @@ Frontmatter (required):
 - Sync mode returns `{"status": "running", "task_id": "..."}` (that's async's shape, not sync's).
 - Async mode returns a synchronous result without a `task_id`.
 - Plan-less invocation is accepted with a fallback path like `/tmp/research-<topic>.md` (refuse; do not improvise).
-- The same `(plan, topic)` is dispatched twice without idempotency check on `.omo/.index.json` field `research_in_flight`.
+- The same `(plan, topic)` is dispatched twice without an idempotency check on the existing output file (filesystem existence) and `decisions.md` audit entry.
 - Librarian is modified, patched, or "improved" — it is the execution body and **must not be touched** by this skill.
 - The output cites a URL that does not resolve to one of the four whitelisted source types, even if the URL "looks official".
 
@@ -251,17 +240,16 @@ Frontmatter (required):
 Before returning to the caller, confirm:
 
 - [ ] Plan slug is set; refusal literal is the exact string the test greps for.
-- [ ] Output file `.omo/research/<slug>/<topic>.md` exists with YAML frontmatter (`topic, plan, ts, mode, status, sources_used`).
+- [ ] Output file `docs/research/<plan-slug>/<topic>.md` exists with YAML frontmatter (`topic, plan, ts, mode, status, sources_used`).
 - [ ] All five body sections present in order: `Question` / `Findings` / `Recommendation` / `See Also` / `Sources Cited`.
 - [ ] Every `Findings` subsection has at least one `[ref:*]` inline citation.
 - [ ] `See Also` contains plain markdown links only — no `[ref:*]` wrapping.
 - [ ] `Sources Cited` deduplicates every `[ref:*]` used.
-- [ ] `decisions.md` entry is exactly: `[research] ts=<iso8601> topic=<slug> findings=<path> mode=sync|async`.
+- [ ] `decisions.md` entry is exactly: `[research] ts=<iso8601> topic=<slug> findings=docs/research/<plan-slug>/<topic>.md mode=sync|async`.
 - [ ] Sync mode returned a one-line summary; async mode returned `{"status": "running", "task_id": "<id>"}` within 100ms of dispatch.
 - [ ] Idempotency: a re-invocation with the same `(plan, topic)` reuses the existing output and does not re-dispatch librarian.
-- [ ] Output file size > 5KB → distill prompt was shown to the user (and answer recorded).
 - [ ] `scripts/test-citation-discipline.sh` exit 0 with all 7 sub-tests passing (run after every change to this skill).
 
 ## omo Integration
 
-Librarian agent is the execution body — this skill **does not modify librarian**; the dispatch prompt above is the entire contract surface. The `decisions.md` audit entry is consumed by OMO `atlas` for progress tracking and by the `compaction-context-injector` hook to surface recent research in surviving context. Async dispatch returns a `task_id` that OMO `atlas` polls via `.omo/.index.json` field `research_complete`. The `.omo/.index.json` A1 hook (owned by `omo-state-index.js`) auto-tracks `research_in_flight` and `research_complete` on write/append — this skill just writes the file and lets the hook fire.
+Librarian agent is the execution body — this skill **does not modify librarian**; the dispatch prompt above is the entire contract surface. The `decisions.md` audit entry is consumed by OMO `atlas` for progress tracking and by the `compaction-context-injector` hook to surface recent research in surviving context. Async dispatch returns a `task_id`; the caller polls it via `/research status <task_id>` or by checking filesystem existence of `docs/research/<plan-slug>/<topic>.md`.
