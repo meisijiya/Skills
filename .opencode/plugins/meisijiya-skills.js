@@ -14,6 +14,12 @@
  *   - Config.skills.paths schema: https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/core/src/v1/config/skills.ts
  *   - Runtime skill discovery: packages/opencode/src/skill/index.ts#L197
  *
+ * Skill discovery (T0.1 verified): OpenCode hook input does not expose
+ * `availableSkills`, but `client.skill.list({ query: { directory } })` is a
+ * working runtime API returning SkillV2Info[] (name/description/slash/location/
+ * content). We call it once per process, cache module-level, and fall back to a
+ * filesystem scan of ~/.agents/skills when the API call fails or returns empty.
+ *
  * Critical gotcha: must mutate in-place (issue #25754) — reassigning
  * `output.messages = newArr` is a silent no-op. This file mutates
  * `firstUser.parts` in place via `unshift`, which is safe.
@@ -33,9 +39,10 @@ import os from 'os';
 
 const EXTREMELY_IMPORTANT_MARKER = 'EXTREMELY_IMPORTANT';
 
-// Module-level cache: bootstrap file does not change during a session.
+// Module-level caches: bootstrap file and skill list do not change during a session.
 // See superpowers.js for the same pattern (avoids redundant disk reads per step).
 let _bootstrapCache = undefined; // undefined = not yet loaded, null = file missing
+let _skillCache = null;          // null = not yet loaded / failed, array = SkillV2Info[] or FS-scan items
 
 /**
  * Strip simple YAML frontmatter from a SKILL.md.
@@ -80,20 +87,77 @@ ${body}
   }
 }
 
-export const MeisijiyaSkillsPlugin = async ({ client, directory }) => {
+/**
+ * FS fallback: scan ~/.agents/skills for directories containing SKILL.md.
+ * Used when the runtime API call fails or returns empty.
+ * Returns items shaped like SkillV2Info ({ name, location }).
+ */
+function scanSkillsDir() {
+  const dir = path.join(os.homedir(), '.agents', 'skills');
+  try {
+    return fs.readdirSync(dir, { withFileTypes: true })
+      .filter((e) => e.isDirectory() && fs.existsSync(path.join(dir, e.name, 'SKILL.md')))
+      .map((e) => ({ name: e.name, location: path.join(dir, e.name) }));
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Load + cache the installed skill list.
+ * Primary: OpenCode runtime API `client.skill.list` (T0.1 verified).
+ * Fallback: FS scan of ~/.agents/skills (the pre-T1.2 path).
+ * Never throws — failures degrade silently to the FS scan.
+ */
+async function loadSkillCache(client, directory) {
+  if (_skillCache !== null) return _skillCache;
+
+  try {
+    const skills = await client.skill.list({ query: { directory } });
+    if (Array.isArray(skills) && skills.length > 0) {
+      _skillCache = skills;
+      return _skillCache;
+    }
+  } catch (e) {
+    // silent degrade: fall through to FS scan
+  }
+
+  _skillCache = scanSkillsDir();
+  return _skillCache;
+}
+
+export const MeisijiyaSkillsPlugin = async (ctx) => {
+  const { client, directory } = ctx || {};
   const skillsDir = path.join(os.homedir(), '.agents', 'skills');
+
+  // One runtime discovery call per process, cached module-level.
+  // Failures (no client / API error / empty result) fall back to the FS scan.
+  try {
+    await loadSkillCache(client, directory);
+  } catch (e) {
+    // never throw out of the plugin factory
+  }
 
   return {
     /**
-     * Register the meisijiya-skills directory with OpenCode's native skill tool
+     * Register the meisijiya-skills directories with OpenCode's native skill tool
      * so it can discover + list + invoke installed skills.
      * Equivalent to a global `npx skills add`; doesn't require symlinks.
      */
     config: async (config) => {
       config.skills = config.skills || {};
       config.skills.paths = config.skills.paths || [];
-      if (!config.skills.paths.includes(skillsDir)) {
-        config.skills.paths.push(skillsDir);
+
+      // Always register the home skills dir (pre-T1.2 behavior), plus any
+      // locations discovered via the runtime API / FS scan (deduped).
+      const paths = new Set([skillsDir]);
+      if (Array.isArray(_skillCache)) {
+        for (const s of _skillCache) {
+          if (s && typeof s.location === 'string' && s.location) paths.add(s.location);
+        }
+      }
+      for (const p of paths) {
+        if (!config.skills.paths.includes(p)) config.skills.paths.push(p);
       }
     },
 
