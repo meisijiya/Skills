@@ -21,7 +21,7 @@ npx skills add meisijiya/Skills \
 - **omo 深度集成**:fork 的每个 skill 显式利用 omo 的 MCPs( context7 / grep_app / websearch / lsp)、agents( sisyphus / prometheus / atlas / oracle / librarian / multimodal-looker )、built-in skills( git-master / frontend-ui-ux / review-work / init-deep )和 modes( hyperplan / security-research / ultrawork )。完整 omo ↔ skills 跨参考图见 `~/.config/opencode/AGENTS.md`(`meisijiya-extras` 段)。
 - **意图门控的构建前对齐**:普通设计对齐只输出 Markdown / 文本；只有用户明确要求响应式 HTML 页面（项目可视化 / 自学习 / 教学型）时才通过 OMO 内置 `frontend` 渲染单文件 HTML；教学型内容额外叠加 `teacher-skill` pedagogy overlay。项目有 UI、即将 build、复杂都不会单独触发 HTML 生成。
 - **designer 协作**:用 [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 为 designer 类 agent 生成 UI/UX design spec。
-- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (35 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 6 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain` / `meisijiya-frontend`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
+- **双目录 + 多 group**:`core/` 必装集 (9 个) + `extra/` 选装集 (36 个,按需装)。`.claude-plugin/marketplace.json` 把 `extra/` 拆为 6 个 plugin entry(`meisijiya-security` / `meisijiya-cicd` / `meisijiya-observability` / `meisijiya-meta` / `meisijiya-domain` / `meisijiya-frontend`)让 `npx skills add` picker 按 group 选。`core/` 保留单 entry(`meisijiya-core`)保留必装视觉信号。它是 skills CLI 的概念,**不是 OpenCode Plugin Marketplace** — OpenCode plugin 走 `~/.config/opencode/plugins/`,不经此文件。
 
 ## 仓库结构
 
@@ -45,8 +45,8 @@ meisijiya-skills/
 │   │   ├── debugging-and-error-recovery/    ← 5-step triage protocol
 │   │   ├── diagnosing-bugs/                  ← symptom-driven diagnosis loop (pairs with debugging-and-error-recovery)
 │   │   └── source-driven-development/       ← verify API against docs (narrowed triggers)
-│   └── extra/                ← 选装集(35 个,按 group 组织在 picker 中)
-│       ├── README.md          ← 35 个 skill + group-aware "怎么选" 决策表
+│   └── extra/                ← 选装集(36 个,按 group 组织在 picker 中)
+│       ├── README.md          ← 36 个 skill + group-aware "怎么选" 决策表
 │       ├── security-and-hardening/          # security group (9)
 │       ├── security-devsecops/
 │       ├── security-incident-response/
@@ -66,7 +66,7 @@ meisijiya-skills/
 │       ├── slice-review/
 │       ├── contract-strengthening/
 │       ├── test-guard/
-│       ├── build-gate-visual-review/        # domain group (13,含 teacher-skill)
+│       ├── build-gate-visual-review/        # domain group (14,含 teacher-skill)
 │       ├── designer-handoff/
 │       ├── api-and-interface-design/
 │       ├── documentation-and-adrs/
@@ -86,7 +86,7 @@ meisijiya-skills/
 ├── bin/
 │   └── meisijiya                  ← lite CLI:plugin list / plugin verify
 └── evals/
-    └── cases/                 ← 每个 skill 的 eval case(44 个)
+    └── cases/                 ← 每个 skill 的 eval case(45 个)
 ```
 
 ## 安装
@@ -159,10 +159,10 @@ git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-meta
 mv /tmp/meisijiya-meta/skills/extra/{writing-skills,contract-strengthening,slice-review,test-guard} .opencode/skills/
 rm -rf /tmp/meisijiya-meta
 
-# 装 meisijiya-domain(13 个,teacher-skill 已合入 marketplace;因 `allowed-tools: Read` only 保持默认不装,若项目需要教学型 overlay 可显式追加 ,teacher-skill)
+# 装 meisijiya-domain(14 个,teacher-skill 已合入 marketplace;因 `allowed-tools: Read` only 保持默认不装,若项目需要教学型 overlay 可显式追加 ,teacher-skill)
 mkdir -p .opencode/skills
 git clone --depth 1 https://github.com/meisijiya/Skills.git /tmp/meisijiya-domain
-mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me,prototype,wayfinder,research,meisijiya-handoff,meisijiya-phase-checkpoint} .opencode/skills/
+mv /tmp/meisijiya-domain/skills/extra/{build-gate-visual-review,designer-handoff,api-and-interface-design,documentation-and-adrs,improve-codebase-architecture,verify-chain,loop-me,prototype,wayfinder,research,meisijiya-handoff,meisijiya-phase-checkpoint,meisijiya-env-context} .opencode/skills/
 rm -rf /tmp/meisijiya-domain
 
 # 装 meisijiya-frontend(3 个,反 AI 味 + 美学方向)
@@ -191,7 +191,7 @@ rm -rf /tmp/meisijiya-core
 按用途拆成两个子目录,每个有自己的 README 详细解释:
 
 - **必装集**(9 个,所有项目都装):[`skills/core/README.md`](./skills/core/README.md) — 工作流骨架。`diagnosing-bugs` 在 0.6.x 加入 core(协议 vs 学科二分:`debugging-and-error-recovery` 是 5 步协议,`diagnosing-bugs` 是 symptom-driven 学科)
-- **选装集**(35 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 6-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain` / `frontend`) + 依赖关系。`npx skills add` picker 按这 6 个 group 展示,可整组装或单选
+- **选装集**(36 个,按项目需求挑):[`skills/extra/README.md`](./skills/extra/README.md) — 含 6-group "怎么选" 决策表(`security` / `cicd` / `observability` / `meta` / `domain` / `frontend`) + 依赖关系。`npx skills add` picker 按这 6 个 group 展示,可整组装或单选
 
 > 不确定装哪个 → 先看 [`skills/extra/README.md`](./skills/extra/README.md) 的"怎么选"表 + group-aware 章节,按你项目特征对号入座。
 
@@ -311,7 +311,7 @@ rm -rf ~/.opencode/skills/ui-ux-pro-max/
 
 > **同伴 skill**:`uipro init --ai opencode --global` 会同步装 6 个同伴 skill 到 `~/.opencode/skills/`:`banner-design` / `brand` / `design` / `design-system` / `slides` / `ui-styling`。与本 fork 体系不重叠、由上游独立维护,按需保留或单独 `rm -rf ~/.opencode/skills/<name>/` 删除。
 
-> **不是 meisijiya skill**:ui-ux-pro-max 不是本仓库 skill,不上 `npx skills add`,不计入 9 + 35 的 SKILL.md 总数;只通过 npm CLI 分发。
+> **不是 meisijiya skill**:ui-ux-pro-max 不是本仓库 skill,不上 `npx skills add`,不计入 9 + 36 的 SKILL.md 总数;只通过 npm CLI 分发。
 
 ### Hallmark(营销 / 落地页 · 与 UI/UX Pro Max 并列)
 
@@ -343,7 +343,7 @@ rm -rf ~/.agents/skills/hallmark/
 
 > **Skills CLI 落点 = `~/.agents/skills/`**:`npx skills add -g` 是 vercel-labs/skills CLI 的全局模式,落 `~/.agents/skills/<skill>/`,与本仓库 meisijiya 系同路径;**不要**用 `uipro init`(那是 UI/UX Pro Max 的专属 CLI,落到 `~/.opencode/skills/`,无 `--skills-dir` 选项)。
 
-> **不是 meisijiya skill**:hallmark 不在 `9 + 35` 仓库总数里,上游独立维护。
+> **不是 meisijiya skill**:hallmark 不在 `9 + 36` 仓库总数里,上游独立维护。
 
 > **安全审计**:Gen / Socket / Snyk 均评 Safe / 0 alerts / Low Risk,详见 [skills.sh/nutlope/hallmark](https://skills.sh/nutlope/hallmark)。输出纯 HTML+CSS,无运行时副作用。
 
