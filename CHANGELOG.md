@@ -2,9 +2,23 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — meisijiya-env-context relocated to user-private (2026-08-08)
+
+**撤回 T1.4 (`9da3cbb`)。** `meisijiya-env-context` 不属于公开 `meisijiya/Skills` repo,改为 **meisijiya 个人用户级私有 skill**。
+
+理由:该 skill 装载 WSL2 / 内网 IP / Port 12121 / 镜像源 fallback 等机器私有云服务配置(含敏感信息),不应进入公开 marketplace 随 `npx skills add meisijiya/Skills` 自动分发。
+
+撤回(`b03626c`)一并还原:marketplace.json (45 → 44)、README.md (35 → 36 行,撤回 env-context 行)、skills/extra/README.md (35 → 36,撤回)、AGENTS.md (domain count 13 → 14,撤回)。
+
+**安装方式**:从 [`meisijiya/Meisijiya-AGENTS_MD`](https://github.com/meisijiya/Meisijiya-AGENTS_MD) 仓库的 `skills/meisijiya-env-context/` 子目录(私有)用 `npx skills add <repo-url>` 单独装。本仓库(`meisijiya/Skills`)不再 ship 该 skill;只保留文档说明其存在。
+
+**常驻内容来源**:GitHub `meisijiya/Meisijiya-AGENTS_MD` 仓库的 `AGENTS.md` 提供 4 个 L1 block(Personal_Rules / Karpathy_Guidelines / Grilling_Protocol / Sensitive_Information_Handling),本地 `~/.config/opencode/AGENTS.md` 与 GitHub 仓库逐行一致。3 个 L3 block(Architecture / Port / Mirror)机器独有,继续留在本地 AGENTS.md 中作为 env-context skill 装载源(用户按需迁移)。
+
+后续:Cloud-ops skill 装载源迁移到 `meisijiya/Meisijiya-AGENTS_MD` 仓库(由用户在私仓维护);本仓库 (`meisijiya/Skills`) 不再跟踪。
+
 ## Unreleased — meisijiya-skills repo optimization (R1-R8 closed, 2026-08-08)
 
-**6 commits · 70 files (60 M + 10 new) · `validate-skills.sh` 45/45 OK · `check-marketplace.sh` 45 in sync · `check-doc-drift.sh` OK · `dispatch-gate.test.js` 17 → 19 pass.** Wave 1-3 + 5 atomic commits;每 commit 前 T4 验证全绿。`msg Feb M3` 答用户三问(Q1 description 精简+Q2 AGENTS.md 拆 L1/L3+Q3 提示词复用)。
+**5 commits (撤回 env-context 后)· 64 files (54 M + 10 new) · `validate-skills.sh` 44/44 OK · `check-marketplace.sh` 44 in sync · `check-doc-drift.sh` OK · `dispatch-gate.test.js` 17 → 19 pass.** Wave 1-3 + 5 atomic commits;每 commit 前 T4 验证全绿。`msg Feb M3` 答用户三问(Q1 description 精简+Q2 AGENTS.md 拆 L1/L3+Q3 提示词复用)。
 
 ### Commits (5 atomic + 1 batch)
 
