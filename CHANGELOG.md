@@ -2,6 +2,22 @@
 
 All notable changes to meisijiya-skills.
 
+## Unreleased — meisijiya-env-context fully discarded; AGENTS.md simplified (2026-08-08)
+
+**env-context skill 完全不存在** (撤回 T1.4 `9da3cbb` + Revert `b03626c` + 删除 home 副本 `~/.agents/skills/meisijiya-env-context/`)。
+
+用户决策:`meisijiya-env-context` skill 没有存在必要 — 3 个 L3 block (Architecture / Port / Mirror) 与 public marketplace 无关,且其承载的部署/端口/镜像约束是 meisijiya 个人用户级常驻内容,不需要作为可被其他人 install 的 skill 暴露。
+
+**`~/.config/opencode/AGENTS.md` 简化(211 → 131 行)**:
+- 4 个 L1 block(Personal_Rules / Karpathy_Guidelines / Grilling_Protocol / Sensitive_Information_Handling)与 GitHub [`meisijiya/Meisijiya-AGENTS_MD`](https://github.com/meisijiya/Meisijiya-AGENTS_MD) 仓库 `AGENTS.md` 逐行一致 — 作为 meisijiya 用户级常驻内容来源
+- 保留 1 个 L3 block:`ARCHITECTURE_PRINCIPLES` § Cloud resource constraints (`@cloud lightweight 2C/2G` + `mem_limit ≤ 512m` + `cpus ≤ 0.5`) — meisijiya 云实例机器硬约束
+- 删除 3 个 L3 block:
+  - `ARCHITECTURE_PRINCIPLES` § Database separation (项目命名 `ai_food_dev`/腾讯云互通 属于项目+机器私有,不入常驻内容)
+  - `PORT_EXPOSURE_RULES` (12121 端口规则是机器私有;不需要 skill 装载)
+  - `DOMESTIC_MIRROR_SOURCES` (中国镜像源 fallback 是公开知识,但规则上下文是个人机器特有;不入常驻内容)
+
+后续:本仓库 (`meisijiya/Skills`) 不再承担任何 `env-context` 类 skill;meisijiya 个人机器约束直接写在 `~/.config/opencode/AGENTS.md`,GitHub 仓库提供 4 个 L1 块作为基线。
+
 ## Unreleased — meisijiya-env-context relocated to user-private (2026-08-08)
 
 **撤回 T1.4 (`9da3cbb`)。** `meisijiya-env-context` 不属于公开 `meisijiya/Skills` repo,改为 **meisijiya 个人用户级私有 skill**。
