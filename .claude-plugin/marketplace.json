@@ -68,8 +68,7 @@
         "./skills/extra/wayfinder",
         "./skills/extra/research",
         "./skills/extra/meisijiya-handoff",
-        "./skills/extra/meisijiya-phase-checkpoint",
-        "./skills/extra/meisijiya-env-context"
+        "./skills/extra/meisijiya-phase-checkpoint"
       ]
     },
     {

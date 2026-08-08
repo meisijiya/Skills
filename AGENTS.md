@@ -15,11 +15,123 @@ The block between the sentinel markers below is what `scripts/inject-agents-md.s
 
 <!-- meisijiya-skills:start -->
 
-完整 skill catalog 由 plugin runtime 的 `<available_skills>` 提供。
+## meisijiya-skills
 
-→ `references/priority-table.md` 用于路由触发关键词
-→ `references/process-chains.md` 用于多 Skill 工作链
-→ `references/category-matrix.md` 用于 Category × Skill 矩阵与 dispatch 场景
+Use this skill system for the omo stack. Invoke skills by matching their `description` field against the user's request; do not invoke skills that don't match.
+
+These conventions apply globally unless a project-level AGENTS.md overrides them.
+
+### Discipline layer
+
+Before any completion claim (commit, PR, "done", "fixed"), invoke [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md). Evidence before claims, always.
+
+### Catalog
+
+Each entry: skill name → install path → 1-line summary. Full `description` lives in each SKILL.md (also exposed via `<available_skills>` at runtime — no need to duplicate here).
+
+**.core/ — load always (9):**
+- [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — meta dispatcher; check before every response
+- [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — pre-design exploration (HARD-GATE)
+- [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — spec before non-trivial code
+- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices with dep/HITL-AFK metadata
+- [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor
+- [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — no completion claims without fresh evidence
+- [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — 5-step triage (reproduce / localize / reduce / fix / guard)
+- [`diagnosing-bugs`](~/.agents/skills/diagnosing-bugs/SKILL.md) — symptom-driven diagnosis loop (≥3 hypotheses)
+- [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — verify API against official docs
+
+**security (9):**
+- [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) — application-layer trust-boundary hardening
+- [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) — supply chain + deploy pipeline (deps / SBOM / secrets / CI/CD / IaC)
+- [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — post-incident (NIST CSF: detect / triage / contain / eradicate / recover / postmortem)
+- [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) — AI-generated code blindspots (boundary / error handling / env compat / deprecated API / hardcoded config)
+- [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — GitHub Actions workflow security audit
+- [`security-threat-model`](~/.agents/skills/security-threat-model/SKILL.md) — AppSec-grade threat model (trust boundaries + STRIDE + file:line)
+- [`security-ownership-map`](~/.agents/skills/security-ownership-map/SKILL.md) — git-history people↔file topology (orphan code / hidden owners / bus-factor)
+- [`supply-chain-risk-auditor`](~/.agents/skills/supply-chain-risk-auditor/SKILL.md) — dependency trustworthyness audit (maintainer signal)
+- [`stack-security-coder`](~/.agents/skills/stack-security-coder/SKILL.md) — per-stack coding checklists (frontend / backend / mobile)
+
+**cicd (2):**
+- [`pre-ship-gate`](~/.agents/skills/pre-ship-gate/SKILL.md) — pre-deploy audit + post-deploy smoke verification
+- [`closed-loop-delivery`](~/.agents/skills/closed-loop-delivery/SKILL.md) — 5-gate evidence chain (impl / review / deploy / runtime / users)
+
+**observability (4):**
+- [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — log/metrics/tracing for production visibility
+- [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — measure-first backend profile + optimization
+- [`k6-load-testing`](~/.agents/skills/k6-load-testing/SKILL.md) — pre-deploy performance acceptance gate (smoke / load / stress / spike / soak)
+- [`production-incident-playbook`](~/.agents/skills/production-incident-playbook/SKILL.md) — end-to-end incident handling (runbook + blameless postmortem)
+
+**meta (4):**
+- [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) — TDD-for-docs for skills
+- [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) — open-world contract review (Phase 1.25 optional extra)
+- [`slice-review`](~/.agents/skills/slice-review/SKILL.md) — per-slice lightweight reviewer (spec compliance + code quality)
+- [`test-guard`](~/.agents/skills/test-guard/SKILL.md) — 7-check AI-test quality audit (over-mocking / tautology / flakiness)
+
+**domain (13):**
+- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO frontend
+- [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — designer → eng UI/UX spec handoff (via ui-ux-pro-max)
+- [`api-and-interface-design`](~/.agents/skills/api-and-interface-design/SKILL.md) — contract-first REST / GraphQL / RPC design
+- [`documentation-and-adrs`](~/.agents/skills/documentation-and-adrs/SKILL.md) — architectural ADRs only
+- [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) — codebase-wide health scan (Ousterhout deep/shallow); proposal-only
+- [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — 3-role article fact-check pipeline (Critic → Verifier × N → Repairer)
+- [`loop-me`](~/.agents/skills/loop-me/SKILL.md) — extract a repeated workflow into an executable spec
+- [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) — pedagogical data-contract emitter for learning docs / HTML pages
+- [`prototype`](~/.agents/skills/prototype/SKILL.md) — throwaway UI variants to resolve `[PROTO-RESOLVE]` markers in Phase 1.2 specs
+- [`wayfinder`](~/.agents/skills/wayfinder/SKILL.md) — multi-session planning (scope > single brainstorming session)
+- [`research`](~/.agents/skills/research/SKILL.md) — investigates planning/design questions against high-trust primary sources (requires plan context)
+- [`meisijiya-handoff`](~/.agents/skills/meisijiya-handoff/SKILL.md) — cross-session checkpoint protocol (`disable-model-invocation: true`); writes `.omo/handoff/<slug>-<date>.md` for context hand-off
+- [`meisijiya-phase-checkpoint`](~/.agents/skills/meisijiya-phase-checkpoint/SKILL.md) — agent-driven phase boundary notification; emits 三选一 soft-prompt on `.omo/plans/<slug>.md` phase completion (complements meisijiya-handoff; never writes handoff doc)
+
+**frontend (3):**
+- [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) — anti-slop frontend rules for landing / portfolio / marketing code
+- [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) — audit-then-fix workflow for existing web/mobile UI
+- [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md) — Linear/Notion-style premium utilitarian editorial UI protocol
+
+(Group counts auto-derive from `.claude-plugin/marketplace.json` on each `scripts/inject-agents-md.sh` run; manifest ↔ files bidirectional check via `scripts/check-marketplace.sh`.)
+
+### Skill chains (process order)
+
+Most work follows a process chain. Invoke skills in order:
+
+1. [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — design before implementation (HARD-GATE)
+2. [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — formalize design
+3. [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — vertical slices
+4. [`test-driven-development`](~/.agents/skills/test-driven-development/SKILL.md) — red-green-refactor (per slice)
+5. [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — before any completion claim
+
+[`writing-skills`](~/.agents/skills/writing-skills/SKILL.md) is invoked separately when adding/editing skills OR extracting a repeated workflow into a reusable skill.
+
+### omo integration
+
+For the reverse map (omo feature → skills that use it), see the `meisijiya-extras` block above. Skills use:
+
+- [`source-driven-development`](~/.agents/skills/source-driven-development/SKILL.md) — context7 MCP (primary), grep_app MCP
+- [`debugging-and-error-recovery`](~/.agents/skills/debugging-and-error-recovery/SKILL.md) — oracle agent (escalation), lsp MCP
+- [`incremental-implementation`](~/.agents/skills/incremental-implementation/SKILL.md) — git-master skill, atlas agent, `/start-work` trigger, OMO `review-work` post-impl
+- [`designer-handoff`](~/.agents/skills/designer-handoff/SKILL.md) — visual-engineering category, frontend-ui-ux skill
+- [`build-gate-visual-review`](~/.agents/skills/build-gate-visual-review/SKILL.md) — intent-gated HTML page via OMO `frontend` (visual-engineering category); teaching-style overlay via [`teacher-skill`](~/.agents/skills/teacher-skill/SKILL.md) §5 reminder
+- [`meisijiya-frontend-taste`](~/.agents/skills/meisijiya-frontend-taste/SKILL.md) + [`meisijiya-redesign-ui`](~/.agents/skills/meisijiya-redesign-ui/SKILL.md) + [`meisijiya-minimalist-ui`](~/.agents/skills/meisijiya-minimalist-ui/SKILL.md) — anti-slop frontend skill triad for landing / portfolio / marketing code; absorbed from Leonxlnx/taste-skill (MIT) via the `meisijiya-frontend` plugin group; `frontend-taste` is the active rule set, `redesign-ui` audits existing UI, `minimalist-ui` is the active aesthetic direction under `frontend-taste`
+- [`security-and-hardening`](~/.agents/skills/security-and-hardening/SKILL.md) + [`security-devsecops`](~/.agents/skills/security-devsecops/SKILL.md) + [`security-incident-response`](~/.agents/skills/security-incident-response/SKILL.md) — security-research mode (3 hunters + 2 PoC engineers)
+- [`gha-security-review`](~/.agents/skills/gha-security-review/SKILL.md) — `oracle` agent for "is this permissions: block actually minimal?" judgment calls + `grep_app` MCP for known-bad action patterns across GitHub
+- [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md) — OMO `review-work` (Stage 2) + `visual-qa` (UI Taste gate)
+- [`verify-chain`](~/.agents/skills/verify-chain/SKILL.md) — `general` agent for parallel Verifier subagents (web research + independent context)
+- [`performance-optimization`](~/.agents/skills/performance-optimization/SKILL.md) — `analyze` mode, lsp MCP for large-codebase bottleneck tracing
+- [`using-meisijiya-skills`](~/.agents/skills/using-meisijiya-skills/SKILL.md) — Sisyphus (executing delegation), atlas (todo orchestration), IntentGate routing
+- [`brainstorming`](~/.agents/skills/brainstorming/SKILL.md) — in-context counterpart of Prometheus Mode (Tab / `@plan`); omo users may prefer Prometheus for multi-day projects
+- [`spec-driven-development`](~/.agents/skills/spec-driven-development/SKILL.md) — Spec/PRD pre-Prometheus-plan; Momus reviews the plan, not the Spec
+- [`contract-strengthening`](~/.agents/skills/contract-strengthening/SKILL.md) — optional extra for open-world contract/state/timing/concurrency/boundary/reversibility risk review (Phase 1.25 between attested Spec and implementation); complements core `spec-driven-development` + `verification-before-completion`; resource/isolation-first with consent-gated global-install exception; external verifiers never auto-installed; makes no correctness guarantee
+- [`loop-me`](~/.agents/skills/loop-me/SKILL.md) — output spec handed to OMO `/goal <objective>` for continuous execution
+- [`improve-codebase-architecture`](~/.agents/skills/improve-codebase-architecture/SKILL.md) — codebase-wide counterpart of per-diff OMO `refactor` / `ponytail-review` / `remove-ai-slops`
+- [`ai-code-blindspots`](~/.agents/skills/ai-code-blindspots/SKILL.md) — catches AI-generated code blindspots (boundary checks / silent error handling / env compatibility / deprecated API / hardcoded config / invisible failures); complements OMO `remove-ai-slops` (which hunts over-engineering); soft-routes via `verification-before-completion` Process step + 4-layer dispatcher Priority chain
+
+**No direct omo bridge** (yet):
+- [`observability-and-instrumentation`](~/.agents/skills/observability-and-instrumentation/SKILL.md) — `oracle` agent could design SLI/SLO targets; tracked as future enhancement
+
+### Conventions
+
+- Don't ship code without spec + tests
+- Verify before claiming completion (use [`verification-before-completion`](~/.agents/skills/verification-before-completion/SKILL.md))
+- When you notice a repeated workflow, capture it as a skill (use [`writing-skills`](~/.agents/skills/writing-skills/SKILL.md))
 
 <!-- meisijiya-skills:end -->
 
