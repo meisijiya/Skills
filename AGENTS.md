@@ -20,7 +20,7 @@ The contract governs skill *format and process*, not skill *content quality* bey
 
 ## Skill discovery
 
-Vercel `npx skills` discovers skills by walking the repo for `**/SKILL.md` files (per its [skill discovery rules](https://github.com/vercel-labs/skills/blob/main/README.md#skill-discovery)). We adopt the `skills/<name>/SKILL.md` convention (one folder per skill) for monorepo-style multi-skill repos. The `_template/` directory is a scaffold and is **excluded** from discovery (see `docs/skills-format.md` §"Why `_template/` is not a skill").
+Vercel `npx skills` discovers skills by walking the repo for `**/SKILL.md` files (per its [skill discovery rules](https://github.com/vercel-labs/skills/blob/main/README.md#skill-discovery)). We adopt the `skills/<name>/SKILL.md` convention (one folder per skill) for monorepo-style multi-skill repos. The `.template/` directory is a scaffold and is **excluded** from discovery (see `docs/skills-format.md` §"Why `.template/` is not a skill").
 
 End users install via: `npx skills add <owner>/<repo>`. This symlinks (or copies with `--copy`) each skill into the user's chosen agent's discovery path (e.g. `.agents/skills/` for opencode, `.claude/skills/` for Claude Code).
 
@@ -98,7 +98,7 @@ The `description` is loaded at discovery time — before the body — and is the
 1. **What** the skill does (its capability).
 2. **When** an agent should use it (its trigger conditions).
 
-A description that says only "Helps with git" fails job two: the agent cannot know when to load it, so it never does. Write both halves; see `skills/_template/SKILL.md` for the pattern.
+A description that says only "Helps with git" fails job two: the agent cannot know when to load it, so it never does. Write both halves; see `skills/.template/SKILL.md` for the pattern.
 
 ### Common frontmatter mistakes (all caught by `skills-ref` or CI)
 
@@ -219,7 +219,7 @@ In order:
 To add a new skill:
 
 1. Verify name is kebab-case, ≤64 chars, matches a real concept (no `test`, `temp`, `foo`, `bar`)
-2. Run `./scripts/new-skill.sh <name>` (or copy `skills/_template/SKILL.md` manually)
+2. Run `./scripts/new-skill.sh <name>` (or copy `skills/.template/SKILL.md` manually)
 3. Fill in frontmatter (`name`, `description` MUST; `license`, `compatibility`, `metadata` OPTIONAL); write body following progressive disclosure tiers
 4. Local self-check before committing: `skills-ref validate skills/<name>/` (or `pipx run skills-ref validate skills/<name>/`)
 
@@ -231,7 +231,7 @@ To add a new skill:
 
 ### What the scaffold script does and does not do
 
-`scripts/new-skill.sh` creates `skills/<name>/` with `SKILL.md` rendered from `skills/_template/SKILL.md` and empty `references/`, `scripts/`, `assets/` subdirs. It validates the name and refuses to overwrite an existing skill. It does NOT write your content — every placeholder in the rendered `SKILL.md` is your job to replace. Run it with `--dry-run` first if you want to see what it will create.
+`scripts/new-skill.sh` creates `skills/<name>/` with `SKILL.md` rendered from `skills/.template/SKILL.md` and empty `references/`, `scripts/`, `assets/` subdirs. It validates the name and refuses to overwrite an existing skill. It does NOT write your content — every placeholder in the rendered `SKILL.md` is your job to replace. Run it with `--dry-run` first if you want to see what it will create.
 
 ### Naming checklist
 
@@ -298,7 +298,7 @@ One logical change per commit. A new skill is one commit (`feat(skills): add <na
 
 CI runs two gates on every PR (see `.github/workflows/lint-skills.yml`):
 
-1. **`lint`** — a matrix job running `skills-ref validate skills/<name>/` over every skill (dynamically enumerated from `skills/`, `_template/` excluded). Catches: frontmatter shape errors, `name`/directory mismatch, forbidden fields, kebab-case violations.
+1. **`lint`** — a matrix job running `skills-ref validate skills/<name>/` over every skill (dynamically enumerated from `skills/`, `.template/` excluded). Catches: frontmatter shape errors, `name`/directory mismatch, forbidden fields, kebab-case violations.
 2. **`discover-skills`** — runs `npx skills@latest add . --list` with the Vercel CLI itself. Catches the failure mode the validator cannot see: a repo that lints clean but is not discoverable by the actual installer (bad folder placement, `SKILL.md` somewhere the CLI doesn't look).
 
 Neither gate checks prose quality, tool choice, or scope discipline — that's the reviewer checklist above.
@@ -319,7 +319,7 @@ Before pushing, reproduce what CI will do, from the repo root:
 
 ```bash
 skills-ref validate skills/<name>/   # format gate
-npx skills@latest add . --list                   # installer gate (lists skills, excludes _template)
+npx skills@latest add . --list                   # installer gate (lists skills, excludes .template)
 ```
 
 If the first passes but the second doesn't list your skill, the problem is placement (folder name, file location) — see §"Troubleshooting a skill that doesn't show up".

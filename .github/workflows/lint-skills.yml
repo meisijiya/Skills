@@ -25,11 +25,11 @@ jobs:
         name: List skill directories
         shell: bash
         run: |
-          SKILLS="$(python3 -c "import json,os; print(json.dumps([d for d in sorted(os.listdir('skills')) if d != '_template']))")"
+          SKILLS="$(python3 -c "import json,os; print(json.dumps([d for d in sorted(os.listdir('skills')) if d != '.template']))")"
           echo "skills=$SKILLS" >> "$GITHUB_OUTPUT"
           echo "Discovered skills: $SKILLS"
 
-  # Matrix job: validate every skill under skills/ (excluding _template)
+  # Matrix job: validate every skill under skills/ (excluding .template)
   # with the official skills-ref validator.
   lint:
     runs-on: ubuntu-latest
@@ -81,8 +81,8 @@ jobs:
             cat _discover.log
             exit 1
           fi
-          if grep -q "_template" _discover.log; then
-            echo "::error::_template must NOT appear in discovery output"
+          if grep -q ".template" _discover.log; then
+            echo "::error::.template must NOT appear in discovery output"
             cat _discover.log
             exit 1
           fi

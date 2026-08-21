@@ -53,5 +53,5 @@ npx skills add <owner>/<repo> --skill hello-world
 ## References
 
 - [`references/glossary.md`](references/glossary.md) — definitions of contract terms
-  (frontmatter, progressive disclosure, `_template/`, `skills-ref`); read when a term
+  (frontmatter, progressive disclosure, `.template/`, `skills-ref`); read when a term
   in the contract is unclear.

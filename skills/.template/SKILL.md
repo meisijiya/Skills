@@ -2,6 +2,8 @@
 name: <skill-name-kebab-case>
 description: <One-sentence "what" + one-sentence "when to use it", ≤200 chars total>
 license: MIT
+metadata:
+  internal: true
 ---
 
 # <Skill Title>

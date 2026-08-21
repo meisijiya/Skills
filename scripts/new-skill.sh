@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# new-skill.sh — scaffold a new skill from skills/_template/SKILL.md
+# new-skill.sh — scaffold a new skill from skills/.template/SKILL.md
 # Usage: scripts/new-skill.sh <skill-name> [--dry-run]
 # Validates the kebab-case name, refuses to overwrite, renders the template
 # into skills/<name>/ with references/, scripts/, assets/ (each with .gitkeep).
@@ -59,7 +59,7 @@ main() {
   local root skill_dir template title
   root="$(repo_root)"
   skill_dir="$root/skills/$name"
-  template="$root/skills/_template/SKILL.md"
+  template="$root/skills/.template/SKILL.md"
 
   if [[ ! -f "$template" ]]; then
     echo "Error: template not found at $template" >&2

@@ -138,13 +138,24 @@ on its semantics. The real security guidance lives in `README.md` §Security.
 | `pdf_extract` | bad | underscore |
 | `foo`, `test`, `temp` | bad | not real concepts |
 
-## Why `_template/` is not a skill
+## Why `.template/` is not a skill
 
-The leading underscore is the conventional exclusion marker: Vercel CLI's discovery
-and this repo's CI both skip `_`-prefixed directories under `skills/`, so
-`skills/_template/` is never listed or installed. That is deliberate — the template's
-frontmatter `name: <skill-name-kebab-case>` does not match its directory name, and its
-body is full of `<!-- TODO: ... -->` placeholders; both would fail validation by
-design. `scripts/new-skill.sh` renders the template into a real, valid skill
-directory; hand-copying requires the rename + placeholder-replacement steps documented
-in `skills/_template/README.md`.
+Vercel CLI's discovery walks `skills/` looking for `SKILL.md` files — it does **not**
+treat the leading dot as an exclusion marker (that is the conventional "scaffold"
+naming only). The actual exclusion is in the frontmatter:
+
+```yaml
+metadata:
+  internal: true
+```
+
+The Vercel CLI hides any skill with `metadata.internal: true` from default discovery
+(skills with `INSTALL_INTERNAL_SKILLS=1`). This repo's CI also excludes `.template/`
+explicitly from its enumeration, so the validator only runs over real skills. Both
+mechanisms together keep `.template/` out of every install path without depending on
+the Vercel CLI's walker defaults. The template's frontmatter `name:
+<skill-name-kebab-case>` does not match its directory name, and its body is full of
+`<!-- TODO: ... -->` placeholders; both would fail validation by design.
+`scripts/new-skill.sh` renders the template into a real, valid skill directory;
+hand-copying requires the rename + placeholder-replacement steps documented in
+`skills/.template/README.md`.

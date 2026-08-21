@@ -8,10 +8,10 @@ Contract terms used across this repo, in the order the contract introduces them.
 - **progressive disclosure** — the three-tier loading model: tier-1 metadata is loaded
   at startup, tier-2 body on activation, tier-3 `references/` files on demand. Keeps
   the always-loaded surface tiny while retaining depth.
-- **`_template/`** — the scaffold directory under `skills/`. Not a real skill: its
-  `_` prefix excludes it from Vercel CLI discovery and CI, and its placeholders are
-  deliberately invalid frontmatter. `scripts/new-skill.sh` renders it into real
-  skills.
+- **`.template/`** — the scaffold directory under `skills/`. Not a real skill: its
+  leading dot hides it from Vercel CLI discovery and from this repo's CI exclusion,
+  and its placeholders are deliberately invalid frontmatter. `scripts/new-skill.sh`
+  renders it into real skills.
 - **`skills-ref`** — the official Python validator (`skills-ref validate <path>`)
   that enforces the frontmatter contract: `name` matches the parent directory,
   valid `description`, kebab-case naming, no forbidden fields.
