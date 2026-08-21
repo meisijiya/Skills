@@ -36,7 +36,7 @@ npx skills add <!-- TODO: replace OWNER/REPO -->OWNER/REPO<!-- /TODO --> --skill
 
 ```
 skills/
-├── _template/       # SKILL.md scaffold (not a real skill)
+├── .template/       # SKILL.md scaffold (not a real skill; uses metadata.internal to exclude from Vercel CLI discovery)
 └── hello-world/     # example skill
 AGENTS.md            # the contract (read this)
 CONTRIBUTING.md      # contributor-facing quickstart

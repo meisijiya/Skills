@@ -53,7 +53,9 @@ Every `SKILL.md` starts with YAML frontmatter delimited by `---` lines. The foll
 | `metadata` | no | string→string map; ignored by clients unless client-specific keys are documented in `docs/skills-format.md` |
 | `allowed-tools` | no | **experimental**; do NOT use as a security boundary; client support varies (see `docs/skills-format.md` §"allowed-tools") |
 
-> **Forbidden fields**: `metadata.internal` (Vercel CLI-specific extension; ignored by opencode and Claude Code, leads to inconsistent visibility), `allowed-tools` as security boundary.
+> **Field restrictions**:
+> - `allowed-tools` as a security boundary — experimental; client support varies; never rely on it for safety.
+> - `metadata.internal` — **forbidden in real (user-authored) skills** because it makes the skill invisible to opencode and Claude Code while still listed by Vercel CLI. It IS the Vercel CLI exclusion mechanism, and is therefore **only** allowed in `skills/.template/SKILL.md` (the scaffold). Any skill authored by a contributor must NOT include it.
 
 Additional frontmatter rules:
 
@@ -108,7 +110,7 @@ A description that says only "Helps with git" fails job two: the agent cannot kn
 - `name: -pdf-extract` or `pdf-extract-` — leading/trailing hyphen
 - `description: Git helper` — no "when to use it" half
 - frontmatter not at line 1 — a comment or blank line above `---`
-- `metadata.internal:` present — forbidden field, inconsistent client support
+- `metadata.internal:` in a real skill (not in `skills/.template/`) — makes the skill invisible to opencode and Claude Code while Vercel CLI still lists it; leads to broken user installs
 - `allowed-tools:` used to enforce security — experimental; see `docs/skills-format.md` §"allowed-tools"
 
 ### Skill design principles
@@ -282,7 +284,7 @@ Reviewer checklist:
 
 - [ ] Frontmatter passes `skills-ref validate skills/<name>/` (paste output in PR body)
 - [ ] `description` ≤200 chars and states "what" + "when to use it"
-- [ ] No `metadata.internal` (or other forbidden fields) present
+- [ ] No `metadata.internal` in real (user-authored) skills (it is allowed only in `skills/.template/SKILL.md`); no other forbidden fields present
 - [ ] Progressive disclosure respected — tier-1 metadata is small, tier-2 body is focused, tier-3 resources are on-demand
 - [ ] Example runnable — the skill's quick-start steps can be executed by a fresh agent without hidden assumptions
 
