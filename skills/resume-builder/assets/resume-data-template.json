@@ -1,0 +1,52 @@
+{
+  "_README": "酥神简历结构化数据模板(融合 resume-builder skill)。把这一份 JSON 填完喂给 skill,即可生成 HTML 简历。缺失字段留空字符串即可,生成器会标【待补】。",
+  "basic": {
+    "name": "",
+    "target_position": "",
+    "tags": [
+      "Apache Fory Committer",
+      "开源项目 Maintainer"
+    ],
+    "contact": {
+      "phone": "",
+      "email": "",
+      "github": "",
+      "homepage": "",
+      "wechat": ""
+    },
+    "honor_bar": "★ 最炸的一条外部认可(红条置顶)"
+  },
+  "education": {
+    "school": "",
+    "detail": "",
+    "time": "",
+    "highlight": ""
+  },
+  "experiences": [
+    {
+      "company": "",
+      "team": "",
+      "role": "",
+      "time": "",
+      "company_class": "bytedance|tencent|alibaba|bilibili|meituan|other",
+      "honors": "",
+      "projects": [
+        {
+          "name": "",
+          "badge": "",
+          "background": "",
+          "responsibility": "",
+          "tech_details": [],
+          "metrics": []
+        }
+      ]
+    }
+  ],
+  "honors": [
+    {
+      "text": "",
+      "highlight": false
+    }
+  ],
+  "foot_note": ""
+}

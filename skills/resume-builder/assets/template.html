@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{NAME}} - 个人简历</title>
+<style>
+  /* =========================================================
+     酥神简历模板 v3.0(融合 resume-builder skill)
+     用法:直接替换 {{占位符}},不需要改 CSS。
+     公司条块:用预设 class(bytedance/tencent/alibaba/
+              bilibili/meituan/other),或 inline background。
+     主题切换:<body class="theme-blue"> 切换 accent 色。
+     ========================================================= */
+  :root {
+    --accent: #e63946;      /* 默认强调色(红) */
+    --text: #1a1a2e;
+    --muted: #5c6470;
+    --light-bg: #f5f5f7;
+  }
+  /* 主题变体 */
+  body.theme-blue  { --accent: #325AB4; }
+  body.theme-green { --accent: #07C160; }
+  body.theme-dark  { --accent: #1a1a2e; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--text);
+    background: var(--light-bg);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    background: #fff;
+    padding: 36px 46px 44px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.08);
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; width: auto; }
+  }
+
+  /* ===== 头部人设区 ===== */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid var(--text);
+    padding-bottom: 14px;
+  }
+  .name { font-size: 32px; font-weight: 800; letter-spacing: 3px; }
+  .titles { margin-top: 8px; font-size: 13px; }
+  .titles .tag {
+    display: inline-block;
+    background: var(--text);
+    color: #fff;
+    padding: 3px 11px;
+    border-radius: 3px;
+    margin-right: 6px;
+    font-weight: 600;
+  }
+  .titles .tag.gold { background: #b8860b; }
+  .contact { font-size: 12px; color: var(--muted); text-align: right; line-height: 1.9; }
+  .contact a { color: var(--accent); text-decoration: none; }
+
+  /* 最炸外部认可红条 */
+  .honor-bar {
+    display: block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+  .honor-bar .star { color: #ffd700; }
+
+  /* ===== 区块标题 ===== */
+  h2 {
+    font-size: 16px;
+    margin: 20px 0 10px;
+    padding-left: 10px;
+    border-left: 5px solid var(--accent);
+    letter-spacing: 1.5px;
+  }
+
+  /* ===== 教育 ===== */
+  .edu-row { display: flex; justify-content: space-between; font-size: 13px; line-height: 1.8; }
+  .edu-row b { font-size: 14px; }
+  .edu-detail { color: var(--muted); font-size: 12.5px; }
+
+  /* ===== 公司条块(预设色) ===== */
+  .company-block {
+    border-radius: 6px;
+    padding: 9px 14px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 14px 0 8px;
+  }
+  .company-block.bytedance { background: #325AB4; }
+  .company-block.tencent   { background: #07C160; }
+  .company-block.alibaba   { background: #FF8A00; color: #1a1a2e; }
+  .company-block.bilibili  { background: #FB7299; color: #1a1a2e; }
+  .company-block.meituan   { background: #FFD100; color: #1a1a2e; }
+  .company-block.other     { background: #1a1a2e; }
+  .company-block .co { font-size: 15px; font-weight: 700; }
+  .company-block .role { font-size: 12px; opacity: .95; margin-left: 10px; }
+  .company-block .time {
+    font-size: 11.5px;
+    background: rgba(255,255,255,.25);
+    padding: 2px 11px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .company-block.alibaba .time,
+  .company-block.bilibili .time,
+  .company-block.meituan .time {
+    background: rgba(0,0,0,.12);
+  }
+  /* 司内认可行 */
+  .company-honors {
+    background: #fafbfc;
+    border-left: 3px solid var(--accent);
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #b8860b;
+    margin: -4px 0 8px;
+  }
+
+  /* ===== 项目四段式 ===== */
+  .project { margin-bottom: 11px; }
+  .project .pname { font-size: 13.5px; font-weight: 700; margin-bottom: 4px; }
+  .project .pname .badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    background: #f0f2f5;
+    border: 1px solid #d7dbe2;
+    color: #4a5568;
+    border-radius: 9px;
+    padding: 1px 8px;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .project ul { margin-left: 1.2em; }
+  .project li { font-size: 12.3px; line-height: 1.62; color: #2d2d3a; margin-bottom: 2px; }
+  .metric { color: var(--accent); font-weight: 700; }
+  .hl { color: var(--accent); font-weight: 800; }
+  .dim { color: var(--muted); }
+
+  /* ===== 外部认可 ===== */
+  .honor ul { margin-left: 1.2em; }
+  .honor li { font-size: 12.8px; line-height: 1.85; }
+  .honor .honor-hl {
+    display: inline-block;
+    color: var(--accent);
+    font-weight: 800;
+    border-bottom: 2px solid var(--accent);
+    padding: 0 2px;
+  }
+
+  /* ===== 待补占位 ===== */
+  .todo {
+    background: #FFF3B8;
+    color: #8a6d00;
+    border-radius: 2px;
+    padding: 0 3px;
+    font-size: 10px;
+    font-family: "PingFang SC", sans-serif;
+    font-weight: 400;
+  }
+
+  /* ===== 页脚 ===== */
+  .foot {
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    color: #aaa;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ===== 头部人设区 ===== -->
+  <div class="header">
+    <div>
+      <div class="name">{{NAME}}</div>
+      <div class="titles">
+        {{TITLE_TAGS}}
+        <!-- 每个标签一个 <span class="tag">XX 开源项目 Maintainer</span>;最炸的给 <span class="tag gold"> -->
+      </div>
+    </div>
+    <div class="contact">
+      {{CONTACT}}
+      <!-- 每行一个:电话 / 邮箱 / github.com/xxx -->
+    </div>
+  </div>
+
+  <!-- 最炸外部认可(可选:没有就删掉这个 honor-bar) -->
+  <span class="honor-bar"><span class="star">★</span> {{HONOR_BAR}}</span>
+
+  <!-- ===== 教育背景 ===== -->
+  <h2>教育背景</h2>
+  <div class="edu-row">
+    <div>
+      <b>{{EDU_SCHOOL}}</b>
+      <span class="edu-detail">{{EDU_DETAIL}}</span>
+      <!-- 第二个 EDU_DETAIL 示例:软件创新人才实验班 · 合作办学双学位 -->
+    </div>
+    <div class="dim">{{EDU_TIME}}</div>
+  </div>
+
+  <!-- ===== 实习/项目经历 ===== -->
+  <h2>实习经历</h2>
+  {{EXPERIENCE_BLOCKS}}
+  <!-- 每家公司一段。公司条块用预设 class(bytedance/tencent/alibaba/bilibili/meituan/other)或 inline background。
+
+  <div class="company-block bytedance">
+    <div><span class="co">字节跳动 Bytedance</span><span class="role">抖音 AI 基建 · AI4SE 基础算法&Infra</span></div>
+    <div class="time">2025.05 - 2026.05</div>
+  </div>
+  <div class="company-honors">🏅 L1 奖赏 · ByteTech 作者奖 1 次 · 字节技术文章月榜 1 次</div>
+
+  <div class="project">
+    <div class="pname">项目【字节排序第一的开源 Long-Horizon Agent Harness】<span class="badge">★ 7.6k</span></div>
+    <ul>
+      <li><span class="dim">背景与目标:</span>一句话抬出项目规模/业务价值,注明【0→1】</li>
+      <li><span class="dim">我的职责:</span><span class="hl">【项目 Owner】</span><span class="hl">0→1</span> 搭建 XX 系统,主导架构</li>
+      <li><span class="dim">技术细节:</span>密集岗位关键词,写架构/方案/路径,2-4 条</li>
+      <li><span class="dim">数据指标:</span><span class="metric">通过率 +25%</span> · <span class="metric">耗时 2-4 小时 → 15-30 分钟</span></li>
+    </ul>
+  </div>
+  -->
+
+  <!-- ===== 外部认可 ===== -->
+  <h2>荣誉 / 外部认可</h2>
+  <div class="honor">
+    <ul>
+      <li><span class="honor-hl">{{HONOR_HL}}</span></li>
+      {{HONOR_LIST}}
+      <!-- 每个一条 <li>:Apache Committer / 期刊论文 / 黑客松获奖 / 技术影响力 -->
+    </ul>
+  </div>
+
+  <div class="foot">{{FOOT_NOTE}}(酥神简历 template v3 生成)</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{NAME}} - 个人简历(商务大气风)</title>
+<style>
+  /* 变体 03:商务大气风 —— 深色页眉 + 双栏正文,适合资深/管理岗 */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Microsoft YaHei","PingFang SC",sans-serif;
+    background:#eef0f3; color:#222;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .page {
+    width:210mm; min-height:297mm; margin:20px auto; background:#fff;
+    box-shadow:0 2px 16px rgba(0,0,0,.08); overflow:hidden;
+  }
+  @media print { body{background:#fff} .page{margin:0;box-shadow:none} }
+  /* 深色页眉 */
+  .banner {
+    background:linear-gradient(135deg,#1a1a2e,#16213e); color:#fff;
+    padding:30px 44px;
+  }
+  .banner .name { font-size:30px; font-weight:800; letter-spacing:3px; }
+  .banner .titles { margin-top:8px; }
+  .banner .tag {
+    display:inline-block; border:1px solid #325AB4; color:#9db9e8;
+    font-size:12px; border-radius:14px; padding:2px 12px; margin-right:8px;
+  }
+  .banner .tag.gold { border-color:#e6c200; color:#ffd700; }
+  .banner .contact { margin-top:12px; font-size:12px; color:#8ba3c7; }
+  .banner .honor-bar { display:inline-block; background:#e63946; color:#fff; font-size:13px; font-weight:700; border-radius:3px; padding:6px 14px; margin-top:12px; }
+  /* 双栏 */
+  .cols { display:grid; grid-template-columns: 150px 1fr; padding: 26px 44px; }
+  .col-label { font-size:13px; font-weight:800; color:#1a1a2e; letter-spacing:2px; }
+  .col-label span { display:block; width:34px; height:3px; background:#325AB4; margin-top:6px; }
+  .col-body { font-size:12.5px; line-height:1.75; padding-left:16px; border-left:1px solid #e5e7eb; }
+  .col-body h3 { font-size:13.5px; margin-bottom:4px; }
+  .col-body .project { margin:10px 0; }
+  .col-body .pname { font-weight:700; font-size:12.8px; }
+  .badge { font-size:10px; background:#eef2ff; color:#325AB4; border-radius:8px; padding:1px 7px; margin-left:5px; }
+  .col-body li { margin-left:1.1em; }
+  .metric { color:#e63946; font-weight:700; }
+  .hl { font-weight:800; }
+  .honor-hl { color:#e63946; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="banner">
+    <div class="name">{{NAME}}</div>
+    <div class="titles">{{TITLE_TAGS}}</div>
+    <div class="contact">{{CONTACT}}</div>
+    <span class="honor-bar">★ {{HONOR_BAR}}</span>
+  </div>
+  <div class="cols">
+    <div class="col-label">教育背景<span></span></div>
+    <div class="col-body">
+      <h3>{{EDU_SCHOOL}}</h3>
+      <p>{{EDU_DETAIL}} · {{EDU_TIME}}</p>
+    </div>
+  </div>
+  <div class="cols" style="border-top:1px solid #f0f2f5">
+    <div class="col-label">实习经历<span></span></div>
+    <div class="col-body">
+      {{EXPERIENCE_BLOCKS}}
+    </div>
+  </div>
+  <div class="cols" style="border-top:1px solid #f0f2f5">
+    <div class="col-label">荣誉认可<span></span></div>
+    <div class="col-body">
+      <ul class="honor">
+        <li><span class="honor-hl">{{HONOR_HL}}</span></li>
+        {{HONOR_LIST}}
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>
