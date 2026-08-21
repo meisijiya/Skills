@@ -1,0 +1,98 @@
+name: Lint skills
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - skill/**
+      - fix/**
+
+permissions:
+  contents: read
+
+jobs:
+  # Enumeration job: list skill directories and expose them as JSON
+  # for the lint matrix.
+  enumerate:
+    runs-on: ubuntu-latest
+    outputs:
+      skills: ${{ steps.list.outputs.skills }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: list
+        name: List skill directories
+        shell: bash
+        run: |
+          SKILLS="$(python3 -c "import json,os; print(json.dumps([d for d in sorted(os.listdir('skills')) if d != '_template']))")"
+          echo "skills=$SKILLS" >> "$GITHUB_OUTPUT"
+          echo "Discovered skills: $SKILLS"
+
+  # Matrix job: validate every skill under skills/ (excluding _template)
+  # with the official skills-ref validator.
+  lint:
+    runs-on: ubuntu-latest
+    needs: enumerate
+    strategy:
+      fail-fast: false
+      matrix:
+        # Dynamically enumerated so adding a new skill never requires
+        # editing this workflow.
+        skill: ${{ fromJson(needs.enumerate.outputs.skills) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install skills-ref
+        run: |
+          # Install from git source: the PyPI package (skills-ref 0.1.1) currently
+          # installs its console script as `agentskills`, while the git source names
+          # it `skills-ref` (verified 2026-08-21). If PyPI later ships a `skills-ref`
+          # entry point, `pip install skills-ref` suffices.
+          pip install git+https://github.com/agentskills/agentskills.git#subdirectory=skills-ref
+
+      - name: Validate ${{ matrix.skill }}
+        run: skills-ref validate "skills/${{ matrix.skill }}/"
+
+  # Discovery job: prove the repo is installable by the real Vercel CLI.
+  # Catches the "validator passes but npx skills can't find anything" failure mode.
+  discover-skills:
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Discover skills via Vercel CLI
+        run: npx skills@latest add . --list 2>&1 | tee _discover.log
+
+      - name: Verify expected skills listed
+        shell: bash
+        run: |
+          if ! grep -q "hello-world" _discover.log; then
+            echo "::error::hello-world is missing from discovery output"
+            cat _discover.log
+            exit 1
+          fi
+          if grep -q "_template" _discover.log; then
+            echo "::error::_template must NOT appear in discovery output"
+            cat _discover.log
+            exit 1
+          fi
+          echo "Discovery output looks correct:"
+          cat _discover.log
+
+      - name: Upload discovery log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-discovery
+          path: _discover.log
+          if-no-files-found: warn
