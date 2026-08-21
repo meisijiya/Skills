@@ -87,6 +87,7 @@ main() {
     echo "Error: skill '$name' already exists at $skill_dir (refusing to overwrite)" >&2
     exit 1
   fi
+  mkdir -p "$skill_dir/references" "$skill_dir/scripts" "$skill_dir/assets"
   touch "$skill_dir/references/.gitkeep" "$skill_dir/scripts/.gitkeep" "$skill_dir/assets/.gitkeep"
   sed -e "s/<skill-name-kebab-case>/$name/g" -e "s/<Skill Title>/$title/g" \
     "$template" > "$skill_dir/SKILL.md"
