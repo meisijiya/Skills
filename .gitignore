@@ -1,0 +1,39 @@
+# omo orchestration state — machine-local, never committed
+.omo/
+
+# omo codegraph index — symlink to ~/.omo/codegraph (ignore the path, not the target)
+.codegraph
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# IDE noise
+.idea/
+.vscode/
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Secrets — example templates stay allowed
+.env
+.env.*
+!*.env.example
+
+# Tooling residue (only relevant if CI tooling is ever added locally)
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Claude Code local-state files (borrowed from libukai/awesome-agent-skills .gitignore;
+# harmless even if Claude Code is never used here)
+.claude/*.local.md
+.claude/memory/
+.claude/worktrees/
