@@ -43,6 +43,7 @@ CONTRIBUTING.md      # contributor-facing quickstart
 docs/skills-format.md # full SKILL.md format spec
 scripts/new-skill.sh  # create a new skill from template
 .github/workflows/lint-skills.yml # CI lint
+docs/awesome-skills.md   # curated pointers to license-incompatible upstream skills
 ```
 
 ## Contributing
