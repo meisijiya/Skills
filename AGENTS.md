@@ -135,6 +135,10 @@ How the six principles map to this repo's structure:
 
 > Source: [libukai/awesome-agent-skills](https://github.com/libukai/awesome-agent-skills) §设计原则. Reused with intent — these are general principles refined from Anthropic/Google internal guides, not libukai-original.
 
+### License gate (2026-08-22)
+
+Skills landing under `skills/<name>/` MUST carry a license compatible with this repo's MIT. Upstream skills without a LICENSE file or with an MIT-incompatible license MUST NOT be copied into `skills/`; track them as pointers only in `docs/awesome-skills.md` until licensing is resolved upstream. This gate takes effect on 2026-08-22 and applies to every skill added on or after that date.
+
 ## Directory layout
 
 Each skill follows this shape:
